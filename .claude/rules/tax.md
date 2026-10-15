@@ -92,7 +92,7 @@ sources, the tests).
   it and does. Gains keep the pooled basis: FIFO lots per path would cost a loop per sale. Gaps of
   the funds: the Vorabpauschale of X counts in X+1 (§18 Abs. 3: Pauschbetrag, Günstigerprüfung,
   GKV), the engine books it in December of X; a loss on shares offsets only gains on shares (§20
-  Abs. 6 S. 4 EStG), the engine pools it (`docs/todo/stock-loss-carryforward.md`); Ausschüttungen; a
+  Abs. 6 S. 4 EStG), the engine pools it (issue #12); Ausschüttungen; a
   bond ETF stays `fixed_income`, taxed yearly; a Dachfonds (§2 Abs. 5, Abs. 6 S. 2–3 InvStG), a
   change of class (§22, §20 Abs. 4), §20 Abs. 5. The Basiszins stays the constant of the tax year:
   its effect is timing (§19 Abs. 1 S. 3). Günstigerprüfung in December refunds the difference to

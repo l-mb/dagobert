@@ -25,6 +25,8 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 - `docs/manual/`: the user guide in plain English, a page per app page, `models.md` and
   `configuration.md` (the input files: `model/` is the authority, change both together).
 - `docs/install/`: an install guide per system (Windows, macOS) and a server, plain English.
+- Planned work: the issues of `l-mb/dagobert` (`gh issue list`). Deferred work becomes an issue
+  that the owner opens; the commit that does the work closes it (`Closes #<n>`).
 - A new, moved or renamed file: update every `paths:` that names it
   (`grep -rn '<path>' .claude/rules`), then run `uv run python scripts/rules-check`: it checks
   the rules and the limits, also in the hook and in CI.
@@ -175,6 +177,3 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 - `scripts/`: `pii-check`, `rules-check` [tooling], `i18n` [i18n], `refresh_shipped.py` [series].
   `.streamlit/config.toml`: the Streamlit options and themes of the app [ui, page-style, container].
 - `src/dagobert/examples/`: made-up data directories for `dagobert init` and the README [examples].
-- `TODO.md`: the index of the planned work, one line per item in order. Each item is a file in
-  `docs/todo/`, until the public release turns them into issues. Add a file and an index line
-  when work is deferred, delete both with the commit that does the work.

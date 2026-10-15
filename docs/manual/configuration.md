@@ -270,7 +270,8 @@ Overview moves it) and `scale` (the overrides of a scenario).
     carries to the new start, into the `tax` that the scenario takes: that of its `overrides` or
     of a scenario that it extends, else that of `assumptions.yaml`, where it adds `tax` when the
     file has none. Scenarios that share one `tax` take the smallest amount. The losses of the
-    stock sales are another pot and stay out (`docs/todo/stock-loss-carryforward.md`).
+    stock sales are another pot and stay out
+    ([issue #12](https://github.com/l-mb/dagobert/issues/12)).
   - `alleinerziehend` (default false): you raise your children alone, with no other adult in the
     household. The Entlastungsbetrag (§24b EStG) of 4,260 € a year in 2026, and 240 € more for each
     further child, comes off the income in each month in which a child of `children_born` counts.

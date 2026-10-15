@@ -107,7 +107,7 @@ paths:
   working` of the Overview read `ausstieg`: P(broke)@90 about 6% at 500 paths (5% at 2,000, 6% at
   50), `plan` and `teilzeit` 0%, the contrast. No event: the full example shows them. `features_off`
   holds the ten features that `mode.uses` finds unused: a newcomer's plan (`engineer`: none).
-- A German `engineer` and a German empty plan: `docs/todo/german-example.md`. Spread the features
+- A German `engineer` and a German empty plan: issue #5. Spread the features
   over the scenarios: no one scenario may stack a real life story.
 - Nothing may resemble a real person's situation: no real city, bank, insurer or employer,
   made-up ISINs (`IE000WORLD05`), round amounts. The personal-data hook checks the amounts too:

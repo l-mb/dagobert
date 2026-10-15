@@ -87,7 +87,7 @@ spouse rule anywhere.
   contributions up to 1,800, at most `av_kinderzulage` (300) per child whose Kindergeld the
   person receives in a month of the year (`Person.kindergeld_in`: `kindergeld` and `until`, rule
   `children`; `carry.depot` too); none below the 120 € minimum. Old Riester contracts:
-  `docs/todo/riester-contracts.md`.
+  issue #10.
 - Migration `to_5` (rule `migrations`; owner 2026-10-14): `fund_policy` loses `deductible`; a
   policy that only `deductible: true` payments fund, and that can be one, becomes a Basisrente
   with a comment. A payment into any other policy without `basisrente`, also one that a payment

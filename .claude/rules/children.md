@@ -35,8 +35,8 @@ Kinderzulage: rule `deductions`; the migration: rule `migrations`. The inputs:
 - A scenario that adds a child overrides `person.children_born` (a list replaces the list,
   `loader.deep_merge`: it repeats the rows) and `children`: no `birth` event, so a `shift` moves no
   birth. The explorer has no slider. Example: `sabbatical` of `engineer` (rule `examples`), with
-  the Elterngeld of the notice as a `taxable: false` stream (Elterngeld by rule: todo
-  `elterngeld`).
+  the Elterngeld of the notice as a `taxable: false` stream (Elterngeld by rule: issue
+  #3).
 
 ## Engine
 
@@ -96,7 +96,7 @@ the model.
 ## Gaps
 
 Elterngeld by rule (a `taxable: false` stream of the notice; its Progressionsvorbehalt, §32b Abs. 1
-S. 1 Nr. 1 j EStG, is left out; todo `elterngeld`). The Kinderzuschlag, a child abroad, a disabled
+S. 1 Nr. 1 j EStG, is left out; issue #3). The Kinderzuschlag, a child abroad, a disabled
 child (§32 Abs. 4 S. 1 Nr. 3, no age limit), a child registered unemployed to 21 (Nr. 1): set
 `until`. The withholding: the monthly Soli and church tax of the Lohnsteuer take the
 Kinderfreibetragszähler (§51a Abs. 2a, §3 Abs. 2a SolZG), Steuerklasse II the Entlastungsbetrag;

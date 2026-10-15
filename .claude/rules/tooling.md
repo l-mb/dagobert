@@ -79,5 +79,5 @@ paths:
   one gets no pull request, dependabot-core#14073), the image pins of the `Dockerfile` and
   `compose.yaml` (not a Python minor: it goes with `.python-version` by hand), the Actions (the SHA
   pins with their version comment) and the pre-commit hooks (gitleaks). It does not see the
-  `docker://` gitleaks step (raise it with the hook) or the uv `version` of setup-uv (keep it at the
-  uv of the `Dockerfile`).
+  `docker://` gitleaks step (raise it with the hook); setup-uv reads its uv from the `Dockerfile`
+  (step `uv`).

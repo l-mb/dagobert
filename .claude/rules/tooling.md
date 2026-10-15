@@ -45,7 +45,8 @@ paths:
   the `FROM python:` of the `Dockerfile` has the minor of `.python-version`, gitleaks over the whole
   history, and the image: build, a smoke test (read-only root, healthy) and Grype
   (`anchore/scan-action`), which fails on a high or critical finding with a fix; in a public
-  repository a second scan uploads every finding as SARIF into code scanning (`security-events:
+  repository a second scan uploads every finding with a fix as SARIF into code scanning (161
+  unfixed ones of the Debian base drowned the alerts; they show in the log) (`security-events:
   write`, which `release.yml` grants the CI it calls: a called workflow gets no more). It runs on a
   push to `main`, on a pull request, weekly (new CVEs in the base image), by hand and for the
   release. uv takes the Python of `.python-version` (3.14, also for local work and the image);

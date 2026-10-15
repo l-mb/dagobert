@@ -144,12 +144,14 @@ jobs:
           only-fixed: true
           severity-cutoff: high
           output-format: table
-      # Every finding into code scanning, which a free plan has for public repositories only.
+      # Every finding with a fix into code scanning, which a free plan has for public repositories
+      # only: an alert means a rebuild or a raised base image.
       - id: sarif
         if: ${{ !cancelled() && !github.event.repository.private }}
         uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
         with:
           image: dagobert:ci
+          only-fixed: true
           fail-build: false
           output-format: sarif
       - if: ${{ !cancelled() && !github.event.repository.private }}

@@ -1,0 +1,11 @@
+/* A phone: the style element that holds this applies it below `page.PHONE` pixels. The table
+   scrolls in its own box, its first column stays and wraps a long name, the tabs scroll. */
+body { padding: 0.5rem 0.75rem 2rem; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.15rem; }
+.phone { display: block; }
+th:first-child, td:first-child { position: sticky; left: 0; background: var(--bg); }
+th:first-child { background: var(--head); }
+td.long { white-space: normal; min-width: 8rem; }
+[role=tablist] { flex-wrap: nowrap; overflow-x: auto; }
+[role=tab] { white-space: nowrap; padding: 0.6rem 0.8rem; }

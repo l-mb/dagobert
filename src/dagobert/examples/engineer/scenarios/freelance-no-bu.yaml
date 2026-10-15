@@ -1,0 +1,12 @@
+name: Self-employed at 42 without the BU
+note: >-
+  As Self-employed at 42, but the BU of the employer lapses when she leaves the job: no premium,
+  and no benefit when she can no longer work. Compare the two on the Explorer page: the chance to
+  run out and the failure anatomy show what the BU is worth.
+extends: freelance
+events:
+  - at: 2029-01-01
+    type: end_streams
+    names: [BU policy]
+    note: The BU of the employer lapses
+    id: no-bu

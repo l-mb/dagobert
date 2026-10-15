@@ -1,0 +1,5 @@
+name: burn
+extends: boost
+# the nominal growth of its parent at more inflation
+overrides:
+  inflation: {mean: 0.05}

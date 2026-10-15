@@ -1,0 +1,14 @@
+# The nominal pension growth of schema 3 becomes real: less inflation.mean, as text
+person: {born: 1977-01-01, horizon_age: 70}
+start: 2026-01-01
+phases:
+  work: {}
+  retired: {}
+inflation: {mean: 0.03, stdev: 0.01}
+returns:
+  equity: {mean: 0.05}
+  fixed_income: {mean: 0.03}
+  cash: {mean: 0.02}
+  property: {mean: 0.01}
+pension_growth: 0.01  # below the prices
+tax: {pkv: false}

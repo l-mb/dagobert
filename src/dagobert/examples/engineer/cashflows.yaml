@@ -1,0 +1,189 @@
+# Monthly amounts in euros of the simulation start, expenses negative.
+streams:
+  # Income
+  - name: Salary
+    cat: salary
+    kind: salary
+    gross: 7000
+    phases: [work]
+    index: salary
+    end: 2027-01-01
+  # A raise is a row of its own from its month on
+  - name: Salary
+    cat: salary
+    kind: salary
+    gross: 7300
+    phases: [work]
+    index: salary
+    start: 2027-01-01
+  # 10% of the yearly salary each March, times the payout ratio of the year
+  - name: Bonus
+    cat: salary
+    kind: salary
+    of: Salary
+    share: 0.1
+    every: 12
+    start: 2027-03-01
+    phases: [work]
+    index: bonus
+  # Vermögenswirksame Leistungen of the employer, paid straight into the loan
+  - name: Employer savings benefit (VL)
+    cat: salary
+    kind: other_income
+    amount: 26
+    index: null
+    repays: flat-loan
+    phases: [work]
+  # The cold rent: the tenant pays the costs that the Hausgeld passes on, on top
+  - name: Rent from the flat
+    cat: flat
+    kind: other_income
+    amount: 640
+    tags: [flat]
+    property: flat
+  - name: ALG1
+    cat: benefits
+    kind: alg1
+    phases: [unemployed]
+  - name: Voluntary pension contributions
+    cat: pension contributions
+    kind: rv_voluntary
+    amount: -250
+    phases: [alt]
+  # From the Renteninformation: points so far and the current value of a point
+  - name: Pension
+    cat: pension
+    kind: pension
+    points: 20.5
+    point_value: 42.52
+    phases: [retired]
+
+  # Housing
+  - name: Rent
+    cat: housing
+    amount: -1450
+  - name: Utilities
+    cat: housing
+    amount: -220
+  # The part of the Hausgeld that the tenant does not pay back, a cost of the rent
+  - name: Service charge of the flat (Hausgeld)
+    cat: flat
+    amount: -60
+    tags: [flat]
+    property: flat
+  # A cost of the rent only when the owners spend it on the building
+  - name: Reserve of the flat (Erhaltungsrücklage)
+    cat: flat
+    amount: -40
+    tags: [flat]
+
+  # Living
+  - name: Groceries
+    cat: food
+    amount: -500
+  - name: Eating out
+    cat: leisure
+    amount: -200
+  - name: Hobbies
+    cat: leisure
+    amount: -80
+  # Half as much again in retirement
+  - name: Holidays
+    cat: leisure
+    amount: -4000
+    every: 12
+    start: 2027-07-01
+    factor: {retired: 1.5}
+  - name: Clothing
+    cat: personal
+    amount: -100
+  - name: Household goods
+    cat: household
+    amount: -150
+  # A cleaner, paid by bank transfer: 20% of it comes off the income tax (§35a)
+  - name: Household help
+    cat: household
+    amount: -100
+    deduct: household
+  - name: Phone and internet
+    cat: household
+    amount: -50
+  - name: Car
+    cat: mobility
+    amount: -320
+  - name: Transit pass
+    cat: mobility
+    amount: -63
+  # Half of it donations, which lower the taxable income
+  - name: Gifts and donations
+    cat: other
+    amount: -70
+    deduct: donation
+    deductible: 0.5
+
+  # Family
+  - name: Child
+    cat: family
+    amount: -300
+    end: 2034-09-01
+  # 80% of it lowers the taxable income until the child turns 14 in April 2030
+  - name: After-school care
+    cat: family
+    amount: -200
+    deduct: childcare
+    end: 2030-08-01
+  - name: Child at university
+    cat: family
+    amount: -800
+    start: 2034-09-01
+    end: 2039-10-01
+
+  # Insurance
+  - name: Household and liability insurance
+    cat: insurance
+    amount: -240
+    every: 12
+    start: 2027-01-01
+  # A disability insurance (BU) of her employer: 2,000 € a month from the month after she can no
+  # longer work, guaranteed in nominal euros, to 67. The employer pays the premium while she
+  # works for him; the scenarios say what happens when she leaves
+  - name: BU policy
+    cat: insurance
+    kind: bu
+    amount: 2000
+    premium: 0
+    until_age: 67
+
+  # Private health insurance (PKV): each tariff is a stream of its own
+  - name: Health insurance
+    cat: health
+    amount: -480
+    health: kv
+    deductible: 0.75
+    index: insurance
+  - name: Sick pay cover
+    cat: health
+    amount: -35
+    health: kv
+    deductible: 0.0
+    phases: [work, new-job]
+    index: insurance
+  # The statutory surcharge ends at 60
+  - name: Statutory surcharge
+    cat: health
+    amount: -48
+    health: kv
+    end: 2046-06-01
+    index: insurance
+  - name: Care insurance
+    cat: health
+    amount: -62
+    health: pv
+
+  # Savings: a fixed rate from the current account into the depot while working, nominal as the
+  # broker runs it. A month without the cash for it skips the rate.
+  - name: ETF savings plan
+    kind: savings
+    amount: -300
+    into: depot
+    phases: [work, new-job]

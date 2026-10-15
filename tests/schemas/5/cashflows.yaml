@@ -1,0 +1,4 @@
+streams:
+  - {name: Gehalt, kind: salary, gross: 5000, phases: [work]}
+  - {name: Kindergeld, kind: other_income, amount: 259, taxable: false, end: 2034-04-01}
+  - {name: Miete, cat: wohnen, amount: -1500}

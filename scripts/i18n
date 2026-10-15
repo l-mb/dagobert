@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Keep the German catalogue, `src/dagobert/locale/de/LC_MESSAGES/dagobert.po`, in step with the
+code (rule `i18n`). Exits 1 on any problem.
+
+update: extract the messages that the code marks and merge them into the catalogue. A new message
+gets an empty translation, a changed one the old translation marked fuzzy as a guess, a message
+that the code dropped goes.
+check: the catalogue serves the code (`i18n_check.problems`), and the modules of
+`i18n_check.TRANSLATED` show no words outside `_()` (`i18n_check.lint`).
+
+Usage: uv run python scripts/i18n update|check
+"""
+
+import sys
+
+from dagobert import i18n, i18n_check
+
+
+def update() -> None:
+    catalogue = i18n.read("de")
+    catalogue.update(i18n_check.extract(), update_creation_date=False)
+    i18n_check.write(catalogue, "de")
+
+
+def check() -> list[str]:
+    return i18n_check.problems(i18n.read("de"), i18n_check.extract()) + i18n_check.lint()
+
+
+if __name__ == "__main__":
+    match sys.argv[1:]:
+        case ["update"]:
+            update()
+        case ["check"]:
+            if found := check():
+                sys.exit("\n".join(found))
+        case _:
+            sys.exit(__doc__)

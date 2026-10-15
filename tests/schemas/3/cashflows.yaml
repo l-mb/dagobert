@@ -1,0 +1,4 @@
+streams:
+  - {name: Gehalt, kind: salary, gross: 5000, phases: [work]}
+  - {name: Rente, kind: pension, points: 40, point_value: 40, phases: [retired]}
+  - {name: Miete, cat: wohnen, amount: -1500}

@@ -1,0 +1,15 @@
+scenarios:
+  - ausstieg
+  - plan
+# Abgeschaltet, was dieser Plan nicht nutzt. Die Seite Funktionen schaltet es an
+features_off:
+  - gold_crypto
+  - property
+  - self_employment
+  - children
+  - estates
+  - job_loss
+  - disability
+  - spending_rules
+  - care
+  - allocation

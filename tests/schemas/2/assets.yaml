@@ -1,0 +1,35 @@
+assets:
+  - id: giro
+    kind: cash
+    value: 1000
+  # the depot
+  - id: depot
+    kind: equity
+    value: 1200
+    trades:
+      # first buy
+      - date: 2020-03-02
+        kind: buy
+        security: IE00B4L5Y983  # World
+        name: World
+        units: 10
+        amount: 900
+        fees: 1.5
+      - date: 2021-01-04
+        kind: vorabpauschale
+        amount: 12.3
+        security: IE00B4L5Y983
+      - {date: 2022-05-02, kind: sell, security: IE00B4L5Y983, units: 2, amount: 220}
+      # the last trade
+  - id: fonds
+    kind: fixed_income
+    value: 500
+    trades:
+      - {date: 2024-01-02, kind: buy, security: IE00BKM4GZ66, name: Overnight, units: 3, amount: 420}
+  # a company pension: the employer pays in `work` by default
+  - id: bav
+    kind: bav
+    value: 1000
+    contribution: 100
+    matures: 2040-01-01
+  - {id: basisrente, kind: bav, value: 0, contribution: 0, phases: [], matures: 2040-01-01}

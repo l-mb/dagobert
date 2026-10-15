@@ -1,0 +1,4 @@
+streams:
+  - name: Miete
+    cat: wohnen
+    amount: -500

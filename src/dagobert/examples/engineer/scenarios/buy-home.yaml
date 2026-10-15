@@ -1,0 +1,43 @@
+name: Buy a home
+note: >-
+  Buy a flat to live in at 41 instead of renting: 330,000 € with a loan of 300,000 €. The rent
+  ends, Hausgeld and property tax start. Compare it with Work to 65, which keeps renting, on the
+  Explorer page.
+extends: plan
+events:
+  # The Grunderwerbsteuer of the Land comes on top of the price. Costs: notary and land
+  # register about 1.5%, the buyer's half of the broker 3.57%
+  - at: 2028-04-01
+    type: buy_property
+    property:
+      id: home
+      name: Own flat
+      # Hausgeld pays for the building, upkeep for the inside of the flat
+      upkeep: 0.005
+      tags: [home]
+    price: 330000
+    land: NI
+    costs: 0.05
+    loan:
+      id: home-loan
+      name: Home loan
+      balance: -300000
+      rate: 0.035
+      annuity: 1500
+      fixed_for: 180
+    note: Buy a flat to live in
+    id: buy-home
+  # The rent ends; its change at the retirement in `plan` then changes nothing
+  - at: 2028-04-01
+    type: end_streams
+    names: [Rent]
+    note: The rent ends
+    id: buy-home
+  - at: 2028-04-01
+    type: add_stream
+    stream: {name: Hausgeld, cat: housing, amount: -400, tags: [home]}
+    id: buy-home
+  - at: 2028-04-01
+    type: add_stream
+    stream: {name: Property tax, cat: housing, amount: -40, tags: [home]}
+    id: buy-home

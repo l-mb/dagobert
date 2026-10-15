@@ -1,0 +1,4 @@
+# LF in every checkout, also on Windows with core.autocrlf: the app writes LF, the tests compare bytes
+* text=auto eol=lf
+# The shipped series stay byte for byte as their source wrote them (SOURCES.md)
+src/dagobert/data/*.csv -text

@@ -1,0 +1,293 @@
+# Legal constants of 2026. The engine applies them in euros of its start year and indexes
+# them with the price level of each later year. A new year is a copy of this file with the
+# new values: a plan takes the newest file up to its start year, `tax.year` in assumptions.yaml
+# another.
+year: 2026
+
+# Income tax tariff, §32a EStG
+grundfreibetrag: 12348.0
+zone2_end: 17799.0
+zone3_end: 69878.0
+zone4_end: 277825.0
+zone2_a: 914.51
+zone2_b: 1400.0
+zone3_a: 173.10
+zone3_b: 2397.0
+zone3_c: 1034.87
+zone4_rate: 0.42
+zone4_sub: 11135.63
+zone5_rate: 0.45
+zone5_sub: 19470.38
+
+# Solidaritätszuschlag, SolZG
+soli_rate: 0.055
+soli_freigrenze: 20350.0
+soli_milderung_rate: 0.119
+
+# Kirchensteuer as a share of the income tax (§51a EStG with the Kirchensteuergesetze of the
+# Länder): the rate of the churches in each Land (EKD, "Übersicht der Kirchensteuersätze",
+# kirchenfinanzen.de). The Kappung at 2.75 to 4% of the zvE, on application in some Länder, is
+# left out.
+kirchensteuer:
+  {BW: 0.08, BY: 0.08, BE: 0.09, BB: 0.09, HB: 0.09, HH: 0.09, HE: 0.09, MV: 0.09, NI: 0.09,
+   NW: 0.09, RP: 0.09, SL: 0.09, SN: 0.09, ST: 0.09, SH: 0.09, TH: 0.09}
+
+# Capital income: the Abgeltungsteuer before Soli and church tax (§32d Abs. 1 S. 1 EStG), the
+# Vorabpauschale (§18 InvStG). Basiszins from the BMF-Schreiben of 2026-01-13.
+abgeltungsteuer_rate: 0.25
+basiszins: 0.032
+basisertrag_share: 0.7
+
+# Private Veräußerungsgeschäfte (§23 EStG): a gain is taxable when the sale comes "nicht mehr
+# als ein Jahr" after the purchase (Abs. 1 S. 1 Nr. 2). The gains of a calendar year stay free
+# when their net is "weniger als 1 000 Euro" (Abs. 3 S. 5), a Freigrenze: 600 up to 2023, 1,000
+# since 2024 (Wachstumschancengesetz; BMF-Schreiben of 2025-03-06 on Kryptowerte, Rn. 53).
+private_sale_months: 12
+private_sale_freigrenze: 1000.0
+# Land and buildings: taxable when "der Zeitraum zwischen Anschaffung und Veräußerung nicht mehr
+# als zehn Jahre beträgt" (Abs. 1 S. 1 Nr. 1 S. 1), the costs of the purchase in the basis (Abs. 3
+# S. 1). A home used by its owner is free (Abs. 1 S. 1 Nr. 1 S. 3): its sale is not `taxable`.
+property_sale_months: 120
+
+# Social insurance: employee shares and Beitragsbemessungsgrenzen per month
+rv_rate: 0.093
+alv_rate: 0.013
+sv_bbg_month: 8450.0
+kv_rate: 0.073
+kv_rate_reduced: 0.070  # half of the ermäßigter Beitragssatz of 14.0% (§243 SGB V)
+# Half of the average Zusatzbeitrag of 2.9% (§242a SGB V, BAnz AT 10.11.2025 B7)
+kv_zusatz_half: 0.0145
+pv_rate: 0.018
+kv_pv_bbg_month: 5812.50
+pv_rente_rate: 0.036  # PV on a pension: the whole rate, no employer half
+# PV of a member (§55 Abs. 3 SGB XI): the surcharge for the childless, else this discount for
+# each child under `pv_child_age` (to the end of the month in which it completes that year) from
+# the second, at most `pv_child_discount_max` (the fifth child). The member bears the surcharge
+# (§58 Abs. 1 S. 3, §59 Abs. 5 SGB XI) and the discount: no law assigns that, the Kassen keep the
+# employer at half of the base rate (TK Beratungsblatt "Beiträge in der Pflegeversicherung", 2026).
+pv_kinderlos_zuschlag: 0.006
+pv_child_discount: 0.0025
+pv_child_discount_max: 0.01
+pv_child_age: 25
+
+# Deductions
+werbungskosten_pauschale: 1230.0  # §9a Nr. 1 a EStG
+pension_pauschbetrag: 102.0  # §9a Nr. 3 EStG
+sonderausgaben_pauschbetrag: 36.0  # §10c EStG
+# Kinderbetreuungskosten (§10 Abs. 1 Nr. 5 S. 1 EStG, since 2025): `childcare_share` of the costs
+# of a child under `childcare_age`, at most `childcare_max` a year per child. Donations (§10b
+# Abs. 1 S. 1 Nr. 1): up to `donation_share` of the Gesamtbetrag der Einkünfte. The credit for
+# haushaltsnahe Dienstleistungen and Handwerkerleistungen (§35a Abs. 2 S. 1, Abs. 3 S. 1): `rate`
+# of the costs, at most `household` and `craftsman` a year.
+childcare_share: 0.8
+childcare_max: 4800.0
+childcare_age: 14
+donation_share: 0.2
+haushalt_credit: {rate: 0.2, household: 4000.0, craftsman: 1200.0}
+vorsorge_hoechstbetrag: 30826.0  # §10 Abs. 3 EStG, GRV plus Basisrente, single
+# The ALV part of the Vorsorgepauschale counts only as far as it stays below this sum with the
+# KV and PV parts (§39b Abs. 2 S. 5 Nr. 3 e EStG)
+vorsorge_alv_cap: 1900.0
+# Basisabsicherung share of a `kv` premium stream without its own `deductible`
+pkv_basis_share: 0.8
+
+# PKV subsidies. The employer pays `kv_rate` plus `kv_zusatz_half` (8.75%) and `pv_rate` (its
+# half of the PV rate of 3.6%, §58 Abs. 1 SGB XI) of the month's contributory salary up to the
+# KV-BBG, at most this share of the KV and of the PV premium (§257 Abs. 2 S. 2 SGB V, §61 Abs. 2
+# S. 2 SGB XI): 508.59 and 104.63 at the BBG.
+employer_pkv_subsidy_cap_rate: 0.5
+# The Agentur pays the whole premium during ALG1 (§174 SGB III), up to what a GKV member would
+# cost it: §232a SGB V sets that base at 80% of the KV-BBG (4,650.00), KV at 14.6% plus the
+# average Zusatzbeitrag of 2.9%, PV at 3.6%. The DRV pays `kv_rate` plus `kv_zusatz_half` of
+# the pension, 8.75% in 2026, at most this share of the KV premium (§106 Abs. 3 SGB VI; DRV,
+# Rentner und ihre Krankenversicherung, 21. Auflage 2/2026, p. 27; a DRV notice of 2026-03-23
+# still named the 8.55% of 2025).
+pkv_agentur: {rate: 1.0, cap_kv: 813.75, cap_pv: 167.40}
+pension_pkv_subsidy_cap_rate: 0.5
+
+# bAV by Entgeltumwandlung into a Pensionsfonds, a Pensionskasse or a Direktversicherung: the
+# contributions of the employer, the converted salary with them, are free of income tax "soweit
+# die Beiträge im Kalenderjahr 8 Prozent der Beitragsbemessungsgrenze in der allgemeinen
+# Rentenversicherung nicht übersteigen" (§3 Nr. 63 S. 1 EStG; 676 € a month in 2026), and no
+# Arbeitsentgelt up to "insgesamt 4 Prozent" of it (§1 Abs. 1 S. 1 Nr. 9 SvEV; 338 €). The
+# employer-financed contributions fill the room first, the subsidy is part of the conversion, and
+# monthly parts of a twelfth are allowed (BMF, Steuerliche Förderung der betrieblichen
+# Altersversorgung, LStH 2024 Anhang 2 III, Rn. 30 f.). The employer adds 15% of the converted
+# salary "soweit er durch die Entgeltumwandlung Sozialversicherungsbeiträge einspart" (§1a Abs. 1a
+# BetrAVG).
+bav_tax_free_share: 0.08
+bav_sv_free_share: 0.04
+bav_subsidy: 0.15
+
+# ALG1 (§§149, 153 SGB III): the share of the pauschaliertes Netto, the flat deduction for
+# the social insurance, and the share of the salary that earns pension points
+alg1_pauschal_abzug: 0.20
+alg1_rate_base: 0.60
+alg1_rate_kinder: 0.67
+alg1_rv_share: 0.80
+# The salary of the year per day (§151 Abs. 1), the Lohnsteuer of a day as 1/360 of the year's
+# (§39b Abs. 2 S. 9 EStG), a full month of ALG1 as 30 days (§154). The Selbstberechnungsprogramm
+# of the Bundesagentur (pub.arbeitsagentur.de) divides the year by 365 days.
+alg1_year_days: 365
+lohnsteuer_year_days: 360
+alg1_month_days: 30
+# Months of ALG1 by the age at its start (§147 SGB III), with the full insurance record
+alg1_months: {0: 12, 50: 15, 55: 18, 58: 24}
+
+# Statutory pension (SGB VI)
+durchschnittsentgelt: 51944.0  # provisional value of 2026, Sozialversicherungs-Rechengrößenverordnung
+# The aktuelle Rentenwert from 2026-07-01 (§1 RWBestV 2026 of 2026-06-16, BGBl. 2026 I Nr. 178;
+# gesetze-im-internet.de and the DRV FAQ Rentenanpassung 2026, read 2026-10-14): the monthly
+# euros of one point, the `point_value` of the pension of a quick start
+rentenwert: 42.52
+regelaltersgrenze: 67.0
+langjaehrig_age: 63.0  # §236 SGB VI, with 35 years
+langjaehrig_years: 35.0
+besonders_age: 65.0  # §236b SGB VI, with 45 years
+besonders_years: 45.0
+abschlag_per_month: 0.003  # §77 SGB VI
+zuschlag_per_month: 0.005
+# Taxable share of a pension (§22 Nr. 1 S. 3 a aa EStG): `pension_share` for a pension that
+# starts in `pension_share_start_year`, plus `pension_share_step` per later year. The
+# half-point steps hold since `pension_share_step_since` (Wachstumschancengesetz), a full
+# point per year before.
+pension_share: 0.84
+pension_share_start_year: 2026
+pension_share_step: 0.005
+pension_share_step_since: 2023
+# Full Erwerbsminderung (§43 Abs. 2 SGB VI) and the months before its pension, checked at
+# gesetze-im-internet.de on 2026-10-13. Six weeks of Entgeltfortzahlung (§3 Abs. 1 S. 1 EFZG) as
+# `efzg_months` months from the onset, then the Krankengeld of the GKV: `krankengeld_rate` of the
+# regular gross up to the KV-BBG (4,068.75 € a month at the BBG of 2026), of an employee at most
+# `krankengeld_net_cap` of the net (§47 Abs. 1, 4, 6 SGB V). The Kasse pays RV, ALV and PV on 80% of
+# the gross (§166 Abs. 1 Nr. 2 SGB VI, §345 Nr. 5 SGB III, §57 Abs. 2 SGB XI); the member bears half
+# of them only "soweit sie auf die Leistung entfallen", half the rates on the Krankengeld paid
+# (§170 Abs. 1 Nr. 2 a SGB VI, §347 Nr. 5 SGB III, §59 Abs. 2, 5 SGB XI). The EM-Rente pays from
+# the `em_start_months`-th calendar month after the onset (§101 Abs. 1), with the allgemeine
+# Wartezeit of `em_wartezeit_months` (§50 Abs. 1) and `em_pflicht_months` months of Pflichtbeiträge
+# in the `em_window_months` before the onset (§43 Abs. 1 S. 1 Nr. 2).
+efzg_months: 2
+krankengeld_rate: 0.70
+krankengeld_net_cap: 0.90
+em_start_months: 7
+em_wartezeit_months: 60
+em_pflicht_months: 36
+em_window_months: 60
+# The Zugangsfaktor of an EM-Rente: `abschlag_per_month` less for each month of the Rentenbeginn
+# before `em_reference_age`, counted from `em_floor_age` at the earliest (§77 Abs. 2 S. 1 Nr. 3,
+# S. 2: 10.8% off for every start before 62; Abs. 4, 40 years, left out)
+em_reference_age: 65.0
+em_floor_age: 62.0
+# The end of the Zurechnungszeit in months of age by the year of the Rentenbeginn (§59 Abs. 2,
+# §253a Abs. 3 SGB VI: 66 years 3 months in 2026), the last for every later year (67 from 2031);
+# the table covers the years of §253a Abs. 3 from 2020, an earlier start takes the first row
+zurechnung_end: {2020: 789, 2021: 790, 2022: 791, 2023: 792, 2024: 793, 2025: 794, 2026: 795,
+  2027: 796, 2028: 798, 2029: 800, 2030: 802, 2031: 804}
+# The Ertragsanteil of an abgekürzte Leibrente, such as a private BU-Rente (§22 Nr. 1 S. 3 a bb S. 4
+# EStG, §55 Abs. 2 EStDV at gesetze-im-internet.de/estdv_1955/__55.html): the share by the Laufzeit
+# in whole years from the start to the contractual end (R 22.4 Abs. 4, 5 EStR: rounded down; NWB,
+# EStR R 22.4, checked on 2026-10-14), keyed by the last year of each row of the table (14 to 15
+# years: 16%). Column 3 (the age table of §22 for a start at a high age) and 80 years and more no
+# BU reaches.
+ertragsanteil_by_years: {
+  1: 0.0, 2: 0.01, 3: 0.02, 4: 0.04, 5: 0.05, 6: 0.07, 7: 0.08, 8: 0.09, 9: 0.10, 10: 0.12,
+  11: 0.13, 12: 0.14, 13: 0.15, 15: 0.16, 17: 0.18, 18: 0.19, 19: 0.20, 20: 0.21, 21: 0.22,
+  22: 0.23, 23: 0.24, 24: 0.25, 25: 0.26, 26: 0.27, 27: 0.28, 28: 0.29, 30: 0.30, 31: 0.31,
+  32: 0.32, 33: 0.33, 34: 0.34, 36: 0.35, 37: 0.36, 38: 0.37, 39: 0.38, 41: 0.39, 42: 0.40,
+  44: 0.41, 45: 0.42, 47: 0.43, 48: 0.44, 50: 0.45, 52: 0.46, 53: 0.47, 55: 0.48, 57: 0.49,
+  59: 0.50, 61: 0.51, 63: 0.52, 65: 0.53, 67: 0.54, 69: 0.55, 71: 0.56, 74: 0.57, 76: 0.58,
+  79: 0.59}
+
+# Self-employment. The monthly Bezugsgröße (§18 SGB IV; SvBezGrV 2026 §1 Abs. 1: 47,460 a year):
+# the freiwillige GKV takes at least its 90th part per day, 30 days a month (§240 Abs. 4 S. 1 SGB V,
+# §57 Abs. 4 SGB XI: 1,318.33; BMG "Beiträge" 2026: 222.80 without and 230.71 with Krankengeld at
+# the minimum, 982.31 and 1,017.19 at the KV-BBG, KV only). The GRV of a self-employed person takes
+# it as the base of the Regelbeitrag (§165 Abs. 1 S. 1 Nr. 1 SGB VI: 735.63), `rv_founding_share` of
+# it up to the end of the `rv_founding_years`-th calendar year after the year of the founding
+# (S. 2: 367.82), a proven income at least the Geringfügigkeitsgrenze (§8 Abs. 1a SGB IV: the
+# Mindestlohn of 13.90 times 130 / 3, rounded up; Minijob-Zentrale 2026).
+bezugsgroesse_month: 3955.0
+geringfuegigkeit_month: 603.0
+# The GKV beyond a salary. A Pflichtmitglied (a salary, ALG1, the KVdR of §5 Abs. 1 Nr. 11 SGB V)
+# pays KV and PV on a company pension (§229 Abs. 1 S. 1 Nr. 5), only while it and the
+# Arbeitseinkommen beside a pension exceed a twentieth of `bezugsgroesse_month` (197.75; §226 Abs. 2
+# S. 1, §237 S. 4, §232a Abs. 3; for the PV §57 Abs. 1 SGB XI), and the KV then on the company
+# pension less that twentieth (S. 2; §57 Abs. 1 leaves it out for the PV). A lump sum counts a
+# `versorgung_months`-th as the monthly payment for that many months (§229 Abs. 1 S. 3), from the
+# month after the payout (BVSzGs §5 Abs. 4). A freiwilliges Mitglied pays on all income (§240
+# SGB V; Beitragsverfahrensgrundsätze Selbstzahler of the GKV-Spitzenverband, as of 2025-01-01, and
+# its Katalog of 2026-05-26): capital income after the Teilfreistellung (§20 InvStG) and the loss
+# offset (§20 Abs. 6 EStG, BVSzGs §3 Abs. 1b S. 4), without the Sparer-Pauschbetrag, less
+# `kv_capital_werbungskosten` a year unless higher costs are proven (BVSzGs §3 Abs. 1b S. 3, checked
+# on 2026-10-13), of the last calendar year (§5 Abs. 2 S. 4); no §226 Abs. 2 (§3 Abs. 4).
+versorgung_months: 120
+kv_capital_werbungskosten: 51.0
+rv_founding_years: 3
+rv_founding_share: 0.5
+# Gewerbesteuer of a natural person: the Freibetrag on the Gewerbeertrag (§11 Abs. 1 S. 3 Nr. 1
+# GewStG), the Steuermesszahl (§11 Abs. 2), the Hebesatz of the municipality on the Messbetrag
+# (§16, at least 200%). The income tax takes back this multiple of the Messbetrag, at most the
+# Gewerbesteuer paid and the share of the tariff tax on the gewerbliche Einkünfte (§35 Abs. 1 S. 1
+# Nr. 1, S. 2 and 5 EStG).
+gewst_freibetrag: 24500.0
+gewst_messzahl: 0.035
+gewst_credit_factor: 4.0
+
+# Altersvorsorgedepot from 2027 (Altersvorsorgereformgesetz 2026): the Grundzulage is
+# `av_first_rate` of the first `av_first` euros of a year's own contributions and `av_rate`
+# of the rest up to `av_subsidized`, none below `av_min_contribution` (§§84, 86 EStG). The
+# contributions up to `av_subsidized` plus the Zulage are a Sonderausgabe (§10a EStG).
+av_first: 360.0
+av_first_rate: 0.5
+av_rate: 0.25
+av_subsidized: 1800.0
+av_min_contribution: 120.0
+# From 2027 the Kinderzulage of every child with Kindergeld in a month of the year: the
+# contributions up to 1,800, at most `av_kinderzulage` per child (§85 Abs. 1 S. 1 EStG as of
+# 2027-01-01, BGBl. 2026 I Nr. 156 Art. 2).
+av_kinderzulage: 300.0
+
+# Children (§§31, 32, 66 EStG). The Kindergeld per child a month from the month of birth (§66
+# Abs. 1, 2: 255 in 2025, 259 from 2026, Steuerfortentwicklungsgesetz, BT-Drs. 20/12778). The
+# Kinderfreibetrag and the Betreuungsfreibetrag per parent and child a year (§32 Abs. 6 S. 1;
+# BMBFSFJ: 6,828 and 2,928 for both parents in 2026), all of both on transfer (S. 6), a twelfth for
+# each month without the conditions (S. 5). The tax takes them instead of the Kindergeld where that
+# saves more (§31 S. 4), the Soli and the church tax always (§3 Abs. 2 SolZG, §51a Abs. 2 EStG).
+kindergeld_month: 259.0
+kinderfreibetrag: 3414.0
+betreuungsfreibetrag: 1464.0
+# Entlastungsbetrag für Alleinerziehende (§24b Abs. 2 EStG): for the first child, and the second for
+# each further one, a twelfth for each month with a child (Abs. 4)
+entlastungsbetrag: 4260.0
+entlastungsbetrag_more: 240.0
+# Kindererziehungszeit (§56 Abs. 5 SGB VI): the `kez_months` after the month of birth, each with
+# `kez_points_month` Entgeltpunkte (§70 Abs. 2 S. 1) on top of those of the month, up to the
+# Höchstwert of Anlage 2b, the BBG over the Durchschnittsentgelt (S. 2). The months up to the
+# `beruecksichtigung_age`-th birthday are Berücksichtigungszeit (§57), which counts for the 35 and
+# the 45 years (§51 Abs. 3, 3a).
+kez_months: 36
+kez_points_month: 0.0833
+beruecksichtigung_age: 10
+
+# Erbschaft- und Schenkungsteuer (ErbStG), nominal: the engine does not index these constants
+# (the Freibeträge stand since 2009). By the relation of the giver to the person: the Freibetrag
+# (§16 Abs. 1 Nr. 2 child, also of a step-parent, Nr. 3 grandchild, Nr. 5 class II, Nr. 7 class
+# III) and the tax class (§15 Abs. 1: I Nr. 2, 3; II Nr. 2 sibling, Nr. 3 child of a sibling, Nr. 5
+# Schwiegerkind; the rest III). The rates of §19 Abs. 1 per class up to each limit (`bis
+# einschließlich`), the last above them; the Härteausgleich of §19 Abs. 3 levies the extra tax over
+# a limit only from half (a rate up to `rate`) or three quarters (above) of the excess. The
+# steuerpflichtige Erwerb is rounded down to 100 (§10 Abs. 1 S. 6), an inheritance deducts the
+# Erbfallkosten-Pauschbetrag without proof (§10 Abs. 5 Nr. 3, 15,000 since the JStG 2024).
+erbst_freibetrag:
+  {parent: 400000, grandparent: 200000, sibling: 20000, aunt_uncle: 20000, parent_in_law: 20000,
+   other: 20000}
+erbst_klasse:
+  {parent: 1, grandparent: 1, sibling: 2, aunt_uncle: 2, parent_in_law: 2, other: 3}
+erbst_brackets: [75000, 300000, 600000, 6000000, 13000000, 26000000]
+erbst_rates:
+  1: [0.07, 0.11, 0.15, 0.19, 0.23, 0.27, 0.30]
+  2: [0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.43]
+  3: [0.30, 0.30, 0.30, 0.30, 0.50, 0.50, 0.50]
+erbst_haerte: {rate: 0.30, below: 0.5, above: 0.75}
+erbst_erbfallkosten: 15000.0
+erbst_rounding: 100.0

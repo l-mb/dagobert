@@ -1,0 +1,41 @@
+# Eine erfundene Person: angestellt, zu Beginn 31, ledig, ohne Kinder, gesetzlich
+# krankenversichert (GKV), in einer Mietwohnung. Sie will früh aufhören zu arbeiten. Alle Beträge
+# in cashflows.yaml sind Euro von `start`.
+person:
+  born: 1995-02-09
+  sex: f
+  rv_since: 2019-10-01
+
+start: 2026-10-01
+
+# Die Lebensphasen, zwischen denen die Szenarien wechseln, in der Reihenfolge der Spalten
+phases:
+  arbeit: {label: Arbeit}
+  teilzeit: {label: Teilzeit}
+  ruhestand: {label: Früher Ruhestand}
+  rente: {label: Rente}
+
+inflation: {mean: 0.02, stdev: 0.01}
+
+# Gehaltserhöhungen von 2.5% im Jahr: einen halben Prozentpunkt mehr als die Preise
+indices:
+  gehalt: {mean: 0.025, stdev: 0.01}
+
+returns:
+  # Ein weltweiter Aktienfonds, etwa einer auf den MSCI World
+  equity: {mean: 0.065, stdev: 0.16}
+  # Das Tagesgeld
+  fixed_income: {mean: 0.02, stdev: 0.01}
+  cash: {mean: 0.0}
+  # Jeder Plan braucht sie, auch ohne eigene Immobilie
+  property: {mean: 0.02, stdev: 0.06}
+  # Die Betriebsrente
+  bav: {mean: 0.03, stdev: 0.01}
+
+# Gesetzliche Krankenversicherung mit dem durchschnittlichen Zusatzbeitrag, keine Kirchensteuer.
+# Das Bundesland würde den Satz der Kirchensteuer bestimmen
+tax:
+  pkv: false
+  land: NW
+  # Ihre Werbungskosten laut Steuerbescheid: der Arbeitsweg, das Homeoffice
+  werbungskosten: 1500

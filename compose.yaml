@@ -1,0 +1,61 @@
+# Local use, on a data directory of this machine, as its owner:
+#   DAGOBERT_USER=$(id -u):$(id -g) docker compose up -d
+#   then open http://localhost:8321
+# DAGOBERT_DATA_DIR names another data directory than ./data. Both can go into .env.
+# The CLI on the same data, for example the report into <data>/out:
+#   DAGOBERT_USER=$(id -u):$(id -g) docker compose run --rm dagobert run scenarios/plan.yaml
+#
+# Server, behind Caddy with forward_auth (see Caddyfile; the guide docs/install/self-hosting.md):
+#   docker compose --profile server up -d
+# and remove `ports` from the app: only Caddy may reach it.
+
+services:
+  dagobert:
+    build: .
+    # The published image instead: ghcr.io/l-mb/dagobert:0.1 (the newest 0.1.x), and remove `build`.
+    image: dagobert
+    init: true  # reaps the explorer's worker processes and forwards signals
+    read_only: true
+    tmpfs:
+      - /tmp  # tempfile; /dev/shm stays writable, the worker pool needs it
+    # Files written into /data belong to this user (a save writes a new file): use the owner of
+    # the data directory. Not UID and GID: bash does not export them, and they are read-only.
+    # Without it the image user 10001 needs write access.
+    user: "${DAGOBERT_USER:-10001:10001}"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      DAGOBERT_WORKERS: "2"  # about 750 MB each at 5000 paths: more workers need more memory
+      # Server only: the public host name, against DNS rebinding (WebSocket Host check).
+      # STREAMLIT_SERVER_ALLOWED_HOSTS: "dagobert.example.com"
+      # Serve under a sub path; the health check follows it.
+      # STREAMLIT_SERVER_BASE_URL_PATH: "dagobert"
+    volumes:
+      # The data directory. Add ":z" on a host with SELinux: a shared label, so that
+      # `docker compose run` beside the app keeps access (":Z" would lock out the other).
+      - ${DAGOBERT_DATA_DIR:-./data}:/data
+    ports:
+      - "127.0.0.1:8321:8321"  # the app has no login: never publish it on all interfaces
+    # Measured: the Explorer at 5000 paths with 2 workers reaches a peak of 2.7 GB over 16 slider
+    # moves and 3.2 GB with a second session that computes at the same time, a report of seven
+    # scenarios 2.1 GB, the Explorer at 500 paths 0.5 GB. No swap.
+    mem_limit: 5g
+    memswap_limit: 5g
+    restart: unless-stopped
+
+  caddy:
+    profiles: [server]
+    image: caddy:2.11.7@sha256:f2a1290d0463aad60660d4ec134943f183ee2a5f6c3eb7bf32dd984f2f020772
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro,z  # z: SELinux label, as for the data directory
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:

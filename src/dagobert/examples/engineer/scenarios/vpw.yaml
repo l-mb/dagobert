@@ -1,0 +1,10 @@
+name: Spend by VPW
+note: >-
+  Work to 65 as the plan, then spend by variable percentage withdrawal: each year a share of the
+  liquid wealth that rises with age, for leisure and clothes, at least 600 € a month. Compare it
+  with Work to 65, which cuts and raises by the wealth, on the Explorer page.
+extends: plan
+# VPW replaces the cut and the increase. A growth trend of 3.7% is that of 60% stocks and 40%
+# bonds, about the glide path in retirement: the rate is 5.0% at 65 and 6.9% at 80
+overrides:
+  spending: {cut: 0, trigger: 0, increase: 0, ceiling: 0, vpw: {growth: 0.037, floor: 600}}

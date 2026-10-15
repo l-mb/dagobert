@@ -1,0 +1,7 @@
+streams:
+  - name: Miete
+    cat: wohnen
+    amount: -500
+    factor: {alt: 0.5}
+  - {name: Gehalt, kind: salary, gross: 5000, phases: [work]}
+  - {name: ALG, kind: alg1, phases: [unemployed]}

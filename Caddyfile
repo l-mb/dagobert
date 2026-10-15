@@ -1,0 +1,20 @@
+# An example for a server: Dagobert behind Caddy with forward auth (single sign-on).
+# Caddy 2.11.7 or later (GHSA-6365-7ppr-5r92 in forward_auth before 2.11.5).
+# Placeholders: dagobert.example.com, the auth service authelia:9091.
+# Keep the default Host header: Streamlit accepts the WebSocket only when the host of its
+# Origin equals Host. So no `header_up Host` here.
+# Every route needs the login, the health route too: the container checks its own health.
+
+dagobert.example.com {
+	# Authelia. authentik: `uri /outpost.goauthentik.io/auth/caddy`, its own
+	# copy_headers, and `reverse_proxy /outpost.goauthentik.io/* <outpost>` before it.
+	forward_auth authelia:9091 {
+		uri /api/authz/forward-auth
+		copy_headers Remote-User Remote-Groups Remote-Email Remote-Name
+	}
+	# WebSockets pass through by themselves. A config reload would close them at once:
+	# the delay keeps open sessions alive for five minutes.
+	reverse_proxy dagobert:8321 {
+		stream_close_delay 5m
+	}
+}

@@ -1,0 +1,5 @@
+name: boost
+extends: base
+# sorts before its child: the child reads the growth of schema 3, not the one migrated here
+overrides:
+  pension_growth: 0.04

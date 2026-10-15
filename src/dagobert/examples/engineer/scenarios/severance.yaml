@@ -1,0 +1,33 @@
+name: Job loss at 53
+note: >-
+  The job ends at 53 with a severance, part of it paid into the company pension. A year of ALG1,
+  then a new job at a lower salary without a company pension, and the pension at 65 as planned.
+extends: plan
+phases:
+  - {from: 2039-06-01, phase: unemployed, id: job-loss}
+  - {from: 2040-06-01, phase: new-job, id: new-job}
+events:
+  # The part into the company pension is tax-free (§3 Nr. 63 S. 3 EStG)
+  - at: 2039-05-01
+    type: severance
+    gross: 120000
+    bav: {policy: bav, amount: 30000}
+    note: Severance, a part into the company pension
+    id: job-loss
+  - at: 2039-06-01
+    type: end_streams
+    names: [Salary, Bonus, Employer savings benefit (VL)]
+    note: The payments of the old employer end
+    id: job-loss
+  - at: 2040-06-01
+    type: add_stream
+    stream:
+      name: New salary
+      cat: salary
+      kind: salary
+      gross: 6200
+      phases: [new-job]
+      index: salary
+      start: 2040-06-01
+    note: A new job
+    id: new-job

@@ -1,0 +1,3 @@
+streams:
+  - {name: Gehalt, kind: salary, gross: 5000, phases: [work]}
+  - {name: Miete, cat: wohnen, amount: -1500}

@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+out/
+tmp/
+*~
+# personal inputs, licensed series and prices: never in git
+/data/
+# exports and their unpacked copies, and the folder variables of compose
+/dagobert-*.zip
+/dagobert-*/
+.env
+.coverage
+.claude/worktrees/

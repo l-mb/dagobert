@@ -1,0 +1,5 @@
+name: base
+phases: [{from: 2026-01-01, phase: work}, {from: 2045-01-01, phase: retired}]
+# a third child in 2028: the override repeats the rows
+overrides: {person: {children: 3, children_born: [{born: 2016-04-01}, {born: 2003-07-15},
+  {born: 2028-02-01}]}}

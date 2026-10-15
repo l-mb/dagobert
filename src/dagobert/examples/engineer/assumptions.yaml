@@ -1,0 +1,102 @@
+# A made-up person: an engineer, 40 at the start, one child, privately insured (PKV), a rented
+# home and a rented-out flat with a loan. Every amount of cashflows.yaml is in euros of `start`.
+person:
+  born: 1986-05-20
+  sex: f
+  children: 1
+  rv_since: 2010-09-01
+  # Her child counts to the end of the studies: the app pays the Kindergeld up to `until`
+  children_born:
+    - {born: 2016-04-01, until: 2039-10-01, kindergeld: true}
+  # The relatives from whom she may inherit: the inheritance of `plan` falls at the death of her
+  # mother, drawn for each simulated future from the life table
+  relatives:
+    mother: {label: Mother, born: 1956-05-02, sex: f, relation: parent}
+
+start: 2026-10-01
+
+# The phases of life that the scenarios switch between, in the order of the columns. `alt` is a
+# break without salary and ALG1, such as a sabbatical: its label names it on the pages. `new-job`
+# is the job after a job loss: the company pension of the old employer gets nothing there.
+# `freelance` is a time with a business of its own
+phases:
+  work: {label: Work}
+  unemployed: {label: Unemployed}
+  alt: {label: Career break}
+  retired: {label: Retired}
+  new-job: {label: New job}
+  freelance: {label: Freelance}
+
+inflation: {mean: 0.02, stdev: 0.01}
+
+indices:
+  salary: {mean: 0.02, stdev: 0.01}
+  insurance: {mean: 0.04, stdev: 0.015}
+  # Not cumulative: each year draws the payout ratio of the bonus itself
+  bonus: {mean: 0.9, stdev: 0.25, floor: 0.0, cap: 1.5, cumulative: false}
+
+returns:
+  equity: {mean: 0.065, stdev: 0.16}
+  fixed_income: {mean: 0.025, stdev: 0.03}
+  cash: {mean: 0.01}
+  property: {mean: 0.02, stdev: 0.06}
+  bav: {mean: 0.03, stdev: 0.01}
+  gold: {mean: 0.05, stdev: 0.15}
+  # Conservative on purpose: `fixed` compounds the mean, and at this spread the median path
+  # of Monte Carlo loses a few percent a year
+  bitcoin: {mean: 0.1, stdev: 0.6, equity_correlation: 0.4}
+
+refinance_rate: 0.04
+cash_buffer_months: 3
+# The pension follows the consumer prices: this is its real growth on top
+pension_growth: 0.0
+
+# The fixed-income share of the liquid investments by age
+allocation:
+  fixed_income:
+    - {age: 40, share: 0.3}
+    - {age: 67, share: 0.4}
+    - {age: 80, share: 0.5}
+  rebalance_every: 12
+  skip_after_loss: 12
+
+spending:
+  # Leisure and clothes against the liquid wealth of the first month without pay (the
+  # retirement, a career break): a quarter less while below a quarter of it, a tenth more
+  # while above one and a half times it
+  base: no_pay
+  cut: 0.25
+  trigger: 0.25
+  increase: 0.1
+  ceiling: 1.5
+  categories: [leisure, personal]
+  age_curve:
+    - {age: 67, factor: 1.0}
+    - {age: 75, factor: 0.9}
+    - {age: 85, factor: 0.8}
+
+care:
+  hazard:
+    - {age: 70, factor: 0.005}
+    - {age: 80, factor: 0.03}
+    - {age: 90, factor: 0.1}
+  cost: 1800
+  duration: {mean: 30, stdev: 18}
+
+# Losing the ability to work (a full Erwerbsminderung), drawn for each simulated future by the
+# yearly chance by age: the default curve, fitted to the new EM-Renten of the DRV. After the onset
+# her salary stops, the EM-Rente follows from the seventh month, and her BU policy pays
+disability:
+  hazard:
+    - {age: 20, factor: 0.00044}
+    - {age: 30, factor: 0.00099}
+    - {age: 40, factor: 0.00226}
+    - {age: 50, factor: 0.00512}
+    - {age: 55, factor: 0.00772}
+    - {age: 60, factor: 0.01162}
+    - {age: 64, factor: 0.01614}
+
+tax:
+  year: 2026
+  # The work expenses of her last Steuerbescheid: the commute, a home office, equipment
+  werbungskosten: 1900

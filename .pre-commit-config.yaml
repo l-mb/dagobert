@@ -1,0 +1,53 @@
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      # Term list outside the repository, see the script. data/ holds personal data on purpose.
+      # The shipped series are public downloads, the golden snapshots numbers computed from the
+      # made-up plans of the tests: digits there can match an amount of the list.
+      # LICENSE names the copyright holder, public by choice.
+      # `exclude` and the pathspecs of `scripts/pii-check --all` hold the same list.
+      - id: pii-check
+        name: personal data
+        entry: scripts/pii-check
+        language: unsupported
+        exclude: ^(data/|src/dagobert/data/[^/]*\.csv$|src/dagobert/data/tax/|tests/__snapshots__/|LICENSE$)
+      # A rule that loads nowhere or everywhere fails silently in Claude Code, see the script.
+      - id: rules-check
+        name: rules of .claude/rules
+        entry: uv run --locked python scripts/rules-check
+        language: unsupported
+        pass_filenames: false
+        always_run: true
+      # The German catalogue against the code (rule i18n): a new or changed text needs its German.
+      - id: i18n-check
+        name: German catalogue
+        entry: uv run --locked python scripts/i18n check
+        language: unsupported
+        pass_filenames: false
+        files: ^(src/|scripts/i18n$)
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --locked ruff check --fix
+        language: unsupported
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --locked ruff format
+        language: unsupported
+        types_or: [python, pyi]
+      - id: mypy
+        name: mypy
+        entry: uv run --locked mypy
+        language: unsupported
+        files: ^(src|tests|scripts)/.*\.pyi?$|^(scripts/rules-check|scripts/i18n|pyproject\.toml|uv\.lock)$
+        pass_filenames: false
+      - id: basedpyright
+        name: basedpyright
+        entry: uv run --locked basedpyright
+        language: unsupported
+        files: ^(src|tests|scripts)/.*\.pyi?$|^(scripts/rules-check|scripts/i18n|pyproject\.toml|uv\.lock)$
+        pass_filenames: false

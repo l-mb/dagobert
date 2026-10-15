@@ -1,0 +1,76 @@
+# Grunderwerbsteuer by Land: the rate as a share of the price, from the day `since` on.
+#
+# §11 Abs. 1 GrEStG sets 3.5% since 1997-01-01 (Jahressteuergesetz 1997). Since 2006-09-01 a Land
+# may set its own rate (Art. 105 Abs. 2a S. 2 GG). A rate holds for a purchase that is
+# "verwirklicht" on or after its day, as a rule the notarial contract.
+#
+# The dates and rates follow the table "Steuersätze" of the article "Grunderwerbsteuer
+# (Deutschland)" of the German Wikipedia (read 2026-10-13). The rates of today agree with
+# steuern.de of 2026-07-06 and with the sources named for each Land below (read 2026-10-12):
+# "PwC" is the PwC table of the laws of the Länder, which still shows 4.5% for HH (stale), so it
+# names the dates only. A proposal of 2026-10 to cut the rate of NW to 5% in 2027 is no law yet.
+# Keys: the ISO 3166-2:DE codes without `DE-`.
+BW:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2011-11-05, rate: 0.05}  # PwC
+BY:  # no rate of its own: §11 Abs. 1 GrEStG
+  - {since: 1997-01-01, rate: 0.035}
+BE:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2007-01-01, rate: 0.045}
+  - {since: 2012-04-01, rate: 0.05}
+  - {since: 2014-01-01, rate: 0.06}  # PwC
+BB:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2011-01-01, rate: 0.05}
+  - {since: 2015-07-01, rate: 0.065}  # PwC
+HB:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2011-01-01, rate: 0.045}
+  - {since: 2014-01-01, rate: 0.05}
+  - {since: 2025-07-01, rate: 0.055}  # service.bremen.de
+HH:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2009-01-01, rate: 0.045}
+  - {since: 2023-01-01, rate: 0.055}  # the portal of the Land
+HE:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2013-01-01, rate: 0.05}
+  - {since: 2014-08-01, rate: 0.06}  # PwC
+MV:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2012-07-01, rate: 0.05}
+  - {since: 2019-07-01, rate: 0.06}  # steuerportal-mv.de
+NI:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2011-01-01, rate: 0.045}
+  - {since: 2014-01-01, rate: 0.05}  # PwC
+NW:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2011-10-01, rate: 0.05}
+  - {since: 2015-01-01, rate: 0.065}  # PwC
+RP:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2012-03-01, rate: 0.05}  # PwC
+SL:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2011-01-01, rate: 0.04}
+  - {since: 2012-01-01, rate: 0.045}
+  - {since: 2013-01-01, rate: 0.055}
+  - {since: 2015-01-01, rate: 0.065}  # PwC
+SN:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2023-01-01, rate: 0.055}  # SächsGrEStSatzG (revosax)
+ST:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2010-03-02, rate: 0.045}
+  - {since: 2012-03-01, rate: 0.05}  # PwC
+SH:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2012-01-01, rate: 0.05}
+  - {since: 2014-01-01, rate: 0.065}  # PwC
+TH:
+  - {since: 1997-01-01, rate: 0.035}
+  - {since: 2011-04-07, rate: 0.05}
+  - {since: 2017-01-01, rate: 0.065}
+  - {since: 2024-01-01, rate: 0.05}  # MDR, FAZ (secondary sources)

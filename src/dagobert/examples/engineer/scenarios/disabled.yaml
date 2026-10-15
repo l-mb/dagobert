@@ -1,0 +1,9 @@
+name: Unable to work at 51
+note: >-
+  A what-if: she can no longer work from January 2038, in every simulated future. Her salary stops
+  after six weeks; the plan leaves out the sick pay of her private health insurance, so five months
+  pass on the savings until the EM-Rente starts; the BU of the employer pays from February to 67.
+  The Cashflows page shows the months.
+extends: plan
+overrides:
+  disability: {at: 2038-01-01}

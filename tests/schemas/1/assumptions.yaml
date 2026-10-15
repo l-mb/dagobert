@@ -1,0 +1,7 @@
+person: {born: 1977-01-01, horizon_age: 51}
+start: 2026-01-01
+returns:
+  equity: {mean: 0.05}
+  fixed_income: {mean: 0.03}
+  cash: {mean: 0.02}
+  property: {mean: 0.01}

@@ -1,0 +1,4 @@
+name: hot
+extends: base
+# more inflation, the same nominal pension growth
+overrides: {inflation: {mean: 0.05}}

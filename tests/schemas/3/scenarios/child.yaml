@@ -1,0 +1,5 @@
+name: child
+extends: tpl
+# the inflation of the assumptions again: the growth of the parent holds
+overrides:
+  inflation: {mean: 0.03}

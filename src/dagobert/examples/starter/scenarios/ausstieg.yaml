@@ -1,0 +1,7 @@
+name: Mit 55 aufhören
+note: >-
+  Finanzielle Unabhängigkeit: mit 55 aufhören zu arbeiten und bis zur Rente mit 67 vom Depot
+  leben. Ohne Job zahlt sie die Krankenversicherung selbst, und ihre Rente hat weniger Punkte.
+extends: plan
+phases:
+  - {from: 2050-03-01, phase: ruhestand, id: ausstieg}

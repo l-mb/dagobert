@@ -1,0 +1,9 @@
+name: base
+phases: [{from: 2026-01-01, phase: work}]
+overrides:
+  assets:
+    fonds:
+      # a trade more in this scenario
+      trades:
+        - {date: 2024-01-02, kind: buy, isin: IE00BKM4GZ66, name: Overnight, units: 3, amount: 420}
+        - {date: 2025-01-02, kind: buy, isin: IE00BKM4GZ66, units: 1, amount: 150}

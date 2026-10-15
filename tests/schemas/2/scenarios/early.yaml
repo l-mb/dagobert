@@ -1,0 +1,5 @@
+name: early
+extends: tpl
+# a change before the start, as after a roll forward: it holds at the start
+phases:
+  - {from: 2025-06-01, phase: unemployed}

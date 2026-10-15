@@ -1,0 +1,36 @@
+name: Self-employed at 42
+note: >-
+  Leave the job at 42 for a consulting business of one's own until the pension at 65: a profit of
+  9,000 € a month before tax, a trade business that pays the Gewerbesteuer, and the pension
+  insurance on the profit. The private health insurance goes on without the employer's half.
+extends: plan
+phases:
+  - {from: 2029-01-01, phase: freelance, id: freelance}
+# The pension insurance on application (§4 Abs. 2 SGB VI), on the profit
+overrides:
+  tax:
+    self_employed: {rv: income}
+events:
+  # The profit after the business expenses, in euros of the start. A Hebesatz of 430%: up to
+  # 400% the income tax takes the Gewerbesteuer back
+  - at: 2029-01-01
+    type: add_stream
+    stream:
+      name: Consulting
+      cat: business
+      kind: self_employed
+      amount: 9000
+      phases: [freelance]
+      index: salary
+      hebesatz: 4.3
+    note: The business starts
+    id: freelance
+  # She keeps the BU of her employer at a premium of her own: a business has no Krankengeld here
+  # (the private health insurance), and the pension insurance on the profit keeps the EM-Rente.
+  # Compare it with `freelance-no-bu` on the Explorer page
+  - at: 2029-01-01
+    type: set_stream
+    name: BU policy
+    premium: -95
+    note: She pays the BU herself
+    id: freelance

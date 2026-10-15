@@ -1,0 +1,51 @@
+/* The report follows the color scheme of the browser. `phone.css` adds the rules of a phone. */
+:root {
+  color-scheme: dark light;
+  --bg: #111418; --fg: #e6e6e6; --muted: #9aa4b2; --line: #333; --head: #1c2128;
+  --shadow: rgba(154, 164, 178, 0.45);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff; --fg: #1f2328; --muted: #57606a; --line: #d0d7de; --head: #f6f8fa;
+    --shadow: rgba(87, 96, 106, 0.35);
+  }
+}
+body {
+  background: var(--bg); color: var(--fg); margin: 0 auto; max-width: 1200px;
+  padding: 1rem 1.5rem 3rem; font-family: system-ui, sans-serif;
+}
+h1, h2 { font-weight: 600; }
+section { margin-bottom: 2.5rem; }
+.scroll {
+  overflow-x: auto; margin: 1rem 0;
+  background:
+    linear-gradient(to left, var(--bg) 40%, transparent) right / 3rem 100% no-repeat local,
+    radial-gradient(farthest-side at 100% 50%, var(--shadow), transparent)
+      right / 1rem 100% no-repeat scroll;
+}
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid var(--line); padding: 0.4rem 0.8rem; text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+th { background: var(--head); }
+th[title] { cursor: help; }
+td { white-space: nowrap; }
+p.note, details.columns { color: var(--muted); max-width: 60rem; }
+details.columns summary { cursor: pointer; }
+details.columns dt { color: var(--fg); font-weight: 600; margin-top: 0.5rem; }
+details.columns dd { margin: 0; }
+.phone { display: none; }
+[role=tablist] {
+  position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 0.25rem;
+  margin: 0 0 1.5rem; padding-top: 0.5rem; background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+[role=tab] {
+  font: inherit; color: var(--muted); background: none; cursor: pointer;
+  padding: 0.5rem 1rem; margin-bottom: -1px; border: 1px solid transparent;
+  border-top: 3px solid transparent; border-radius: 6px 6px 0 0;
+}
+[role=tab]:hover { color: var(--fg); }
+[role=tab][aria-selected=true] {
+  color: var(--fg); background: var(--head); border-color: var(--line);
+  border-top-color: var(--accent); border-bottom-color: var(--head);
+}

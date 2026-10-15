@@ -1,0 +1,86 @@
+name: Work to 65
+note: >-
+  Work until 65, with a pension 7.2% lower than at 67 (0.3% per month earlier). The rented-out
+  flat is sold at 50 and repays its loan, a Basisrente premium at 55, an inheritance from the
+  mother at her death.
+phases:
+  - {from: 2026-10-01, phase: work}
+  - {from: 2051-06-01, phase: retired, id: retirement}
+# Each December, realize the gains of the depot that fit into the tax-free room and buy back:
+# the Vorabpauschale of a large depot takes the Pauschbetrag, so the room comes from the
+# Grundfreibetrag of a year without salary, such as a career break or the first years of the pension
+overrides:
+  tax: {harvest: true}
+events:
+  - at: 2027-02-01
+    type: buy
+    asset: bitcoin
+    amount: 1500
+    note: Top up the wallet
+  # Event amounts are nominal at their date
+  - at: 2030-04-01
+    type: lump_sum
+    amount: -28000
+    note: Replace the car
+    id: car
+  - at: 2041-04-01
+    type: lump_sum
+    amount: -34000
+    note: Replace the car
+    id: car
+  - at: 2036-06-01
+    type: sell
+    asset: flat
+    costs: 0.05
+    price_stdev: 0.1
+    then:
+      - {repay: flat-loan}
+      - {invest: portfolio}
+    note: Sell the flat
+    id: flat-sale
+  # Without a month: at the death of the mother, drawn for each simulated future. Below the
+  # Freibetrag of a parent, so no Erbschaftsteuer; the securities keep her cost basis
+  - type: inheritance
+    from: mother
+    cash: 20000
+    equity: {value: 10000, cost_basis: 4000}
+    note: Inheritance from the mother
+    id: inheritance
+  # A Basisrente premium is deductible in its year
+  - at: 2041-10-01
+    type: fund_policy
+    policy: basisrente
+    amount: 12000
+    note: A Basisrente premium at 55
+    id: basisrente
+  # Conditional sales: per path, at the first condition met
+  - type: sell
+    asset: bitcoin
+    when: {age: 50, liquid_below: 10000}
+    then:
+      - {invest: portfolio}
+    note: Bitcoin out at 50, or earlier when money runs short
+    id: bitcoin-exit
+  - type: sell
+    asset: gold-coins
+    when: {liquid_below: 15000}
+    note: The coins are the last reserve
+    id: gold-reserve
+  # Shares the id of the phase, so a shift of the retirement moves it too
+  - at: 2051-06-01
+    type: set_stream
+    name: Rent
+    amount: -1300
+    note: A smaller flat
+    id: retirement
+  # The BU of the employer ends with the job; a benefit that pays already runs on to 67
+  - at: 2051-06-01
+    type: end_streams
+    names: [BU policy]
+    note: The BU of the employer ends
+    id: retirement
+  - at: 2056-06-01
+    type: set_stream
+    name: Car
+    amount: -150
+    note: A smaller car at 70

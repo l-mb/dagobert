@@ -1,0 +1,7 @@
+name: Arbeiten bis 67
+note: >-
+  Vollzeit bis zur Regelaltersrente mit 67, die ganze Zeit mit dem Sparplan von 500 € im Monat.
+  Die Betriebsrente zahlt mit 67 aus, und das Altersvorsorgedepot zahlt ab dann.
+phases:
+  - {from: 2026-10-01, phase: arbeit}
+  - {from: 2062-03-01, phase: rente, id: rente}

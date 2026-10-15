@@ -1,0 +1,489 @@
+{
+  "markers": [
+    "2026-01 phase: Work",
+    "2026-07 phase: Career break",
+    "2028-03 disability",
+    "2029-01 phase: Privatier",
+    "2033-01 repay: kredit",
+    "2035-01 bav: bav pays 46.729 €",
+    "2042-01 phase: Retired",
+    "2043-01 gift: tante",
+    "2044-01 bav: pk pays 435 € per month",
+    "2044-01 bav: ruerup pays 210 € per month"
+  ],
+  "years": {
+    "2026": {
+      "capital_taxes": -2252,
+      "expenses": -55336,
+      "income": 82966,
+      "ledger": {
+        "move out: savings plan": 1800,
+        "moved: savings plan": 1800,
+        "non-cash: bav": 4563,
+        "non-cash: equity": 30379,
+        "non-cash: property": 2000,
+        "source: ": 7266,
+        "source: profit": 39551,
+        "source: salary": 36149,
+        "spending: base": 30274,
+        "spending: loan interest": 3430,
+        "spending: loan principal": 4370,
+        "spending: property upkeep": 2011,
+        "spending: versicherung": 720,
+        "spending: wohnen": 14532,
+        "tax: ": 28983
+      },
+      "liquid": 607207,
+      "phases": [
+        "alt",
+        "work"
+      ],
+      "taxes": -26731,
+      "total": 809940
+    },
+    "2027": {
+      "capital_taxes": -2385,
+      "expenses": -56253,
+      "income": 108267,
+      "ledger": {
+        "non-cash: bav": 4724,
+        "non-cash: equity": 31436,
+        "non-cash: property": 1980,
+        "source: ": 7266,
+        "source: profit": 98878,
+        "spending: base": 30274,
+        "spending: loan interest": 3211,
+        "spending: loan principal": 4436,
+        "spending: property upkeep": 1991,
+        "spending: versicherung": 706,
+        "spending: wohnen": 14532,
+        "tax: ": 51642
+      },
+      "liquid": 635345,
+      "phases": [
+        "alt"
+      ],
+      "taxes": -50290,
+      "total": 849441
+    },
+    "2028": {
+      "capital_taxes": -3574,
+      "expenses": -72052,
+      "income": 75132,
+      "ledger": {
+        "non-cash: bav": 4863,
+        "non-cash: equity": 32289,
+        "non-cash: property": 1961,
+        "source: ": 46150,
+        "source: profit": 26064,
+        "spending: base": 45081,
+        "spending: loan interest": 2993,
+        "spending: loan principal": 4504,
+        "spending: property upkeep": 1972,
+        "spending: versicherung": 173,
+        "spending: wohnen": 14532,
+        "tax: ": 22050
+      },
+      "liquid": 646783,
+      "phases": [
+        "alt"
+      ],
+      "taxes": -19367,
+      "total": 872665
+    },
+    "2029": {
+      "capital_taxes": -4419,
+      "expenses": -68677,
+      "income": 49156,
+      "ledger": {
+        "non-cash: bav": 5006,
+        "non-cash: equity": 32115,
+        "non-cash: property": 1942,
+        "source: ": 46321,
+        "spending: base": 40882,
+        "spending: loan interest": 2777,
+        "spending: loan principal": 4573,
+        "spending: property upkeep": 1952,
+        "spending: wohnen": 14532,
+        "tax: ": 8089
+      },
+      "liquid": 651166,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -4165,
+      "total": 889273
+    },
+    "2030": {
+      "capital_taxes": -4413,
+      "expenses": -68050,
+      "income": 49780,
+      "ledger": {
+        "non-cash: bav": 5153,
+        "non-cash: equity": 31788,
+        "non-cash: property": 1923,
+        "source: ": 45989,
+        "spending: base": 39197,
+        "spending: loan interest": 2563,
+        "spending: loan principal": 4643,
+        "spending: property upkeep": 1933,
+        "spending: wohnen": 14532,
+        "tax: ": 8074
+      },
+      "liquid": 656909,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -4327,
+      "total": 907700
+    },
+    "2031": {
+      "capital_taxes": -4519,
+      "expenses": -68972,
+      "income": 50415,
+      "ledger": {
+        "non-cash: bav": 5304,
+        "non-cash: equity": 31491,
+        "non-cash: property": 1904,
+        "source: ": 45663,
+        "spending: base": 38960,
+        "spending: loan interest": 2351,
+        "spending: loan principal": 4713,
+        "spending: property upkeep": 1914,
+        "spending: wohnen": 14532,
+        "tax: ": 8164
+      },
+      "liquid": 662498,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -4495,
+      "total": 926452
+    },
+    "2032": {
+      "capital_taxes": -4625,
+      "expenses": -69914,
+      "income": 51063,
+      "ledger": {
+        "non-cash: bav": 5460,
+        "non-cash: equity": 31185,
+        "non-cash: property": 1885,
+        "source: ": 45343,
+        "spending: base": 38728,
+        "spending: loan interest": 2141,
+        "spending: loan principal": 4785,
+        "spending: property upkeep": 1895,
+        "spending: wohnen": 14532,
+        "tax: ": 8250
+      },
+      "liquid": 667915,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -4666,
+      "total": 945530
+    },
+    "2033": {
+      "capital_taxes": -9627,
+      "expenses": -70878,
+      "income": 51725,
+      "ledger": {
+        "move out: repayment": 57412,
+        "moved: repayment": 57412,
+        "non-cash: bav": 5621,
+        "non-cash: equity": 28038,
+        "non-cash: property": 1867,
+        "source: ": 45029,
+        "spending: base": 45295,
+        "spending: property upkeep": 1877,
+        "spending: wohnen": 14532,
+        "tax: ": 13075
+      },
+      "liquid": 603986,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -5392,
+      "total": 956150
+    },
+    "2034": {
+      "capital_taxes": -4303,
+      "expenses": -68806,
+      "income": 52399,
+      "ledger": {
+        "non-cash: bav": 5786,
+        "non-cash: equity": 27421,
+        "non-cash: property": 1848,
+        "source: ": 44722,
+        "spending: base": 42335,
+        "spending: property upkeep": 1858,
+        "spending: wohnen": 14532,
+        "tax: ": 8387
+      },
+      "liquid": 608561,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -5524,
+      "total": 969670
+    },
+    "2035": {
+      "capital_taxes": -3562,
+      "expenses": -69346,
+      "income": 99817,
+      "ledger": {
+        "moved: policy payout": -39101,
+        "non-cash: bav": 4168,
+        "non-cash: equity": 28405,
+        "non-cash: property": 1830,
+        "one-off in: severance": 39101,
+        "one-off out: tax on one-offs": 9860,
+        "source: ": 44421,
+        "spending: base": 41654,
+        "spending: property upkeep": 1840,
+        "spending: wohnen": 14532,
+        "tax: ": 8009
+      },
+      "liquid": 649233,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -17793,
+      "total": 970782
+    },
+    "2036": {
+      "capital_taxes": -4689,
+      "expenses": -71805,
+      "income": 53789,
+      "ledger": {
+        "non-cash: bav": 4127,
+        "non-cash: equity": 28320,
+        "non-cash: property": 1812,
+        "source: ": 44126,
+        "spending: base": 42552,
+        "spending: property upkeep": 1822,
+        "spending: wohnen": 14532,
+        "tax: ": 8910
+      },
+      "liquid": 653515,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -6171,
+      "total": 982305
+    },
+    "2037": {
+      "capital_taxes": -4791,
+      "expenses": -72919,
+      "income": 54505,
+      "ledger": {
+        "non-cash: bav": 4249,
+        "non-cash: equity": 27982,
+        "non-cash: property": 1795,
+        "source: ": 43836,
+        "spending: base": 42310,
+        "spending: property upkeep": 1804,
+        "spending: wohnen": 14532,
+        "tax: ": 8924
+      },
+      "liquid": 657493,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -6305,
+      "total": 993796
+    },
+    "2038": {
+      "capital_taxes": -4889,
+      "expenses": -74032,
+      "income": 55235,
+      "ledger": {
+        "non-cash: bav": 4374,
+        "non-cash: equity": 27633,
+        "non-cash: property": 1777,
+        "source: ": 43552,
+        "spending: base": 42055,
+        "spending: property upkeep": 1787,
+        "spending: wohnen": 14532,
+        "tax: ": 8934
+      },
+      "liquid": 661164,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -6441,
+      "total": 1005268
+    },
+    "2039": {
+      "capital_taxes": -4987,
+      "expenses": -75170,
+      "income": 55979,
+      "ledger": {
+        "non-cash: bav": 4502,
+        "non-cash: equity": 27272,
+        "non-cash: property": 1760,
+        "source: ": 43274,
+        "spending: base": 41808,
+        "spending: property upkeep": 1769,
+        "spending: wohnen": 14532,
+        "tax: ": 8942
+      },
+      "liquid": 664501,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -6580,
+      "total": 1016705
+    },
+    "2040": {
+      "capital_taxes": -5084,
+      "expenses": -76336,
+      "income": 56739,
+      "ledger": {
+        "non-cash: bav": 4635,
+        "non-cash: equity": 26900,
+        "non-cash: property": 1742,
+        "source: ": 43001,
+        "spending: base": 41570,
+        "spending: property upkeep": 1752,
+        "spending: wohnen": 14532,
+        "tax: ": 8947
+      },
+      "liquid": 667470,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -6722,
+      "total": 1028089
+    },
+    "2041": {
+      "capital_taxes": -5179,
+      "expenses": -77530,
+      "income": 57514,
+      "ledger": {
+        "non-cash: bav": 4771,
+        "non-cash: equity": 26515,
+        "non-cash: property": 1725,
+        "source: ": 42734,
+        "spending: base": 41340,
+        "spending: property upkeep": 1735,
+        "spending: wohnen": 14532,
+        "tax: ": 8950
+      },
+      "liquid": 670040,
+      "phases": [
+        "gap"
+      ],
+      "taxes": -6866,
+      "total": 1039402
+    },
+    "2042": {
+      "capital_taxes": -5274,
+      "expenses": -78753,
+      "income": 58304,
+      "ledger": {
+        "non-cash: bav": 4911,
+        "non-cash: equity": 26118,
+        "non-cash: property": 1708,
+        "source: ": 42471,
+        "spending: base": 41118,
+        "spending: property upkeep": 1718,
+        "spending: wohnen": 14532,
+        "tax: ": 8951
+      },
+      "liquid": 672174,
+      "phases": [
+        "retired"
+      ],
+      "taxes": -7014,
+      "total": 1050624
+    },
+    "2043": {
+      "capital_taxes": -4037,
+      "expenses": -80004,
+      "income": 159110,
+      "ledger": {
+        "non-cash: bav": 5056,
+        "non-cash: equity": 28354,
+        "non-cash: property": 1692,
+        "one-off in: gift": 71416,
+        "one-off out: tax on one-offs": 9820,
+        "source: ": 42214,
+        "spending: base": 40904,
+        "spending: property upkeep": 1701,
+        "spending: wohnen": 14532,
+        "tax: ": 7999
+      },
+      "liquid": 763108,
+      "phases": [
+        "retired"
+      ],
+      "taxes": -20914,
+      "total": 1151005
+    },
+    "2044": {
+      "capital_taxes": -6013,
+      "expenses": -73733,
+      "income": 49678,
+      "ledger": {
+        "draw: bav": -5423,
+        "non-cash: bav": 424,
+        "non-cash: equity": 28418,
+        "non-cash: property": 1675,
+        "source: ": 34782,
+        "spending: base": 35409,
+        "spending: property upkeep": 1684,
+        "spending: wohnen": 14532,
+        "tax: ": 10758
+      },
+      "liquid": 763171,
+      "phases": [
+        "retired"
+      ],
+      "taxes": -9351,
+      "total": 1146322
+    },
+    "2045": {
+      "capital_taxes": -6060,
+      "expenses": -75061,
+      "income": 50516,
+      "ledger": {
+        "draw: bav": -5316,
+        "non-cash: equity": 27906,
+        "non-cash: property": 1659,
+        "source: ": 34676,
+        "spending: base": 35325,
+        "spending: property upkeep": 1668,
+        "spending: wohnen": 14532,
+        "tax: ": 10226
+      },
+      "liquid": 763322,
+      "phases": [
+        "retired"
+      ],
+      "taxes": -8837,
+      "total": 1141143
+    },
+    "2046": {
+      "capital_taxes": -6147,
+      "expenses": -76306,
+      "income": 51372,
+      "ledger": {
+        "draw: bav": -5212,
+        "non-cash: equity": 27393,
+        "non-cash: property": 1642,
+        "source: ": 34572,
+        "spending: base": 35169,
+        "spending: property upkeep": 1651,
+        "spending: wohnen": 14532,
+        "tax: ": 10151
+      },
+      "liquid": 763032,
+      "phases": [
+        "retired"
+      ],
+      "taxes": -8937,
+      "total": 1135548
+    }
+  }
+}

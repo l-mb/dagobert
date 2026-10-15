@@ -1,0 +1,89 @@
+[project]
+name = "dagobert"
+version = "0.1.0"
+description = "Personal wealth projection: scenarios, Monte Carlo, historical cycles, German taxes"
+requires-python = ">=3.14"
+license = "0BSD"
+dependencies = [
+    "babel>=2.18",
+    "filelock>=4.0.5",
+    "numpy>=2.5",
+    "plotly>=7.0",
+    "pydantic>=2.13",
+    "python-dateutil>=2.9",
+    "pyyaml>=6.0.3",
+    "rich>=15.0",
+    "ruamel-yaml>=0.19.1",
+    "streamlit>=1.65.0",
+    "typer>=0.27",
+]
+
+[project.scripts]
+dagobert = "dagobert.cli:app"
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.30",
+    "mypy>=1.18",
+    "openpyxl>=3.1.5",
+    "pandas-stubs>=3.0.5.260914",
+    "pip-licenses>=5.5.5",
+    "pre-commit>=4.6.2",
+    "pytest>=8.4",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.13",
+    "syrupy>=6.1.1",
+    "types-PyYAML>=6.0.12",
+    "types-openpyxl>=3.1.5.20260827",
+    "types-python-dateutil>=2.9",
+]
+
+[build-system]
+requires = ["uv_build>=0.8"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+extend-include = ["scripts/rules-check", "scripts/i18n"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "ANN", "N", "PL", "INT"]
+ignore = ["PLR2004", "PLR0913", "RUF001", "RUF003"]
+
+[tool.ruff.lint.flake8-gettext]
+extend-function-names = ["N_", "pgettext"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ANN", "PLR"]
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src", "tests", "scripts", "scripts/rules-check", "scripts/i18n"]
+mypy_path = ["src"]  # a file checked alone imports the package from the source
+scripts_are_modules = true  # two scripts without a suffix, each a module of its name
+
+[[tool.mypy.overrides]]
+module = ["plotly.*"]
+ignore_missing_imports = true
+
+[tool.basedpyright]
+include = ["src", "tests", "scripts", "scripts/rules-check", "scripts/i18n"]
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false
+
+[tool.vulture]
+# `uvx vulture` finds dead code. A name that a library calls or sets by name is no dead code: the
+# typer commands, the pydantic validators, the Babel extractor `i18n_check.schema` (`i18n_check.MAPPING`), the
+# header of a catalogue; `vulture_whitelist.py` names the rest.
+paths = ["src", "scripts", "scripts/rules-check", "scripts/i18n", "vulture_whitelist.py"]
+ignore_decorators = ["@field_validator", "@model_validator", "@*.command"]  # called by name
+ignore_names = ["schema", "last_translator", "msgid_bugs_address"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-n auto --dist worksteal"
+# A text file of the package without `encoding` fails: Windows reads it as cp1252. Python warns
+# only with PYTHONWARNDEFAULTENCODING=1, which CI sets. The tests and the libraries may.
+filterwarnings = ["ignore::EncodingWarning", "error::EncodingWarning:dagobert"]

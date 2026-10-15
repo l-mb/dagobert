@@ -1,0 +1,6 @@
+name: shifted
+# its change at the start moves past it: `work` held before
+phases:
+  - {from: 2026-01-01, phase: alt, id: gap}
+overrides:
+  shift: {gap: 6}

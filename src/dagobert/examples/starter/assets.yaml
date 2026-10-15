@@ -1,0 +1,49 @@
+# Werte, wie sie die Seite Snapshot erfasst hat; `asof` ist das Datum des Werts.
+assets:
+  - id: girokonto
+    name: Girokonto
+    kind: cash
+    value: 2800
+    asof: 2026-10-09
+  # Die Liquiditätsreserve
+  - id: tagesgeld
+    name: Tagesgeld
+    kind: fixed_income
+    value: 9000
+    asof: 2026-10-09
+  # Der MSCI-World-ETF, den der Sparplan kauft. Ohne Käufe und Verkäufe braucht er einen
+  # Einstandswert (`cost_basis`): was bisher eingezahlt wurde
+  - id: depot
+    name: Depot (MSCI-World-ETF)
+    kind: equity
+    value: 19500
+    cost_basis: 16000
+    asof: 2026-10-09
+
+  # Aus dem Gehalt bezahlt (Entgeltumwandlung): 200 € im Monat, frei von Steuer und
+  # Sozialversicherung bis 4% der Beitragsbemessungsgrenze. Der Arbeitgeber gibt bis zu 15% dazu,
+  # so viel, wie er an Sozialversicherung spart. Die Einmalzahlung mit 67 ist steuerpflichtig, ohne
+  # Fünftelregelung
+  - id: bav
+    name: Betriebsrente
+    kind: bav
+    value: 5700
+    paid: 5520
+    contribution: 0
+    conversion: 200
+    phases: [arbeit, teilzeit]
+    matures: 2062-03-01
+    guarantee: 1.0
+    fuenftel: false
+    asof: 2025-12-31
+    update_every: 12
+  # Altersvorsorgedepot: 1.800 € im Jahr ab 2027 und die Zulage
+  - id: av-depot
+    name: Altersvorsorgedepot
+    kind: av_depot
+    value: 0
+    contribution: 1800
+    start: 2027-01-01
+    cost: 0.002
+    asof: 2026-06-30
+    update_every: 12

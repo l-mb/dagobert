@@ -1,0 +1,146 @@
+# Quality gates, the tests on Windows and macOS, gitleaks, and the image with a smoke test and a
+# vulnerability scan. Actions are pinned by commit SHA; Dependabot raises SHA and comment together.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "23 4 * * 1"  # weekly: new CVEs in the base image show up without a push
+  workflow_dispatch:
+  workflow_call:  # the release runs the same checks first
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow_ref }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # uv takes the Python of .python-version, the one of the image.
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.0"  # the uv of the Dockerfile; Dependabot does not see this one
+      - run: uv sync --locked
+      - run: uv run --locked ruff check src tests scripts
+      - run: uv run --locked ruff format --check src tests scripts
+      - run: uv run --locked mypy
+      - run: uv run --locked basedpyright
+      - run: uv run --locked pytest
+        env:
+          PYTHONWARNDEFAULTENCODING: "1"  # a text file of the package without encoding fails
+      - run: uv run --locked python scripts/rules-check
+      - run: uv run --locked python scripts/i18n check
+      - name: The image runs the Python that CI tests
+        run: |
+          python=$(cat .python-version)
+          grep -q "^FROM python:${python}\." Dockerfile
+      # The runtime dependencies alone, in an environment of their own: a permissive licence
+      # each, and no copyleft term anywhere in an expression. certifi's MPL-2.0 is allowed.
+      - name: Licences of the runtime dependencies
+        env:
+          PERMISSIVE: "MIT;BSD;Apache;ISC;PSF;Python Software Foundation;Zlib;CC0"
+          COPYLEFT: "GPL;General Public;MPL;Mozilla;EPL;Eclipse;EUPL;CDDL;OSL;CC-BY-SA;SSPL"
+        run: |
+          UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/runtime" uv sync --locked --no-dev --no-install-project
+          uv run --locked pip-licenses --python "${RUNNER_TEMP}/runtime/bin/python" \
+            --partial-match --ignore-packages certifi \
+            --allow-only "${PERMISSIVE}" --fail-on "${COPYLEFT}"
+
+  # The tests on the systems that the author does not use, for docs/install/. Not for a release:
+  # it publishes the Linux image, which the job `check` tests.
+  platforms:
+    if: github.ref_type != 'tag'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.0"
+      - run: uv sync --locked
+      - run: uv run --locked pytest
+        env:
+          PYTHONWARNDEFAULTENCODING: "1"
+
+  gitleaks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0  # the whole history: the pre-commit hook sees staged changes only
+          persist-credentials: false
+      # The image, not gitleaks-action (proprietary licence). Same version as the hook:
+      # Dependabot does not update a `docker://` step, raise it with `.pre-commit-config.yaml`.
+      - uses: docker://ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+        env:
+          # The step runs as root on a checkout of the runner user, and HOME is /github/home,
+          # so the image's own safe.directory does not apply.
+          GIT_CONFIG_COUNT: "1"
+          GIT_CONFIG_KEY_0: safe.directory
+          GIT_CONFIG_VALUE_0: /github/workspace
+        with:
+          args: git /github/workspace --redact --no-banner
+
+  image:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write  # the scan into code scanning
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: dagobert:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Smoke test
+        run: |
+          docker run -d --name smoke --read-only --tmpfs /tmp dagobert:ci
+          for _ in $(seq 30); do
+            status=$(docker inspect -f '{{.State.Health.Status}}' smoke)
+            [[ ${status} == healthy ]] && exit 0
+            sleep 2
+          done
+          docker logs smoke
+          exit 1
+      # Fails on a high or critical finding with a fix. Unfixed Debian findings only show.
+      - uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          image: dagobert:ci
+          only-fixed: true
+          severity-cutoff: high
+          output-format: table
+      # Every finding into code scanning, which a free plan has for public repositories only.
+      - id: sarif
+        if: ${{ !cancelled() && !github.event.repository.private }}
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          image: dagobert:ci
+          fail-build: false
+          output-format: sarif
+      - if: ${{ !cancelled() && !github.event.repository.private }}
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          sarif_file: ${{ steps.sarif.outputs.sarif }}
+          category: image

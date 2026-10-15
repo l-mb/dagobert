@@ -1,0 +1,2 @@
+name: base
+phases: [{from: 2026-01-01, phase: work}, {from: 2040-01-01, phase: retired}]

@@ -1,0 +1,20 @@
+name: Keep the flat
+note: >-
+  The flat stays and keeps its rent. Savings repay the loan when its fixed rate ends, and the
+  flat is sold at 78, or earlier when money runs short.
+extends: plan
+# Leave out the sale of the parent, with the repayment from it
+drop: [flat-sale]
+events:
+  - at: 2032-07-01
+    type: repay
+    loan: flat-loan
+    note: Repay the rest when the fixed rate ends
+  - type: sell
+    asset: flat
+    when: {age: 78, liquid_below: 30000}
+    costs: 0.06
+    then:
+      - {invest: portfolio}
+    note: Sell the flat at 78, or earlier when money runs short
+    id: flat-reserve

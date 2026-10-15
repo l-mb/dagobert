@@ -1,0 +1,71 @@
+# Beträge im Monat in Euro des Simulationsstarts, Ausgaben negativ.
+streams:
+  # Einnahmen: 70.800 € im Jahr, davon gehen 200 € im Monat in die Betriebsrente (siehe
+  # assets.yaml). In Teilzeit 60% davon
+  - name: Gehalt
+    cat: Gehalt
+    kind: salary
+    gross: 5900
+    phases: [arbeit, teilzeit]
+    factor: {teilzeit: 0.6}
+    index: gehalt
+  # 10% des Jahresgehalts, jedes Jahr im März
+  - name: Bonus
+    cat: Gehalt
+    kind: salary
+    of: Gehalt
+    share: 0.1
+    every: 12
+    start: 2027-03-01
+    phases: [arbeit, teilzeit]
+    index: null
+  # Aus der Renteninformation: die Rentenpunkte bis jetzt und der aktuelle Rentenwert
+  - name: Rente
+    cat: Rente
+    kind: pension
+    points: 8.5
+    point_value: 42.52
+    phases: [rente]
+
+  # Ausgaben: etwa der Durchschnitt einer Frau, die allein lebt (Destatis, Laufende
+  # Wirtschaftsrechnungen 2024: 2.033 € im Monat), mit der Miete für 55 m² in einer mittelgroßen
+  # Stadt
+  - name: Warmmiete
+    cat: Wohnen
+    amount: -850
+  - name: Strom, Telefon und Internet
+    cat: Wohnen
+    amount: -110
+  - name: Lebensmittel
+    cat: Essen
+    amount: -280
+  - name: Essen gehen und Freizeit
+    cat: Freizeit
+    amount: -300
+  - name: Urlaub
+    cat: Freizeit
+    amount: -1500
+    every: 12
+    start: 2027-07-01
+  - name: Kleidung und Haushalt
+    cat: Haushalt
+    amount: -170
+  - name: Bus und Bahn
+    cat: Verkehr
+    amount: -120
+  # Haftpflicht, Hausrat und Berufsunfähigkeit
+  - name: Versicherungen
+    cat: Versicherungen
+    amount: -70
+  - name: Gesundheit und Sonstiges
+    cat: Sonstiges
+    amount: -90
+
+  # Sparen: 500 € im Monat in den ETF des Depots, solange sie Vollzeit arbeitet, nominal, wie die
+  # Bank den Sparplan ausführt. Was über drei Monate Ausgaben hinaus übrig bleibt, geht auch ins
+  # Depot
+  - name: ETF-Sparplan
+    kind: savings
+    amount: -500
+    into: depot
+    phases: [arbeit]

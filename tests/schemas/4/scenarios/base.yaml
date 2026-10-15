@@ -1,0 +1,11 @@
+name: base
+phases: [{from: 2026-01-01, phase: work}, {from: 2040-01-01, phase: retired}]
+events:
+  - {at: 2027-01-01, id: rurup, type: fund_policy, policy: ruerup, amount: 5000, deductible: true}
+  - at: 2028-01-01
+    id: basis
+    type: fund_policy
+    policy: basis
+    amount: 3000
+    deductible: true  # a Basisrente premium is deductible
+  - {at: 2029-01-01, type: severance, gross: 40000, bav: {policy: firma, amount: 10000}}

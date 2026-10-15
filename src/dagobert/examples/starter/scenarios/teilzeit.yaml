@@ -1,0 +1,7 @@
+name: Teilzeit ab 40
+note: >-
+  Ab 40 drei Tage die Woche bis zur Rente mit 67, für 60% des Gehalts. Der Sparplan endet dann,
+  und das Depot wächst von allein weiter.
+extends: plan
+phases:
+  - {from: 2035-03-01, phase: teilzeit, id: teilzeit}

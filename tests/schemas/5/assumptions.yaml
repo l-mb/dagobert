@@ -1,0 +1,20 @@
+# Two children, the Kindergeld of the younger by a stream: schema 6 pays it without one
+person:
+  born: 1980-01-01
+  horizon_age: 70
+  children: 2
+  children_born:
+    - {born: 2016-04-01}  # the comments of the user stay
+    - born: 2003-07-15
+start: 2026-01-01
+phases:
+  work: {}
+  retired: {}
+inflation: {mean: 0.02}
+returns:
+  equity: {mean: 0.05}
+  fixed_income: {mean: 0.03}
+  cash: {mean: 0.02}
+  property: {mean: 0.01}
+# Growth on top of the consumer prices since schema 4: 0.02 nominal less inflation.mean 0.02
+pension_growth: 0.0

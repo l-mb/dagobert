@@ -1,0 +1,443 @@
+/* The style of every page, injected by main.py as `ui.PAGE_STYLE`. `$side` is `SIDE_PADDING`.
+   Colors follow the theme of the Streamlit menu through light-dark(), never prefers-color-scheme,
+   which follows the OS. A dialog lies outside `.stApp`: the boot script of main.py gives the page
+   the color scheme of `.stApp`. */
+.stApp, [data-testid="stDialog"] {
+  --dg-bg: light-dark(#ffffff, #0e1117);
+  --dg-fg: light-dark(#31333f, #fafafa);
+  --dg-side: light-dark(#f0f2f6, #262730); /* the sidebar */
+}
+[data-testid="stMainBlockContainer"] {padding-left: $side; padding-right: $side}
+/* the boot script of main.py: no height, but a flex gap of 1rem above every page */
+[data-testid="stElementContainer"]:has(> [data-testid="stHtml"] > script) {display: none}
+/* A primary button labels in white on the light blue and in the page color on the dark one: white
+   on the dark accent reached 3.24:1, the page color 5.8:1. */
+:is(.stApp, [data-testid="stDialog"]) [data-testid^="stBaseButton-primary"]:not(:disabled) {
+  color: var(--dg-bg);
+}
+/* A segmented control is as high as a text field, so its label lines up in a row of fields */
+[data-testid="stButtonGroup"] button[data-variant^="segmented_control"] {min-height: 2.5rem}
+
+/* Tiles: st.columns of st.metric in an st.container whose key starts with `tiles`. Two per row in
+   a narrow main area, a smaller value in a narrow column. */
+[class*="st-key-tiles"], [class*="st-key-tiles"] [data-testid="stColumn"] {container-type: inline-size}
+@container (max-width: 720px) {
+  [class*="st-key-tiles"] [data-testid="stHorizontalBlock"] {flex-wrap: wrap !important}
+  [class*="st-key-tiles"] [data-testid="stColumn"] {
+    flex: 1 1 calc(50% - 1rem) !important;
+    min-width: calc(50% - 1rem) !important;
+    width: calc(50% - 1rem) !important;
+  }
+}
+@container (max-width: 220px) {
+  [class*="st-key-tiles"] [data-testid="stMetricValue"] {font-size: 1.6rem}
+  [class*="st-key-tiles"] [data-testid="stMetricDelta"] {font-size: 0.75rem}
+}
+
+/* Phone portrait: help tooltips inside the screen. An st.table in an st.container whose key
+   starts with `table-` keeps every cell on one line and its first column in view, with a divider:
+   at a fractional device pixel ratio the scrolled glyphs showed through its last device column.
+   An opaque divider covers it, a translucent one would not. */
+@media (max-width: 640px) {
+  [class*="st-key-table-"] [data-testid="stTable"] :is(th, td) {padding: 0.25rem 0.5rem}
+  [class*="st-key-table-"] [data-testid="stTable"] :is([data-testid="stMarkdownContainer"], p) {
+    white-space: nowrap;
+    max-width: none;
+  }
+  [class*="st-key-table-"] [data-testid="stTable"] tr > :first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--dg-bg);
+    box-shadow: 1px 0 color-mix(in srgb, var(--dg-fg) 20%, var(--dg-bg));
+  }
+  [data-testid="stTooltipContent"] {max-width: calc(100vw - 2rem) !important}
+}
+
+/* Phones: less room above the title, also in landscape (not in a short desktop window) */
+@media (max-width: 640px), (max-height: 500px) and (pointer: coarse) {
+  [data-testid="stMainBlockContainer"] {padding-top: 4.5rem}
+  [data-testid="stMainBlockContainer"] h1 {font-size: 2rem}
+}
+
+/* Touch: tap targets of about 40 px (not the help icon in the label of a segmented control: its
+   label would grow), no pull-to-refresh (it would drop unsaved edits), and a slider moves only by
+   its thumb, 24 px wide, so a swipe over its track scrolls the page. */
+@media (pointer: coarse) {
+  [data-testid="stTooltipIcon"] {padding: 12px; margin: -12px}
+  [data-testid="stButtonGroup"] button:not([data-testid="stWidgetLabel"] button),
+  [data-testid="stExpander"] summary {
+    min-height: 40px;
+  }
+  [data-testid="stSidebarNavLink"] {min-height: 2.75rem}
+  :is(
+      [data-testid="stExpandSidebarButton"],
+      [data-testid="stMainMenuButton"],
+      [data-testid="stSidebarCollapseButton"] button
+    ) {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+  [data-testid="stCheckbox"] label {min-height: 40px; align-items: center}
+  [data-testid="stPageLink-NavLink"] {min-height: 40px; align-items: center}
+  [data-testid^="stNumberInputStep"] {min-width: 40px; min-height: 40px}
+  [data-testid="stTab"] {padding-inline: 0.5rem}
+  [data-testid^="stTabsScroll"] {min-width: 2.5rem}
+  /* a tapped tab scrolls into view clear of the arrows */
+  [data-testid="stTabs"] [role="tablist"] {scroll-padding-inline: 2.5rem}
+  [data-testid="stMain"], [data-testid="stSidebarContent"] {overscroll-behavior-y: contain}
+  [data-testid="stSlider"] [role="group"] > div {pointer-events: none; touch-action: pan-y}
+  [data-testid="stSlider"] [role="group"] > div > div:has(input) {
+    pointer-events: auto;
+    touch-action: none;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  [data-testid="stSlider"] [role="group"] > div > div:has(input)::before {
+    content: "";
+    position: absolute;
+    inset: -14px;
+  }
+}
+
+/* Without hover the grid toolbar is always shown: in a band of its own above a grid that adds rows
+   (`Add row`, by the labels of Streamlit 1.65), not over the tabs or buttons above it. Its Delete
+   row(s) is the only way to delete a row on a phone. A grid without it (read only, or of fixed
+   rows) gets neither band nor toolbar: search, download and the column menu serve a desktop. A grid
+   that scrolls sideways fades out at its right edge until it reaches its end (a scroll-driven
+   animation of the scroller of the canvas grid; it is inactive while nothing scrolls; the fade
+   flips off at the end: `@property` would need its syntax in angle brackets, and an opening one
+   before a letter makes st.html drop the whole style).
+   The modebar of a chart is always shown too, with Fullscreen alone (`ui.PHONE_MODEBAR`): its icon
+   and backdrop stay where plotly puts them, its tap area grows into the chart. So is the button
+   that closes the sidebar, which Streamlit shows on hover in landscape. */
+@keyframes dg-fade {
+  from, 98% {--dg-fade: 2.5rem}
+  to {--dg-fade: 0px}
+}
+@media (hover: none) {
+  [data-testid="stSidebarCollapseButton"] {visibility: visible}
+  [data-testid="stElementContainer"]:has(
+      > [data-testid="stFullScreenFrame"] > [data-testid="stDataFrame"] button[aria-label="Add row"]
+    ) {
+    margin-top: 3rem;
+  }
+  [data-testid="stDataFrame"]:not(:has(button[aria-label="Add row"])) > [data-testid="stElementToolbar"] {
+    display: none;
+  }
+  [data-testid="stDataFrameResizable"] {timeline-scope: --dg-grid}
+  [data-testid="stDataFrameResizable"] .dvn-scroller {scroll-timeline: --dg-grid x}
+  [data-testid="stDataFrameResizable"] > :first-child {
+    mask-image: linear-gradient(to left, transparent, #000 var(--dg-fade, 0px));
+    animation: dg-fade linear both;
+    animation-timeline: --dg-grid;
+  }
+  [data-testid="stDataFrame"] > [data-testid="stElementToolbar"] {
+    top: auto;
+    bottom: 100%;
+    padding-block: 0;
+  }
+  [data-testid="stElementToolbar"] button {min-width: 2.5rem; min-height: 2.5rem}
+  [data-testid="stPlotlyChart"] .js-plotly-plot .modebar .modebar-btn {
+    height: 40px;
+    padding: 3px 4px 21px 20px;
+    margin: 0 0 -18px -16px;
+  }
+}
+
+/* The outflow picker of every page (`bars.outflow_bars`): a new pick scrolls its streams into
+   view, the heading clear of the fixed header of 60 px. */
+[class*="st-key-outflow-detail-"] {scroll-margin: 4rem 0 1rem}
+
+/* Cashflows page. On a touch screen the outflow and income bars stack in a narrow main area, as
+   in landscape with the sidebar open: a phone shows the streams of a category below its pills
+   (`bars.outflow_bars`). A desktop keeps them side by side, the streams of a clicked bar in
+   the income column. On a phone the tables take 13 px and keep dates and amounts on one line, so
+   the sheet fits four phases in portrait and the change tables fit in landscape. `change` of the
+   change tables wraps, in portrait `stream` too: `change` is the third column of the scheduled
+   changes and the second of `Changes since`, counted from the start before any phase, as st.table
+   keeps no class of a column (`cashflows._show_changes`). A phone gets no total
+   row under a grid in a block of the streams (`tables.total_row`). A window up to 640 px wide or,
+   on touch, 500 px high hides it: it cannot follow the grid when it scrolls sideways, and the
+   header of the block holds the same totals (important: the row sets its display inline). On a
+   phone the header of the sheet (`table-cashflows-sheet`) stays below the page header while its
+   rows scroll: the sheet does not scroll sideways there, its first column wraps in portrait, so it
+   fits four phases also per year, and its box takes no scroll (a scroller of its own would
+   hold the sticky header). In portrait a fifth phase (the sixth header cell) no longer fits: then
+   its box scrolls sideways like any `table-` box, the first column sticky, and the header stays
+   at the top of the sheet. */
+.st-key-cashflows-bars {container-type: inline-size}
+@media (pointer: coarse) {
+  @container (max-width: 760px) {
+    .st-key-cashflows-bars [data-testid="stHorizontalBlock"] {flex-direction: column}
+    .st-key-cashflows-bars [data-testid="stColumn"] {
+      width: 100% !important;
+      flex: 1 1 100% !important;
+    }
+  }
+}
+@media (max-width: 640px), (max-height: 500px) and (pointer: coarse) {
+  [class*="st-key-table-cashflows-"] [data-testid="stTable"] :is(th, td) {
+    padding: 0.25rem;
+    font-size: 0.8125rem;
+  }
+  [class*="st-key-table-cashflows-"] [data-testid="stTable"]
+    td:not(:first-child) :is([data-testid="stMarkdownContainer"], p) {
+    white-space: nowrap;
+  }
+  :is(
+      .st-key-table-cashflows-scheduled [data-testid="stTable"] td:nth-child(3),
+      .st-key-table-cashflows-since [data-testid="stTable"] td:nth-child(2)
+    )
+    :is([data-testid="stMarkdownContainer"], p) {
+    white-space: normal;
+  }
+  [data-testid="stExpander"] .dg-total {display: none !important}
+  .st-key-table-cashflows-sheet [data-testid="stTable"],
+  .st-key-table-cashflows-sheet [data-testid="stTable"] > div {
+    overflow: visible;
+  }
+  .st-key-table-cashflows-sheet [data-testid="stTable"] thead th {
+    position: sticky;
+    top: 3.75rem;
+    z-index: 2;
+    background: var(--dg-bg);
+    box-shadow: inset 0 -1px color-mix(in srgb, var(--dg-fg) 20%, var(--dg-bg));
+  }
+  .st-key-table-cashflows-sheet [data-testid="stTable"] thead tr > :first-child {z-index: 3}
+}
+@media (max-width: 640px) {
+  .st-key-table-cashflows-sheet td:first-child :is([data-testid="stMarkdownContainer"], p) {
+    white-space: normal;
+  }
+  .st-key-table-cashflows-sheet [data-testid="stTable"] > div:has(thead th:nth-child(6)) {
+    overflow-x: auto;
+  }
+  .st-key-table-cashflows-sheet [data-testid="stTable"] > div:has(thead th:nth-child(6)) thead th {
+    top: 0;
+  }
+  :is(
+      .st-key-table-cashflows-scheduled td:is(:first-child, :nth-child(3)),
+      .st-key-table-cashflows-since td:is(:first-child, :nth-child(2))
+    )
+    :is([data-testid="stMarkdownContainer"], p) {
+    white-space: normal;
+    min-width: 8rem;
+  }
+}
+
+/* Export and import: in portrait a file name wraps after a slash (`transfer.WRAP`), so the
+   action column fits beside it */
+@media (max-width: 640px) {
+  .st-key-table-transfer [data-testid="stTable"]
+    td:first-child :is([data-testid="stMarkdownContainer"], p) {
+    white-space: normal;
+  }
+}
+
+/* Spend: in portrait the comparison table leaves out its months column, the second
+   (`spend._table`), takes 13 px and lets a header wrap, so it fits without a swipe. The total row
+   and the buttons under the grid stay at the bottom of the screen while the grid scrolls
+   (`spend-grid` bounds them); what the browser scrolls into view, a focused field, stops above
+   them (`scroll-padding-bottom`, their height). Up to 960 px the charts stack. The line under the quick add
+   (`spend-said`, a row that does not wrap) keeps the height of its button, in portrait of two lines
+   of text beside it, so it does not move the page when one comes. On touch the toolbar of the grid
+   keeps add row and fullscreen: three columns need no column menu, search or download (by the
+   labels of Streamlit 1.65). The month (`spend-whole`, 25rem) and the comparison table
+   (`spend-against`, at least 36rem) sit side by side where both fit, else they wrap. */
+.st-key-spend-said {min-height: 2.5rem}
+[data-testid="stLayoutWrapper"]:has(> .st-key-spend-whole) {flex: 0 1 25rem}
+[data-testid="stLayoutWrapper"]:has(> .st-key-spend-against) {flex: 1 1 36rem}
+@media (hover: none) {
+  .st-key-spend-grid [data-testid="stTooltipHoverTarget"]:has(
+      > button:is(
+          [aria-label="Show/hide columns"],
+          [aria-label="Download as CSV"],
+          [aria-label="Search"]
+        )
+    ) {
+    display: none !important; /* it sets its display inline */
+  }
+}
+@media (max-width: 640px) {
+  [data-testid="stMain"]:has(.st-key-spend-actions) {scroll-padding-bottom: 4.5rem}
+  .st-key-spend-said {min-height: 3.625rem}
+  .st-key-table-spend [data-testid="stTable"] tr > :nth-child(2) {display: none}
+  .st-key-table-spend [data-testid="stTable"] :is(th, td) {padding: 0.25rem; font-size: 0.8125rem}
+  .st-key-table-spend [data-testid="stTable"] th :is([data-testid="stMarkdownContainer"], p) {
+    white-space: normal;
+  }
+  [data-testid="stLayoutWrapper"]:has(> .st-key-spend-actions) {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    padding-block: 0.5rem;
+    background: var(--dg-bg);
+    box-shadow: 0 -1px 0 color-mix(in srgb, var(--dg-fg) 20%, transparent);
+  }
+  .st-key-spend-actions {gap: 0.25rem}
+}
+@media (max-width: 960px) {
+  .st-key-spend-charts [data-testid="stHorizontalBlock"] {flex-wrap: wrap}
+  .st-key-spend-charts [data-testid="stColumn"] {flex: 1 1 100% !important; min-width: 100% !important}
+}
+
+/* Overview: the five tiles of the plan take three per row in a main area from 720 to 1,000 px (a
+   phone in landscape, a narrow window), where one row cut `Chance to run out, lifetime`. */
+@container (720px < width <= 1000px) {
+  .st-key-tiles-plan [data-testid="stHorizontalBlock"] {flex-wrap: wrap !important}
+  .st-key-tiles-plan [data-testid="stColumn"] {
+    flex: 1 1 calc(33.333% - 1rem) !important;
+    min-width: calc(33.333% - 1rem) !important;
+    width: calc(33.333% - 1rem) !important;
+  }
+}
+
+/* Overview: the day of On track keeps room for its saves, Measure wraps below it in portrait.
+   The attention table and the items before the new start of a roll (`overview._linked`): a grid
+   of four columns, the dates on one line, the last one the links to the pages that fix a row.
+   Each row is a container on its columns (subgrid), ruled below. In portrait each row is a card
+   without the header: the item in bold on top, the date and the third cell below it, the link on
+   the right of both. */
+.st-key-overview-track-day {min-width: min(100%, 20rem)}
+[data-testid="stVerticalBlock"]:is(.st-key-overview-attention, [class*="st-key-overview-passed-"]) {
+  display: grid;
+  grid-template-columns: max-content minmax(8rem, 1fr) minmax(10rem, 2fr) max-content;
+  gap: 0 1rem;
+}
+:is(.st-key-overview-attention, [class*="st-key-overview-passed-"]) > [data-testid="stLayoutWrapper"] {
+  display: contents;
+}
+:is(.st-key-overview-attention, [class*="st-key-overview-passed-"]) > * > [data-testid="stVerticalBlock"] {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-auto-flow: row dense;
+  align-items: center;
+  gap: 0 1rem;
+  padding-block: 0.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--dg-fg) 12%, transparent);
+}
+:is(.st-key-overview-attention, [class*="st-key-overview-passed-"]) [data-testid="stMarkdownContainer"] p {
+  font-size: 0.875rem;
+}
+@media (max-width: 640px) {
+  [data-testid="stVerticalBlock"]:is(.st-key-overview-attention, [class*="st-key-overview-passed-"]) {
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+  }
+  :is(.st-key-overview-attention, [class*="st-key-overview-passed-"])
+    > [data-testid="stLayoutWrapper"]:first-child {
+    display: none;
+  }
+  :is(.st-key-overview-attention, [class*="st-key-overview-passed-"])
+    > * > [data-testid="stVerticalBlock"] > :nth-child(1) {
+    grid-area: 2 / 1;
+  }
+  :is(.st-key-overview-attention, [class*="st-key-overview-passed-"])
+    > * > [data-testid="stVerticalBlock"] > :nth-child(2) {
+    grid-area: 1 / 1 / 2 / 3;
+  }
+  :is(.st-key-overview-attention, [class*="st-key-overview-passed-"])
+    > * > [data-testid="stVerticalBlock"] > :nth-child(2) p {
+    font-weight: 600;
+  }
+  :is(.st-key-overview-attention, [class*="st-key-overview-passed-"])
+    > * > [data-testid="stVerticalBlock"] > :nth-child(3) {
+    grid-area: 2 / 2;
+  }
+  :is(.st-key-overview-attention, [class*="st-key-overview-passed-"])
+    > * > [data-testid="stVerticalBlock"] > :nth-child(3):last-child {
+    grid-column: 2 / 4; /* no link: the room of the link too */
+  }
+  :is(.st-key-overview-attention, [class*="st-key-overview-passed-"])
+    > * > [data-testid="stVerticalBlock"] > :nth-child(4) {
+    grid-area: 1 / 3 / 3 / 4;
+  }
+}
+
+/* Explorer: `Reset sliders` (on a phone with `Show results`) stays at the bottom of the sidebar
+   while the sliders scroll. On a phone the sliders come before the navigation, which took the
+   first screen. In portrait the results stay at the top of the sidebar while its sliders scroll,
+   in small type, so the sliders keep most of the screen. Both stick inside `explorer-sidebar`
+   only: below it the language switch scrolls clear of them. */
+[data-testid="stLayoutWrapper"]:has(> .st-key-explorer-actions) {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding: 0.5rem 0;
+  background: var(--dg-side);
+}
+@media (max-width: 640px), (max-height: 500px) and (pointer: coarse) {
+  [data-testid="stSidebarContent"]:has(.st-key-explorer-actions) {
+    display: flex;
+    flex-direction: column;
+  }
+  [data-testid="stSidebarContent"]:has(.st-key-explorer-actions)
+    > [data-testid="stSidebarUserContent"] {
+    order: 1;
+  }
+  [data-testid="stSidebarContent"]:has(.st-key-explorer-actions) > [data-testid="stSidebarNav"] {
+    order: 2;
+  }
+}
+@media (max-width: 640px) {
+  [data-testid="stLayoutWrapper"]:has(> .st-key-explorer-strip) {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--dg-side);
+  }
+  .st-key-explorer-strip {padding: 0.5rem 0.75rem; gap: 0.25rem}
+  .st-key-explorer-strip p {font-size: 0.8125rem}
+  .st-key-explorer-strip [data-testid="stCaptionContainer"] p {font-size: 0.75rem}
+}
+
+/* Flows page. In a main area up to 860 px (portrait, landscape with the sidebar open, a narrow
+   window) the outflow bars with their picker stand in for the Sankey diagram, whose labels need
+   the width: the rules hide the layout wrapper, which would keep the gap of the tab. Up to
+   1000 px the labels take 12 px (important: plotly writes the size into each label). Fullscreen
+   would squash the diagram to the screen height. The comparison table aligns its figures and
+   their headers right (Streamlit aligns text cells left, inline). `Show the diagram anyway` turns the view into `flows-scroll-`,
+   which no container query reaches: the diagram keeps 1000 px and its labels 14 px, in a box that
+   scrolls sideways. */
+[class*="st-key-flows-view-"] {container: flows-view / inline-size}
+@container flows-view (width <= 860px) {
+  [data-testid="stLayoutWrapper"]:has(> [class*="st-key-flows-sankey-"]) {display: none}
+}
+@container flows-view (width > 860px) {
+  [data-testid="stLayoutWrapper"]:has(> [class*="st-key-flows-bars-"]) {display: none}
+}
+@container flows-view (width <= 1000px) {
+  [class*="st-key-flows-sankey-"] g.textpoint text {font-size: 12px !important}
+}
+.st-key-table-flows :is(td, thead th) {text-align: right !important}
+[class*="st-key-flows-sankey-"] .modebar-btn[data-title="Fullscreen"] {display: none}
+[class*="st-key-flows-scroll-"] [class*="st-key-flows-sankey-"] {overflow-x: auto}
+[class*="st-key-flows-scroll-"] [data-testid="stElementContainer"]:has([data-testid="stPlotlyChart"]) {
+  min-width: 1000px;
+}
+
+/* Scenarios page: on a phone its tab bar stays below the page header while a tab scrolls, so the
+   title, the chooser and the tabs leave the timeline the screen of a phone in landscape. Not the
+   tabs inside a tab (the event types). */
+@media (max-width: 640px), (max-height: 500px) and (pointer: coarse) {
+  .st-key-scenarios-tabs > [data-testid="stTabs"] > div > [role="tablist"] {
+    position: sticky;
+    top: 3.75rem;
+    z-index: 3;
+    background: var(--dg-bg);
+  }
+}
+
+/* Scenarios page: a tag of `Also compare in the Explorer` (its option with the start of the note)
+   keeps 20rem, its whole text in the tooltip, so several show: Streamlit 1.65 scrolls the tags
+   sideways in one row (`stMultiSelectTagsContainer`, `data-tag`). */
+.st-key-scenarios-plan [data-testid="stMultiSelectTagsContainer"] [data-tag] {
+  max-width: 20rem;
+}
+
+/* Data page: in portrait the buttons that fetch or import a series take the full width. */
+@media (max-width: 640px) {
+  :is([class*="st-key-data-fetch-"], [class*="st-key-data-save-"]),
+  :is([class*="st-key-data-fetch-"], [class*="st-key-data-save-"]) button {width: 100% !important}
+}

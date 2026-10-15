@@ -1,0 +1,7 @@
+name: child
+extends: base
+# an override of the flag alone goes, one with more keeps them
+overrides:
+  events:
+    rurup: {deductible: true}
+    basis: {deductible: true, amount: 4000}

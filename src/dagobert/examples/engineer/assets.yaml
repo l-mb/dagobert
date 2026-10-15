@@ -1,0 +1,299 @@
+# Values as recorded on the Snapshot page; `asof` is the date of the value.
+assets:
+  - id: current-account
+    name: Current account
+    kind: cash
+    value: 6240.10
+    asof: 2026-10-09
+
+  - id: savings
+    name: Savings account
+    kind: fixed_income
+    value: 19355.80
+    asof: 2026-10-09
+  # A yearly statement: the value needs an update after 12 months
+  - id: building-savings
+    name: Building savings contract
+    kind: fixed_income
+    value: 13960.42
+    asof: 2025-12-31
+    update_every: 12
+  # A money-market ETF in the depot is its own fixed-income asset
+  - id: money-market
+    name: Money market ETF
+    kind: fixed_income
+    value: 15008.00
+    asof: 2026-10-09
+    trades:
+      - date: 2025-11-12
+        kind: buy
+        security: LU000MMKT003
+        name: Money market ETF
+        units: 100
+        amount: 10480.00
+        fees: 4.90
+      - date: 2026-06-09
+        kind: buy
+        security: LU000MMKT003
+        units: 40
+        amount: 4256.00
+        fees: 4.90
+  - id: term-deposit
+    name: Term deposit 2 years
+    kind: term_deposit
+    value: 20000
+    rate: 0.027
+    start: 2025-05-15
+    matures: 2027-05-15
+    asof: 2025-05-15
+
+  # The depot: the trades give the lots and their basis, the price files the value
+  - id: depot
+    name: Depot
+    kind: equity
+    value: 79366.00
+    asof: 2026-10-09
+    trades:
+      - date: 2016-03-15
+        kind: buy
+        security: IE000WORLD05
+        name: Global equity ETF (acc.)
+        units: 80
+        amount: 3200.00
+        fees: 4.90
+      - date: 2017-09-12
+        kind: buy
+        security: IE000WORLD05
+        units: 60
+        amount: 2850.00
+        fees: 4.90
+      - date: 2018-12-11
+        kind: buy
+        security: IE000WORLD05
+        units: 70
+        amount: 3164.00
+        fees: 4.90
+      - date: 2019-10-08
+        kind: buy
+        security: IE000WORLD05
+        units: 60
+        amount: 3288.00
+        fees: 4.90
+      - date: 2019-10-08
+        kind: buy
+        security: IE0000EMKT07
+        name: Emerging markets ETF (acc.)
+        units: 120
+        amount: 2952.00
+        fees: 4.90
+      - date: 2020-04-07
+        kind: buy
+        security: IE000WORLD05
+        units: 90
+        amount: 4284.00
+        fees: 4.90
+      - date: 2021-06-15
+        kind: buy
+        security: IE000WORLD05
+        units: 50
+        amount: 3545.00
+        fees: 4.90
+      - date: 2021-06-15
+        kind: buy
+        security: IE0000EMKT07
+        units: 100
+        amount: 3120.00
+        fees: 4.90
+      - date: 2022-10-11
+        kind: buy
+        security: IE000WORLD05
+        units: 60
+        amount: 3978.00
+        fees: 4.90
+      - date: 2023-03-14
+        kind: sell
+        security: IE000WORLD05
+        units: 60
+        amount: 4428.00
+        fees: 4.90
+      - date: 2023-07-11
+        kind: buy
+        security: IE000WORLD05
+        units: 40
+        amount: 3216.00
+        fees: 4.90
+      # The Vorabpauschale for 2023, booked in January
+      - date: 2024-01-03
+        kind: vorabpauschale
+        security: IE000WORLD05
+        amount: 521.93
+      - date: 2024-01-03
+        kind: vorabpauschale
+        security: IE0000EMKT07
+        amount: 104.07
+      - date: 2024-05-14
+        kind: buy
+        security: IE000WORLD05
+        units: 40
+        amount: 3748.00
+        fees: 4.90
+      - date: 2024-05-14
+        kind: buy
+        security: IE0000EMKT07
+        units: 130
+        amount: 3822.00
+        fees: 4.90
+      - date: 2025-01-03
+        kind: vorabpauschale
+        security: IE000WORLD05
+        amount: 626.56
+      - date: 2025-01-03
+        kind: vorabpauschale
+        security: IE0000EMKT07
+        amount: 137.64
+      - date: 2025-04-08
+        kind: buy
+        security: IE000WORLD05
+        units: 50
+        amount: 4395.00
+        fees: 4.90
+      - date: 2026-01-05
+        kind: vorabpauschale
+        security: IE000WORLD05
+        amount: 915.52
+      - date: 2026-01-05
+        kind: vorabpauschale
+        security: IE0000EMKT07
+        amount: 189.05
+      - date: 2026-02-10
+        kind: buy
+        security: IE000WORLD05
+        units: 30
+        amount: 3285.00
+        fees: 4.90
+  # Shares of the employer, from a quarterly statement; without trades it takes a cost basis.
+  # Shares are no fund: their gains get no Teilfreistellung
+  - id: share-plan
+    name: Employee share plan
+    kind: equity
+    value: 4180.00
+    cost_basis: 3600.00
+    teilfreistellung: 0
+    asof: 2026-09-30
+    update_every: 3
+
+  # Coins count in troy ounces (XAU): the gold series of the Data page prices them
+  - id: gold-coins
+    name: Gold coins
+    kind: gold
+    value: 22500.00
+    asof: 2026-09-30
+    trades:
+      - date: 2017-11-14
+        kind: buy
+        security: XAU
+        name: Gold coins, 1 oz
+        units: 4
+        amount: 4360.00
+        fees: 80.00
+      - date: 2026-02-17
+        kind: buy
+        security: XAU
+        units: 2
+        amount: 8500.00
+        fees: 120.00
+  # A note fully backed by gold, one gram per unit, priced by an imported price history
+  - id: gold-note
+    name: Gold note
+    kind: gold
+    value: 16188.00
+    asof: 2026-03-31
+    trades:
+      - date: 2022-03-15
+        kind: buy
+        security: DE000GOLD0X1
+        name: Gold note (physically backed)
+        units: 120
+        amount: 6828.00
+        fees: 4.90
+  # One lot, bought less than a year ago: a sale now would be taxable
+  - id: bitcoin
+    name: Bitcoin wallet
+    kind: crypto
+    value: 3180.00
+    asof: 2026-10-09
+    trades:
+      - date: 2026-01-14
+        kind: buy
+        security: BTC
+        name: Bitcoin
+        units: 0.04
+        amount: 3240.00
+        fees: 12.00
+
+  # Let since its purchase in 2018: a sale within ten years of it would be taxable. The rent pays
+  # tax after the AfA, 2% of the building (completed in 1972), 70% of what the flat cost
+  - id: flat
+    name: Rented-out flat
+    kind: property
+    sqm: 54
+    per_sqm: 3600
+    bought_for: 172000
+    upkeep: 0.01
+    tags: [flat]
+    asof: 2026-04-30
+    bought: 2018-03-01
+    building_share: 0.7
+    afa: 0.02
+  # Its interest is a cost of the rent
+  - id: flat-loan
+    name: Flat loan
+    kind: loan
+    balance: -97625.06
+    rate: 0.015
+    annuity: 560
+    fixed_until: 2032-06-01
+    prepayment_penalty: 0.02
+    asof: 2026-09-30
+    finances: flat
+
+  # Paid by the employer, tax-free under §3 Nr. 63 EStG: so the lump sum at 67 is other income
+  # (§22 Nr. 5 EStG), without the Fünftelregelung
+  - id: bav
+    name: Company pension
+    kind: bav
+    value: 23800.00
+    paid: 20500.00
+    contribution: 180
+    phases: [work]
+    matures: 2053-06-01
+    guarantee: 1.0
+    fuenftel: false
+    asof: 2025-12-31
+    update_every: 12
+  # A Basisrente, no company pension: her own premium of 200 € a month while she works, and the
+  # plan pays into it (fund_policy), both lower the income tax. An annuity from 67, taxed at the
+  # share of its start; no health insurance on it in the statutory insurance
+  - id: basisrente
+    name: Basisrente
+    kind: bav
+    value: 0
+    premium: 200
+    phases: [work, new-job]
+    matures: 2053-06-01
+    payout: annuity
+    annuity_per_10k: 32
+    basisrente: true
+    cost: 0.008
+    asof: 2026-04-30
+    update_every: 12
+  # Altersvorsorgedepot: 1,800 € a year from 2027 plus the Zulage
+  - id: av-depot
+    name: Altersvorsorgedepot
+    kind: av_depot
+    value: 0
+    contribution: 1800
+    start: 2027-01-01
+    cost: 0.0025
+    asof: 2026-04-30
+    update_every: 12

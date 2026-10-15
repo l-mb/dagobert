@@ -1,0 +1,49 @@
+name: Sabbatical at 45
+note: >-
+  A year off at 45 without salary, with voluntary pension contributions and a long journey, then
+  back to the job. A second child is born in its first month. A gift of the mother pays for part
+  of it.
+extends: plan
+# The second child: the list replaces that of assumptions.yaml, so it repeats the first row. Its
+# child-raising years add pension points for three years
+overrides:
+  person:
+    children: 2
+    children_born:
+      - {born: 2016-04-01, until: 2039-10-01, kindergeld: true}
+      - {born: 2031-06-12, erziehung: true}
+phases:
+  - {from: 2031-06-01, phase: alt, id: sabbatical}
+  - {from: 2032-06-01, phase: work, id: sabbatical}
+events:
+  - at: 2031-09-01
+    type: lump_sum
+    amount: -15000
+    note: The journey
+    id: sabbatical
+  # The parental allowance (Elterngeld) of the notice, nominal, for twelve months: tax-free here,
+  # its Progressionsvorbehalt is left out
+  - at: 2031-06-01
+    type: add_stream
+    stream:
+      name: Parental allowance (Elterngeld)
+      cat: family
+      kind: other_income
+      amount: 1800
+      taxable: false
+      index: null
+      start: 2031-06-01
+      end: 2032-06-01
+    id: sabbatical
+  - at: 2031-06-01
+    type: add_stream
+    stream: {name: Second child, cat: family, amount: -400, start: 2031-06-01, end: 2049-07-01}
+    id: sabbatical
+  # Within ten years the Erbschaftsteuer adds the gift to the inheritance of `plan`; where her
+  # death comes first, the gift joins the inheritance
+  - at: 2028-02-01
+    type: gift
+    from: mother
+    cash: 25000
+    note: A gift of the mother for the break
+    id: sabbatical

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Finds personal data in files: the terms of a list kept outside the repository, so the list
+# does not leak itself. Prints file:line:term for each hit and exits 1 on any hit.
+#
+# Usage: pii-check FILE...   (the staged files, from pre-commit)
+#        pii-check --all     (every tracked file outside data/, the shipped series, the golden
+#                             snapshots and LICENSE)
+#
+# The list holds one term per line, `#` comments and blank lines are ignored. A term matches
+# as a whole word, as fixed text, in any case. Binary files are skipped.
+set -euo pipefail
+export LC_ALL=C.UTF-8
+
+terms=${DAGOBERT_PII_TERMS:-${HOME}/.config/dagobert/pii-terms}
+if [[ ! -r ${terms} ]]; then
+	echo "pii-check: no term list at ${terms}, nothing checked" >&2
+	exit 0
+fi
+patterns=$(sed -E -e 's/[[:space:]]+$//' -e '/^[[:space:]]*(#|$)/d' "${terms}")
+[[ -n ${patterns} ]] || exit 0
+
+if [[ ${1-} == --all ]]; then
+	# the same exclusions as `exclude` of the hook pii-check in .pre-commit-config.yaml
+	listing=$(git -c core.quotePath=false ls-files -- ':(exclude)data/' \
+		':(exclude,glob)src/dagobert/data/*.csv' ':(exclude)src/dagobert/data/tax/' \
+		':(exclude)tests/__snapshots__/' \
+		':(exclude)LICENSE')
+	[[ -n ${listing} ]] || exit 0
+	files=()
+	while IFS= read -r f; do files+=("${f}"); done <<<"${listing}"
+else
+	files=("$@")
+fi
+((${#files[@]})) || exit 0
+
+status=0
+grep -HnoiwFI -f - -- "${files[@]}" <<<"${patterns}" || status=$?
+case ${status} in
+0) exit 1 ;;
+1) exit 0 ;;
+*) exit "${status}" ;;
+esac

@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""Check the rules in `.claude/rules/` against the tracked files. Exits 1 on any problem.
+
+A rule loads when an agent reads or edits a file that its `paths:` match. A rule whose
+frontmatter does not parse or has no `paths:` loads in every session, a glob with a typo matches
+nothing, and a file that no rule matches loads no rule: all three fail silently in Claude Code.
+An `@` import loads its file at once, so a rule must not hold one.
+
+Usage: uv run python scripts/rules-check
+"""
+
+import re
+import subprocess
+import sys
+from pathlib import Path, PurePosixPath
+
+import yaml
+
+REPO = Path(__file__).resolve().parent.parent
+RULES = ".claude/rules"
+COVERED = ("src/", "tests/", "scripts/", ".github/")
+LIMITS = {"CLAUDE.md": 180, RULES: 200}
+FRONTMATTER = re.compile(r"---\n(.*?)\n---\n", re.S)
+CODE = re.compile(r"```.*?```|`[^`\n]*`", re.S)
+IMPORT = re.compile(r"(?:^|\s)@\S")
+
+
+def expand(glob: str) -> list[str]:
+    """The globs of a brace group: `a/{b,c}.py` gives `a/b.py` and `a/c.py`."""
+    group = re.search(r"\{([^{}]*)\}", glob)
+    if group is None:
+        return [glob]
+    head, tail = glob[: group.start()], glob[group.end() :]
+    return [g for alt in group[1].split(",") for g in expand(head + alt + tail)]
+
+
+def globs(text: str) -> list[str]:
+    """The `paths:` of a rule; raises ValueError when they are missing or malformed."""
+    front = FRONTMATTER.match(text)
+    if front is None:
+        raise ValueError("no frontmatter")
+    try:
+        meta = yaml.safe_load(front[1])
+    except yaml.YAMLError as e:
+        raise ValueError(f"frontmatter does not parse: {e}") from e
+    paths = meta.get("paths") if isinstance(meta, dict) else None
+    if not paths or not isinstance(paths, list) or not all(isinstance(p, str) for p in paths):
+        raise ValueError("frontmatter has no `paths:` list")
+    return paths
+
+
+def problems() -> list[str]:
+    tracked = [
+        PurePosixPath(f)
+        for f in subprocess.run(
+            ["git", "ls-files", "-z"], cwd=REPO, check=True, capture_output=True, text=True
+        ).stdout.split("\0")
+        if f
+    ]
+    out: list[str] = []
+    uncovered = {f for f in tracked if str(f).startswith(COVERED)}
+    for rule in sorted((REPO / RULES).rglob("*.md")):
+        name = rule.relative_to(REPO).as_posix()
+        text = rule.read_text(encoding="utf-8")
+        if len(text.splitlines()) > LIMITS[RULES]:
+            out.append(f"{name}: more than {LIMITS[RULES]} lines")
+        if IMPORT.search(CODE.sub("", text)):
+            out.append(f"{name}: an `@` import")
+        try:
+            patterns = globs(text)
+        except ValueError as e:
+            out.append(f"{name}: {e}")
+            continue
+        for glob in (g for pattern in patterns for g in expand(pattern)):
+            matched = {f for f in tracked if f.full_match(glob)}
+            if not matched:
+                out.append(f"{name}: {glob!r} matches no tracked file")
+            uncovered -= matched
+    out += [f"{f}: in no rule of {RULES}" for f in sorted(uncovered)]
+    root = (REPO / "CLAUDE.md").read_text(encoding="utf-8")
+    if len(root.splitlines()) > LIMITS["CLAUDE.md"]:
+        out.append(f"CLAUDE.md: more than {LIMITS['CLAUDE.md']} lines")
+    return out
+
+
+if __name__ == "__main__" and (found := problems()):
+    sys.exit("\n".join(found))

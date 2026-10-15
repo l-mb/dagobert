@@ -1,0 +1,25 @@
+# For a server started from the repository root, as the test server of the skill `app-check`.
+# `dagobert app` sets the same settings as STREAMLIT_* defaults (`cli.STREAMLIT_ENV`).
+
+[client]
+toolbarMode = "viewer"
+
+[browser]
+gatherUsageStats = false
+
+[server]
+disconnectedSessionTTL = 3600
+maxUploadSize = 64
+
+# A rerun waits for the next Streamlit call of the running script, so the explorer's engine runs
+# of quick slider moves do not pile up in threads of their own.
+[runner]
+fastReruns = false
+
+# A blue accent: the red of Streamlit marked a selected pill or a slider value like an error. Per
+# scheme, so the menu keeps Light and Dark: a bare [theme] makes one light theme.
+[theme.light]
+primaryColor = "#1c64d1"
+
+[theme.dark]
+primaryColor = "#4a8ff0"

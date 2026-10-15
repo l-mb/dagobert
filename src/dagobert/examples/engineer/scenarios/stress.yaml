@@ -1,0 +1,22 @@
+name: Stress test
+note: >-
+  Weaker markets: shares return 4.5% a year instead of 6.5%, and the employer's shares become
+  worthless. The flat sells two years later and below its value, its upkeep doubles, and Bitcoin
+  bought from 2027 is taxed like shares (the BMF draft).
+extends: plan
+events:
+  - at: 2029-03-01
+    type: write_off
+    asset: share-plan
+    note: The employer's shares become worthless
+overrides:
+  returns:
+    equity: {mean: 0.045}
+    property: {mean: 0.01}
+  tax: {crypto_capital_from: 2027-01-01}
+  # Items of the parent by their id: move them, set their fields
+  shift: {flat-sale: 24}
+  events:
+    flat-sale: {price: 170000, costs: 0.07}
+  assets:
+    flat: {upkeep: 0.02}

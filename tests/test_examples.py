@@ -332,10 +332,12 @@ def test_a_start_checks_again_under_the_lock(
     assert len(revisions.entries(data)) == 1
 
 
-@pytest.mark.parametrize("born", [date(1899, 12, 31), date.today() + timedelta(days=1)])
-def test_an_empty_plan_refuses_an_implausible_date_of_birth(tmp_path: Path, born: date) -> None:
+@pytest.mark.parametrize("born", [date(1899, 12, 31), None])  # None: tomorrow, at the call
+def test_an_empty_plan_refuses_an_implausible_date_of_birth(
+    tmp_path: Path, born: date | None
+) -> None:
     with pytest.raises(ValueError, match="is no date of birth"):
-        datadir.start_empty(tmp_path, born)
+        datadir.start_empty(tmp_path, born or date.today() + timedelta(days=1))
     assert datadir.empty(tmp_path)
 
 

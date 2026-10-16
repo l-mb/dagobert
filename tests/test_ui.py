@@ -37,16 +37,18 @@ from dagobert.ui import (
     PAGE_STYLE,
     PAGES,
     PER,
+    Stamp,
+    data_stamp,
     explorer,
     literal,
     main,
     mode,
     overview,
+    run_stamp,
     runs,
     tables,
     welcome,
 )
-from dagobert.ui import data_stamp as stamp
 from dagobert.ui import rename as rename_ui
 
 
@@ -416,24 +418,28 @@ def test_a_link_to_the_roll_forward_opens_the_overview_of_the_navigation(
     assert not at.get("page_link")
 
 
-def test_the_runs_follow_the_inputs_and_the_series_only(data: Path) -> None:
-    """The cache key of the runs: a fetched series counts, a file elsewhere does not."""
+def test_the_runs_follow_what_they_read_only(data: Path) -> None:
+    """The cache key of the runs: the plan and a fetched series count. `app.yaml` and the
+    manifest, which the other caches of the inputs follow, do not, nor does a file elsewhere."""
 
-    def touched(path: str, offset: float) -> tuple[float, int]:
+    def touched(path: str, offset: float) -> Stamp:
         (data / path).parent.mkdir(parents=True, exist_ok=True)
         (data / path).touch()  # keeps an existing file
         os.utime(data / path, (base + offset, base + offset))
-        return stamp(data)
+        return run_stamp(data)
 
-    before = stamp(data)
+    before = run_stamp(data)
     base = before[0]
     assert touched("revisions/1/assets.yaml", 10) == before
     assert touched("prices/IE00B4L5Y983.csv", 20) == before
-    assert touched("series/vpi.csv", 30) == (base + 30, before[1] + 1)
-    last = touched("scenarios/base.yaml", 40)
-    assert last[0] == base + 40
+    for offset, path in enumerate(("app.yaml", "manifest.yaml"), 30):
+        assert touched(path, offset) == before
+        assert data_stamp(data)[0] == base + offset
+    assert touched("series/vpi.csv", 40) == (base + 40, before[1] + 1)
+    last = touched("scenarios/base.yaml", 50)
+    assert last[0] == base + 50
     (data / "series/vpi.csv").unlink()  # removing a file that is not the newest counts
-    assert stamp(data) == (base + 40, last[1] - 1)
+    assert run_stamp(data) == (base + 50, last[1] - 1)
 
 
 @pytest.mark.parametrize(

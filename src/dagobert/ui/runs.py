@@ -23,7 +23,7 @@ from dagobert.problems import InputError
 from dagobert.result import RunResult
 from dagobert.runner import WORKERS_ENV, ModelName, Options
 from dagobert.schema import SchemaError
-from dagobert.ui import Stamp, data_stamp, fixed, literal
+from dagobert.ui import RUN_INPUTS, Stamp, fixed, literal, run_stamp
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -67,6 +67,12 @@ def cached_run(opts: Options, scenario: Path, overrides: str, stamp: Stamp) -> R
     return keep(runs, key, run, RUNS_BYTES, nbytes)
 
 
+def cached(opts: Options, scenario: Path, overrides: str, stamp: Stamp) -> bool:
+    """Whether `cached_run` holds this run: a page says that it simulates on a miss only, so a hit
+    never looks like a run."""
+    return (opts, scenario, overrides, stamp) in _runs()
+
+
 def options(data: Path, model: ModelName = "montecarlo", paths: int = PATHS) -> Options:
     """The run options of the explorer, part of the key of its cached runs."""
     return Options(data, data, model, paths, seed=42, mortality=True)
@@ -100,12 +106,23 @@ def at_revision(
             return Refused(str(err))
 
 
-@st.cache_resource(max_entries=8, show_spinner=False)
 def baseline(
-    data_dir: str, file: str, at: str, model: Literal["fixed", "explorer"]
+    data: Path, file: str, at: str, model: Literal["fixed", "explorer"]
 ) -> RunResult | Refused | None:
     """The `fixed` run or the explorer's run of the scenario `file` on the inputs at the revision
-    `at` (`at_revision`)."""
+    `at`. While no later revision changed what a run reads (`ui.RUN_INPUTS`), the run of the
+    files, which `datadir.open` keeps at the head: a first Overview runs nothing more, and a
+    ValueError of the engine raises as in `files_run` (the tiles ran those files first). Else
+    `at_revision` in a directory of its own, which gives a refusal as `Refused`."""
+    if revisions.changed_after(data, at, RUN_INPUTS):
+        return _baseline(str(data), file, at, model)
+    return fixed.result(data, Path(file).stem) if model == "fixed" else files_run(data, data / file)
+
+
+@st.cache_resource(max_entries=8, show_spinner=False)
+def _baseline(
+    data_dir: str, file: str, at: str, model: Literal["fixed", "explorer"]
+) -> RunResult | Refused | None:
     return at_revision(
         Path(data_dir),
         at,
@@ -142,7 +159,12 @@ def models(data: Path) -> list[ModelName]:
 def files_run(data: Path, scenario: Path) -> RunResult | None:
     """The run of the files with the default options: the explorer opens with it, so the
     Overview shares its cache."""
-    return cached_run(options(data), scenario, "{}", data_stamp(data))
+    return cached_run(options(data), scenario, "{}", run_stamp(data))
+
+
+def files_cached(data: Path, scenario: Path) -> bool:
+    """Whether `files_run` takes its run from the cache."""
+    return cached(options(data), scenario, "{}", run_stamp(data))
 
 
 def workers() -> int:

@@ -50,7 +50,6 @@ from dagobert.ui import (
     SCENARIO,
     Stamp,
     chart,
-    data_stamp,
     fixed,
     is_mobile,
     literal,
@@ -58,15 +57,16 @@ from dagobert.ui import (
     mode,
     note,
     page_link,
+    run_stamp,
     scenario_note,
     source,
 )
 from dagobert.ui.gridcolumns import on_off
 from dagobert.ui.knobs import NO_SALARIES, STANDING, Salaries, classes, knobs, switches
-from dagobert.ui.runs import PATHS, cached_run, keep, models, options, pool
+from dagobert.ui.runs import PATHS, cached, cached_run, keep, models, options, pool
 from dagobert.ui.save import REFUSED, reason
 from dagobert.ui.seek import goal_seek, work_dials
-from dagobert.ui.sliders import ALL_SPENDING, GROUPS, KEY, Knob, Switch
+from dagobert.ui.sliders import ALL_SPENDING, GROUPS, KEY, Knob, Switch, forget
 from dagobert.ui.tables import COLUMNS_MEAN, PHONE_PINNED, column_help, pin
 
 PATH_CHOICES = (200, 500, 1000, 5000)
@@ -190,12 +190,6 @@ class Sidebar:
     nominal: bool
     sliders: Mapping[tuple[str, ...], Knob]
     keys: tuple[str, ...]
-
-
-def _reset(keys: tuple[str, ...]) -> None:
-    """Every slider and toggle back to the value of the files."""
-    for key in keys:
-        st.session_state.pop(key, None)
 
 
 @dataclass(frozen=True)
@@ -342,7 +336,7 @@ def _sidebar(
         keys = tuple(c.key for c in controls)
         actions = st.container(key="explorer-actions", horizontal=True)
         # no `KEY`: `main.py` cannot carry a button
-        actions.button(_("Reset sliders"), key="sliders-reset", on_click=_reset, args=(keys,))
+        actions.button(_("Reset sliders"), key="sliders-reset", on_click=forget, args=(keys,))
         if compact:
             actions.button(_("Show results"), key="show-results", type="primary")
 
@@ -726,7 +720,7 @@ def _moved(side: Sidebar) -> None:
     row.button(
         _("Reset sliders"),
         key="sliders-reset-moved",  # no `KEY`: `main.py` cannot carry a button
-        on_click=_reset,
+        on_click=forget,
         args=(side.keys,),
         disabled=not side.moved,
         width="content",
@@ -819,9 +813,15 @@ def _results(
     status: Status,
 ) -> list[tuple[Path, RunResult]]:
     """The runs with the sliders, then, with a slider moved, those of the files as twins: the same
-    scenarios as the files define them, in the charts and tabs. The runs of the files run first:
-    inputs that do not load raise there (`main.py` shows them), so a refusal of the runs with the
-    sliders is one of their positions, which `status` names: no results."""
+    scenarios as the files define them, in the charts and tabs. `status` says `Simulating` while
+    the cache lacks one of them: a hit takes no time and must not look like a run. The runs of
+    the files run first: inputs that do not load raise there (`main.py` shows them), so a refusal
+    of the runs with the sliders is one of their positions, which `status` names: no results."""
+    if not all(cached(opts, p, json.dumps(o), stamp) for p in chosen for o in ({}, overrides)):
+        status.busy(
+            _("Simulating {how}").format(how=_how(opts, len(chosen))),
+            f" {_('A faded result below is the last one.')}",
+        )
     files = _runs(opts, chosen, {}, stamp)
     if not overrides:
         return files
@@ -865,7 +865,7 @@ def page(data: Path) -> None:
         _sidebar_buttons()
     chosen = _scenarios(data, compact=compact)
     paths = list(chosen)
-    stamp = data_stamp(data)
+    stamp = run_stamp(data)
     # the controls of the page in one box of the sidebar: its sticky strip and buttons end with it,
     # so they never cover the language switch that `main.py` draws below
     box = st.sidebar.container(key="explorer-sidebar")
@@ -888,10 +888,6 @@ def page(data: Path) -> None:
         return
     status = Status(st.empty(), results_box)
     _moved(side)
-    status.busy(
-        _("Simulating {how}").format(how=_how(opts, len(paths))),
-        f" {_('A faded result below is the last one.')}",
-    )
     ran = _results(opts, chosen, overrides, stamp, status)
     if not ran:
         return

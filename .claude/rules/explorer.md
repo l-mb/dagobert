@@ -24,8 +24,9 @@ the features: rule `mode`.
   Without a chosen scenario the page asks for one and `Set as default, the first as main` is off;
   its help says why, else it names the first chosen one, which becomes the main scenario (rule
   `scenarios`). Above the table one line never goes (`Status`): `Simulating 2 scenarios, Monte
-  Carlo, 500 paths … A faded result below is the last one.` while the runs compute (Streamlit fades
-  the elements of the last run until the new ones replace them) and the progress of the sensitivity,
+  Carlo, 500 paths … A faded result below is the last one.` while the runs compute, only when the
+  cache lacks one (`runs.cached`; Streamlit fades the elements of the last run until the new ones
+  replace them) and the progress of the sensitivity,
   then `Up to date: …`, or `Not simulated: …` for positions that the model refuses (`InputError` of
   the runs with the sliders: the runs of the files run first, so inputs that do not load still raise
   to `main.py`): a warning below the moved sliders, on a phone also in the strip, names the problem
@@ -63,7 +64,7 @@ the features: rule `mode`.
   chosen. The month slider of its id reaches the range of the seek in every chosen scenario
   (`knobs(work=)`, `seek.work_dials`: `_dial` of each without the sliders), so `Apply to sliders`
   sets it; the range is part of its key, so a new choice may reset it. `_dial` is `st.cache_data` by
-  the overrides and `data_stamp`: the sidebar asks on every rerun. It holds no words: the English
+  the overrides and `run_stamp`: the sidebar asks on every rerun. It holds no words: the English
   label of `LEVERS` (`_named` says it) or a `goalseek.NoChange`. A chosen scenario that does not
   load has no dial there, so the sidebar draws and its run raises after it, as before the lever
   (`InputError`, shown by `main.py`). `_find` runs the seeks under one progress bar, which counts

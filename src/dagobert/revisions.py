@@ -170,6 +170,12 @@ def last_change(data_dir: Path, path: str) -> str | None:
     return next((e.id for e in reversed(entries(data_dir)) if path in e.paths), None)
 
 
+def changed_after(data_dir: Path, at: str, patterns: Iterable[str]) -> bool:
+    """Whether a revision after `at` writes or removes a path of `patterns`."""
+    later = (e for e in entries(data_dir) if e.id > at)
+    return any(_matches(path, patterns) for entry in later for path in entry.paths)
+
+
 def state(data_dir: Path, at: str | None = None) -> dict[str, Path]:
     """The inputs at the revision `at` (the head without), as the copy of each tracked path: its
     newest at or before `at`. A path that its newest entry removes is absent."""

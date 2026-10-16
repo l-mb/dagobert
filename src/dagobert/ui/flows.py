@@ -662,7 +662,7 @@ def page(data_dir: Path) -> None:
         else None
     )
     scenario_note(result.note)
-    past = runs.baseline(str(data_dir), bases[day][1], bases[day][0], "fixed") if day else None
+    past = runs.baseline(data_dir, bases[day][1], bases[day][0], "fixed") if day else None
     base = past if isinstance(past, RunResult) else None
     if day and not isinstance(past, RunResult):
         st.warning(

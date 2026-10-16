@@ -25,12 +25,12 @@ from dagobert.scenariofiles import concrete_scenarios, scenario_file
 from dagobert.ui import (
     MAIN,
     chart,
-    data_stamp,
     day_said,
     fold,
     literal,
     month_labels,
     page_link,
+    run_stamp,
     runs,
     scenario_note,
     timezone,
@@ -321,7 +321,7 @@ def plan(data_dir: Path, scenario: str) -> None:
     )
     job = goalseek.Job(runs.options(data_dir), path, {}, target / 100)
     seeks = _seeks()
-    key = (job.opts, path, job.target, data_stamp(data_dir))
+    key = (job.opts, path, job.target, run_stamp(data_dir))
     answers = st.container()
     for button, (label, dial_of, _say) in SEEKS.items():
         if seek.button(_(label), key=button):
@@ -432,7 +432,7 @@ def on_track(data_dir: Path, scenario: str, records: Records, assets: Iterable[A
         )
     )
     with st.spinner(_("Running the plan of {day}").format(day=day.day)):
-        result = runs.baseline(str(data_dir), files[day], day.last, "explorer")
+        result = runs.baseline(data_dir, files[day], day.last, "explorer")
     if not isinstance(result, RunResult):
         st.warning(runs.refusal(result, _("The plan saved on {day}").format(day=day.day)))
         return

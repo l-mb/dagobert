@@ -57,7 +57,8 @@ rule `store`.
   missing copy differs), at the newest modification time of those files, kept between the head and
   now.
 - Readers take no lock: `entries` (cached by size and modification time of the log, a torn last line
-  ignored), `head`, `last_change`, `state(at)` (the copy of each path at or before `at`),
+  ignored), `head`, `last_change`, `changed_after` (whether a revision after one writes or removes
+  a path of some patterns: `runs.baseline`), `state(at)` (the copy of each path at or before `at`),
   `materialize` (the plan at `at`, copied into a directory and migrated: the Flows page and `Records
   against the plan` run a scenario there; `cashplan.plan_at` migrates the texts of `state` in memory
   and reads raw rows), `days` (one `Day` per local day of a time zone with a revision of the

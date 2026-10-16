@@ -85,7 +85,21 @@ The `scale` overrides that the sliders write: `docs/manual/configuration.md`.
   charts show euros of the simulation start. The switch `Nominal euros` below `Paths` shows nominal
   euros without new runs, with a help icon (`explorer.NOMINAL_HELP`). On a phone a caption below it
   gives the help instead: the icon of a `help` sits in the label of a toggle, and a tap on it flips
-  the switch. `Reset sliders` (all keys of `Sidebar.keys`, `_reset` in `on_click`) ends the controls
-  of the page in a row `explorer-actions` that stays at the bottom of the sidebar while the sliders
-  scroll (`ui/page.css`). The controls sit in the box `explorer-sidebar`, which the sticky row and
-  strip end with: below it the language switch of `main.py` scrolls clear of them (rule `i18n`).
+  the switch. `Reset sliders` (all keys of `Sidebar.keys`, `sliders.forget` in `on_click`) ends the
+  controls of the page in a row `explorer-actions` that stays at the bottom of the sidebar while the
+  sliders scroll (`ui/page.css`). The controls sit in the box `explorer-sidebar`, which the sticky
+  row and strip end with: below it the language switch of `main.py` scrolls clear of them (rule
+  `i18n`).
+- The widgets keyed `sliders.KEY` keep their values across pages (`main.py`): `keep` at the end of
+  every run stores them and the keys of those that the run drew (`Carried`: the write that keeps
+  the others as plain state raises for a widget of the run), `carry` at the start writes back those
+  that the run before did not draw, all of them on a run that opens a page (`ui.arrived`).
+  Streamlit drops a widget that a run does not draw (a page switch those of the page before; a
+  closed tab, simple mode, another first scenario), and a toggle or a select that comes back shows
+  its kept value only after a write: present but not drawn, one hidden for two reruns showed its
+  default (checked in Chrome). A widget of the run before gets no write: a write tells the browser
+  to take that value, and with `runner.fastReruns = false` a key press that landed while the next
+  run began went back a step (five ArrowRight presses 300 ms apart ended one step short in three of
+  four tries, checked in Chrome 2026-10-16, when `main.py` wrote every key in every run; none
+  after). `forget` drops keys from `Carried` too
+  (`test_a_slider_keeps_its_position_while_no_run_draws_it`).

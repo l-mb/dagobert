@@ -367,18 +367,27 @@ def keyboard() -> None:
     st.html(KEYBOARD, unsafe_allow_javascript=True)
 
 
-# What a run reads from the data directory: the YAML inputs and the fetched series
+# The files that a cache of what the inputs give follows: the YAML inputs and the fetched series
 STAMPED = (*(p for p in schema.INPUTS if p.endswith(".yaml")), f"{series.FETCHED}/*.csv")
+# What an engine run reads of them: neither the manifest nor `app.yaml`, which names what the app
+# shows (the scenarios that it opens with, the features off), not what a run computes
+RUN_INPUTS = (*(p for p in revisions.PLAN if p != schema.MANIFEST), f"{series.FETCHED}/*.csv")
 
 
 type Stamp = tuple[float, int]
 
 
-def data_stamp(data_dir: Path) -> Stamp:
-    """Latest mtime and number of the files of `STAMPED`: a cache key of the runs that changes
-    when one is changed, added or removed."""
-    times = [p.stat().st_mtime for pattern in STAMPED for p in data_dir.glob(pattern)]
+def data_stamp(data_dir: Path, inputs: Sequence[str] = STAMPED) -> Stamp:
+    """Latest mtime and number of the files of `inputs`: a cache key that changes when one is
+    changed, added or removed."""
+    times = [p.stat().st_mtime for pattern in inputs for p in data_dir.glob(pattern)]
     return max(times, default=0.0), len(times)
+
+
+def run_stamp(data_dir: Path) -> Stamp:
+    """The `data_stamp` of what a run reads (`RUN_INPUTS`): the cache key of the runs and of what
+    they give, which a save of `app.yaml` keeps."""
+    return data_stamp(data_dir, RUN_INPUTS)
 
 
 def timezone() -> tzinfo:

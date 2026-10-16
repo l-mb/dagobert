@@ -7,6 +7,7 @@ import json
 from dataclasses import replace
 from datetime import date
 from pathlib import Path
+from typing import Literal
 
 import pytest
 from apps import MAIN, labels, record
@@ -14,7 +15,7 @@ from builders import ASSETS, spent
 from german import ACTIVATE, words
 from streamlit.testing.v1 import AppTest
 
-from dagobert import datadir, goalseek, i18n, revisions, rollforward
+from dagobert import datadir, goalseek, i18n, revisions, rollforward, schema
 from dagobert.loader import APP, load_assumptions, load_plan
 from dagobert.model.assets import Assets
 from dagobert.model.months import add_months, months_between
@@ -34,6 +35,7 @@ POLICY = {
 }
 OVERVIEW = """
 from pathlib import Path
+from typing import Literal
 from dagobert.store import streams_file
 from dagobert.ui import overview
 overview.page(streams_file(Path({data!r})))
@@ -394,6 +396,39 @@ def test_a_past_plan_that_the_engine_refuses_gives_its_reason(data: Path) -> Non
     assert runs.at_revision(data, at, "scenarios/gone.yaml", _refuses) is None
 
 
+AT_REVISION = runs.Refused("the run in a directory of its own")
+
+
+@pytest.mark.parametrize(
+    ("later", "model", "files"),
+    [
+        ({APP: "scenarios: [base]\n"}, "explorer", True),
+        ({APP: "scenarios: [base]\n"}, "fixed", True),
+        ({"history.csv": "date,asset,value\n2026-03-15,giro,1100\n"}, "fixed", True),
+        ({schema.MANIFEST: schema.manifest_text()}, "fixed", True),
+        ({"scenarios/base.yaml": "name: base\n" + PHASES.replace("then", "later")}, "fixed", False),
+        ({"scenarios/base.yaml": None}, "explorer", False),
+    ],
+)
+def test_the_baseline_is_the_run_of_the_files_while_they_hold_its_plan(
+    data: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    later: revisions.Texts,
+    model: Literal["fixed", "explorer"],
+    files: bool,
+) -> None:
+    """`Records against the plan` and the Flows comparison run nothing more while no later
+    revision changed what a run reads: a save of `app.yaml`, the records or the manifest keeps
+    the run of the files, a change or a removal of the plan runs its inputs of that day."""
+    monkeypatch.setattr(runs, "at_revision", lambda *_: AT_REVISION)
+    scenario = "scenarios/base.yaml"
+    record(data, "20260110T120000.000000+0000", "test", {scenario: "name: base\n" + PHASES})
+    at = revisions.entries(data)[-1].id
+    record(data, "20260111T120000.000000+0000", "test", later)
+    found = runs.baseline(data, scenario, at, model)
+    assert isinstance(found, RunResult) if files else found is AT_REVISION
+
+
 def test_records_against_a_plan_that_no_longer_runs_say_why(
     data: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -404,6 +439,9 @@ def test_records_against_a_plan_that_no_longer_runs_say_why(
     (data / "history.csv").write_text("date,asset,value\n2026-03-15,giro,1100\n")
     scenario = "scenarios/base.yaml"
     record(data, "20260110T120000.000000+0000", "test", {scenario: "name: base\n" + PHASES})
+    # a later plan, so the one of the record runs on its own inputs, not those of the files
+    later = "name: base\n" + PHASES.replace("then", "later")
+    record(data, "20260501T120000.000000+0000", "test", {scenario: later})
     at = AppTest.from_string(OVERVIEW.format(data=str(data)), default_timeout=60).run()
     assert not at.exception
     assert any(f"this version of the app ({REFUSAL})" in w.value for w in at.warning)

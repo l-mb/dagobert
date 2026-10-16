@@ -109,7 +109,8 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   changes the sources of a day keeps the choice. It opens on the plan as it stood when the record
   began: the newest day before the first recorded month ended, else the oldest
   (`outlook.default_day`). Without a revision, an info. The run takes the inputs of the last
-  revision of the day (`revisions.materialize`). The band runs from the `start` of that day to
+  revision of the day (`revisions.materialize`), or is the run of the tiles while the files still
+  hold them (`runs.baseline`, rule `explorer-runs`). The band runs from the `start` of that day to
   `outlook.AHEAD` months after the last record, and a line gives the share of the paths below the
   last record. Below the chart, while an asset is a pension policy or depot with an `asof`
   (`outlook.carried`), one line: the plan carries it from that date (rule `engine`), the records

@@ -11,7 +11,7 @@ import streamlit as st
 from dagobert.result import RunResult
 from dagobert.runner import Options
 from dagobert.scenariofiles import scenario_file
-from dagobert.ui import Stamp, data_stamp
+from dagobert.ui import Stamp, run_stamp
 
 
 def run(data_dir: Path, scenario: str) -> RunResult | None:
@@ -27,5 +27,5 @@ def _cached(data_dir: str, scenario: str, stamp: Stamp) -> RunResult | None:
 
 
 def result(data_dir: Path, scenario: str) -> RunResult | None:
-    """The run of the files, cached until one of them changes."""
-    return _cached(str(data_dir), scenario, data_stamp(data_dir))
+    """The run of the files, cached until one that a run reads changes (`ui.run_stamp`)."""
+    return _cached(str(data_dir), scenario, run_stamp(data_dir))

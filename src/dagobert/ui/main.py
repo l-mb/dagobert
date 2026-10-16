@@ -24,6 +24,7 @@ if __name__ == "__main__":
         PAGE,
         PAGE_STYLE,
         PAGES,
+        arrived,
         assets,
         assumptions,
         cashflows,
@@ -88,10 +89,6 @@ if __name__ == "__main__":
         }}</script>""",
         unsafe_allow_javascript=True,
     )
-    # Streamlit drops the state of widgets that a page does not draw. Writing the value back
-    # turns it into plain session state, so the explorer keeps its selection across pages.
-    for key in [k for k in st.session_state if str(k).startswith(sliders.KEY)]:
-        st.session_state[key] = st.session_state[key]
     # An empty or missing data directory shows the first-run page without the navigation. The
     # pages stay registered, so the start can go to the Overview or the Assumptions page. The
     # navigation registers the pages that the mode, the features and the inputs show
@@ -158,6 +155,7 @@ if __name__ == "__main__":
     st.session_state[CAME] = st.session_state.get(PAGE)
     st.session_state[PAGE] = next(title for title, p in pages.items() if p is page)
     st.session_state[PAGES] = pages
+    sliders.carry(arrived=arrived())  # the explorer keeps its selection across pages
     told()
     try:
         if first_run:
@@ -171,5 +169,6 @@ if __name__ == "__main__":
     except BusyError:
         st.error(_("Another save is running: reload the page."), icon=":material/error:")
     finally:
+        sliders.keep()
         mode.mode_switch()
         language_switch()

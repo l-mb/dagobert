@@ -39,6 +39,7 @@ from dagobert.ui import (
     month_labels,
     outlook,
     page_link,
+    runs,
     save,
     source,
     summary,
@@ -754,7 +755,8 @@ def page(streams: RowFile) -> None:
     st.title(_("Overview"))
     summary.tiles(data_dir, "overview")
     plan = st.empty()  # filled last: its Monte Carlo run must not hold up the rest of the page
-    plan.caption(_("Simulating the plan …"))
+    if not runs.files_cached(data_dir, concrete_scenarios(data_dir)[scenario]):  # a hit: no wait
+        plan.caption(_("Simulating the plan …"))
     _attention(data_dir, view)
     _roll_forward(data_dir, view)
     loaded = load_assets(data_dir)

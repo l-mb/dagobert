@@ -457,6 +457,30 @@ def test_the_target_names_the_age_of_the_chosen_runs(data: Path) -> None:
     )
 
 
+CARRIED = """
+import streamlit as st
+from dagobert.ui import sliders
+sliders.carry(arrived=False)
+if st.session_state.get("shown", True):
+    st.slider("x", 0, 10, key=f"{sliders.KEY}x")
+    st.button("Reset", key="reset", on_click=sliders.forget, args=([f"{sliders.KEY}x"],))
+sliders.keep()
+"""
+
+
+def test_a_slider_keeps_its_position_while_no_run_draws_it() -> None:
+    """As `main.py` runs the pages: a page switch or a closed tab drops the widgets that a run
+    does not draw, `carry` brings their values back, and `Reset sliders` forgets them."""
+    at = AppTest.from_string(CARRIED).run()
+    at.slider(key=f"{sliders.KEY}x").set_value(5).run()
+    at.session_state["shown"] = False
+    at.run().run()
+    at.session_state["shown"] = True
+    assert at.run().slider(key=f"{sliders.KEY}x").value == 5
+    at.button(key="reset").click().run()
+    assert at.slider(key=f"{sliders.KEY}x").value == 0
+
+
 def test_a_language_switch_runs_nothing_again(data: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The explorer's caches hold no words (rule `i18n`): in German it shows the runs and the
     sensitivity that English ran, the effects named by the levers in German."""
@@ -568,6 +592,23 @@ def test_the_explorer_keeps_its_runs_by_their_bytes_and_computes_each_once(
     for overrides in ('{"a": 1}', '{"a": 2}', "{}", '{"a": 2}'):
         runs.cached_run(opts, scenario, overrides, (0.0, 0))
     assert calls == [{}, {"a": 1}, {"a": 2}, {}]  # two runs fit: the first went, the last stayed
+    assert runs.cached(opts, scenario, '{"a": 2}', (0.0, 0))
+    assert not runs.cached(opts, scenario, '{"a": 1}', (0.0, 0))
+
+
+def test_a_run_from_the_cache_shows_no_progress(
+    data: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`Simulating` only while a run is missing: the second visit takes the runs of the first."""
+    said: list[str] = []
+    monkeypatch.setattr(explorer.Status, "busy", lambda _self, text, then="": said.append(text))
+    at = AppTest.from_string(EXPLORER.format(data=str(data)), default_timeout=60).run()
+    assert not at.exception
+    assert any(text.startswith("Simulating") for text in said)
+    said.clear()
+    at.run()
+    assert not at.exception
+    assert not any(text.startswith("Simulating") for text in said)
 
 
 def test_explorer_workers_follow_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:

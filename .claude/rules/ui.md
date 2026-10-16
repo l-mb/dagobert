@@ -126,15 +126,15 @@ style of the pages (`ui/page.css`): rule `page-style`.
   through `note` into `About the scenario`), `month_labels` (the month labels that fit across a
   chart in one of n columns: `DESKTOP_MONTHS` at 1,500 px with the sidebar open, `PHONE_MONTHS` on a
   phone) and `per_control` (`Amounts` with its help, its options the ids `month` and `year`, `PER`
-  their words, English, and multiplier, wrap in a narrow column), `data_stamp` (the cache key of the
-  runs: the latest mtime of `STAMPED`, the YAML files of `schema.INPUTS` and `series/*.csv`; no
-  other file, so neither a price nor a later `revisions/` drops a run), `timezone` (of the browser,
+  their words, English, and multiplier, wrap in a narrow column), `data_stamp` (a cache key of the
+  inputs: the latest mtime and count of `STAMPED`, the YAML files of `schema.INPUTS`, `series/*.csv`;
+  `run_stamp` that of the runs, `RUN_INPUTS`: rule `explorer-runs`), `timezone` (of the browser,
   `st.context.timezone`, UTC without one: a day of the revisions is a local day) and `since` (the
   days with a revision of some files that have a revision before them, each with the last revision
   before the day began: `Changes since` and the Flows comparison; a data directory with only the
   baseline has none, so both are off).
-- `fixed.py` holds the single-path `fixed` run of a scenario: `result` cached until an input
-  changes, `run` uncached for the inputs of a revision.
+- `fixed.py` holds the single-path `fixed` run of a scenario: `result` cached by `run_stamp`,
+  `run` uncached for the inputs of a revision.
 
 ## Rules
 

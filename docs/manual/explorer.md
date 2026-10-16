@@ -23,7 +23,9 @@ you tap is the first one. A line below the button names it.
 
 Above the table, one line tells you what the app does. While it computes, the line says so, for
 example `Simulating 2 scenarios, Monte Carlo, 500 paths`. The old table stays grey until the new
-results arrive. When the work is done, the line starts with `Up to date`. Your inputs do not allow
+results arrive. When the work is done, the line starts with `Up to date`. The app keeps the results
+that it computed. When you come back to them, also from another page, they show at once without
+that line. A new default choice of scenarios or a change on the Features page keeps them too. Your inputs do not allow
 some positions of the sliders, for example a spending rule whose increase starts at or below the
 wealth where its cut starts. Then the line starts with `Not simulated`, a message below it names the
 problem, and the page shows no results. Move a slider back to see them again.

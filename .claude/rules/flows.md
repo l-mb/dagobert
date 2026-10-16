@@ -31,21 +31,22 @@ Its budget comes from the ledger: rule `ledger`.
   only with `One-offs`, and wealth built: their sum, the change of the net worth before the latent
   tax, see `Budget.wealth_built`) with the change against the inputs of the last revision before
   that day (`runs.baseline`, `runs.at_revision`, as `Records against the plan`:
-  `revisions.materialize`, the same `fixed` run; an error of the run other than a ValueError raises:
-  a bug), signed like the Cashflows sheet (rule `money`). Its caption says so and that a phase the
-  scenario does not reach has no column; below it the lines (`LINES`) and the terms
-  (`cashflows.terms`) in `What the lines and terms mean`, and why the Cashflows page differs, with a
-  link there. Then one tab per stretch (named by the label of its phase, which gets its years when
-  it occurs twice; on a phone only the open tab draws, a closed one keeps its period and picked
-  group), opening on the whole stretch, with a slider for its calendar years between two step
-  buttons (above them the months, and where the taxes hold a part of the SV the short names in
-  words, `SV_TERMS`: the boxes name `RV` and `AV`), the tiles and a Sankey diagram titled
-  `<stretch>, per month`: income sources, then taxes and SV beside the budget, then the spending
-  groups, then their items. In a main area up to 860 px (portrait, landscape with the sidebar open,
-  a narrow window) the outflow bars with their picker (`bars.outflow_bars`) stand in for the
-  diagram, below a hint to turn the phone or close the sidebar and the switch `Show the diagram
-  anyway` (`flows-diagram-<stretch>`, kept per page): it draws the diagram 1000 px wide in a box
-  that scrolls sideways instead. The rest folds into `How to read this`.
+  `revisions.materialize`, the same `fixed` run, the cached one of the files while they hold those
+  inputs; an error of the run other than a ValueError raises: a bug), signed like the Cashflows
+  sheet (rule `money`). Its caption says so and that a phase the scenario does not reach has no
+  column; below it the lines (`LINES`) and the terms (`cashflows.terms`) in `What the lines and
+  terms mean`, and why the Cashflows page differs, with a link there. Then one tab per stretch
+  (named by the label of its phase, which gets its years when it occurs twice; on a phone only the
+  open tab draws, a closed one keeps its period and picked group), opening on the whole stretch,
+  with a slider for its calendar years between two step buttons (above them the months, and where
+  the taxes hold a part of the SV the short names in words, `SV_TERMS`: the boxes name `RV` and
+  `AV`), the tiles and a Sankey diagram titled `<stretch>, per month`: income sources, then taxes
+  and SV beside the budget, then the spending groups, then their items. In a main area up to 860 px
+  (portrait, landscape with the sidebar open, a narrow window) the outflow bars with their picker
+  (`bars.outflow_bars`) stand in for the diagram, below a hint to turn the phone or close the
+  sidebar and the switch `Show the diagram anyway` (`flows-diagram-<stretch>`, kept per page): it
+  draws the diagram 1000 px wide in a box that scrolls sideways instead. The rest folds into `How to
+  read this`.
 
 ## Code
 

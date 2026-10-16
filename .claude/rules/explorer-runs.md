@@ -36,6 +36,22 @@ page: rule `explorer`; the sensitivity run: rule `analyses`; the memory in a con
   included, sits under `if __name__ == "__main__":`. Without the guard every worker draws the page
   in bare mode and logs Streamlit warnings. So does an `AppTest` script that reaches the pool
   (`apps.EXPLORER`): its workers wrote them past the capture of pytest.
+- The runs and what they give key by `ui.run_stamp`: the latest mtime and count of `RUN_INPUTS`,
+  the plan files of `revisions.PLAN` without the manifest and `series/*.csv`, what a run reads
+  (`load_plan`, `make_provider`; the life table ships). So `cached_run`, `files_run`, `fixed`,
+  `explorer._found`, `seek._seeks` and `_dial` and `outlook._seeks` keep their runs over a save of
+  `app.yaml` (`Set as default`, Features, the order of the scenarios), a price and `revisions/`. No
+  run reads `app.yaml`: `features_off` and the mode only hide sliders, and a hidden slider stands at
+  its file value, so the overrides of a key hold all that they change. The other caches of the
+  inputs keep `ui.data_stamp` (`STAMPED`, also `app.yaml`). A profile of 2026-10-16 found no engine
+  run on a page switch. `runs.cached` tells a hit: `Simulating …` of the Explorer (`_results`) and
+  `Simulating the plan …` of the Overview (`runs.files_cached`) draw on a miss only, as a hit looked
+  like a run.
+- `runs.baseline`, the plan of a day of `Records against the plan` and the Flows comparison: while
+  no revision after it changed a path of `RUN_INPUTS` (`revisions.changed_after`; `datadir.open`
+  keeps the files at the head) the run of the files (`files_run`, `fixed.result`), else
+  `at_revision` in a temporary directory (`_baseline`, `st.cache_resource` by revision): about 1.1 s
+  less on the first Overview after a restart.
 - `src/dagobert/ui/outlook.py`: the plan on the Overview, `plan` (tiles, spending and work seek) and
   `on_track`. The tiles take the explorer's cached run (`runs.files_run`, the key of `runs.options`
   with no overrides), so an explorer opened with the same scenario shows at once. The seek runs in

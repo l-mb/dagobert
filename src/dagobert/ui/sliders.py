@@ -6,11 +6,12 @@ holds no words."""
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import date
-from typing import get_args
+from typing import TYPE_CHECKING, get_args
 
 import streamlit as st
+from streamlit.errors import StreamlitWidgetAlreadyInstantiatedError
 
 from dagobert import goalseek
 from dagobert.i18n import N_, NP_, _, pgettext
@@ -19,7 +20,56 @@ from dagobert.money import EUR_COLUMN, printf
 from dagobert.runner import ModelName
 from dagobert.sensitivity import Lever
 
-KEY = "explorer-"  # `main.py` carries widget keys with this prefix across page switches
+if TYPE_CHECKING:
+    from collections.abc import Collection
+
+KEY = "explorer-"  # the widget keys of the explorer, whose values `carry` keeps across pages
+CARRIED = "ui-explorer"  # session state: the `Carried` of the last run
+
+
+@dataclass(frozen=True)
+class Carried:
+    """The values of the explorer widgets at the end of a run (`keep`) and the keys of those that
+    the run drew."""
+
+    values: dict[str, object] = field(default_factory=dict)
+    drawn: frozenset[str] = frozenset()
+
+
+def carry(*, arrived: bool) -> None:
+    """At the start of a run (`main.py`), the value of each explorer widget that the run before
+    did not draw, as plain session state, of all of them in a run that opens a page: Streamlit
+    drops a widget that a run does not draw (a page switch those of the page before), and a widget
+    that comes back shows a value only after a write. A widget of the run before stays as it is: a
+    write tells it to take the value, and a slider that a key press moved while the page ran went
+    back a step."""
+    carried = st.session_state.get(CARRIED, Carried())
+    for key, value in carried.values.items():
+        if arrived or key not in carried.drawn:
+            st.session_state[key] = st.session_state.get(key, value)
+
+
+def keep() -> None:
+    """At the end of a run (`main.py`), the values of the explorer widgets for `carry`, and which
+    of them it drew: a widget of this run refuses the write that keeps the others."""
+    values: dict[str, object] = {}
+    drawn: set[str] = set()
+    for key in [k for k in st.session_state if str(k).startswith(KEY)]:
+        values[key] = st.session_state[key]
+        try:
+            st.session_state[key] = values[key]
+        except StreamlitWidgetAlreadyInstantiatedError:
+            drawn.add(key)
+    st.session_state[CARRIED] = Carried(values, frozenset(drawn))
+
+
+def forget(keys: Collection[str]) -> None:
+    """The values of `keys` gone, also for `carry`: `Reset sliders` sets them to the files."""
+    carried = st.session_state.get(CARRIED, Carried())
+    values = {key: value for key, value in carried.values.items() if key not in keys}
+    st.session_state[CARRIED] = Carried(values, carried.drawn - set(keys))
+    for key in keys:
+        st.session_state.pop(key, None)
 
 
 @dataclass(frozen=True)

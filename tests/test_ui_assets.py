@@ -17,7 +17,7 @@ from builders import plan
 from pydantic import TypeAdapter
 from streamlit.testing.v1 import AppTest
 
-from dagobert import history, lots, prices, revisions, series
+from dagobert import history, i18n, lots, prices, revisions, series
 from dagobert.loader import load_assets
 from dagobert.model.assets import Asset, EquityAsset, GoldAsset, HoldingsAsset, LotAsset
 from dagobert.model.plan import Scenario
@@ -433,13 +433,16 @@ def test_a_typed_trade_reads_a_comma_and_a_point_alike(
 
 
 def test_a_typed_trade_names_the_fields_to_correct() -> None:
-    """The form frames them in red, and its hint gives a fraction with a comma, like the others."""
+    """The form frames them in red, and its hint gives a fraction in the decimal mark of the
+    language, like the others."""
     with pytest.raises(tradeform.TypedError, match="units and the amount") as refused:
         tradeform.Typed(DAY, "buy", WORLD).row()
     assert refused.value.fields == ("units", "amount")
-    with pytest.raises(tradeform.TypedError, match="or 1,2 for a fraction") as refused:
+    with pytest.raises(tradeform.TypedError, match=r"or 1\.2 for a fraction") as refused:
         tradeform.Typed(DAY, "buy", WORLD, units="1.200", amount="5").row()
     assert refused.value.fields == ("units",)
+    with i18n.use("de"), pytest.raises(tradeform.TypedError, match="oder 1,2 für") as refused:
+        tradeform.Typed(DAY, "buy", WORLD, units="1.200", amount="5").row()
 
 
 def test_an_added_trade_shows_its_price() -> None:

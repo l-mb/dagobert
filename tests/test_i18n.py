@@ -5,6 +5,7 @@ English."""
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -227,6 +228,8 @@ def test_the_start_page_speaks_german(
         at.text_input(key=f"decimal-welcome-{key}").set_value(text).run()
         assert any(c.value.startswith(line) for c in at.caption)
         assert leaks([t for t in words(at) if t not in data]) == []
+        if key == "since":  # the estimate with a decimal comma
+            assert any(re.match(r"Geschätzt: \d+,\d\d Rentenpunkte", c.value) for c in at.caption)
     assert "lang" not in at.query_params  # taken once: the switch can change it
     switch = next(s for s in at.sidebar.segmented_control if s.label == LANGUAGE_LABEL)
     switch.set_value("en").run()

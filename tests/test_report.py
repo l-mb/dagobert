@@ -26,7 +26,7 @@ from dagobert.engine.simulation import simulate
 from dagobert.model.assets import EquityAsset
 from dagobert.model.assumptions import ReturnClass
 from dagobert.model.streams import Stream
-from dagobert.money import format_eur
+from dagobert.money import PERCENT, format_eur
 from dagobert.report import (
     BROKE_AT,
     TOTAL_AT,
@@ -342,12 +342,31 @@ def test_flow_figure_is_yearly_bars_plus_net(
     )
 
 
-def test_a_band_hover_names_the_band_and_shows_a_percent() -> None:
-    data = lasting_figure(_make_result("Vermietung", 1)).to_dict()["data"]
-    template = next(t for t in data if t["name"] == "dead")["hovertemplate"]
+@pytest.mark.parametrize(("lang", "point"), [("en", "."), ("de", ",")])
+def test_a_band_hover_names_the_band_and_shows_a_percent(lang: i18n.Language, point: str) -> None:
+    """The percent is text in the language of the page: plotly writes no space before its `%`."""
+    with i18n.use(lang):
+        data = lasting_figure(_make_result("Vermietung", 1)).to_dict()["data"]
+    band = next(t for t in data if t["name"] in {"dead", "verstorben"})
 
-    assert "%{fullData.name}" in template
-    assert "%{y:.1%}" in template
+    assert band["hovertemplate"] == "%{fullData.name}: %{customdata}<extra></extra>"
+    assert all(re.fullmatch(rf"\d+\{point}\d{PERCENT[lang]}", text) for text in band["customdata"])
+
+
+def test_a_percent_axis_writes_the_percent_of_the_language() -> None:
+    """Plotly writes the decimal mark of the separators but no space before `%`: in German the
+    labels of a percent axis take their words by `labelalias`, keyed as plotly writes them."""
+    assert charts.tick_format(".0%", [1.0]) == {"tickformat": ".0%"}
+    with i18n.use("de"):
+        axis = charts.tick_format(".0%", [1.0])
+        change: Any = charts.tick_format("+.1%", [-0.025, 0.01])["labelalias"]
+        assert charts.tick_format(",.0f", [1.0]) == {"tickformat": ",.0f"}
+    assert axis["tickformat"] == ".0%"
+    whole: Any = axis["labelalias"]
+    assert whole["70%"] == "70\u00a0%"
+    assert "100%" in whole
+    assert change["−2,5%"] == "−2,5\u00a0%"
+    assert change["+1,0%"] == "+1,0\u00a0%"
 
 
 def test_the_title_of_whether_the_money_lasts_rounds_the_age() -> None:

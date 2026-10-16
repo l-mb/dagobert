@@ -166,7 +166,14 @@ Language` at the end of the sidebar. A cookie in your browser keeps your choice 
 
 Every page is in German, with its help, its tables and its charts. Some text always stays in
 English: the names and notes in your files, the examples, the problems of an input file, and the
-words that Streamlit draws itself, such as the toolbar of a table and the file upload.
+words that Streamlit draws itself, such as the toolbar of a table. The file upload is in German.
+
+Numbers follow the language. An English page writes a percentage as `36.6%` and a number as
+`5.00`. A German page writes `36,6 %` and `5,00`. Amounts in euros look the same in both
+languages, for example `1.234.567 €`, and so do months, for example `2026-10`. The sliders and the
+number columns of a table come from Streamlit, which always writes a decimal point: a German
+slider shows `2.25 %`. In a text field you can type a decimal comma or a decimal point in both
+languages.
 
 The report of the command line is in English. To get it in German, add `--lang de`, for example
 `uv run dagobert run --lang de data/scenarios/*.yaml`. You can also set the environment variable

@@ -46,6 +46,7 @@ if __name__ == "__main__":
         told,
         transfer,
         undo,
+        uploader_words,
         welcome,
     )
 
@@ -60,6 +61,7 @@ if __name__ == "__main__":
         initial_sidebar_state="collapsed" if is_mobile() else "auto",
     )
     st.html(PAGE_STYLE)
+    st.html(uploader_words())
     # A tab from before a server restart reconnects with stale scripts and widget state.
     # The address bar of Chrome on a phone takes the page background. Its media query follows
     # the OS, not a theme picked in the menu; the app follows the OS by default. Only `.stApp`

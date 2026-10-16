@@ -29,15 +29,16 @@ The editors build their forms here; each page that uses them has its own rule. T
   of an event) is no field.
 - `shown` and `parse` give the one text of a value: euros `1.234,56` with a decimal comma or point
   (`euros`, a minus only with `signed`; the Spend quick add and the trade form read it unsigned), a
-  share or a rate in percent (`2.5` for 0.025, rounded like the grid cells, so a shown value parses
-  back to the same), a month `2027-05` (also `05.2027` or a day; any day reads as the first, the
-  file keeps the 1st), a date in ISO (`day` also reads it day first with dots, `14.03.1965`, as a
-  German user types it; bare digits stay unread, either order fits them; the start page takes it
-  too), `null` where a null differs from the default (`care.index`: nominal). `parse` checks the
-  bounds in the unit (`at most 100%`, `above 0 €`) and raises ValueError with what to type. An empty
-  text is None: the fallback. A whole number goes as an int (`4`, not `4.0`), as the other writers
-  keep it. `read` keeps the old value while its text is unchanged, so cents beyond two are not
-  rewritten.
+  share or a rate in percent (`2.5` for 0.025, German `2,5`, rounded like the grid cells, so a shown
+  value parses back to the same; either mark reads, and a switch of the language rewrites an
+  untouched field in its mark, `widgets._respoken`, rule `money`), a month `2027-05` (also `05.2027`
+  or a day; any day reads as the first, the file keeps the 1st), a date in ISO (`day` also reads it
+  day first with dots, `14.03.1965`, as a German user types it; bare digits stay unread, either
+  order fits them; the start page takes it too), `null` where a null differs from the default
+  (`care.index`: nominal). `parse` checks the bounds in the unit (`at most 100%`, `above 0 €`) and
+  raises ValueError with what to type. An empty text is None: the fallback. A whole number goes as
+  an int (`4`, not `4.0`), as the other writers keep it. `read` keeps the old value while its text
+  is unchanged, so cents beyond two are not rewritten.
 - The fallback of an empty field depends on what the mapping holds after the edits (the candidate):
   `fallback` takes it from `overrides.filled`, the defaults of each field in the mapping that holds
   it, of that mapping's own default where it goes too. So `inflation` without a file value takes 2%

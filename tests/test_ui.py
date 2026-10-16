@@ -48,6 +48,7 @@ from dagobert.ui import (
     run_stamp,
     runs,
     tables,
+    uploader_words,
     welcome,
 )
 from dagobert.ui import rename as rename_ui
@@ -531,9 +532,13 @@ def test_a_phone_folds_a_note_for_the_session() -> None:
 
 def test_the_page_style_survives_the_sanitizer() -> None:
     """`st.html` drops a whole style whose text holds an opening angle bracket before a letter,
-    `/` or `!` (DOMPurify), without a word: every rule of the app would go."""
-    style = PAGE_STYLE.removeprefix("<style>").removesuffix("</style>")
-    assert not re.search(r"<[A-Za-z/!]", style)
+    `/` or `!` (DOMPurify), without a word: every rule of the app would go. So do the words of
+    the file uploader, which a German page writes by CSS with the limit of the app."""
+    with i18n.use("de"):
+        words = uploader_words()
+    for style in (PAGE_STYLE, words):
+        assert not re.search(r"<[A-Za-z/!]", style.removeprefix("<style>").removesuffix("</style>"))
+    assert all(f'"{w}"' in words for w in ("Hochladen", "Datei hier ablegen", "64 MB pro Datei"))
 
 
 DAYS = ("20260120T120000.000000+0000", "20260305T120000.000000+0000")

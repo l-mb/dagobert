@@ -101,8 +101,8 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 
 - Use a dataclass for option bundles (see `runner.Options`). Typer commands take keyword-only
   options after `*` to satisfy ruff's argument limits.
-- Money shows in one format everywhere, `1.234.567 €`, and charts and tables show euros of the
-  simulation start by default [money].
+- Money shows in one format everywhere, `1.234.567 €`, a percent or a plain number in the decimal
+  mark of the language (German `36,6 %`); charts and tables show euros of the start [money].
 - The phone (412 x 915 CSS px, touch only) uses every page, and the desktop keeps its look [ui].
 - A save passes the save guard [save-guard], is one revision [revisions], checks conflicts [grids].
 - The Flows page and the rows of the run on the Cashflows page read the ledger and never

@@ -14,9 +14,9 @@ from dagobert.money import format_eur
 from dagobert.report.charts import (
     EUR_TICKS,
     GRAY,
-    LAYOUT,
     add_phase_bands,
     age_axis,
+    layout,
     legend_below,
     split_title,
     title_room,
@@ -146,7 +146,7 @@ def flow_figure(r: RunResult, *, nominal: bool = False, compact: bool = False) -
     age_axis(fig, yearly.centers, [date(y, 7, 1) for y in yearly.years], compact=compact)
     title = split_title(r.label, _("income, spending and taxes, median"), compact=compact)
     fig.update_layout(
-        LAYOUT,
+        layout(),
         title=title,
         yaxis={
             "title": r.unit(nominal=nominal, yearly=True),

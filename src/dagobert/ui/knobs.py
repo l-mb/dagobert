@@ -19,7 +19,7 @@ from dagobert.model.events import AddStreamEvent, BuyPropertyEvent, Event, Phase
 from dagobert.model.months import months_between
 from dagobert.model.plan import Scenario
 from dagobert.model.streams import Stream, StreamKind
-from dagobert.money import format_eur
+from dagobert.money import format_eur, format_percent
 from dagobert.report.charts import class_name
 from dagobert.returns import historical_draws, historical_replays, median_growth
 from dagobert.runner import ModelName
@@ -180,9 +180,9 @@ def _holding_knobs(name: str, d: ReturnClass, *, crypto: bool) -> list[Knob]:
         "{spread} in the scenario."
     )
     growth = {
-        "growth": f"{median_growth(d):.1%}",
-        "mean": f"{d.mean:.1%}",
-        "spread": f"{d.stdev:.1%}",
+        "growth": format_percent(median_growth(d)),
+        "mean": format_percent(d.mean),
+        "spread": format_percent(d.stdev),
         "name": name,
     }
     historical = (

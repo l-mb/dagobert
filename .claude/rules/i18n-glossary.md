@@ -17,8 +17,10 @@ gets its row with the unit that brings it.
 Style: "du", lowercase (`du`, `dein`); buttons in the infinitive (`Speichern`, `Szenario anlegen`);
 short active sentences; quotes „…"; after a colon a capital before a whole sentence (Duden D 89),
 not before a fragment or an apposition; legal terms as the law writes them; a term of the report
-(`P(broke)@90`, `Total@67`) stays as it is in the help. The page names of rule `i18n` win over
-this table.
+(`P(broke)@90`, `Total@67`) stays as it is in the help; a number with a decimal comma and a no-break
+space before `%` (`36,6 %`, `5,00`; euros `1.234.567 €` and ISO months as in English: rule
+`money`). The page names of rule `i18n` win over this table: `Snapshot` stays English in German
+text too (owner, issue #23: `auf der Seite Snapshot`), as do Explorer, Cashflows and Flows.
 
 | English (app) | German | Note |
 |---|---|---|

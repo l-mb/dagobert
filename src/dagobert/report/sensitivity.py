@@ -10,21 +10,21 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from dagobert.i18n import N_, _, pgettext
-from dagobert.money import format_eur, printf
+from dagobert.money import format_eur, format_percent, printf
 from dagobert.report.charts import (
     ENTRY,
     EUR_TICKS,
     GRAY,
     GREEN,
-    LAYOUT,
     RED,
     TICK_ROOM,
-    format_pct,
+    layout,
     points,
     run_out,
     shared,
     signed_eur,
     split_title,
+    tick_format,
     title_room,
 )
 from dagobert.result import unit
@@ -123,7 +123,7 @@ def sensitivity_figure(
     `measure`, its title below the figure title: centered over the panel, the title of a total
     ran past the edge. The title names the levers of the plan or of the assumptions (`plan`)."""
     measures = [
-        _Measure(run_out(s.base.ages[-1]), lambda o: o.p_broke, format_pct, points, "+.1%", -1),
+        _Measure(run_out(s.base.ages[-1]), lambda o: o.p_broke, format_percent, points, "+.1%", -1),
         *(
             _Measure(
                 _("Net worth at {age}, {unit}").format(
@@ -155,9 +155,10 @@ def sensitivity_figure(
     for col, m in enumerate(measures, start=1):
         base = m.get(s.base)
         same_way = [(m.get(e.low) - base) * (m.get(e.high) - base) > 0 for e in effects]
+        panel: list[float] = []
         for side, name in sides.items():
             changes = [m.get(getattr(e, side)) - base for e in effects]
-            spans += changes
+            panel += changes
             effect = [_EFFECTS[int(np.sign(change)) * m.better] for change in changes]
             fig.add_trace(
                 go.Bar(
@@ -182,7 +183,8 @@ def sensitivity_figure(
                 row=1,
                 col=col,
             )
-        fig.update_xaxes(tickformat=m.ticks, row=1, col=col)
+        spans += panel
+        fig.update_xaxes(tick_format(m.ticks, panel), row=1, col=col)
     # The sides in gray: a click hides the bars of one in every panel. Wide the colors in a
     # legend of their own, which a click does not change; compact in the one legend, which
     # lines up its rows: of two legends below the plot, plotly moved the one too wide for the
@@ -197,7 +199,7 @@ def sensitivity_figure(
     title = split_title(s.scenario, subject, compact=compact)
     legend = {"orientation": "h", "y": -0.08}
     fig.update_layout(
-        LAYOUT,
+        layout(),
         title={"text": title},
         barmode="overlay",
         height=140 + 26 * len(effects),

@@ -24,7 +24,17 @@ from dagobert.anatomy import (
 )
 from dagobert.i18n import N_, NP_, _, pgettext
 from dagobert.model.base import named
-from dagobert.report.charts import BLUE, GRAY, LAYOUT, class_name, run_out, split_title, title_room
+from dagobert.money import format_percent
+from dagobert.report.charts import (
+    BLUE,
+    GRAY,
+    class_name,
+    layout,
+    run_out,
+    split_title,
+    tick_format,
+    title_room,
+)
 
 COLUMNS = 3
 ROW, GAP, TOP = 240, 110, 180  # pixels: a row of panels, the gap between rows, the top margin
@@ -80,10 +90,10 @@ def groups(d: Driver, age: int) -> str:
     inheritance) the shares with the event by `BROKE_AGE`."""
     if d.key[0] in AGES:
         return _("by {age}: ran out {broke}, others {others}").format(
-            age=age, broke=f"{d.broke:.0%}", others=f"{d.others:.0%}"
+            age=age, broke=format_percent(d.broke, 0), others=format_percent(d.others, 0)
         )
     return _("median: ran out {broke}, others {others}").format(
-        broke=f"{d.broke:.1%}", others=f"{d.others:.1%}"
+        broke=format_percent(d.broke), others=format_percent(d.others)
     )
 
 
@@ -100,7 +110,7 @@ def bin_label(d: Driver, b: Bin) -> str:
     kind = d.key[0]
     is_age = kind in AGES
     low, high = (
-        None if v is None else f"{v:.0f}" if is_age else f"{v:.1%}" for v in (b.low, b.high)
+        None if v is None else f"{v:.0f}" if is_age else format_percent(v) for v in (b.low, b.high)
     )
     if low is None:
         text = (
@@ -123,7 +133,7 @@ def anatomy_figure(a: Anatomy, *, compact: bool = False) -> go.Figure:
     """Small multiples on one probability axis, so the steepest panel stands out. Compact: one
     column, and the caller shows `reading`."""
     ran_out = _("{broke} of {paths} paths ran out by {age} ({p})").format(
-        broke=a.broke, paths=a.paths, age=a.age, p=f"{a.p_broke:.1%}"
+        broke=a.broke, paths=a.paths, age=a.age, p=format_percent(a.p_broke)
     )
     title, lines = split_title(a.scenario, ran_out, compact=compact), reading(a)
     columns, row, margin = (
@@ -154,7 +164,7 @@ def anatomy_figure(a: Anatomy, *, compact: bool = False) -> go.Figure:
                         [
                             f"{label(d, a.age)}: {shown.replace('<br>', ' ')}",
                             _("ran out by {age}: {p} of {paths} paths").format(
-                                age=a.age, p=f"{b.broke:.1%}", paths=b.paths
+                                age=a.age, p=format_percent(b.broke), paths=b.paths
                             ),
                         ]
                     )
@@ -170,11 +180,12 @@ def anatomy_figure(a: Anatomy, *, compact: bool = False) -> go.Figure:
         y=a.p_broke, line={"color": GRAY, "dash": "dash", "width": 1.5}, row="all", col="all"
     )
     top = max(b.broke for d in a.drivers for b in d.bins)
-    fig.update_yaxes(range=[0, 1.1 * max(top, a.p_broke)], tickformat=".0%")
+    top = 1.1 * max(top, a.p_broke)
+    fig.update_yaxes({"range": [0, top]} | tick_format(".0%", [top]))
     fig.update_yaxes(title=run_out(a.age), col=1)
     fig.update_xaxes(tickfont={"size": 11})
     fig.update_layout(
-        LAYOUT,
+        layout(),
         title={"text": title} | ({} if compact else {"subtitle": {"text": "<br>".join(lines)}}),
         height=margin + plot + 80,  # the default bottom margin
         margin={"t": margin},

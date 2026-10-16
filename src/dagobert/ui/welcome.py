@@ -21,7 +21,7 @@ from dagobert.loader import load_assumptions, load_scenario
 from dagobert.model.assumptions import REGELALTERSGRENZE, Person
 from dagobert.model.base import Unit, description
 from dagobert.model.plan import Feature
-from dagobert.money import format_eur, format_number
+from dagobert.money import format_eur, format_number, format_percent
 from dagobert.ui import PAGES, fields, is_mobile, keyboard, literal, mode, outlook
 from dagobert.ui.gridcolumns import also
 from dagobert.ui.overview import explore
@@ -406,8 +406,8 @@ def _goals(born: date | None, values: dict[str, Any], slots: dict[str, DeltaGene
             st.caption(
                 _(PAYMENT).format(
                     payment=format_eur(datadir.payment(owed)),
-                    rate=f"{datadir.LOAN_RATE:.0%}",
-                    repayment=f"{datadir.REPAYMENT:.0%}",
+                    rate=format_percent(datadir.LOAN_RATE, None),
+                    repayment=format_percent(datadir.REPAYMENT, None),
                 )
             )
     return read

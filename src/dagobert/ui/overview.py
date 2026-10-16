@@ -21,7 +21,7 @@ from dagobert.model.events import BuyPropertyEvent, Event
 from dagobert.model.months import add_months, months_between
 from dagobert.model.plan import Plan, Scenario
 from dagobert.model.streams import StreamKind
-from dagobert.money import format_eur
+from dagobert.money import format_eur, format_number, format_percent
 from dagobert.report.tracker import history_figure
 from dagobert.result import RunResult
 from dagobert.scenariofiles import (
@@ -328,7 +328,7 @@ def _end(asset: Asset, refinance: float, day: date) -> Notice | None:
         case Loan(fixed_until=date() as end):
             what = _(
                 "last month at the fixed rate of {rate}, the plan then uses {refinance}"
-            ).format(rate=f"{asset.rate:.2%}", refinance=f"{refinance:.2%}")
+            ).format(rate=format_percent(asset.rate, 2), refinance=format_percent(refinance, 2))
             late, fields = False, ("fixed_until", "rate")
         case _:
             return None
@@ -581,7 +581,7 @@ def _roll_check(roll: rollforward.Roll, scenarios: int, *, snapshot: bool) -> No
     cpi = roll.cpi
     st.markdown(
         _("Consumer prices {old} to {new}: **× {factor}**, from {source}.").format(
-            old=f"{cpi.old:%Y-%m}", new=new, factor=f"{cpi.factor:.4f}", source=cpi.source
+            old=f"{cpi.old:%Y-%m}", new=new, factor=format_number(cpi.factor, 4), source=cpi.source
         )
     )
     if cpi.estimated:  # while the navigation shows the page (`ui.page_link`)
@@ -746,7 +746,7 @@ def _rolled(roll: rollforward.Roll) -> str:
     ).format(
         n=months,
         month=f"{cpi.new:%Y-%m}",
-        factor=f"{cpi.factor:.4f}",
+        factor=format_number(cpi.factor, 4),
         source=cpi.source,
         changes=len(roll.changes),
         files=", ".join(sorted({c.file for c in roll.changes})) or _("no file"),

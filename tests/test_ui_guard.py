@@ -194,7 +194,7 @@ def test_a_line_of_the_guard_names_its_field_in_the_language_of_the_session() ->
         [change] = formguard.changes(part, {"returns": {"equity": {"mean": 0.5}}}, [returns])
         names = cashflows.EXPENSES.names()
         [line] = guard.changes(rows, edits, units={"amount": Unit.EUR}, names=names)
-        assert change.text == "**Renditen equity Mittelwert** 5% → 50%"
+        assert change.text == "**Renditen equity Mittelwert** 5\u00a0% → 50\u00a0%"
     assert change.named == "returns equity mean"
     assert assumptions_page.hint(form, [change]) == guard.LOCALE
     assert (line.label, line.named) == ("Rent Betrag", "Rent amount")

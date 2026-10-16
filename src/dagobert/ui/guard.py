@@ -20,7 +20,7 @@ import streamlit as st
 
 from dagobert.i18n import N_, _, ngettext
 from dagobert.model.base import Unit
-from dagobert.money import format_eur
+from dagobert.money import decimal_mark, format_eur, format_percent
 from dagobert.store import NULL, Merge, RowEdits
 from dagobert.ui import literal
 from dagobert.ui.gridcolumns import Row
@@ -83,9 +83,9 @@ class Change:
             case Unit.EUR:
                 return format_eur(value, cents=True)
             case Unit.PERCENT:
-                return f"{value * 100:.10g}%"
+                return format_percent(value, None)
             case _:
-                return f"{value:.10g}"
+                return decimal_mark(f"{value:.10g}")
 
     @property
     def text(self) -> str:
@@ -99,7 +99,9 @@ def _times(ratio: float) -> str:
     value."""
     if ratio < 0.01:
         return _("1/{n} of the old value").format(n=f"{1 / ratio:.0f}")
-    return _("{n} times the old value").format(n=f"{ratio:{'.0f' if ratio >= 100 else '.3g'}}")
+    return _("{n} times the old value").format(
+        n=decimal_mark(f"{ratio:{'.0f' if ratio >= 100 else '.3g'}}")
+    )
 
 
 def label(row: Row) -> str:

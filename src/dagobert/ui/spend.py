@@ -31,7 +31,7 @@ from dagobert.loader import load_assumptions, load_scenario
 from dagobert.model.assumptions import Assumptions
 from dagobert.model.months import add_months, months_between
 from dagobert.model.plan import Scenario
-from dagobert.money import EUR_COLUMN, format_eur
+from dagobert.money import EUR_COLUMN, format_eur, format_number, format_percent
 from dagobert.report.tracker import Slice, bars_figure, spend_figure
 from dagobert.scenariofiles import first_scenario, scenario_file
 from dagobert.store import RowFile
@@ -235,7 +235,7 @@ def _add(data_dir: Path, options: list[date], known: list[str]) -> None:
             key=PICK,
             width=180,
         )
-        text = st.text_input(_("Spent"), placeholder="20,50", key=SPENT, width=120)
+        text = st.text_input(_("Spent"), placeholder=format_number(20.5, 2), key=SPENT, width=120)
         month: date = st.selectbox(
             _("Add to month"), options, format_func=lambda m: f"{m:%Y-%m}", key=TO_MONTH, width=140
         )
@@ -278,7 +278,11 @@ def _said(error: str = "") -> None:
                     args=[last.month],
                 )
         else:
-            st.caption(_("Enter the euros spent without a minus, for example 20,50."))
+            st.caption(
+                _("Enter the euros spent without a minus, for example {amount}.").format(
+                    amount=format_number(20.5, 2)
+                )
+            )
 
 
 def _show(month: date) -> None:
@@ -520,7 +524,7 @@ def _money(value: object) -> str:
 def _share(value: object) -> str:
     if not isinstance(value, float) or pd.isna(value):
         return "–"
-    return f"{value:+.1%}" if round(value, 3) else "0.0%"
+    return format_percent(value, signed=True) if round(value, 3) else format_percent(0)
 
 
 def _table(comparison: Comparison) -> None:

@@ -27,7 +27,7 @@ from dagobert.loader import (
 )
 from dagobert.model.base import KeyPath
 from dagobert.model.plan import SCENARIO_KEYS, Feature, Plan
-from dagobert.money import format_eur
+from dagobert.money import format_eur, format_percent
 from dagobert.problems import InputError
 from dagobert.report.anatomy import reading
 from dagobert.report.charts import run_out
@@ -158,7 +158,7 @@ def _sensitivity(
 
         def progress(share: float) -> None:
             bar.progress(share, text.format(n=n))
-            status.busy(busy.format(n=n, scenario=name, share=f"{share:.0%}"))
+            status.busy(busy.format(n=n, scenario=name, share=format_percent(share, 0)))
 
         keep(found, key, sensitivity.run(job, levers, pool(), progress))
     by_path = {lever.path: lever for lever in levers}
@@ -583,7 +583,7 @@ def strip(results: list[RunResult], *, nominal: bool) -> str:
     lines = []
     for r, files in _pairs(results):
         row = report.summary_row(r, nominal=nominal)
-        broke, worth = f"{row.p_broke:.0%}", format_eur(row.median_total)
+        broke, worth = format_percent(row.p_broke, 0), format_eur(row.median_total)
         if files is not None:
             moved = report.changes(row, report.summary_row(files, nominal=nominal))
             broke += f" ({moved[report.BROKE_AT]})"

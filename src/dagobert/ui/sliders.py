@@ -110,10 +110,12 @@ class Unit:
         return round(moved) if self.whole else round(moved / self.scale, 6)
 
 
-RATE = Unit(-2.0, 15.0, 0.25, "%.2f%%", delta=1.0, scale=100, hard=False)
-SPREAD = Unit(0.0, 40.0, 0.5, "%.1f%%", delta=2.0, scale=100)
-SHARE = Unit(0.0, 100.0, 1.0, "%.0f%%", delta=10.0, scale=100)
-LEVEL = Unit(0.0, 150.0, 5.0, "%.0f%%", delta=10.0, scale=100)
+# A percent in the sign of the language (German `2.25 %`); Streamlit's sprintf writes a decimal
+# point in both, `printf` the decimal mark of the language
+RATE = Unit(-2.0, 15.0, 0.25, NP_("sprintf", "%.2f%%"), delta=1.0, scale=100, hard=False)
+SPREAD = Unit(0.0, 40.0, 0.5, NP_("sprintf", "%.1f%%"), delta=2.0, scale=100)
+SHARE = Unit(0.0, 100.0, 1.0, NP_("sprintf", "%.0f%%"), delta=10.0, scale=100)
+LEVEL = Unit(0.0, 150.0, 5.0, NP_("sprintf", "%.0f%%"), delta=10.0, scale=100)
 EUR = Unit(0.0, 10000.0, 100.0, EUR_COLUMN, delta=500.0)
 MONTHS = Unit(0.0, 60.0, 1.0, NP_("sprintf", "%.0f months"), delta=3.0)
 FACTOR = replace(LEVEL, high=200.0)
@@ -122,10 +124,10 @@ SHIFT = replace(MONTHS, low=-24.0, high=48.0, whole=True)
 AMOUNT = replace(EUR, step=5000.0, delta=25000.0)
 # the ceiling of a payment into one Altersvorsorgedepot: 570 euros a month
 PER_YEAR = Unit(0.0, 6840.0, 60.0, NP_("sprintf", "%'.,.0f € per year"), delta=600.0)
-CRYPTO_RATE = Unit(-20.0, 60.0, 1.0, "%.0f%%", delta=5.0, scale=100, hard=False)
-CRYPTO_SPREAD = Unit(0.0, 150.0, 5.0, "%.0f%%", delta=10.0, scale=100)
+CRYPTO_RATE = Unit(-20.0, 60.0, 1.0, NP_("sprintf", "%.0f%%"), delta=5.0, scale=100, hard=False)
+CRYPTO_SPREAD = Unit(0.0, 150.0, 5.0, NP_("sprintf", "%.0f%%"), delta=10.0, scale=100)
 CORRELATION = Unit(-1.0, 1.0, 0.05, "%.2f", delta=0.2)
-TREND = Unit(0.0, 8.0, 0.1, "%.1f%%", delta=0.5, scale=100)  # a real growth: VPW
+TREND = Unit(0.0, 8.0, 0.1, NP_("sprintf", "%.1f%%"), delta=0.5, scale=100)  # a real growth: VPW
 AGE = Unit(80.0, 110.0, 1.0, "%.0f", delta=5.0, whole=True)
 
 MARKETS = "markets"  # the sidebar groups by id, `GROUPS` their words

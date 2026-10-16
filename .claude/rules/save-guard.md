@@ -19,8 +19,9 @@ paths:
   shows in the unit of its field (`Change.unit`, default euros): `guard.changes` takes the units of
   the table by the name of each cell (`Table.units`; `gridcolumns.asset_units` on the Snapshot
   page), not by the field name alone, since the `cost` of care is euros and the `cost` of an asset a
-  share. A share or a rate shows in percent like its grid, `2.5% → 250%`. A number set to zero, that
-  changes its sign or lands outside 0.5 to 2 times the old one gets an `st.warning` (`1000 times`,
+  share. A share or a rate shows in percent like its grid, `2.5% → 250%` (German `2,5 % → 250 %`,
+  rule `money`). A number set to zero, that changes its sign or lands outside 0.5 to 2 times the
+  old one gets an `st.warning` (`1000 times`,
   `1/1004 of the old value`: no exponent), so does a share or a rate above 100% (`2,50` reads 250 in
   an English browser; a percent column takes no maximum, so the guard sees it), not a factor shown
   in percent (`Change.capped` off: the categories of `scale` in the Overrides tab) nor a field of

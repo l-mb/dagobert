@@ -89,9 +89,10 @@ a value and then switch to simple mode, the field stays on the page until you sa
 ## Edit and save
 
 1. Open the tab of the value.
-2. Type the new value. Type shares and rates in percent: type `2.5` for 2.5%. Type amounts in euros
-   with a decimal comma or a decimal point. Type a month as `2027-05` or `05.2027`, and a date as
-   `1986-05-20` or `20.05.1986`.
+2. Type the new value. Type shares and rates in percent: type `2.5` for 2.5%. Type numbers and
+   amounts in euros with a decimal comma or a decimal point. A field shows a number with the
+   decimal mark of the language of the page: `2.5` in English, `2,5` in German. Type a month as
+   `2027-05` or `05.2027`, and a date as `1986-05-20` or `20.05.1986`.
 3. Read the list of changes below the tab.
 4. Press `Save` at the top of the page. A short message `Saved assumptions.yaml` shows at the bottom
    of the page. While nothing changed, `Save` is off.

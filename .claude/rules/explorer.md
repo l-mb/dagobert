@@ -53,7 +53,8 @@ the features: rule `mode`.
   name scrolls rather than lose the end that tells variants apart. The caption names the unit and
   says that a header explains its column on hover.
 - The goal seek (`seek.goal_seek`: `Goal seek: the limit of one lever`, `Find the limit`, the target
-  in the words of the Overview, `seek.Target` of the runs of the chosen scenarios, rule `goalseek`)
+  in the words of the Overview, `seek.Target` of the runs of the chosen scenarios, rule `goalseek`;
+  the text field of the Overview, `seek.target_field`, its key `explorer-seek-target`, carried)
   answers in one sentence per scenario (`seek_answer`: the limit of `goalseek.Found.limit`, where
   the lever stands, the chance there by the age of its runs) and, when the target is met, `Apply to
   sliders` (`slider_positions`: the position of each slider of `Dial.weights` at the value found,

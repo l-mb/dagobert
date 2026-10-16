@@ -15,7 +15,7 @@ from dagobert.i18n import N_, NP_, _, pgettext, use
 from dagobert.loader import deep_merge, nested
 from dagobert.model.events import AddStreamEvent, EndStreamsEvent
 from dagobert.model.months import add_months, months_between, months_of_age
-from dagobert.money import printf
+from dagobert.money import format_percent, printf
 from dagobert.result import BROKE_AGE, age_at
 from dagobert.sensitivity import outcome
 
@@ -410,7 +410,7 @@ def work(plan: Plan, shift: Mapping[str, float] | None = None) -> Dial:
 def stop(found: Found, dial: Dial, target: float) -> str:
     """The answer of the work seek in Markdown: the earliest month that meets the target, or the
     chance when the latest month misses it."""
-    p, age = f"{found.p_broke:.1%}", found.age
+    p, age = format_percent(found.p_broke), found.age
     if found.rising is None:
         return _(
             "Stopping work in {low} or in {high} leaves the same chance to run out by {age}, {p}: "
@@ -420,7 +420,7 @@ def stop(found: Found, dial: Dial, target: float) -> str:
         return _("Working longer raises the chance to run out by {age} here: {limit}.").format(
             age=age, limit=found.limit(dial, target)
         )
-    month, at_most = dial.text(found.value), f"{target * 100:g}%"
+    month, at_most = dial.text(found.value), format_percent(target, None)
     if found.p_broke > target:
         return _(
             "Even working until {month} leaves a {p} chance to run out by {age}, above the target "

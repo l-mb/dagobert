@@ -645,9 +645,9 @@ msgid ""
 msgstr ""
 "Die jährliche AfA (Abschreibung) des Gebäudes einer vermieteten "
 "Immobilie, nach dem Jahr seiner Fertigstellung (§7 Abs. 4 S. 1 Nr. 2 "
-"EStG): 3% nach 2022, 2% von 1925 bis 2022, 2.5% vor 1925. Eine kürzere "
-"Nutzungsdauer, die du nachweisen kannst, hat ihren eigenen Satz (S. 2); 0"
-" für keine, etwa bei einer geerbten Wohnung ohne Unterlagen. Nötig für "
+"EStG): 3 % nach 2022, 2 % von 1925 bis 2022, 2,5 % vor 1925. Eine kürzere"
+" Nutzungsdauer, die du nachweisen kannst, hat ihren eigenen Satz (S. 2); "
+"0 für keine, etwa bei einer geerbten Wohnung ohne Unterlagen. Nötig für "
 "eine vermietete Immobilie"
 
 #: model/assets.py model/events.py model/plan.py
@@ -789,9 +789,9 @@ msgid ""
 "certificates and funds of gold or crypto. Keep one asset per class. "
 "Empty: `tax.teilfreistellung` of the assumptions"
 msgstr ""
-"Der steuerfreie Anteil der Gewinne, die Teilfreistellung (§20 InvStG): "
-"30% für einen Aktienfonds, 15% für einen Mischfonds, 60% für einen "
-"Immobilienfonds, 80% für einen Fonds mit Immobilien im Ausland, 0 für "
+"Der steuerfreie Anteil der Gewinne, die Teilfreistellung (§20 InvStG): 30"
+" % für einen Aktienfonds, 15 % für einen Mischfonds, 60 % für einen "
+"Immobilienfonds, 80 % für einen Fonds mit Immobilien im Ausland, 0 für "
 "Aktien, Anleihen, Zertifikate und Fonds aus Gold oder Krypto. Halte einen"
 " Vermögenswert je Klasse. Leer: `tax.teilfreistellung` der Annahmen"
 
@@ -916,9 +916,9 @@ msgid ""
 "pension insurance, with the employer's contribution and subsidy"
 msgstr ""
 "Monatliche Entgeltumwandlung, nominal: der Teil des Bruttos von `salary`,"
-" der in den Vertrag fließt; steuerfrei bis 8% und sozialversicherungsfrei"
-" bis 4% der Beitragsbemessungsgrenze der Rentenversicherung, "
-"einschließlich Beitrag und Zuschuss des Arbeitgebers"
+" der in den Vertrag fließt; steuerfrei bis 8 % und "
+"sozialversicherungsfrei bis 4 % der Beitragsbemessungsgrenze der "
+"Rentenversicherung, einschließlich Beitrag und Zuschuss des Arbeitgebers"
 
 #: model/assets.py model/plan.py
 msgctxt "key"
@@ -955,7 +955,7 @@ msgid ""
 "share of the contract is paid in full"
 msgstr ""
 "Anteil der Umwandlung, den der Arbeitgeber dazugibt. Leer: die "
-"gesetzlichen 15%, soweit der Arbeitgeber durch die Umwandlung "
+"gesetzlichen 15 %, soweit der Arbeitgeber durch die Umwandlung "
 "Sozialversicherungsbeiträge einspart; ein vertraglich vereinbarter Anteil"
 " wird voll gezahlt"
 
@@ -1144,7 +1144,7 @@ msgid ""
 msgstr ""
 "Verbraucherpreise pro Jahr. Jede Zahlung mit dem Standard `index: cpi` "
 "wächst mit ihnen. Monte Carlo zieht einen Satz pro Kalenderjahr, "
-"mindestens -2%"
+"mindestens -2 %"
 
 #: model/assumptions.py model/events.py
 msgid "Age"
@@ -1558,10 +1558,10 @@ msgid ""
 msgstr ""
 "Die Kinder mit ihren Geburtsdaten, höchstens `children` davon. Solange es"
 " zählt, zahlt ein Kind sein Kindergeld, nimmt die Kinderfreibeträge der "
-"Steuer, hebt ALG1 von 60% auf 67% und gibt Alleinerziehenden den "
+"Steuer, hebt ALG1 von 60 % auf 67 % und gibt Alleinerziehenden den "
 "Entlastungsbetrag. Ein Mitglied der GKV zahlt bis zur ersten Geburt den "
 "Zuschlag für Kinderlose, dann für das zweite bis fünfte Kind unter 25 je "
-"0.25 Prozentpunkte weniger Beitrag zur Pflegeversicherung"
+"0,25 Prozentpunkte weniger Beitrag zur Pflegeversicherung"
 
 #: model/assumptions.py model/plan.py
 msgid "Children born"
@@ -1590,7 +1590,7 @@ msgid ""
 "Age in years, 67.5 for 67 and a half. Each age once, the value linear "
 "between two ages"
 msgstr ""
-"Alter in Jahren, 67.5 für 67½. Jedes Alter nur einmal, dazwischen "
+"Alter in Jahren, 67,5 für 67½. Jedes Alter nur einmal, dazwischen "
 "verläuft der Wert linear"
 
 #: model/assumptions.py model/plan.py
@@ -1664,8 +1664,8 @@ msgid ""
 "now and less later"
 msgstr ""
 "Das reale Wachstum pro Jahr, das der Satz annimmt. Bogleheads nimmt für "
-"Aktien 5.0%, für Anleihen 1.8%: für 60/40 3.7%, für 50/50 3.4%. Mehr gibt"
-" jetzt mehr aus und später weniger"
+"Aktien 5,0 %, für Anleihen 1,8 %: für 60/40 3,7 %, für 50/50 3,4 %. Mehr "
+"gibt jetzt mehr aus und später weniger"
 
 #: model/assumptions.py model/plan.py
 msgid ""
@@ -1675,7 +1675,7 @@ msgid ""
 msgstr ""
 "Das Alter, bis zu dem die Sätze das Vermögen aufbrauchen würden: Der Satz"
 " eines Jahres ist die Zahlung einer Annuität zum Wachstumstrend über die "
-"Jahre bis zu diesem Alter, gezahlt zu Beginn jedes Jahres, höchstens 10%"
+"Jahre bis zu diesem Alter, gezahlt zu Beginn jedes Jahres, höchstens 10 %"
 
 #: model/assumptions.py model/plan.py
 msgid ""
@@ -2417,7 +2417,7 @@ msgstr ""
 "Der Zusatzbeitrag deiner Krankenkasse (§242 SGB V), der volle Satz: das "
 "Mitglied zahlt die Hälfte davon auf ein Gehalt und auf die Rente, alles "
 "auf die übrigen beitragspflichtigen Einnahmen, etwa eine Betriebsrente "
-"oder einen Gewinn. Leer: der Durchschnitt des Steuerjahrs (§242a), 2.9% "
+"oder einen Gewinn. Leer: der Durchschnitt des Steuerjahrs (§242a), 2,9 % "
 "im Jahr 2026. Nur GKV"
 
 #: model/assumptions.py model/plan.py model/taxes.py
@@ -2438,10 +2438,10 @@ msgid ""
 " 24.51% or 24.45% with the church tax on top (§32d Abs. 1 EStG). Leaving "
 "the church is a lever of a scenario"
 msgstr ""
-"Mitglied einer Kirche, die Kirchensteuer erhebt: 8% der Einkommensteuer "
-"in Baden-Württemberg und Bayern, sonst 9% (§51a EStG, die "
+"Mitglied einer Kirche, die Kirchensteuer erhebt: 8 % der Einkommensteuer "
+"in Baden-Württemberg und Bayern, sonst 9 % (§51a EStG, die "
 "Kirchensteuergesetze), nach `land`. Auf Kapitalerträge sinkt die "
-"Abgeltungsteuer auf 24.51% oder 24.45%, die Kirchensteuer kommt dazu "
+"Abgeltungsteuer auf 24,51 % oder 24,45 %, die Kirchensteuer kommt dazu "
 "(§32d Abs. 1 EStG). Ein Kirchenaustritt ist ein Hebel eines Szenarios"
 
 #: model/assumptions.py model/plan.py model/taxes.py
@@ -2631,7 +2631,7 @@ msgid ""
 "V), at the general rate of 14.6% instead of the reduced 14.0%"
 msgstr ""
 "Nur GKV: Krankengeld ab der siebten Woche (Wahlerklärung, §44 Abs. 2 SGB "
-"V), zum allgemeinen Satz von 14.6% statt des ermäßigten von 14.0%"
+"V), zum allgemeinen Satz von 14,6 % statt des ermäßigten von 14,0 %"
 
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid "Krankengeld"
@@ -2775,8 +2775,8 @@ msgid ""
 "Notary and land register (about 1.5%) and the buyer's share of a broker "
 "(up to 3.57%) as a share of the price"
 msgstr ""
-"Notar und Grundbuch (etwa 1.5%) und der Käuferanteil der Maklerprovision "
-"(bis 3.57%), als Anteil am Preis"
+"Notar und Grundbuch (etwa 1,5 %) und der Käuferanteil der Maklerprovision"
+" (bis 3,57 %), als Anteil am Preis"
 
 #: model/events.py
 msgid "A loan taken for the purchase"
@@ -3145,7 +3145,7 @@ msgid ""
 "payout ratio of the stream's index"
 msgstr ""
 "Gehalt: eine Zahlung ist dieser Anteil des Bruttos der Grundzahlung über "
-"`every` Monate (10% bei every 12: ein Zehntel des jährlichen "
+"`every` Monate (10 % bei every 12: ein Zehntel des jährlichen "
 "Grundgehalts), mal der Auszahlungsquote des Index der Zahlung"
 
 #: model/events.py model/plan.py model/streams.py
@@ -3263,11 +3263,12 @@ msgstr ""
 "die du zu einem Datum zahlst, etwa eine Weiterbildung oder Bewerbungen, "
 "auch ohne Job: Sie zählen im Jahr der Zahlung, zusätzlich zu den "
 "jährlichen Werbungskosten der Seite Annahmen, und ein Verlust geht in "
-"andere Jahre. Eine Spende (bis zu 20% der Einkünfte) und Kinderbetreuung "
-"(80% der Kosten eines Kindes unter 14, höchstens 4.800 € im Jahr je Kind)"
-" senken das zu versteuernde Einkommen; haushaltsnahe Dienstleistungen und"
-" Handwerkerleistungen senken die Steuer um 20% der Kosten, höchstens "
-"4.000 € und 1.200 € im Jahr (§35a EStG). Die Zahlung bleibt eine Ausgabe"
+"andere Jahre. Eine Spende (bis zu 20 % der Einkünfte) und Kinderbetreuung"
+" (80 % der Kosten eines Kindes unter 14, höchstens 4.800 € im Jahr je "
+"Kind) senken das zu versteuernde Einkommen; haushaltsnahe "
+"Dienstleistungen und Handwerkerleistungen senken die Steuer um 20 % der "
+"Kosten, höchstens 4.000 € und 1.200 € im Jahr (§35a EStG). Die Zahlung "
+"bleibt eine Ausgabe"
 
 #: model/events.py model/plan.py model/streams.py
 msgctxt "key"
@@ -3339,7 +3340,7 @@ msgid ""
 "Gewerbesteuer"
 msgstr ""
 "Selbstständig: der Gewerbesteuer-Hebesatz der Gemeinde eines "
-"Gewerbebetriebs, mindestens 200% (§16 Abs. 4 GewStG). Leer: ein "
+"Gewerbebetriebs, mindestens 200 % (§16 Abs. 4 GewStG). Leer: ein "
 "Freiberufler, keine Gewerbesteuer"
 
 #: model/events.py model/plan.py model/streams.py
@@ -4169,12 +4170,12 @@ msgstr "Vergleich"
 #: report/fan.py
 #, python-format
 msgid "liquid, middle 90% of runs"
-msgstr "liquide, mittlere 90% der Simulationen"
+msgstr "liquide, mittlere 90 % der Simulationen"
 
 #: report/fan.py
 #, python-format
 msgid "liquid, middle 50% of runs"
-msgstr "liquide, mittlere 50% der Simulationen"
+msgstr "liquide, mittlere 50 % der Simulationen"
 
 #: report/fan.py
 msgid "liquid (median)"
@@ -4215,7 +4216,7 @@ msgstr "Liquides Vermögen"
 #: report/fan.py
 #, python-format
 msgid "middle 90% of runs"
-msgstr "mittlere 90% der Simulationen"
+msgstr "mittlere 90 % der Simulationen"
 
 #: report/fan.py
 #, python-brace-format
@@ -4225,7 +4226,7 @@ msgstr "Median {value}"
 #: report/fan.py
 #, python-brace-format
 msgid "middle 90%: {low} to {high}"
-msgstr "mittlere 90%: {low} bis {high}"
+msgstr "mittlere 90 %: {low} bis {high}"
 
 #: report/fan.py
 #, python-brace-format
@@ -4646,7 +4647,7 @@ msgstr "Steuern"
 #: report/tracker.py
 #, python-format
 msgid "plan, middle 90% of runs"
-msgstr "Plan, mittlere 90% der Simulationen"
+msgstr "Plan, mittlere 90 % der Simulationen"
 
 #: report/tracker.py
 #, python-brace-format
@@ -5121,6 +5122,19 @@ msgstr "Nächstes Jahr"
 #: ui/__init__.py
 msgid "How to read this"
 msgstr "So liest du das"
+
+#: ui/__init__.py
+msgid "Upload"
+msgstr "Hochladen"
+
+#: ui/__init__.py
+msgid "Drag and drop a file here"
+msgstr "Datei hier ablegen"
+
+#: ui/__init__.py
+#, python-brace-format
+msgid "{mb} MB per file"
+msgstr "{mb} MB pro Datei"
 
 #: ui/__init__.py
 msgid "outside the app"
@@ -5870,8 +5884,8 @@ msgstr ""
 " bis zu seinem 18. Geburtstag; ein Kind in Ausbildung bis zum Monat vor "
 "dem unter `Kind bis`, höchstens bis zu seinem 25. Geburtstag. Solange es "
 "zählt, zahlt der Plan sein Kindergeld, wenn es an dich geht, die Steuer "
-"nimmt stattdessen die Kinderfreibeträge, wo das mehr spart, ALG1 zahlt "
-"67% statt 60%, und wer allein erzieht, zieht den Entlastungsbetrag ab. "
+"nimmt stattdessen die Kinderfreibeträge, wo das mehr spart, ALG1 zahlt 67"
+" % statt 60 %, und wer allein erzieht, zieht den Entlastungsbetrag ab. "
 "Der Kinderfreibetrag ist halb für jeden Elternteil, oder voll, wenn der "
 "andere Elternteil keinen Unterhalt zahlt. Die Kindererziehungszeiten "
 "geben Rentenpunkte für die drei Jahre nach der Geburt. Ein Mitglied der "
@@ -6018,8 +6032,8 @@ msgid ""
 msgstr ""
 "Ein Szenario ändert diese Werte in seinen Abweichungen, der Explorer mit "
 "seinen Reglern, ohne zu speichern. Ein leeres Feld übernimmt den grau "
-"angezeigten Wert. Gib Anteile und Sätze in Prozent ein: 2.5 für 2.5%. Das"
-" Hilfesymbol eines Felds erklärt es und nennt seinen Standard."
+"angezeigten Wert. Gib Anteile und Sätze in Prozent ein: 2,5 für 2,5 %. "
+"Das Hilfesymbol eines Felds erklärt es und nennt seinen Standard."
 
 #: ui/assumptions.py
 msgid ""
@@ -6378,7 +6392,7 @@ msgid ""
 "Kirchensteuer: the church tax of a church member, 8% or 9% of the income "
 "tax. The rows of the income tax hold it, with the Soli"
 msgstr ""
-"Kirchensteuer: die Steuer eines Kirchenmitglieds, 8% oder 9% der "
+"Kirchensteuer: die Steuer eines Kirchenmitglieds, 8 % oder 9 % der "
 "Einkommensteuer. Die Zeilen der Einkommensteuer enthalten sie, ebenso wie"
 " den Soli"
 
@@ -6446,7 +6460,7 @@ msgid ""
 "§35a EStG: 20% of the labour costs of household services and of a "
 "craftsman come off the income tax"
 msgstr ""
-"§35a EStG: 20% der Arbeitskosten haushaltsnaher Dienstleistungen und "
+"§35a EStG: 20 % der Arbeitskosten haushaltsnaher Dienstleistungen und "
 "eines Handwerkers gehen von der Einkommensteuer ab"
 
 #: ui/cashflows.py
@@ -6474,7 +6488,7 @@ msgstr ""
 "Der Anteil, der für die Steuer zählt, in Prozent. Bei einem Beitrag zur "
 "Krankenversicherung der Anteil, den das Finanzamt anerkennt, laut "
 "Bescheinigung des Versicherers: leer ist alles bei der Pflegeversicherung"
-" und 80% bei der Krankenversicherung. Bei einer Ausgabe, die als etwas "
+" und 80 % bei der Krankenversicherung. Bei einer Ausgabe, die als etwas "
 "absetzbar ist, der Anteil, der zählt, etwa der Arbeitslohn einer "
 "Handwerkerrechnung oder die Spenden unter den Geschenken: leer ist alles."
 
@@ -6488,7 +6502,7 @@ msgid ""
 "least 200%, in percent: 430 for 430%. Empty: a freelancer, no trade tax."
 msgstr ""
 "Der Gewerbesteuer-Hebesatz der Gemeinde eines Gewerbebetriebs, mindestens"
-" 200%, in Prozent: 430 für 430%. Leer: freiberuflich, keine "
+" 200 %, in Prozent: 430 für 430 %. Leer: freiberuflich, keine "
 "Gewerbesteuer."
 
 #: ui/cashflows.py
@@ -7904,10 +7918,6 @@ msgid "type euros, such as 1.234,56 or 1234.56"
 msgstr "gib Euro ein, etwa 1.234,56 oder 1234.56"
 
 #: ui/fields.py
-msgid "type a number, such as 2,5 or 2.5"
-msgstr "gib eine Zahl ein, etwa 2,5 oder 2.5"
-
-#: ui/fields.py
 msgid "type a whole number"
 msgstr "gib eine ganze Zahl ein"
 
@@ -7948,6 +7958,10 @@ msgstr "{value} (Standard)"
 #, python-brace-format
 msgid "{value} from {source}"
 msgstr "{value} aus {source}"
+
+#: ui/fields.py ui/seek.py
+msgid "type a number, such as 2.5"
+msgstr "gib eine Zahl ein, etwa 2,5"
 
 #: ui/fileactions.py
 msgid "none: a scenario of its own"
@@ -8513,8 +8527,14 @@ msgid "Add"
 msgstr "Hinzufügen"
 
 #: ui/gridcolumns.py
+#, python-format
+msgctxt "sprintf"
+msgid "%g%%"
+msgstr "%g %%"
+
+#: ui/gridcolumns.py
 msgid "In percent: 2.5 for 2.5%."
-msgstr "In Prozent: 2.5 für 2.5%."
+msgstr "In Prozent: 2,5 für 2,5 %."
 
 #: ui/gridcolumns.py
 #, python-brace-format
@@ -8531,7 +8551,7 @@ msgstr "über null (wird als Erstattung erfasst)"
 
 #: ui/guard.py
 msgid "above 100%"
-msgstr "über 100%"
+msgstr "über 100 %"
 
 #: ui/guard.py
 msgid "set to zero"
@@ -8694,9 +8714,9 @@ msgid ""
 "(a spread of 60% to 90% gives that), and a mean of 15% with a spread of "
 "80% loses money on the median path."
 msgstr ""
-"Setze sie vorsichtig an: Bitcoin fiel seit 2011 viermal um 75% oder mehr "
-"(eine Schwankung von 60% bis 90% ergibt das), und ein Mittelwert von 15% "
-"mit einer Schwankung von 80% verliert im mittleren Verlauf Geld."
+"Setze sie vorsichtig an: Bitcoin fiel seit 2011 viermal um 75 % oder mehr"
+" (eine Schwankung von 60 % bis 90 % ergibt das), und ein Mittelwert von "
+"15 % mit einer Schwankung von 80 % verliert im mittleren Verlauf Geld."
 
 #: ui/knobs.py
 msgid "Monte Carlo and Historical read it."
@@ -8783,7 +8803,7 @@ msgstr ""
 "Korrelation der monatlichen Ziehung mit der von Aktien, von -1 bis 1. 0 "
 "heißt keine Korrelation und unterschätzt so das Risiko einer Klasse, die "
 "mit Aktien fällt. Pro Monat gegen den MSCI World: Gold etwa 0, Bitcoin "
-"0.3 bis 0.5 seit 2014, höher in einem Crash."
+"0,3 bis 0,5 seit 2014, höher in einem Crash."
 
 #: ui/knobs.py
 msgid ""
@@ -9950,7 +9970,7 @@ msgid ""
 "of the item again."
 msgstr ""
 "In der Einheit des Felds: Euro 1.234,56, ein Anteil oder Satz in Prozent "
-"(7 für 7%), ein Monat 2027-05, ein Datum 2027-05-14, true oder false, "
+"(7 für 7 %), ein Monat 2027-05, ein Datum 2027-05-14, true oder false, "
 "Namen mit Kommas dazwischen. Leer oder eine gelöschte Zeile: Das Feld "
 "nimmt wieder den Wert des Eintrags."
 
@@ -10767,8 +10787,9 @@ msgid "choose a date up to today"
 msgstr "wähle ein Datum bis heute"
 
 #: ui/pricing.py
-msgid "price: type a number above zero, for example 80,12"
-msgstr "Preis: tippe eine Zahl über null, zum Beispiel 80,12"
+#, python-brace-format
+msgid "price: type a number above zero, for example {price}"
+msgstr "Preis: tippe eine Zahl über null, zum Beispiel {price}"
 
 #: ui/pricing.py
 #, python-brace-format
@@ -10804,12 +10825,13 @@ msgid "{asset} {value} as of {day}"
 msgstr "{asset} {value} zum {day}"
 
 #: ui/pricing.py
+#, python-brace-format
 msgid ""
 "The price of one unit on a day, also a past one, saved at once. No "
-"thousands groups: 5432, or 5,4320 for a fraction."
+"thousands groups: 5432, or {fraction} for a fraction."
 msgstr ""
 "Der Preis eines Stücks an einem Tag, auch einem vergangenen, sofort "
-"gespeichert. Ohne Tausenderpunkte: 5432, oder 5,4320 mit "
+"gespeichert. Ohne Tausenderpunkte: 5432, oder {fraction} mit "
 "Nachkommastellen."
 
 #: ui/pricing.py
@@ -11292,7 +11314,7 @@ msgstr ""
 "geerbten Wert, grau mit seiner Herkunft: dem Standard, `assumptions.yaml`"
 " oder einem Szenario, auf dem dieses basiert. Ein Wert, den du hier "
 "setzt, bleibt, wenn sich das später ändert, auch wenn er jetzt gleich "
-"ist. Anteile und Sätze in Prozent: 2.5 für 2.5%."
+"ist. Anteile und Sätze in Prozent: 2,5 für 2,5 %."
 
 #: ui/scenario_overrides.py
 #, python-format
@@ -11300,8 +11322,8 @@ msgid ""
 "Factor on every expense stream of the categories, in percent: 90 spends "
 "10% less."
 msgstr ""
-"Faktor auf alle Ausgaben der Kategorien, in Prozent: 90 heißt 10% weniger"
-" Ausgaben."
+"Faktor auf alle Ausgaben der Kategorien, in Prozent: 90 heißt 10 % "
+"weniger Ausgaben."
 
 #: ui/scenario_overrides.py
 #, python-format
@@ -11309,7 +11331,7 @@ msgid ""
 "Factor on the expense streams of the category, in percent: 90 spends 10% "
 "less."
 msgstr ""
-"Faktor auf die Ausgaben der Kategorie, in Prozent: 90 heißt 10% weniger "
+"Faktor auf die Ausgaben der Kategorie, in Prozent: 90 heißt 10 % weniger "
 "Ausgaben."
 
 #: ui/scenario_overrides.py
@@ -11317,7 +11339,7 @@ msgid ""
 "Factor on the rate of the savings plan, in percent: 150 saves half as "
 "much again."
 msgstr ""
-"Faktor auf die Rate des Sparplans, in Prozent: 150 heißt 50% mehr "
+"Faktor auf die Rate des Sparplans, in Prozent: 150 heißt 50 % mehr "
 "Sparrate."
 
 #: ui/scenario_overrides.py
@@ -11584,6 +11606,11 @@ msgstr ""
 "Szenarios. Zufälliges Rauschen macht den letzten Schritt unscharf."
 
 #: ui/seek.py
+#, python-brace-format
+msgid "Target: {problem}"
+msgstr "Ziel: {problem}"
+
+#: ui/seek.py
 msgid "Goal seek: the limit of one lever"
 msgstr "Zielsuche: die Grenze eines Hebels"
 
@@ -11614,6 +11641,24 @@ msgid "{lever} — {limit}, now {value}. A {p} chance to run out by {age} there.
 msgstr ""
 "{lever} — {limit}, jetzt {value}. Dort ein Risiko von {p}, dass dein Geld"
 " vor {age} ausgeht."
+
+#: ui/sliders.py
+#, python-format
+msgctxt "sprintf"
+msgid "%.2f%%"
+msgstr "%.2f %%"
+
+#: ui/sliders.py
+#, python-format
+msgctxt "sprintf"
+msgid "%.1f%%"
+msgstr "%.1f %%"
+
+#: ui/sliders.py
+#, python-format
+msgctxt "sprintf"
+msgid "%.0f%%"
+msgstr "%.0f %%"
 
 #: ui/sliders.py
 #, python-format
@@ -11881,8 +11926,9 @@ msgid "Show {month}"
 msgstr "{month} zeigen"
 
 #: ui/spend.py
-msgid "Enter the euros spent without a minus, for example 20,50."
-msgstr "Gib die ausgegebenen Euro ohne Minus ein, etwa 20,50."
+#, python-brace-format
+msgid "Enter the euros spent without a minus, for example {amount}."
+msgstr "Gib die ausgegebenen Euro ohne Minus ein, etwa {amount}."
 
 #: ui/spend.py
 #, python-brace-format
@@ -12006,15 +12052,15 @@ msgid ""
 "you only change what differs. An empty cell records nothing: enter 0 for "
 "a category without spending. A new row records a category that the plan "
 "does not have, for example cash. Rows of one category add up, a deleted "
-"row records nothing. `Save` at the top of the page, as on the other pages,"
-" saves the month that the grid shows into `actuals.csv`. "
-"The other categories keep what the file holds by then, also after a quick"
-" add on another device. A category that you edited and that changed "
-"elsewhere since shows both amounts: take the file or keep yours. Unsaved "
-"edits stay with their month while you look at another, `Discard` drops "
-"them. A month is recorded when every category of its plan has an actual, "
-"0 included: the line above the grid counts them, and the Overview names "
-"the first complete month that lacks one."
+"row records nothing. `Save` at the top of the page, as on the other "
+"pages, saves the month that the grid shows into `actuals.csv`. The other "
+"categories keep what the file holds by then, also after a quick add on "
+"another device. A category that you edited and that changed elsewhere "
+"since shows both amounts: take the file or keep yours. Unsaved edits stay"
+" with their month while you look at another, `Discard` drops them. A "
+"month is recorded when every category of its plan has an actual, 0 "
+"included: the line above the grid counts them, and the Overview names the"
+" first complete month that lacks one."
 msgstr ""
 "Die Tabelle enthält einen ganzen Monat je Kategorie, Ausgaben unter null "
 "wie in deinen Zahlungen, eine Erstattung über null. `Plan` ist, was deine"
@@ -12029,15 +12075,15 @@ msgstr ""
 "der Plan nicht hat, etwa Bargeld. Zeilen einer Kategorie addieren sich, "
 "eine gelöschte Zeile erfasst nichts. `Speichern` oben auf der Seite, wie "
 "auf den anderen Seiten, speichert den Monat, den die Tabelle zeigt, in "
-"`actuals.csv`. Die anderen Kategorien behalten, was"
-" die Datei dann enthält, auch nach einem schnellen Eintrag auf einem "
-"anderen Gerät. Eine Kategorie, die du geändert hast und die sich seitdem "
-"anderswo geändert hat, zeigt beide Beträge: übernimm die Datei oder "
-"behalte deine. Ungespeicherte Änderungen bleiben bei ihrem Monat, während"
-" du einen anderen ansiehst, `Verwerfen` verwirft sie. Ein Monat ist "
-"erfasst, wenn jede Kategorie seines Plans einen Ist-Wert hat, 0 "
-"eingeschlossen: die Zeile über der Tabelle zählt sie, und die Übersicht "
-"nennt den ersten vollständigen Monat, dem einer fehlt."
+"`actuals.csv`. Die anderen Kategorien behalten, was die Datei dann "
+"enthält, auch nach einem schnellen Eintrag auf einem anderen Gerät. Eine "
+"Kategorie, die du geändert hast und die sich seitdem anderswo geändert "
+"hat, zeigt beide Beträge: übernimm die Datei oder behalte deine. "
+"Ungespeicherte Änderungen bleiben bei ihrem Monat, während du einen "
+"anderen ansiehst, `Verwerfen` verwirft sie. Ein Monat ist erfasst, wenn "
+"jede Kategorie seines Plans einen Ist-Wert hat, 0 eingeschlossen: die "
+"Zeile über der Tabelle zählt sie, und die Übersicht nennt den ersten "
+"vollständigen Monat, dem einer fehlt."
 
 #: ui/spend.py
 msgid "How to enter a month"
@@ -12225,22 +12271,23 @@ msgstr "wähle ein Datum"
 
 #: ui/tradeform.py
 #, python-brace-format
-msgid "{fields}: type a number, for example 12,5"
-msgstr "{fields}: tippe eine Zahl, zum Beispiel 12,5"
+msgid "{fields}: type a number, for example {number}"
+msgstr "{fields}: tippe eine Zahl, zum Beispiel {number}"
 
 #: ui/tradeform.py
 msgid "of a new security"
 msgstr "eines neuen Wertpapiers"
 
 #: ui/tradeform.py
+#, python-brace-format
 msgid ""
-"Saved at once. Units take no thousands groups: 1200, or 1,2 for a "
+"Saved at once. Units take no thousands groups: 1200, or {fraction} for a "
 "fraction. The amount is the price of all units without fees (the "
 "Kurswert)."
 msgstr ""
-"Wird sofort gespeichert. Stück ohne Tausenderpunkte: 1200, oder 1,2 für "
-"einen Bruchteil. Der Betrag ist der Preis aller Stücke ohne Gebühren (der"
-" Kurswert)."
+"Wird sofort gespeichert. Stück ohne Tausenderpunkte: 1200, oder "
+"{fraction} für einen Bruchteil. Der Betrag ist der Preis aller Stücke "
+"ohne Gebühren (der Kurswert)."
 
 #: ui/tradeform.py
 msgid "buy"

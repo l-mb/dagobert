@@ -29,17 +29,26 @@ def edited(at: AppTest, key: str, state: dict[str, Any]) -> AppTest:
     return at._run(states)
 
 
+# a percent written the English way: `36.6%`, `36.6 %`, `36%` (German `36,6 %`, rule `money`)
+ENGLISH_PERCENT = re.compile(r"\d\.\d+\s?%|\d%")
+
+
 def leaks(texts: Iterable[str], *, inside: bool = True) -> list[str]:
     """The texts that show English where the catalogue has German: a message as it is, or with
     `inside` one or more words inside a text (a page whose sentences stay English for now takes
-    the message as it is only). A message with a context (a key of the inputs, `Plan` of the
-    navigation) is a word that a page may say in another sense: it does not count."""
+    the message as it is only), and a percent written the English way. A message with a context
+    (a key of the inputs, `Plan` of the navigation) is a word that a page may say in another
+    sense: it does not count."""
     english = [
         m.id
         for m in i18n.read("de")
         if isinstance(m.id, str) and m.id and not m.context and m.string != m.id
     ]
-    return [t for t in texts for e in english if t == e or (inside and " " in e and e in t)]
+    texts = list(texts)
+    return [
+        *(t for t in texts for e in english if t == e or (inside and " " in e and e in t)),
+        *(t for t in texts if ENGLISH_PERCENT.search(t)),
+    ]
 
 
 def words(at: AppTest) -> list[str]:
@@ -97,7 +106,9 @@ class _Text(HTMLParser):
 
 FIGURE = re.compile(r'<script type="application/json" id="data-[^"]*">(.*?)</script>', re.S)
 # the fields of a plotly figure that a reader sees: titles, names, labels and hover texts
-FIGURE_TEXT = frozenset({"text", "name", "label", "hovertext", "hovertemplate", "ticktext"})
+FIGURE_TEXT = frozenset(
+    {"text", "name", "label", "hovertext", "hovertemplate", "ticktext", "customdata"}
+)
 
 
 def _figure_words(value: object, key: str = "") -> Iterator[str]:

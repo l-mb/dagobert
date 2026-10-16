@@ -7,22 +7,34 @@ from __future__ import annotations
 import math
 import textwrap
 from collections import Counter
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from datetime import date
 
 import numpy as np
 import plotly.graph_objects as go
 
 from dagobert.budget import stretches
-from dagobert.i18n import N_, NP_, _, pgettext
+from dagobert.i18n import N_, NP_, _, language, pgettext
 from dagobert.model.base import named
 from dagobert.model.months import add_months, months_between
-from dagobert.money import SEPARATORS, format_eur
+from dagobert.money import (
+    PERCENT,
+    decimal_mark,
+    format_eur,
+    format_number,
+    format_percent,
+    separators,
+)
 from dagobert.result import FloatArray, Marker, MarkerKind, RunResult
 
-# Every figure takes this layout. The app replaces the template with its own theme, the
-# separators stay: numbers read like `format_eur`.
-LAYOUT: dict[str, object] = {"template": "plotly_dark", "separators": SEPARATORS}
+
+def layout() -> dict[str, object]:
+    """The layout of every figure. The app replaces the template with its own theme, the
+    separators stay: the decimal mark of the language (`money.separators`), euros read like
+    `format_eur`."""
+    return {"template": "plotly_dark", "separators": separators()}
+
+
 EUR_TICKS = ",.0f"  # euro axes: whole euros with thousands separators
 
 # Categorical steps validated on the dark surface of the report and on the light theme of
@@ -76,7 +88,9 @@ def class_name(name: str) -> str:
 # plot, a tap lists every line at its age. Pixels: the plot, the axis below it, a legend entry
 # and each further line of one.
 PLOT, AXIS, ENTRY, LINE = 300, 60, 21, 15
-EUR_HOVER, PCT_HOVER = "%{y:,.0f} €", "%{y:.1%}"
+# A percentage in a hover is text of `percents` in `customdata`: the locale of plotly takes the
+# decimal mark of `separators` but writes no space before its `%`
+EUR_HOVER, PCT_HOVER = "%{y:,.0f} €", "%{customdata}"
 # compact: the characters of a title line, and the top margin of each line beyond two: plotly
 # centers the first line of a title in the margin and lets the others flow below, so a line
 # takes twice its height of 21 pixels
@@ -119,8 +133,27 @@ def unified(fig: go.Figure) -> None:
 PHASE_COLORS = ("#2b6cb0", "#9b2c2c", "#805ad5", "#276749", "#b7791f", "#2c7a7b", "#97266d")
 
 
-def format_pct(value: float) -> str:
-    return f"{value:.1%}"
+def percents(values: Iterable[float]) -> list[str]:
+    """Shares as `money.format_percent` writes them, the `customdata` of `PCT_HOVER`."""
+    return [format_percent(v) for v in values]
+
+
+def tick_format(fmt: str, values: Sequence[float]) -> dict[str, object]:
+    """The `tickformat` of an axis, and of a percent (`.0%`, `+.1%`) whose ticks lie around
+    `values` in a language with a space before its `%` the labels in its words (`labelalias`,
+    which must match a label of plotly: its decimal mark, its minus sign U+2212). Plotly writes the
+    decimal mark of `separators`, but no space."""
+    sign = PERCENT[language()]
+    if not fmt.endswith("%") or sign == "%":
+        return {"tickformat": fmt}
+    step = 10.0 ** -int(fmt[-2])
+    # a quarter beyond the values: plotly pads its range
+    low, high = (round(edge * 125 / step) for edge in (min(0.0, *values), max(0.0, *values)))
+    labels = (
+        decimal_mark(f"{n * step:{fmt[:-1]}f}").replace("-", "\u2212")
+        for n in range(low - 1, high + 2)
+    )
+    return {"tickformat": fmt, "labelalias": {f"{t}%": t + sign for t in labels}}
 
 
 def hover_text(
@@ -244,7 +277,7 @@ def said(m: Marker) -> str:
             paid = PAID.get(m.form) or N_("{policy} pays {amount}")
             return _(paid).format(policy=m.detail, amount=format_eur(m.amount))
         case "pension":
-            claim, years = f"{m.amount:.1%}".replace(".0%", "%"), f"{m.years:.0f}"
+            claim, years = format_percent(round(m.amount, 3), None), f"{m.years:.0f}"
             text = (
                 _("{claim} with {years} years")
                 if m.since is None
@@ -442,7 +475,7 @@ def legend_below(
 
 def points(value: float) -> str:
     """A change of a share in percentage points: `+1.5 pt`."""
-    return _("{value} pt").format(value=f"{value * 100:+.1f}")
+    return _("{value} pt").format(value=format_number(value * 100, 1, signed=True))
 
 
 def signed_eur(value: float) -> str:

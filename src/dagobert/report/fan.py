@@ -11,11 +11,11 @@ from dagobert.i18n import _
 from dagobert.report.charts import (
     EUR_HOVER,
     EUR_TICKS,
-    LAYOUT,
     PLOT,
     add_overlays,
     age_axis,
     hover_text,
+    layout,
     legend_below,
     shared,
     signed_eur,
@@ -118,7 +118,7 @@ def liquid_fan_figure(r: RunResult, *, nominal: bool = False, compact: bool = Fa
     markers = add_overlays(fig, r, compact=compact)
     title = split_title(r.label, _("liquid & total"), compact=compact)
     fig.update_layout(
-        LAYOUT,
+        layout(),
         title=title,
         yaxis={
             "title": r.unit(nominal=nominal),
@@ -228,7 +228,7 @@ def difference_figure(d: Difference, *, compact: bool = False) -> go.Figure:
     if compact:  # one title below both plots
         fig.update_xaxes(title=None, row=1)
     fig.update_layout(
-        LAYOUT,
+        layout(),
         # compact the selectors above name A and B: a long name ran off the screen
         title=_("{b} less {a}, path by path").format(
             b="B" if compact else d.b, a="A" if compact else d.a

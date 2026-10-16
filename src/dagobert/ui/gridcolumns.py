@@ -15,10 +15,10 @@ import streamlit as st
 from pydantic import BaseModel
 from streamlit.elements.lib.column_types import ColumnConfig
 
-from dagobert.i18n import N_, _, pgettext
+from dagobert.i18n import N_, NP_, _, pgettext
 from dagobert.model.assets import Asset, HoldingsAsset
 from dagobert.model.base import TITLES, KeyPath, Unit
-from dagobert.money import EUR_COLUMN, NUMBER_COLUMN, format_eur
+from dagobert.money import EUR_COLUMN, NUMBER_COLUMN, decimal_mark, format_eur, format_percent
 from dagobert.store import NULL
 
 ASSET_MODELS: dict[str, type[BaseModel]] = {
@@ -42,10 +42,12 @@ WIDTHS = {
     "array": 90,
 }
 # A grid shows euros whole and grouped like the tiles, a share or a rate in percent, as typed, a
-# plain number with its decimals: a printf format reads the same in every browser language
+# plain number with its decimals: a printf format reads the same in every browser language, with a
+# decimal point in both (Streamlit's sprintf knows no other), the sign of a percent in the
+# language of the session (`pgettext("sprintf", …)`: German `2.5 %`)
 FORMATS: dict[Unit | None, str] = {
     Unit.EUR: EUR_COLUMN,
-    Unit.PERCENT: "%g%%",
+    Unit.PERCENT: NP_("sprintf", "%g%%"),
     Unit.NUMBER: NUMBER_COLUMN,
 }
 PERCENT_HELP = N_("In percent: 2.5 for 2.5%.")
@@ -101,9 +103,9 @@ def default_said(value: object, unit: Unit | None) -> str | None:
         case int() | float() if unit is Unit.EUR:
             return format_eur(value)
         case int() | float() if unit is Unit.PERCENT:
-            return f"{value * 100:g}%"
+            return format_percent(value, None)
         case int() | float():
-            return f"{value:g}"
+            return decimal_mark(f"{value:g}")
         case str():
             return value
     return None
@@ -302,7 +304,9 @@ class Column:
                 low, high = (None if b is None else self._scaled(b) for b in self.bounds)
                 return st.column_config.NumberColumn(
                     **common,
-                    format=FORMATS.get(self.unit),
+                    format=pgettext("sprintf", FORMATS[self.unit])
+                    if self.unit in FORMATS
+                    else None,
                     min_value=low,
                     max_value=None if self.unit is Unit.PERCENT else high,
                     step=1 if self.type == "integer" else self.unit.step if self.unit else None,

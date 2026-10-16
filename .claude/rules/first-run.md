@@ -103,8 +103,8 @@ The examples that a start copies: rule `examples`. The manual: `docs/manual/star
   import` (`ui.transfer.import_zip`, rule `transfer`): every file `add`, one revision `import
   <zip>`, or with the revisions of the zip its history (`_take_history`); then the Overview. The
   page speaks the language of the session (rule `i18n`: the date in words, `20. Mai 1986`; the
-  points of `pension_note` as `9.24` in both languages), the names and notes of the examples as
-  written (each line names its language).
+  points of `pension_note` in the decimal mark of the language, `9,24`, rule `money`), the names
+  and notes of the examples as written (each line names its language).
 
 ## Tests
 

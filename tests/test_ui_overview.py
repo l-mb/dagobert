@@ -151,7 +151,7 @@ def test_overview_shows_the_plan(data: Path) -> None:
     assert any("main scenario, Early," in e.value for e in at.markdown)  # the folds name it
     tiles = [labels(data)[term] for term in outlook.TILES]
     assert [m.label for m in at.metric if m.label in tiles] == tiles
-    target = at.number_input(key="overview-seek-target")
+    target = at.text_input(key="overview-seek-target")
     assert target.label == "Target, chance to run out by 51 (%)"
     assert "needs a saved version of the plan" in at.info[-1].value  # no revision, no comparison
     stop = next(m for m in at.metric if m.label == goalseek.STOP)

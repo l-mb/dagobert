@@ -15,7 +15,7 @@ import streamlit as st
 
 from dagobert import loader, revisions
 from dagobert.i18n import N_, _, ngettext
-from dagobert.money import format_eur
+from dagobert.money import decimal_mark, format_eur
 from dagobert.store import Edit, RowFile
 from dagobert.ui import gridcolumns, guard, is_mobile, joined, save, tables
 from dagobert.ui.gridcolumns import Row
@@ -174,7 +174,7 @@ def at_death(givers: Sequence[str]) -> str:
 def condition(age: object, below: object) -> str:
     """The condition of a sale in words, from its age and its `liquid_below` (None: not set)."""
     return either(
-        _("age {age}").format(age=f"{age:g}" if isinstance(age, int | float) else age)
+        _("age {age}").format(age=decimal_mark(f"{age:g}") if isinstance(age, int | float) else age)
         if age is not None
         else "",
         _("liquid below {amount}").format(

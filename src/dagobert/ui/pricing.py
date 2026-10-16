@@ -16,7 +16,7 @@ import streamlit as st
 from dagobert import csvimport, prices
 from dagobert.i18n import N_, _
 from dagobert.model.assets import SECURITY
-from dagobert.money import format_eur
+from dagobert.money import decimal_mark, format_eur, format_number
 from dagobert.ui import guard, keyboard, source, tell
 from dagobert.ui.csvcolumns import DECIMAL, ColumnPick, ends, refused, said, select
 from dagobert.ui.save import reason
@@ -94,7 +94,11 @@ class TypedPrice:
         if not re.fullmatch(SECURITY, security := self.security.strip().upper()):
             raise ValueError(_(CHOOSE_SECURITY))
         if not (price := plain(self.price, "price")):
-            raise ValueError(_("price: type a number above zero, for example 80,12"))
+            raise ValueError(
+                _("price: type a number above zero, for example {price}").format(
+                    price=format_number(80.12, 2)
+                )
+            )
         return security, (self.day, float(price))
 
 
@@ -120,7 +124,7 @@ def receipt(name: str, point: prices.Price, units: float, replaced: float | None
         price=format_eur(price, cents=True),
         day=day,
         old=format_eur(replaced or 0.0, cents=True),
-        units=f"{units:.12g}",
+        units=decimal_mark(f"{units:.12g}"),
         value=format_eur(units * price, cents=True),
     )
 
@@ -192,14 +196,17 @@ def _add(data_dir: Path, securities: prices.Securities) -> None:
                 width=140,
             )
             text = st.text_input(
-                _("Price €"), key=f"decimal-{key}-price", placeholder="80,12", width=120
+                _("Price €"),
+                key=f"decimal-{key}-price",
+                placeholder=format_number(80.12, 2),
+                width=120,
             )
             sent = st.form_submit_button(_("Add"), type="primary", key=f"{key}-add")
         st.caption(
             _(
                 "The price of one unit on a day, also a past one, saved at once. No thousands "
-                "groups: 5432, or 5,4320 for a fraction."
-            )
+                "groups: 5432, or {fraction} for a fraction."
+            ).format(fraction=decimal_mark("5.4320"))
         )
     if not sent:
         return

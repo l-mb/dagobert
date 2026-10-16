@@ -20,7 +20,7 @@ from dagobert.i18n import N_, _, pgettext
 from dagobert.model.base import Unit
 from dagobert.model.months import months_of_age
 from dagobert.model.taxes import Land
-from dagobert.money import format_eur
+from dagobert.money import format_eur, format_percent
 from dagobert.scenariofiles import scenario_file
 from dagobert.store import streams_file
 from dagobert.ui import at_age, fields, guard, is_mobile, keyboard, language, literal, slug
@@ -331,7 +331,7 @@ def _property(data_dir: Path, plan: Plan) -> None:
             "A new scenario that extends {scenario}: you buy a property, pay the "
             "Grunderwerbsteuer and {costs} of the price for the notary and a broker from your own "
             "funds and borrow the rest. The rent that you type ends with the purchase."
-        ).format(scenario=plan.said(main), costs=f"{whatifs.COSTS:.0%}")
+        ).format(scenario=plan.said(main), costs=format_percent(whatifs.COSTS, None))
     )
     form = _Form()
     at = form.typed("at", _("Buy in (month)"), MONTH, value=_next_year())
@@ -383,8 +383,8 @@ def _property(data_dir: Path, plan: Plan) -> None:
             ).format(
                 cost=format_eur(step.cost),
                 loan=format_eur(owed),
-                rate=f"{datadir.LOAN_RATE:.0%}",
-                repayment=f"{datadir.REPAYMENT:.0%}",
+                rate=format_percent(datadir.LOAN_RATE, None),
+                repayment=format_percent(datadir.REPAYMENT, None),
                 payment=format_eur(datadir.payment(owed)),
             )
         )

@@ -31,7 +31,7 @@ from dagobert.model.events import (
 from dagobert.model.months import add_months
 from dagobert.model.plan import Plan
 from dagobert.model.streams import Stream
-from dagobert.money import format_eur
+from dagobert.money import decimal_mark, format_eur, format_percent
 
 Row = dict[str, Any]
 FILE = "cashflows.yaml"
@@ -234,7 +234,7 @@ def shown(name: str, value: Any) -> str:  # noqa: ANN401 a raw YAML value
         return "–" if value is None else str(value)
     if (unit := _UNITS.get(name)) is Unit.EUR:
         return format_eur(value, cents=round(value) != value)
-    return f"{value * 100:g}%" if unit is Unit.PERCENT else f"{value:g}"
+    return format_percent(value, None) if unit is Unit.PERCENT else decimal_mark(f"{value:g}")
 
 
 def _field(name: str, was: Any, now: Any) -> str:  # noqa: ANN401 raw YAML values
@@ -304,7 +304,7 @@ def _condition(when: SaleTrigger | None) -> str:
         return ""
     parts = []
     if when.age is not None:
-        parts.append(pgettext("condition", "at {age}").format(age=f"{when.age:g}"))
+        parts.append(pgettext("condition", "at {age}").format(age=decimal_mark(f"{when.age:g}")))
     if when.liquid_below:
         # a narrow table breaks the text at its spaces, but never before the euro sign
         below = format_eur(when.liquid_below).replace(" ", "\u00a0")

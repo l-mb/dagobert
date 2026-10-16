@@ -131,7 +131,7 @@ def test_a_field_and_a_column_say_their_words_in_the_language_of_the_session() -
         )
         assert share.help == (
             "Steuerfreier Anteil der Gewinne eines Aktienfonds, für jedes Depot ohne eigenen "
-            "(Standard: 30%). In Prozent: 2.5 für 2.5%."
+            "(Standard: 30\u00a0%). In Prozent: 2,5 für 2,5\u00a0%."
         )
     assert english == (
         "Teilfreistellung %",

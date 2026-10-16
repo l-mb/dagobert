@@ -107,7 +107,9 @@ crypto. The asset with the most trades comes first. Select one. For each securit
 - the open lots (the units of each purchase that you still hold) and the sales.
 
 The units show with a decimal point and a small space between the thousands, for example
-`1 234.5678`. The table of trades shows them the same way.
+`1 234.5678`. The table of trades shows them the same way. A table always writes a decimal point,
+also on a German page. A text, such as the preview of an import, writes the units in the way of the
+language: `1 234,5678` on a German page.
 
 The yearly return weighs each amount by how long it was invested. The value uses the last stored
 price (see [Snapshot](snapshot.md#prices)).

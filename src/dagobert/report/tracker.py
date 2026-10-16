@@ -15,8 +15,8 @@ import plotly.graph_objects as go
 
 from dagobert.i18n import N_, _
 from dagobert.model.months import months_between
-from dagobert.money import format_eur
-from dagobert.report.charts import AMBER, BLUE, EUR_TICKS, GRAY, LAYOUT, RED, gapped
+from dagobert.money import format_eur, format_percent
+from dagobert.report.charts import AMBER, BLUE, EUR_TICKS, GRAY, RED, gapped, layout
 
 if TYPE_CHECKING:
     from dagobert.actuals import Line
@@ -24,9 +24,10 @@ if TYPE_CHECKING:
 
 NEUTRAL = "#6b7280"
 # Larger text than the plotly default of 12, so the labels of the tracker charts read well.
-# The theme of the app sets the size of ticks and legend itself, so they need it too.
+# The theme of the app sets the size of ticks and legend itself, so they need it too. After
+# `charts.layout()`.
 FONT = {"size": 14}
-TRACKER = LAYOUT | {
+TRACKER: dict[str, object] = {
     "margin": {"l": 10, "r": 10, "t": 10, "b": 10},
     "font": FONT,
     "legend": {"font": FONT},
@@ -83,23 +84,26 @@ def sunburst_figure(
     nodes = list(cents)
     ident = {path: str(i) for i, path in enumerate(nodes)}
     total = sum(cents[path] for path in nodes if len(path) == 1)
+    values = [total, *(cents[p] for p in nodes)]
     fig = go.Figure(
         go.Sunburst(
             ids=["root", *(ident[p] for p in nodes)],
             labels=[center, *(p[-1] for p in nodes)],
             parents=["", *(ident.get(p[:-1], "root") for p in nodes)],
-            values=[total, *(cents[p] for p in nodes)],
-            text=[format_eur(v / 100) for v in [total, *(cents[p] for p in nodes)]],
+            values=values,
+            text=[format_eur(v / 100) for v in values],
+            # the share of the total as text: `percentRoot` writes no space before its `%`
+            customdata=[format_percent(v / (total or 1)) for v in values],
             branchvalues="total",
             marker={"colors": ["rgba(0,0,0,0)", *(_color(p, colors) for p in nodes)]},
             texttemplate="%{label}<br>%{text}",
-            hovertemplate="%{label}<br>%{text}<br>%{percentRoot:.1%}<extra></extra>",
+            hovertemplate="%{label}<br>%{text}<br>%{customdata}<extra></extra>",
             leaf={"opacity": 1},
             maxdepth=maxdepth,
         )
     )
     fig.update_layout(
-        TRACKER,
+        layout() | TRACKER,
         height=height,
         uniformtext={"minsize": FONT["size"], "mode": "hide"},  # a label too small is hidden
     )
@@ -144,7 +148,7 @@ def bars_figure(
     )
     room, names = LABEL_ROOM[compact], [s.path[-1] for s in shown]
     fig.update_layout(
-        TRACKER,
+        layout() | TRACKER,
         height=80 + 40 * len(shown),
         margin={"l": room, "r": 80, "t": 30},  # the modebar stays clear of the top bar
         xaxis=_zero_axis([s.value for s in shown]) if signed else {"visible": False},
@@ -223,7 +227,7 @@ def spend_figure(months: Mapping[date, Line], *, labels: int) -> go.Figure:
         ]
     )
     fig.update_layout(
-        TRACKER,
+        layout() | TRACKER,
         height=380,
         yaxis={"tickformat": EUR_TICKS, "ticksuffix": " €", "rangemode": "tozero"},
         xaxis=_month_axis(x, labels),
@@ -254,7 +258,7 @@ def history_figure(
         )
     fig.add_trace(_records([(month, sum(sums.values())) for month, sums in months], _("net worth")))
     fig.update_layout(
-        TRACKER,
+        layout() | TRACKER,
         barmode="relative",
         height=height,
         yaxis={"tickformat": EUR_TICKS, "ticksuffix": " €"},
@@ -338,7 +342,7 @@ def track_figure(
         ]
     )
     fig.update_layout(
-        TRACKER,
+        layout() | TRACKER,
         height=420,
         hovermode="x unified",
         hoverlabel={"namelength": -1},  # plotly cuts a name at 15 characters

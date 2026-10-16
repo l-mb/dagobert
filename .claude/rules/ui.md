@@ -102,11 +102,12 @@ style of the pages (`ui/page.css`): rule `page-style`.
   run before, set by `main.py`), `language` and `language_switch` (the language of the session and
   its switch, rule `i18n`), `chose` and `remember` (a choice on a switch of the viewer: the grid
   edits carried, the cookie written in every later run, `SET_COOKIE`; the language and the mode),
-  `keyboard` (the keyboard of a phone for the text fields by the start of their key: `decimal-` the
-  decimal keypad, such as the numbers of `Add a trade` and the euros of the Spend quick add,
-  `nocaps-` no capital first letter, the category of the quick add), `step_button` (a chevron that
-  moves a select control to the previous or the next option, off at the end: the Spend month and the
-  Flows year, `after` runs after the step; its help names the unit, `STEPS`), `page_link` (a link to
+  `keyboard` (the keyboard of a phone for the text fields by the start of their key or of the key of
+  a container around them: `decimal-` the decimal keypad, such as the numbers of `Add a trade`, the
+  euros of the Spend quick add and the target of the goal seek, `nocaps-` no capital first letter,
+  the category of the quick add), `step_button` (a chevron that moves a select control to the
+  previous or the next option, off at the end: the Spend month and the Flows year, `after` runs
+  after the step; its help names the unit, `STEPS`), `uploader_words`, `page_link` (a link to
   a page of the navigation, an arrow by default: the `st.Page` that `main.py` registers and keeps in
   `PAGES` by its English title, None for a page that the navigation leaves out, which then shows no
   link; Streamlit finds a page by the hash of its `url_path`, so a link never builds a page again; a
@@ -156,15 +157,14 @@ style of the pages (`ui/page.css`): rule `page-style`.
   reads the code: `AppTest` shows no key of an expander), the Explorer groups by id
   (`sliders.GROUPS`), but `ui.fold`: a help that starts closed and may close in other words.
 - `ui/` never calls `st.plotly_chart`: `ui.chart` draws every chart. On a phone it sets
-  `dragmode=False`, so a swipe over a chart scrolls the page and a tap still shows the hover
-  label, and the modebar keeps only Fullscreen (`PHONE_MODEBAR`: Streamlit adds Fullscreen
-  through `modeBarButtonsToAdd`, a `modeBarButtons` list would drop it). It turns off
-  `doubleClick`: without the drag mode a tap counts twice, as touch and as mouse, and the
-  double click reset the axes, for example the cut of the fan chart. `charts.LAYOUT` keeps
-  the drag mode, so the HTML report keeps drag to zoom. Streamlit gives a chart with
-  `on_select` the drag mode `pan` whatever the figure says: on a phone such a chart holds the
-  finger, and a tap only shows the hover label. So on a phone no chart selects:
-  `bars.outflow_bars` picks with pills there.
+  `dragmode=False`, so a swipe over a chart scrolls the page and a tap still shows the hover label,
+  and the modebar keeps only Fullscreen (`PHONE_MODEBAR`: Streamlit adds Fullscreen through
+  `modeBarButtonsToAdd`, a `modeBarButtons` list would drop it). It turns off `doubleClick`:
+  without the drag mode a tap counts twice, as touch and as mouse, and the double click reset the
+  axes, for example the cut of the fan chart. `charts.layout()` keeps the drag mode, so the HTML
+  report keeps drag to zoom. Streamlit gives a chart with `on_select` the drag mode `pan` whatever
+  the figure says: on a phone such a chart holds the finger, and a tap only shows the hover label.
+  So on a phone no chart selects: `bars.outflow_bars` picks with pills there.
 - `st.tabs(on_change="rerun")` with `tab.open` draws only the open tab, and Streamlit then drops
   the state of the widgets of a closed tab. A widget there that must keep its value takes
   `persist_state="page"` (the period of the Flows page, the pills of `bars.outflow_bars`).

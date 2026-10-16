@@ -13,13 +13,15 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import streamlit as st
+from streamlit.delta_generator import DeltaGenerator
 
 from dagobert import goalseek, report
 from dagobert.i18n import N_, _
 from dagobert.loader import load_plan
+from dagobert.money import format_number, format_percent
 from dagobert.problems import InputError
 from dagobert.result import BROKE_AGE, RunResult
-from dagobert.ui import Stamp, literal, note
+from dagobert.ui import Stamp, fields, literal, note
 from dagobert.ui.runs import keep, seek, tick
 from dagobert.ui.sliders import KEY, Knob
 
@@ -27,6 +29,7 @@ if TYPE_CHECKING:
     from dagobert.ui.explorer import Sidebar
 
 TARGET = 5.0  # the default target of the goal seek: P(broke by `BROKE_AGE`) in %
+TARGETS = fields.Field(("target",), fields.Kind.NUMBER, low=0.5, high=50.0)  # how it reads
 # the target of the goal seek and of the seeks of the Overview, in the same words (`Target`)
 TARGET_LABEL = N_("Target, chance to run out by {age} (%)")
 TARGET_HELP = N_("The highest chance to run out of money by {age} that you accept.")
@@ -64,6 +67,26 @@ class Target:
         return cls(age, _(TARGET_LABEL).format(age=age), f"{said} {apart}".rstrip())
 
 
+def target_field(row: DeltaGenerator, aim: Target, key: str) -> float | None:
+    """The target in percent in `row`, of the goal seek and the seeks of the Overview: a text
+    field, read with a decimal comma or a point in either language (`5,5`): a number input
+    shows a decimal point (`5.00`), and the browser reads a mark by its own language. Its
+    container `decimal-…` gives a phone the decimal keypad (`ui.keyboard`). None, with what to
+    type below the row, for a text that does not read or lies outside `TARGETS`."""
+    st.session_state.setdefault(key, format_number(TARGET))
+    text = row.container(key=f"decimal-{key}", width="content").text_input(
+        aim.label, key=key, help=aim.help, width=220
+    )
+    try:
+        if (typed := fields.parse(TARGETS, text)) is not None:
+            return float(typed)
+        problem = _("type a number, such as 2.5")
+    except ValueError as e:
+        problem = str(e)
+    st.warning(_("Target: {problem}").format(problem=problem))
+    return None
+
+
 @st.cache_resource(show_spinner=False)
 def _seeks() -> dict[tuple[object, ...], goalseek.Found]:
     return {}
@@ -80,7 +103,6 @@ def goal_seek(
         lever_key = f"{KEY}seek-lever"
         if st.session_state.get(lever_key) not in {*LEVERS, *dials}:
             st.session_state[lever_key] = SPENDING_ALL
-        st.session_state.setdefault(f"{KEY}seek-target", TARGET)
         aim = Target.of([r for r in results if not r.twin])
         row = st.container(horizontal=True, vertical_alignment="bottom")
         lever = row.selectbox(
@@ -90,18 +112,12 @@ def goal_seek(
             key=lever_key,
             width=360,
         )
-        target = row.number_input(
-            aim.label,
-            0.5,
-            50.0,
-            step=0.5,
-            help=aim.help,
-            key=f"{KEY}seek-target",
-            width=220,  # beside the lever on a desktop, as on the Overview
-        )
+        typed = target_field(row, aim, f"{KEY}seek-target")  # beside the lever on a desktop
         jobs = [
             (
-                goalseek.Job(side.opts, p, side.overrides, target / 100),
+                goalseek.Job(
+                    side.opts, p, side.overrides, (TARGET if typed is None else typed) / 100
+                ),
                 dials.get(lever)
                 or _named(_dial(lever, side.opts.data, p, json.dumps(side.overrides), stamp)),
             )
@@ -113,14 +129,14 @@ def goal_seek(
             for job, dial in jobs
         ]
         # no `KEY`: `main.py` cannot carry a button
-        if row.button(_("Find the limit"), key="seek", type="primary"):
+        if row.button(_("Find the limit"), key="seek", type="primary", disabled=typed is None):
             _find(found, dict(zip(keys, jobs, strict=True)), chosen)
         for i, (key, (job, dial)) in enumerate(zip(keys, jobs, strict=True)):
             name = chosen[job.scenario]
             if isinstance(dial, goalseek.NoChange):  # a scenario without the lever says why at once
                 st.markdown(f"**{literal(name)}** · {literal(dial.said())}")
                 continue
-            if key not in found:
+            if typed is None or key not in found:
                 continue
             answer = st.container(horizontal=True, vertical_alignment="center")
             answer.markdown(seek_answer(name, dial, found[key], job.target, work=lever == WORK))
@@ -206,7 +222,7 @@ def seek_answer(
         lever=dial.label,
         limit=found.limit(dial, target),
         value=dial.text(dial.value),
-        p=f"{found.p_broke:.1%}",
+        p=format_percent(found.p_broke),
         age=found.age,
     )
     return f"**{literal(scenario)}** · {limit}"

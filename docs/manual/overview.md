@@ -40,7 +40,9 @@ works](models.md#the-results) explains each figure:
 
 `Find the spending limit` answers the question: by how much can all spending change, so that the
 chance to run out by 90 stays at the target? Set the target in the field `Target, chance to run out
-by 90 (%)` beside the button (5% by default). The answer shows below the button. The answer is in
+by 90 (%)` beside the button (5% by default). Type a number from 0.5 to 50, with a decimal comma
+or a decimal point, for example `4.5` or `4,5`. If the field holds something else, a message says
+what to type, and the buttons stay off. The answer shows below the button. The answer is in
 words, for example: `Spend at most 2.054 € a month, 14% less than now`. It is one change for all
 spending categories. The health insurance premium does not change with it. If the target is not met,
 a link opens the [Explorer](explorer.md), where you can try less spending or more savings. The

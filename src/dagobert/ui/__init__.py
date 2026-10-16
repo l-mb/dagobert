@@ -21,6 +21,7 @@ from dagobert import i18n, revisions, schema, series
 from dagobert.i18n import N_, _
 from dagobert.loader import load_scenario
 from dagobert.model.months import months_of_age
+from dagobert.transfer import UPLOAD_MB
 from dagobert.ui import gridstate
 
 if TYPE_CHECKING:
@@ -60,6 +61,34 @@ PAGE_STYLE = (
     )
     + "</style>"
 )
+# Streamlit 1.65 writes the words of its file uploader in English: another language writes them by
+# CSS on their elements (the DOM of 1.65: check it after an upgrade), the English at a size of 0
+# and the words of the catalogue after it at the size of Streamlit. The button, the words while a
+# file is dragged over it, and the limit, without the types of files, which its label names.
+# English keeps the words of Streamlit (`:lang(en)`, which the boot script of `main.py` sets).
+UPLOADER_WORDS = Template(
+    "<style>"
+    "$zone button [data-testid=stMarkdownContainer] p, $zone > div:not([data-testid]) > span, "
+    "$zone [data-testid=stFileUploaderDropzoneInstructions] span { font-size: 0; }"
+    '$zone button [data-testid=stMarkdownContainer] p::after { content: "$upload"; }'
+    '$zone > div:not([data-testid]) > span::after { content: "$drop"; }'
+    '$zone [data-testid=stFileUploaderDropzoneInstructions] span::after { content: "$limit"; }'
+    "$zone :is(p, span)::after { font-size: 0.875rem; }"
+    "</style>"
+)
+
+
+def uploader_words() -> str:
+    """The style of `UPLOADER_WORDS` in the language of the session, which `main.py` draws in
+    every run."""
+    return UPLOADER_WORDS.substitute(
+        zone="html:not(:lang(en)) [data-testid=stFileUploaderDropzone]",
+        upload=_("Upload"),
+        drop=_("Drag and drop a file here"),
+        limit=_("{mb} MB per file").format(mb=UPLOAD_MB),
+    )
+
+
 UMLAUTS = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"})  # spelled out in a `slug`
 MOBILE = "ui-mobile"  # session state: the `mobile` query of this session
 PAGE = "ui-page"  # session state: the title of the page that runs, set by `main.py`

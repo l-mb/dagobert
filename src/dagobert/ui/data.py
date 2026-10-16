@@ -13,6 +13,7 @@ import streamlit as st
 from dagobert import csvimport, prices, series
 from dagobert.i18n import N_, _, ngettext
 from dagobert.model.months import add_months
+from dagobert.money import format_number
 from dagobert.ui import Outcome, fold, guard, mode, source
 from dagobert.ui.csvcolumns import ends, refused
 from dagobert.ui.pricing import mapper, recorded
@@ -143,7 +144,7 @@ def conversion(data_dir: Path) -> str:
         "The app converts gold and Bitcoin to euros, month by month: from {first} at the ECB "
         "rate, before that at the Deutsche Mark rate and {rate} DEM per euro. A month after the "
         "last rate takes the last one."
-    ).format(first=_month(first), rate=f"{series.DEM_PER_EUR:.5f}")
+    ).format(first=_month(first), rate=format_number(series.DEM_PER_EUR, 5))
 
 
 NOTES = {"vpi": chain, "usd-eur": conversion}  # a caption below the series
@@ -344,7 +345,7 @@ def _preview(
                     _("month"): _("{month} provisional").format(month=_month(p.month))
                     if p.provisional
                     else _month(p.month),
-                    _("value"): f"{p.value:.2f}",
+                    _("value"): format_number(p.value, 2),
                 }
                 for p in ends(months)
             ],

@@ -24,7 +24,7 @@ from dagobert.model.assets import (
     LotAsset,
     Trade,
 )
-from dagobert.money import format_eur
+from dagobert.money import decimal_mark, format_eur, format_number
 from dagobert.prices import GRAMS_PER_TROY_OUNCE, off_series
 from dagobert.store import RowEdits
 from dagobert.tradeimport import replaced_basis
@@ -67,11 +67,6 @@ _PLAIN = re.compile(r"\d*[.,]?\d+")
 _GROUPED = re.compile(r"[1-9]\d{0,2}[.,]\d{3}")
 
 
-def _comma(number: float) -> str:
-    """A number in a hint of what to type, with the decimal comma of every hint of the forms."""
-    return f"{number}".replace(".", ",")
-
-
 COUNTS = {
     "XAU": N_("XAU counts troy ounces of {grams} g: a 100 g bar is {ounces} troy ounces."),
     "BTC": N_("BTC counts bitcoins."),
@@ -81,7 +76,8 @@ COUNTS = {
 def counts(model: type[LotAsset]) -> str:
     """What one unit of the symbol of a gold or crypto asset is (`COUNTS`)."""
     return _(COUNTS[SYMBOLS[model]]).format(
-        grams=_comma(GRAMS_PER_TROY_OUNCE), ounces=_comma(round(100 / GRAMS_PER_TROY_OUNCE, 4))
+        grams=decimal_mark(f"{GRAMS_PER_TROY_OUNCE}"),
+        ounces=decimal_mark(f"{round(100 / GRAMS_PER_TROY_OUNCE, 4)}"),
     )
 
 
@@ -116,12 +112,14 @@ def plain(text: str, field: str) -> float | None:
     """A number without thousands groups (the units of a trade, a price per unit), typed with a
     decimal comma or point: whole numbers stay whole in the file, like the others. None for
     anything else. Raises `TypedError` for a mark before three digits, which may group thousands:
-    1.200 may be 1200 whole units or euros or 1,2, which the hint (`GROUPED`) gives with the
-    comma of every hint."""
+    1.200 may be 1200 whole units or euros or 1,2, which the hint (`GROUPED`) gives in the decimal
+    mark of the language."""
     if _GROUPED.fullmatch(text := text.strip()):
         units, fraction = re.split("[.,]", text)
         msg = _(GROUPED[field]).format(
-            text=text, whole=units + fraction, fraction=f"{units},{fraction.rstrip('0') or '0'}"
+            text=text,
+            whole=units + fraction,
+            fraction=decimal_mark(f"{units}.{fraction.rstrip('0') or '0'}"),
         )
         raise TypedError(msg, field)
     if not _PLAIN.fullmatch(text):
@@ -156,7 +154,10 @@ class Typed:
         if bad := [k for k, v in numbers.items() if v is None and getattr(self, k).strip()]:
             fields = ", ".join(_(NUMBERS[k]) for k in bad)
             raise TypedError(
-                _("{fields}: type a number, for example 12,5").format(fields=fields), *bad
+                _("{fields}: type a number, for example {number}").format(
+                    fields=fields, number=decimal_mark("12.5")
+                ),
+                *bad,
             )
         needed = {"units": self.kind != lots.TradeKind.VORABPAUSCHALE, "amount": True}
         if missing := tuple(
@@ -231,7 +232,7 @@ def _trade_form(
                 or ""
                 for field, text, example, width in (
                     ("units", N_("Units"), "10", 100),
-                    ("amount", N_("Amount €"), "104,20", 120),
+                    ("amount", N_("Amount €"), format_number(104.2, 2), 120),
                     ("fees", N_("Fees €"), "0", 100),
                 )
             }
@@ -247,9 +248,9 @@ def _trade_form(
             )
         message = st.empty()
         saved = _(
-            "Saved at once. Units take no thousands groups: 1200, or 1,2 for a fraction. The "
-            "amount is the price of all units without fees (the Kurswert)."
-        )
+            "Saved at once. Units take no thousands groups: 1200, or {fraction} for a fraction. "
+            "The amount is the price of all units without fees (the Kurswert)."
+        ).format(fraction=decimal_mark("1.2"))
         st.caption(f"{saved} {counts(type(asset))}" if isinstance(asset, LotAsset) else saved)
     if not sent:
         return None, message
@@ -282,7 +283,7 @@ def receipt(row: Row, names: Mapping[str, str]) -> str:
     price per unit show a slip of a mark."""
     units = row.get("units")
     return _(RECEIPTS[row["kind"]]).format(
-        units=f"{units:.12g}" if units else "",
+        units=decimal_mark(f"{units:.12g}") if units else "",
         name=row.get("name") or names.get(row["security"], row["security"]),
         price=format_eur(row["amount"] / units, cents=True) if units else "",
         amount=format_eur(row["amount"], cents=True),

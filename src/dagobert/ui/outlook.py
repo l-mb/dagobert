@@ -17,7 +17,7 @@ from dagobert.loader import load_plan
 from dagobert.model.assets import Asset, AvDepot, PensionPolicy
 from dagobert.model.months import add_months, months_between
 from dagobert.model.plan import Plan
-from dagobert.money import format_eur
+from dagobert.money import format_eur, format_percent
 from dagobert.report.summary import Shown
 from dagobert.report.tracker import Band, track_figure
 from dagobert.result import RunResult
@@ -35,7 +35,7 @@ from dagobert.ui import (
     scenario_note,
     timezone,
 )
-from dagobert.ui.seek import TARGET, Target
+from dagobert.ui.seek import TARGET, Target, target_field
 
 # the columns of the explorer's summary that the tiles show, by their plain headers
 TILES = (report.BROKE_ALIVE, report.BROKE_AT, report.TOTAL_AT, "Shortfall")
@@ -113,7 +113,7 @@ def _allowed(found: goalseek.Found, dial: goalseek.Dial, target: float) -> str:
             low=format_eur(dial.low * dial.scale),
             high=format_eur(dial.high * dial.scale),
         )
-    chance = f"{found.p_broke:.1%}"
+    chance = format_percent(found.p_broke)
     change = _change(found.value)
     if found.p_broke > target:
         return _(
@@ -128,16 +128,16 @@ def _allowed(found: goalseek.Found, dial: goalseek.Dial, target: float) -> str:
 
 def _change(factor: float) -> str:
     """A factor on the spending in words: `14% less than now`."""
-    if (share := f"{abs(factor - 1):.0%}") == "0%":
+    if round(abs(factor - 1) * 100) == 0:
         return _("the same as now")
     return (_("{share} less than now") if factor < 1 else _("{share} more than now")).format(
-        share=share
+        share=format_percent(abs(factor - 1), 0)
     )
 
 
 def _floor(found: goalseek.Found, dial: goalseek.Dial, target: float) -> str:
     """The floor of the flexible spending under VPW at the edge that the seek found."""
-    chance, amount = f"{found.p_broke:.1%}", format_eur(found.value)
+    chance, amount = format_percent(found.p_broke), format_eur(found.value)
     if found.rising is None:
         return _(
             "The floor does not change the chance to run out by {age} from {low} to {high} per "
@@ -311,23 +311,16 @@ def plan(data_dir: Path, scenario: str) -> None:
     *tiles, stop = st.container(key="tiles-plan").columns(len(TILES) + 1)
     _risks(tiles, row, shown, aim.age, vpw)
     seek = st.container(horizontal=True, vertical_alignment="bottom")
-    target = seek.number_input(
-        aim.label,
-        0.5,
-        50.0,
-        TARGET,
-        step=0.5,
-        help=aim.help,
-        key="overview-seek-target",
-        width=220,  # beside the button on a phone in portrait
-    )
-    job = goalseek.Job(runs.options(data_dir), path, {}, target / 100)
+    typed = target_field(seek, aim, "overview-seek-target")  # beside the button on a phone
+    job = goalseek.Job(runs.options(data_dir), path, {}, (TARGET if typed is None else typed) / 100)
     seeks = _seeks()
-    key = (job.opts, path, job.target, run_stamp(data_dir))
+    # a target that does not read keeps no answer
+    key = (job.opts, path, None if typed is None else job.target, run_stamp(data_dir))
     answers = st.container()
     first = st.session_state.pop(SEEK_FIRST, False)  # a new plan: its stop tile not left empty
     for button, (label, dial_of, _say) in SEEKS.items():
-        if seek.button(_(label), key=button) or (first and button == STOP):
+        pressed = seek.button(_(label), key=button, disabled=typed is None)
+        if typed is not None and (pressed or (first and button == STOP)):
             bar = answers.progress(0.0)
             text = _("{seek}: round by round").format(seek=_(label))
             try:
@@ -452,7 +445,7 @@ def on_track(data_dir: Path, scenario: str, records: Records, assets: Iterable[A
         below = float((values[:, months_between(result.months[0], month)] < record).mean())
         st.markdown(
             _("The last record, {month}, lies above **{share}** of the paths of the plan.").format(
-                month=f"{month:%Y-%m}", share=f"{below:.0%}"
+                month=f"{month:%Y-%m}", share=format_percent(below, 0)
             )
         )
     chart(

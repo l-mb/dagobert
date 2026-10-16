@@ -416,23 +416,31 @@ seek.goal_seek(side, {{base: "Base"}}, 0.0, [side.opts.run_one(base)])
 
 def test_a_seek_answer_is_kept_in_other_words(data: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A dial keys the kept answer without its words: the page in other words, as of another
-    language, shows that answer in them and seeks no more."""
+    language, shows that answer in them and seeks no more. The target reads a decimal comma, and
+    one beyond its bounds keeps the button off."""
     sought: list[goalseek.Dial] = []
+    targets: list[float] = []
 
-    def answer(_: goalseek.Job, dial: goalseek.Dial, __: object) -> goalseek.Found:
+    def answer(job: goalseek.Job, dial: goalseek.Dial, __: object) -> goalseek.Found:
         sought.append(dial)
+        targets.append(job.target)
         return goalseek.Found(dial.value, 0.04, 10, rising=True, age=51)
 
     monkeypatch.setattr(seek, "seek", answer)
     at = AppTest.from_string(SEEK.format(data=str(data)), default_timeout=30).run()
-    target = at.number_input(key=f"{sliders.KEY}seek-target")
-    assert target.label == "Target, chance to run out by 51 (%)"  # the plan ends at 51
+    target = at.text_input(key=f"{sliders.KEY}seek-target")
+    assert (target.label, target.value) == ("Target, chance to run out by 51 (%)", "5")
+    target.set_value("60").run()
+    assert at.warning[-1].value == "Target: at most 50"
+    assert at.button(key="seek").disabled
+    at.text_input(key=f"{sliders.KEY}seek-target").set_value("4,5").run()
     at.selectbox(key=f"{sliders.KEY}seek-lever").set_value("returns.equity.mean").run()
     at.button(key="seek").click().run()
     monkeypatch.setitem(sliders.GROUPS, sliders.MARKETS, "Märkte")
     at.run()
     assert not at.exception
     assert len(sought) == 1
+    assert targets == [pytest.approx(0.045)]
     assert any(m.value.startswith("**Base** · Märkte: ") for m in at.markdown)
 
 

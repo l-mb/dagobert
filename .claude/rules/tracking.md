@@ -110,39 +110,39 @@ The price files, their import and the `Prices` expander: rule `prices`.
   purchases: the lines of the Anlage SO. Then the heading `Trades`, on a phone the form `Add a
   trade` (`ui/tradeform.py`: security, the one of the latest trade first or a new ISIN or symbol,
   for gold or crypto also `XAU` or `BTC`, `tradeform.choices`; date, kind, without the
-  Vorabpauschale there; units, euros, fees with the placeholders `10`, `104,20`, `0`; name), whose
+  Vorabpauschale there; units, euros, fees with the placeholders `10`, `104.20`, `0`; name), whose
   refusal (`Not added:`) shows right below `Add`, in plain words (`enter the number of units`,
   `enter the amount in euros`), with the fields to correct framed in red
-  (`tradeform.TypedError.fields`); every hint takes the decimal comma, `1200, or 1,2 for a
-  fraction`, also `tradeform.COUNTS`. The form saves one trade at once, its `Add` off while the grid
-  holds unsaved edits (`tables.unsaved`, help `tradeform.WAIT`), which shows the trades as it read
-  them until a save (the grid adds a row at the end of its list, out of view on a phone). The trades
-  of an asset are found by its id inside each write (`RowFile.child`): a removed asset refuses a
-  trade, an asset added before it on another device takes none. Units take no thousands groups:
-  `1.200` is refused (`tradeform.plain`, also for a typed price), a mark before three digits may
-  group them like the euros. The toast names units, price per unit and euros (`tradeform.receipt`),
-  so a slip of a mark shows. A trade of `XAU` or `BTC` far from its series (`prices.off_series`,
-  rule `prices`) adds a toast after the save, and in the grid a warning of the guard (`Table.check`,
-  `tradeform.series_notes`): grams typed as troy ounces. Then on every device the expander `Import
-  trades` (`ui.tradeimport`, its code: rule `tradeimport`): one sentence, folded `Where to get the
-  file` (`WHERE`: the menu of each broker, as far as public sources name it), an upload (a file that
-  is no table: `Not read:` with `NOT_READ`), its columns in the expander `COLUMNS` (`ui.csvcolumns`,
-  each preselected with the guess; open only while the guess lacks a field of `REQUIRED`, which then
-  waits for a choice, named by its label), a preview (`tradeimport.summary`, two lines: the new
-  trades by kind with their dates and those held already; then the other rows by kind or status and
-  the refused lines; per security the new trades and the units net of sales, so a stray security
-  shows; the first and last three with their price per unit, so a slip of a mark shows, units and
-  euros as in the trades grid, `format_number` and whole euros; folded `Other rows left out` with
-  their line and cells; the first three refused lines), the save guard with the prices far off
-  (`tradeimport.slips`, `hint`: the decimal mark) and `Import N trades`, off like `Add` while the
-  grid holds unsaved edits. It adds only onto the trades that the preview of the last run was
-  checked against: its `Seen` goes to `RowFile.apply(seen=…)`, so a trade added or changed elsewhere
-  since refuses it (`Not imported: … since the preview`), and the run shows the preview of the
-  trades now. The toast after the rerun (`ui.tell`) names the count and the dates; the upload field
-  starts empty. Then the editable trades, the name last (`assets.TRADE_FIELDS`), the security as
-  `ISIN or symbol`; the asset with the most trades comes first, the others are marked `(no trades)`
-  and explain that an account without securities needs none, gold or crypto that it counts as held
-  over a year.
+  (`tradeform.TypedError.fields`); every hint takes the mark of the language, `1200, or 1.2 for a
+  fraction` (German `1,2`), also `tradeform.COUNTS`. The form saves one trade at once, its `Add` off
+  while the grid holds unsaved edits (`tables.unsaved`, help `tradeform.WAIT`), which shows the
+  trades as it read them until a save (the grid adds a row at the end of its list, out of view on a
+  phone). The trades of an asset are found by its id inside each write (`RowFile.child`): a removed
+  asset refuses a trade, an asset added before it on another device takes none. Units take no
+  thousands groups: `1.200` is refused (`tradeform.plain`, also for a typed price), a mark before
+  three digits may group them like the euros. The toast names units, price per unit and euros
+  (`tradeform.receipt`), so a slip of a mark shows. A trade of `XAU` or `BTC` far from its series
+  (`prices.off_series`, rule `prices`) adds a toast after the save, and in the grid a warning of the
+  guard (`Table.check`, `tradeform.series_notes`): grams typed as troy ounces. Then on every device
+  the expander `Import trades` (`ui.tradeimport`, its code: rule `tradeimport`): one sentence,
+  folded `Where to get the file` (`WHERE`: the menu of each broker, as far as public sources name
+  it), an upload (a file that is no table: `Not read:` with `NOT_READ`), its columns in the expander
+  `COLUMNS` (`ui.csvcolumns`, each preselected with the guess; open only while the guess lacks a
+  field of `REQUIRED`, which then waits for a choice, named by its label), a preview
+  (`tradeimport.summary`, two lines: the new trades by kind with their dates and those held already;
+  then the other rows by kind or status and the refused lines; per security the new trades and the
+  units net of sales, so a stray security shows; the first and last three with their price per unit,
+  so a slip of a mark shows, units and euros as in the trades grid, `format_number` and whole euros;
+  folded `Other rows left out` with their line and cells; the first three refused lines), the save
+  guard with the prices far off (`tradeimport.slips`, `hint`: the decimal mark) and `Import N
+  trades`, off like `Add` while the grid holds unsaved edits. It adds only onto the trades that the
+  preview of the last run was checked against: its `Seen` goes to `RowFile.apply(seen=…)`, so a
+  trade added or changed elsewhere since refuses it (`Not imported: … since the preview`), and the
+  run shows the preview of the trades now. The toast after the rerun (`ui.tell`) names the count and
+  the dates; the upload field starts empty. Then the editable trades, the name last
+  (`assets.TRADE_FIELDS`), the security as `ISIN or symbol`; the asset with the most trades comes
+  first, the others are marked `(no trades)` and explain that an account without securities needs
+  none, gold or crypto that it counts as held over a year.
 
 ## Code
 

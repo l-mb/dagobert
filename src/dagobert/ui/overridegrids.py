@@ -18,12 +18,13 @@ import streamlit as st
 import yaml
 from streamlit.delta_generator import DeltaGenerator
 
-from dagobert import loader, overrides, revisions, scenariofiles, store
+from dagobert import i18n, loader, overrides, revisions, scenariofiles, store
 from dagobert.i18n import N_, NP_, _, pgettext
 from dagobert.loader import flatten
 from dagobert.model.base import KeyPath, Unit
 from dagobert.model.months import add_months
 from dagobert.model.plan import SCENARIO_KEYS
+from dagobert.money import PERCENT
 from dagobert.overrides import Leaf
 from dagobert.references import Kind, References
 from dagobert.ui import fields, formguard, gridstate, guard, joined, literal, tables
@@ -56,7 +57,7 @@ NOT_SET = {  # the fields that name or describe an item, which no override sets
     "events": frozenset({"type", "id", "note"}),
     "assets": frozenset({"id", "name", "tags", "asof", "update_every"}),
 }
-SUFFIX: dict[Unit | None, str] = {Unit.EUR: " €", Unit.PERCENT: "%"}
+SUFFIX: dict[Unit | None, str] = {Unit.EUR: " €"}  # a percent takes `money.PERCENT`
 MONTHS = fields.Field(("months",), fields.Kind.INTEGER, unit=Unit.MONTHS)
 # the overrides by id, each a grid; `shift` is no field of a model: the guard names it by its word
 GRIDS = (NP_("key", "shift"), "events", "assets")
@@ -171,7 +172,8 @@ def text(field: fields.Field | None, value: Any) -> str:  # noqa: ANN401 a value
         dumped = yaml.safe_dump(value, default_flow_style=True, allow_unicode=True, width=1000)
         return dumped.strip().removesuffix("...").strip()
     found = fields.shown(field, value)
-    return found + SUFFIX.get(field.unit, "") if found else found
+    suffix = PERCENT[i18n.language()] if field.unit is Unit.PERCENT else SUFFIX.get(field.unit, "")
+    return found + suffix if found else found
 
 
 def value(field: fields.Field | None, typed: str) -> Any:  # noqa: ANN401 a value of the file

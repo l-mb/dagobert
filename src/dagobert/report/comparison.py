@@ -5,19 +5,21 @@ from __future__ import annotations
 import plotly.graph_objects as go
 
 from dagobert.i18n import _
+from dagobert.money import format_percent
 from dagobert.report.charts import (
     BROKE_BY_AGE,
     EUR_HOVER,
     EUR_TICKS,
-    LAYOUT,
     PCT_HOVER,
     SCENARIO_PALETTE,
     age_axis,
-    format_pct,
     hover_text,
+    layout,
     legend_below,
+    percents,
     split_title,
     tap_lists_all,
+    tick_format,
     title_room,
 )
 from dagobert.result import RunResult
@@ -53,22 +55,20 @@ def broke_probability_figure(results: list[RunResult], *, compact: bool = False)
                 name=r.label,
                 showlegend=not r.twin,
                 mode="lines",
-                hovertext=hover_text(r, share, format_pct),
+                hovertext=hover_text(r, share, format_percent),
                 hoverinfo="text",
+                customdata=percents(share) if compact else None,  # `tap_lists_all`
                 **style,
             )
         )
     twins = sum(r.twin for r in results)
-    peak = max(float(share.max()) for share in shares)
+    top = 1.1 * max(*(float(share.max()) for share in shares), 0.05)
     title = split_title(_("Comparison"), _(BROKE_BY_AGE), compact=compact)
     fig.update_layout(
-        LAYOUT,
+        layout(),
         title=title,
-        yaxis={
-            "title": _("Share of paths"),
-            "range": [0, 1.1 * max(peak, 0.05)],  # whole-percent ticks stay distinct
-            "tickformat": ".0%",
-        },
+        # whole-percent ticks stay distinct
+        yaxis={"title": _("Share of paths"), "range": [0, top]} | tick_format(".0%", [top]),
     )
     age_axis(fig, results[0].ages, results[0].months, compact=compact)
     if compact:
@@ -109,7 +109,7 @@ def comparison_figure(
     twins = sum(r.twin for r in results)
     title = split_title(_("Comparison"), _("median net worth and liquid by age"), compact=compact)
     fig.update_layout(
-        LAYOUT,
+        layout(),
         title=title,
         yaxis={"title": results[0].unit(nominal=nominal), "tickformat": EUR_TICKS},
     )

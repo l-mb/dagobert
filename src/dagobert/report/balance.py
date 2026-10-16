@@ -23,7 +23,6 @@ from dagobert.report.charts import (
     GOLD,
     GRAY,
     GREEN,
-    LAYOUT,
     ORANGE,
     PCT_HOVER,
     PINK,
@@ -34,10 +33,13 @@ from dagobert.report.charts import (
     age_axis,
     gapped,
     hover_text,
+    layout,
     legend_below,
+    percents,
     shared,
     split_title,
     tap_lists_all,
+    tick_format,
     title_room,
     unified,
 )
@@ -141,7 +143,7 @@ def balance_figure(
     markers = add_overlays(fig, r, compact=compact)
     title = split_title(r.label, _("balance sheet"), compact=compact)
     fig.update_layout(
-        LAYOUT,
+        layout(),
         title=title,
         yaxis={"title": r.unit(nominal=nominal), "tickformat": EUR_TICKS},
     )
@@ -216,6 +218,7 @@ def lasting_figure(r: RunResult, *, nominal: bool = False, compact: bool = False
                 stackgroup="one",
                 line={"width": 0, "color": _COLORS[key]},
                 fillcolor=_COLORS[key],  # opaque, as in the balance sheet
+                customdata=percents(values),
                 hovertemplate=f"%{{fullData.name}}: {PCT_HOVER}<extra></extra>",
             )
         )
@@ -227,9 +230,9 @@ def lasting_figure(r: RunResult, *, nominal: bool = False, compact: bool = False
         compact=compact,
     )
     fig.update_layout(
-        LAYOUT,
+        layout(),
         title=title,
-        yaxis={"title": _("Share of paths"), "range": [0, 1], "tickformat": ".0%"},
+        yaxis={"title": _("Share of paths"), "range": [0, 1]} | tick_format(".0%", [1.0]),
         legend={"traceorder": "reversed"},  # top down as the stack
     )
     age_axis(fig, r.ages[r.pay_ends :], r.months[r.pay_ends :], compact=compact)

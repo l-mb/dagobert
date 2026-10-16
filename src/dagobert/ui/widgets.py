@@ -10,6 +10,7 @@ from typing import Any, Literal, cast
 
 import streamlit as st
 
+from dagobert import i18n
 from dagobert.i18n import N_, _
 from dagobert.model.base import Unit
 from dagobert.overrides import DEFAULT, Leaf
@@ -198,10 +199,29 @@ def plain(field: Field, old: object, spot: Spot) -> Any:  # noqa: ANN401, PLR091
             text = st.text_area(**common, value=shown(field, old), placeholder=hint)
             return read(field, text, old)
     shape = SHAPE.get(field.unit)
+    value = _respoken(spot.key, field, old)
     text = st.text_input(
-        **common, value=shown(field, old), placeholder=hint or (shape and _(shape)), width=width
+        **common, value=value, placeholder=hint or (shape and _(shape)), width=width
     )
-    return read(field, text, old)
+    return read(field, text or "", old)
+
+
+def _respoken(key: str, field: Field, old: object) -> str | None:
+    """The text of `old` in the language of the session, also where a field shows it in another
+    after a switch (`2.5` on a German page): its state takes the text of this language. None
+    while the state holds the text: Streamlit takes the state, and a default beside a state set
+    by code logs a warning."""
+    now = shown(field, old)
+    if (held := st.session_state.get(key)) is None:
+        return now
+    if held != now and held in {_shown_in(lang, field, old) for lang in i18n.LANGUAGES}:
+        st.session_state[key] = now
+    return None
+
+
+def _shown_in(lang: i18n.Language, field: Field, old: object) -> str:
+    with i18n.use(lang):
+        return shown(field, old)
 
 
 def _names(

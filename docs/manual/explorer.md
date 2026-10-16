@@ -104,7 +104,8 @@ new scenario on the [Scenarios](scenarios.md) page, where you edit it.
 ## Goal seek
 
 The goal seek looks for the value of one slider at which the chance to run out of money by 90 meets
-a target that you set. Instead of one slider, it can look for the factor `All spending`. Press `Find
+a target that you set. Type the target as on the [Overview](overview.md), with a decimal comma or a
+decimal point. Instead of one slider, it can look for the factor `All spending`. Press `Find
 the limit`. It runs the selected scenarios with the other sliders as they are. A bar shows how far
 the search is. It first runs both ends of the range, then a few rounds of simulations that narrow
 it: at 500 paths a scenario takes about 10 seconds.

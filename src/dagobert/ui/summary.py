@@ -14,7 +14,7 @@ from dagobert.i18n import N_, _
 from dagobert.loader import load_assets, load_assumptions
 from dagobert.model.assets import Asset, HoldingsAsset, TermDeposit
 from dagobert.model.events import SellEvent
-from dagobert.money import format_eur
+from dagobert.money import format_eur, format_number, format_percent
 from dagobert.prices import market_value
 from dagobert.report.charts import AMBER, BLUE, GOLD, GREEN, ORANGE, PINK, PLUM, PURPLE
 from dagobert.report.tracker import Slice, sunburst_figure
@@ -244,9 +244,9 @@ def breakdown(data_dir: Path, height: int) -> None:
                 "fixed-income share **{share}**: {points} points against the target of {target} "
                 "at {age}"
             ).format(
-                share=f"{share:.1%}",
-                points=f"{100 * (share - target):+.1f}",
-                target=f"{target:.1%}",
+                share=format_percent(share),
+                points=format_number(100 * (share - target), 1, signed=True),
+                target=format_percent(target),
                 age=f"{age:.0f}",
             )
         )

@@ -18,7 +18,7 @@ from rich.table import Table
 from dagobert import i18n
 from dagobert.difference import SPREAD, Difference
 from dagobert.i18n import N_, _, ngettext
-from dagobert.money import format_eur
+from dagobert.money import format_eur, format_percent
 from dagobert.report.charts import RUN_OUT, points
 from dagobert.result import BROKE_AGE, MEDIAN_AGE, TOTAL_AGES, BoolArray, IntArray, RunResult
 
@@ -84,7 +84,7 @@ Cell = Callable[[SummaryRow, bool], str]  # the text of a value, with ` €` by 
 
 
 def _share(value: Callable[[SummaryRow], float]) -> Cell:
-    return lambda row, _symbol: f"{value(row):.0%}"
+    return lambda row, _symbol: format_percent(value(row), 0)
 
 
 def _euros(value: Callable[[SummaryRow], float | None]) -> Cell:
@@ -116,7 +116,7 @@ def _change(
 
 
 def _share_change(value: Callable[[SummaryRow], float]) -> Change:
-    return _change(value, points, lambda v: f"{v:.0%}", "")
+    return _change(value, points, lambda v: format_percent(v, 0), "")
 
 
 def _euros_change(value: Callable[[SummaryRow], float | None]) -> Change:
@@ -415,7 +415,7 @@ def difference_table(d: Difference, *, compact: bool = False) -> list[dict[str, 
     return [
         {_("Measure ({unit})").format(unit=d.unit): label}
         | {
-            column: format_eur(values[i], signed=True) if money else f"{values[i]:.1%}"
+            column: format_eur(values[i], signed=True) if money else format_percent(values[i])
             for column, i in ages.items()
         }
         for label, values, money in rows

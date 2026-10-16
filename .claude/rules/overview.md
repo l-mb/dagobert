@@ -34,7 +34,9 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   plan that the start page started, `outlook.SEEK_FIRST`, owner 2026-10-16); on request (`Find
   the spending limit`, beside the target `Target, chance to run out by 90 (%)`, its sentence in the
   help, both shared with the goal seek of the Explorer, `seek.Target` (the age of the run, rule
-  `goalseek`), in a row that wraps, the answer below) the one factor on all spending at which
+  `goalseek`); a text field, `seek.target_field`: it reads `4,5` and `4.5` in either language, one
+  outside 0.5 to 50 or that does not read says what to type below the row and keeps the buttons
+  off, rule `money`; in a row that wraps, the answer below) the one factor on all spending at which
   P(broke by 90) meets the target (default `seek.TARGET`), in euros per month and as the change
   against now, in plain words with no factor and no count of runs: `Spend at most 2.054 € a month,
   14% less than now` (`outlook._allowed`; a miss adds the link `Explorer: try less spending or more

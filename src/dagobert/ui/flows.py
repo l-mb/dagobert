@@ -28,7 +28,7 @@ from dagobert.budget import (
 from dagobert.i18n import N_, _, ngettext
 from dagobert.loader import load_plan
 from dagobert.money import EUR_COLUMN, format_eur
-from dagobert.report.charts import LAYOUT
+from dagobert.report import charts
 from dagobert.report.tracker import Slice
 from dagobert.result import RunResult
 from dagobert.scenariofiles import concrete_scenarios, first_scenario, scenario_file
@@ -311,7 +311,7 @@ def flow_figure(flows: _Links, title: str) -> go.Figure:
         )
     hidden = {"visible": False, "fixedrange": True}
     fig.update_layout(
-        LAYOUT,
+        charts.layout(),
         title=title,
         height=layout.height + 2 * PAD + 70,
         margin={"l": 10, "r": 10, "t": 50, "b": 20},

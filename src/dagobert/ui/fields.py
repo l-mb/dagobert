@@ -19,7 +19,7 @@ import numpy as np
 from dagobert.i18n import N_, _
 from dagobert.loader import flatten
 from dagobert.model.base import TITLES, KeyPath, Unit, named
-from dagobert.money import format_eur
+from dagobert.money import decimal_mark, format_eur, format_percent
 from dagobert.overrides import DEFAULT, Leaf, filled, own
 from dagobert.store import NULL
 from dagobert.ui.gridcolumns import (
@@ -283,7 +283,8 @@ def shown(field: Field, value: Any) -> str:  # noqa: ANN401, PLR0911 a value of 
             return format_eur(value, cents=not float(value).is_integer(), symbol=False)
         case int() | float():
             number = float(value * 100 if field.unit is Unit.PERCENT else value)
-            return np.format_float_positional(round(number, 9), trim="-")  # not 2.98000004
+            # not 2.98000004; German `2,5`
+            return decimal_mark(np.format_float_positional(round(number, 9), trim="-"))
         case date() if field.unit is Unit.MONTH:
             return f"{value:%Y-%m}"
         case date():
@@ -338,7 +339,7 @@ def _number(field: Field, text: str) -> float:
         return _whole(number)
     plain = text.removesuffix("%").rstrip() if field.unit is Unit.PERCENT else text
     if not _DECIMAL.fullmatch(plain):
-        raise ValueError(_("type a number, such as 2,5 or 2.5"))
+        raise ValueError(_("type a number, such as 2.5"))
     number = float(plain.replace(",", "."))
     if field.kind is Kind.INTEGER and not number.is_integer():
         raise ValueError(_("type a whole number"))
@@ -396,8 +397,9 @@ def _outside(field: Field, value: Any) -> str | None:  # noqa: ANN401 a value of
 
 
 def _bound(field: Field, value: float) -> str:
-    symbol = SYMBOL.get(field.unit, "")
-    return shown(field, value) + (symbol if field.unit is Unit.PERCENT else f" {symbol}".rstrip())
+    if field.unit is Unit.PERCENT:
+        return format_percent(value, None)
+    return f"{shown(field, value)} {SYMBOL.get(field.unit, '')}".rstrip()
 
 
 def read(field: Field, text: str, old: Any) -> Any:  # noqa: ANN401 a value of the file

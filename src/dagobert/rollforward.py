@@ -29,6 +29,7 @@ from dagobert.model.assumptions import CPI_INDEX, Assumptions
 from dagobert.model.events import STATE_EVENTS, GiftEvent, SellEvent, SetStreamEvent
 from dagobert.model.months import add_months, months_between
 from dagobert.model.streams import stream_index
+from dagobert.money import format_percent
 from dagobert.problems import Keys, dotted
 from dagobert.references import Kind
 from dagobert.scenariofiles import concrete_scenarios, scenario_file, scenario_paths
@@ -132,7 +133,7 @@ class CpiChange:
     def source(self) -> str:
         """Where the factor comes from, after `from` in a sentence of the Overview, in the
         language of the session."""
-        span, rate = months_between(self.old, self.new), f"{self.mean:.1%}"
+        span, rate = months_between(self.old, self.new), format_percent(self.mean)
         if not self.estimated:
             return _("the consumer prices of {old} and {new}").format(
                 old=f"{self.old:%Y-%m}", new=f"{self.new:%Y-%m}"

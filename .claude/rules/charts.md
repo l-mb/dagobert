@@ -11,8 +11,9 @@ After a change of a figure, run the check at the end of this rule, and for a fig
 app the skill `app-check`. `ui.chart` draws every chart of the app: rule `ui`.
 
 - `src/dagobert/report/`: plotly HTML, rich table. `money.py` (a leaf) holds the euro formatting.
-  `charts.py` holds what every figure shares: the color palette and `LAYOUT` (the template and
-  number separators), titles, legends, hover labels and the age axis with its phase bands and
+  `charts.py` holds what every figure shares: the color palette and `layout()` (the template and
+  the separators of the language), titles, legends, hover labels (a percent as text, `percents`),
+  percent ticks (`tick_format`, rule `money`) and the age axis with its phase bands and
   markers. The `go.Figure` builders (public, the app reuses them) are a module per theme: `fan.py`
   (the liquid fan, the difference), `comparison.py` (the scenarios by age), `balance.py` (the
   balance sheet, whether the money lasts: rule `balance`), `flows.py`, `sensitivity.py`,
@@ -104,10 +105,10 @@ app the skill `app-check`. `ui.chart` draws every chart of the app: rule `ui`.
   `total`, `broke`), the terms of the report (`P(broke)@90`) stay in the help. Every age axis is one
   axis (`age_axis`): a tick at every fifth age, compact every tenth, each with its calendar year
   below, the title `Age and year`. A marker reads in words, written from its data (rule `engine`):
-  `charts.said` what it says (`Policy pays 5 € per month`, `85.9% with 40 years`, a full claim
-  `100%` without its `.0`, the gain of a harvest `19.120 €`; `SAYS` of a kind that always says the
-  same: `alg1`, the end of the claim `alg1 used` and `alg1 expired` (§161, rule `alg1`), the law
-  behind `exemption` and `gkv`, rule `gkv`, its paragraph `{law}` of `LAWS`
+  `charts.said` what it says (`Policy pays 5 € per month`, `85.9% with 40 years`, German `85,9 %`,
+  a full claim `100%` without its `.0`, the gain of a harvest `19.120 €`; `SAYS` of a kind that
+  always says the same: `alg1`, the end of the claim `alg1 used` and `alg1 expired` (§161, rule
+  `alg1`), the law behind `exemption` and `gkv`, rule `gkv`, its paragraph `{law}` of `LAWS`
   with no-break spaces, so a legend never parts `SGB` from `V`), `readable` its kind in words
   before it (`MARKER_KINDS`, one entry per `result.MarkerKind`, a test holds them equal: a
   `lump_sum` of `Car` is `One-off payment: Car`, `alg1` `ALG1: …`, an estate drawn per path

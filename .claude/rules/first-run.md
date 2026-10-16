@@ -47,7 +47,8 @@ The examples that a start copies: rule `examples`. The manual: `docs/manual/star
   ETF investing): `stop`, the age to stop working (the change to `retired`); `lost`, the month of a
   job loss (`_lost`: `scenariofiles.lost_job` on a copy of the files in a temporary directory, its
   edits applied with `Edit.onto`, so one revision: a scenario `job-loss` that extends `plan`, no new
-  job, the ALG1 stream, `job_loss` on; second in `app.yaml`, which the Explorer compares); `home`
+  job, the ALG1 stream, `job_loss` on, second in `app.yaml`, which the Explorer and the what-ifs
+  of the Overview compare: `lost_job` writes it, `scenariofiles.compared`); `home`
   and `owed`, an own property at its value as 1 m² (as a `buy_property`, `sqm` 1, `per_sqm` the
   value) and its loan (`balance`, `rate` `LOAN_RATE`, the refinance rate of the model, `annuity`
   `payment`: `LOAN_RATE` and `REPAYMENT`, 2%, of the balance a year, `asof` today, `finances` the
@@ -72,7 +73,8 @@ The examples that a start copies: rule `examples`. The manual: `docs/manual/star
 - `ui/welcome.py`, the page `Start a plan`: `main.py` draws it instead of the page while
   `datadir.empty(DATA)`, with the navigation registered but hidden (`position="hidden"`), so a start
   goes on by `st.switch_page` to the `Overview` (an example, a quick start with a salary before 67),
-  whose plan seeks when to stop working once (`outlook.SEEK_FIRST`, rule `overview`), or the
+  whose plan seeks when to stop working once (`outlook.SEEK_FIRST`, rule `overview`) and whose
+  block `What-ifs` invites to the steps after the quick start (rule `whatifs`), or the
   `Assumptions` page; not an import. The sidebar holds the language switch alone: no mode switch
   (owner 2026-10-16), and a start keeps the mode of the browser (a new one starts simple, rule
   `mode`). Two columns, stacked on a phone: `An example`, a line and a button per example of

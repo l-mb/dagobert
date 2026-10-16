@@ -61,9 +61,12 @@ section on the mode and the features) and `features.md`.
   `overrides` or `drop` (the Overrides tab, rule `scenarios`). `used(feature)`: a place exists. A
   file that does not parse (`InputError`) gives `ALL` (`everything`: every item used, `where`
   empty): the error screen of `main.py` comes with every page.
-- A feature also turns on by an action that adds its items: `Add a job loss` of the Scenarios page
-  drops `job_loss` from `features_off` in its revision (`scenariofiles.lost_job`, rule `store`), a
-  goal of the quick start leaves its feature on (`job_loss`, `property`; `datadir.unused`).
+- A feature also turns on by an action that adds its items: a step of `Check a what-if` (rule
+  `whatifs`) drops its features from `features_off` in its revision (`scenariofiles.compared`, rule
+  `store`: `Lose the job` and a course after a job loss `job_loss`, a course with costs
+  `deductions`, `Start a business` `self_employment`, `Buy a property` `property`), a goal of the
+  quick start leaves its feature on (`job_loss`, `property`; `datadir.unused`). The steps show in
+  both modes and whatever `features_off` holds: they are how a newcomer turns a part on.
 - `features_off(data_dir)`: the known ids of `features_off` of the raw `app.yaml` (`listed`); a
   file that does not load switches nothing off, an unknown id is an `InputError` of the model
   (`AppSettings`, `Strict`) on the pages that load it.

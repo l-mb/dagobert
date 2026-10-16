@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from dagobert import actuals, files, revisions, schema
+from dagobert import actuals, datadir, files, revisions, schema
 from dagobert.engine.core import year_levels
 from dagobert.engine.simulation import simulate
 from dagobert.model.assets import CashAsset, GoldAsset
@@ -44,6 +44,10 @@ PHASE_LABELS = {
     "retired": "Retired",
 }
 PHASES = {name: PhaseSpec(label=label) for name, label in PHASE_LABELS.items()}
+# the answers of the quick start of the fixture `quick`: it stops working at 67
+QUICK = datadir.Quick(
+    date(1986, 5, 20), gross=5000, spending=2500, savings=40000, cash=10000, plan=500
+)
 PHASES_TEXT = (  # in YAML
     "phases: {work: {label: Work}, unemployed: {label: Unemployed}, alt: {label: Career break}, "
     "retired: {label: Retired}}\n"

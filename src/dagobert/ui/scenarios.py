@@ -46,6 +46,7 @@ from dagobert.ui import (
     source,
     tell,
     titled,
+    whatifs,
 )
 from dagobert.ui import fields as model_fields
 from dagobert.ui.fileactions import KEY, NO_PARENT, PENDING, Doc, Plan, actions, shut
@@ -512,6 +513,7 @@ def page(data_dir: Path) -> None:
     stem = _chooser(docs, order, first, row)
     chosen = Chosen(data_dir, stem, docs[stem])
     actions(data_dir, chosen, Plan(docs, first), row)
+    whatifs.menu(data_dir, Plan(docs, first), row, "scenarios")
     try:
         loader.load_plan(data_dir, chosen.path)
     except InputError as err:

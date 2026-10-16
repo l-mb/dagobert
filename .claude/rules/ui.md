@@ -18,7 +18,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
 
 | Module | Rules besides `ui`, `money` and `i18n` |
 |---|---|
-| `overview.py` | `overview` (the page), `cashflows` (the plan changes of the attention table), `rollforward`, `tracking`, `i18n-track` |
+| `overview.py` | `overview` (the page), `whatifs` (its block `What-ifs`), `cashflows` (the plan changes of the attention table), `rollforward`, `tracking`, `i18n-track` |
 | `outlook.py` | `overview`, `explorer-runs`, `i18n-track` |
 | `explorer.py`, `knobs.py`, `sliders.py`, `seek.py`, `main.py` | `explorer` (the page), `explorer-sliders` (`knobs.py`, `sliders.py`: sliders, groups, switches), `explorer-runs` (its runs, caches and pool), `mode` (simple mode) |
 | `runs.py` | `explorer-runs` |
@@ -31,7 +31,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
 | `spend.py` | `spend` (the page), `save-guard` |
 | `data.py` | `series` (the page), `prices` |
 | `assumptions.py` | `assumptions` (the page), `forms`, `save-guard` |
-| `scenarios.py`, `fileactions.py`, `phases.py` | `scenarios` (the page), `events`, `scenario-overrides`, `forms`, `store` |
+| `scenarios.py`, `fileactions.py`, `phases.py`, `whatifs.py` | `scenarios` (the page), `whatifs` (its steps, also of the Overview), `events`, `scenario-overrides`, `forms`, `store` |
 | `transfer.py` | `transfer` (the page) |
 | `welcome.py` | `first-run` (the first-run page), `examples` |
 | `mode.py`, `features.py` | `mode` (the mode, the features and their page), `save-guard` |

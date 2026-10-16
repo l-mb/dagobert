@@ -60,14 +60,16 @@ rule `scenario-overrides`.
   own` last, each `stem · name` by `Plan.said`, `titled` and `main_marked` on the raw files: a
   template is a parent, so not `ui.scenario_titles`; on a phone no typing, `filter_mode=None`),
   `Copy` (name and file name; the text with its comments and parent), `Rename file` (the file;
-  every `extends` and entry of `app.yaml` follow, the name stays), `Delete`, and with a main
-  scenario `Add a job loss` (`_job_loss`). Each is an `st.dialog`, its title made per call and the
-  language taken first (rule `i18n`: it reruns alone), that lists what it writes through the save
+  every `extends` and entry of `app.yaml` follow, the name stays) and `Delete`; beside them, with a
+  main scenario, the menu `Check a what-if` (rule `whatifs`). Each is an `st.dialog`, its title
+  made per call and the language taken first (rule `i18n`: it reruns alone), that lists what it
+  writes through the save
   guard (`listing`: the moved or copied file, each value with the one before, each row that it adds
   to a list or cell that it changes, the removed files; a value in words, never a Python repr,
   `worded`: phase changes `Work from 2026-10` by their labels, also a label that the edits define,
   events by `lineage.worded`, a stream kind by its title, a month `2026-10`; `features_off` per
-  feature `job loss off → on`, as the Features page) or why it is refused
+  feature `job loss off → on`, as the Features page; `lines`, a line that the action words
+  itself: the shift of `Stop earlier`, rule `whatifs`) or why it is refused
   (`Refused:`, `literal`: the store names the characters in words), says why its button is off
   (`why`: `Type a name first.`), and writes it as one revision `Scenarios: new b`, `Scenarios:
   rename scenarios/a.yaml → scenarios/b.yaml` (`revisions.renaming`: the Overview and the Flows
@@ -77,16 +79,16 @@ rule `scenario-overrides`.
   (`save.changed_at`). After a rename or a delete the selections of other pages in the session
   follow (`FOLLOW`: the explorer's scenarios, the Cashflows and the Flows scenario; `followed`). A
   written action says what it did in a toast of the next run (`ui.tell`, `Created Früh in Rente!,
-  which extends plan`): the dialog closes with a rerun.
-- `Add a job loss` (owner 2026-10-16, for a first-time user; `scenariofiles.lost_job`, rule `store`,
-  which the quick start and the goal steps can call): the month of the loss and, optional, of a new
-  job (text fields read by `fields.parse` of a month, the error as `why`), the name (placeholder
-  `Job loss at <age>`, numbered `(2)` where taken; the file name its slug, numbered `-2`), the
-  label of a phase it adds in the language of the session (`pgettext("phase", "Unemployed")`: a
-  context, so the leak check of user data does not count it). A new job in a month where the
-  main scenario is unemployed or has no phase is refused (`Refused:`): it would change no phase.
-  One revision `Scenarios: job loss
-  <stem>`, then the chooser opens the new scenario. It shows in both modes (rule `mode`).
+  which extends plan`): the dialog closes with a rerun, or `fileactions.confirm(page=)` opens that
+  page of the navigation (`st.switch_page`; a page drawn alone stays).
+- `Check a what-if` (owner 2026-10-16, for a first-time user; `ui/whatifs.menu`, rule `whatifs`):
+  a popover after the file actions, also on a phone (no popover in `File`), with `Stop earlier`,
+  `Lose the job` (the former `Add a job loss`: the month of the loss and, optional, of a new job,
+  `scenariofiles.lost_job`, rule `store`; a new job where the main scenario is unemployed or has
+  no phase is `Refused:`), `Take a course`, `Start a business`, `Buy a property`. Each dialog ends
+  with `confirm(page="Overview")`: one revision `Scenarios: what-if <stem>`, the chooser takes the
+  stem (`PENDING`) and the Overview opens on its block `What-ifs`. It shows in both modes (rule
+  `mode`).
 
 ## Tabs
 

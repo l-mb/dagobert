@@ -1,30 +1,28 @@
-"""The file actions of the Scenarios page: `New`, `Copy`, `Rename file`, `Delete` and `Add a job
-loss`, each a dialog that lists what it writes through the save guard, in words, or why it is
-refused, and writes it as one revision. The write refuses a file changed since the list, and
-after a rename or a delete the selections of the other pages follow."""
+"""The file actions of the Scenarios page: `New`, `Copy`, `Rename file` and `Delete`, each a
+dialog that lists what it writes through the save guard, in words, or why it is refused, and
+writes it as one revision (`confirm`, also of the what-ifs, `ui.whatifs`). The write refuses a
+file changed since the list, and after a rename or a delete the selections of the other pages
+follow."""
 
 from __future__ import annotations
 
-from collections.abc import Callable, Collection, Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 from functools import partial
-from itertools import chain, count
 from typing import TYPE_CHECKING, Any
 
 import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 
 from dagobert import i18n, references, revisions, scenariofiles, store
-from dagobert.i18n import N_, _, pgettext
-from dagobert.model.base import Unit
-from dagobert.model.events import PhaseChange
-from dagobert.model.months import months_of_age
+from dagobert.i18n import N_, _
 from dagobert.model.streams import StreamKind
 from dagobert.problems import Keys, dotted
 from dagobert.ui import (
     CASHFLOWS_SCENARIO,
     FLOWS_SCENARIO,
+    PAGES,
     guard,
     is_mobile,
     keyboard,
@@ -38,12 +36,10 @@ from dagobert.ui import (
     tell,
     titled,
 )
-from dagobert.ui import fields as model_fields
-from dagobert.ui.fields import ABSENT, dicts, lookup, parse
+from dagobert.ui.fields import ABSENT, dicts, lookup
 from dagobert.ui.gridcolumns import keyword, on_off
 from dagobert.ui.save import changed_at, listed, reason
 from dagobert.ui.sliders import KEY as EXPLORER
-from dagobert.ui.widgets import SHAPE
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -66,7 +62,7 @@ NAME_HELP = N_(
     "The name in the results, the tabs and the summary table. Two scenarios cannot share one."
 )
 Doc = Mapping[str, Any]
-MONTH = next(f for f in model_fields.of(PhaseChange) if f.unit is Unit.MONTH)  # a month typed
+Lines = Mapping[tuple[str, Keys], guard.Change]  # a line of the guard by file and key path
 
 
 def followed(held: object, old: str, new: str | None) -> object:
@@ -80,13 +76,17 @@ def followed(held: object, old: str, new: str | None) -> object:
 
 
 def listing(
-    edits: Sequence[store.Edit], read: Callable[[str], Doc], labels: Mapping[str, str] | None = None
+    edits: Sequence[store.Edit],
+    read: Callable[[str], Doc],
+    labels: Mapping[str, str] | None = None,
+    lines: Lines | None = None,
 ) -> tuple[list[guard.Change], list[str]]:
     """What the edits of a file action write, for the save guard: the file that it moves or copies,
     each value that it sets with the value before (`read` gives the raw mapping of a file), each
     row that it adds or changes in a list, and the files that it removes. A key as the pages name
     it, a value in words (`worded`, the phases by their `labels`, also those that the edits
-    define), a feature as on the Features page, `on` or `off`."""
+    define; `lines`: the line of a value by its file and key path that the action words itself), a
+    feature as on the Features page, `on` or `off`."""
     moved = {e.origin for e in edits if e.origin} & {e.name for e in edits if e.remove}
     defined: dict[str, str] = {
         str(keys[1]): str(value["label"])
@@ -108,6 +108,9 @@ def listing(
             old = None if (held := lookup(before, keys)) is ABSENT else held
             if keys == ("features_off",):
                 found += _features(old, value)
+                continue
+            if (line := (lines or {}).get((edit.name, keys))) is not None:
+                found.append(line)
                 continue
             found.append(
                 guard.Change(
@@ -206,7 +209,7 @@ def shut(popover: str) -> None:
     st.session_state[popover] = False
 
 
-def _confirm(
+def confirm(
     data_dir: Path,
     params: tuple[object, ...],
     action: scenariofiles.Action,
@@ -218,13 +221,16 @@ def _confirm(
     ready: bool = True,
     why: str = "",
     moved: tuple[str, str | None] | None = None,
+    page: str | None = None,
+    lines: Callable[[], Lines] | None = None,
 ) -> None:
-    """The end of a dialog: what `action` writes (`listing`), or why it is refused, and the
-    button that writes it as one revision `Scenarios: <what>`; while it is not `ready`, `why`. The
-    write checks what the last run listed for the same `params`: a file changed since
-    refuses it. A written action closes the dialog with the toast `done`, the chooser takes
-    `then`, and the selections of other pages follow the stem that it `moved` (old and new, None
-    after a delete)."""
+    """The end of a dialog: what `action` writes (`listing`, the `lines` that it words itself),
+    or why it is refused, and the button that writes it as one revision `<page title>: <what>`;
+    while it is not `ready`, `why`. The write checks what the last run listed for the same
+    `params`: a file changed since refuses it. A written action closes the dialog with the toast
+    `done`, the chooser takes `then`, the selections of other pages follow the stem that it
+    `moved` (old and new, None after a delete), and the app goes on to `page` of the navigation (a
+    page drawn alone, as in a test, has none: it stays)."""
     now: scenariofiles.Listed | None = None
     if not ready and why:
         st.caption(why)
@@ -237,7 +243,9 @@ def _confirm(
             )
         else:
             labels = references.phases(data_dir)
-            found, gone = listing(now.edits, partial(references.read, data_dir), labels)
+            found, gone = listing(
+                now.edits, partial(references.read, data_dir), labels, lines() if lines else None
+            )
             guard.review(found, gone, key=f"{KEY}dialog", hint="")
     shown = listed(LISTED, params, now)
     if not st.button(button, key=f"{KEY}confirm", type="primary", disabled=shown is None):
@@ -259,6 +267,8 @@ def _confirm(
     st.session_state.pop(LISTED, None)
     st.session_state[PENDING] = then
     tell(done)
+    if page is not None and (target := st.session_state.get(PAGES, {}).get(page)) is not None:
+        st.switch_page(target)
     st.rerun()
 
 
@@ -296,7 +306,7 @@ def _new(data_dir: Path, plan: Plan) -> None:
         filter_mode=None if is_mobile() else "fuzzy",  # no keyboard on a phone
         help=_("The scenario whose phases, events and overrides it starts from."),
     )
-    _confirm(
+    confirm(
         data_dir,
         ("new", stem, name, parent),
         lambda d: scenariofiles.created(d, stem, name or stem, parent),
@@ -311,71 +321,6 @@ def _new(data_dir: Path, plan: Plan) -> None:
     )
 
 
-def _month(label_text: str, key: str) -> tuple[date | None, str]:
-    """A month typed into a text field, and why it does not read."""
-    typed = st.text_input(label_text, key=f"{KEY}{key}", placeholder=_(SHAPE[Unit.MONTH]))
-    try:
-        return parse(MONTH, typed), ""
-    except ValueError as err:
-        return None, str(err)
-
-
-def _free(first: str, taken: Collection[str], numbered: Callable[[int], str]) -> str:
-    """`first`, else the first of its `numbered` forms from 2 that is not `taken`."""
-    return next(n for n in chain([first], map(numbered, count(2))) if n not in taken)
-
-
-def _job_loss(data_dir: Path, plan: Plan) -> None:
-    """The months of a job loss and of a new job, the name of its scenario, and what the action
-    writes (`scenariofiles.lost_job`)."""
-    i18n.activate(language())
-    main = str(plan.main)
-    st.caption(
-        _(
-            "A new scenario that extends {scenario}. From the month of the job loss the salary "
-            "stops and ALG1 pays, until the month of a new job, if you type one. Where the plan "
-            "lacks them, the app adds the payment ALG1, a phase without a job and the feature "
-            "Job loss."
-        ).format(scenario=plan.said(main))
-    )
-    lost, problem = _month(_("Month of the job loss"), "loss-lost")
-    back, later = _month(_("Month of a new job (optional)"), "loss-back")
-    birth = references.born(data_dir)
-    named = (
-        _("Job loss at {age}").format(age=months_of_age(birth, lost) // 12)
-        if lost and birth
-        else _("Job loss")
-    )
-    taken = {str(doc.get("name")) for doc in plan.docs.values()}
-    default = _free(named, taken, lambda k: f"{named} ({k})")
-    name = st.text_input(
-        _("Name"), key=f"{KEY}loss-name", placeholder=default, help=_(NAME_HELP)
-    ).strip()
-    stems = {s.casefold() for s in plan.docs}
-    base = slug(name or default)
-    stem = _free(base, stems, lambda k: f"{base}-{k}")
-    loss = (
-        None
-        if lost is None
-        else scenariofiles.JobLoss(
-            main, lost, back, name or default, stem, pgettext("phase", "Unemployed")
-        )
-    )
-    _confirm(
-        data_dir,
-        ("job-loss", loss),
-        lambda d: [] if loss is None else scenariofiles.lost_job(d, loss),
-        button=_("Add the job loss"),
-        what=f"job loss {stem}",
-        done=_("Created {name}: a job loss in {month}").format(
-            name=name or default, month=f"{lost:%Y-%m}" if lost else ""
-        ),
-        then=stem,
-        ready=loss is not None and not later,
-        why=problem or later or _("Type the month of the job loss first."),
-    )
-
-
 def _copy(data_dir: Path, chosen: Chosen) -> None:
     i18n.activate(language())
     st.caption(
@@ -386,7 +331,7 @@ def _copy(data_dir: Path, chosen: Chosen) -> None:
     named = _("{name} (copy)").format(name=chosen.doc.get("name") or chosen.stem)
     name = st.text_input(_("Name"), named, key=f"{KEY}copy-name", help=_(NAME_HELP)).strip()
     stem = _stem(_("File name of the copy"), "copy-stem", f"{chosen.stem}-copy")
-    _confirm(
+    confirm(
         data_dir,
         ("copy", chosen.stem, stem, name),
         lambda d: scenariofiles.copied(d, chosen.stem, stem, name or stem),
@@ -409,7 +354,7 @@ def _rename(data_dir: Path, chosen: Chosen) -> None:
         )
     )
     stem = _stem(_("New file name"), "rename-stem", chosen.stem)
-    _confirm(
+    confirm(
         data_dir,
         ("rename", chosen.stem, stem),
         lambda d: scenariofiles.renamed(d, chosen.stem, stem),
@@ -426,7 +371,7 @@ def _rename(data_dir: Path, chosen: Chosen) -> None:
 def _delete(data_dir: Path, chosen: Chosen) -> None:
     i18n.activate(language())
     st.caption(_("`{file}` goes. The revisions keep a copy of it.").format(file=chosen.file))
-    _confirm(
+    confirm(
         data_dir,
         ("delete", chosen.stem),
         lambda d: scenariofiles.removed(d, chosen.stem),
@@ -461,8 +406,7 @@ class Plan:
 def actions(data_dir: Path, chosen: Chosen | None, plan: Plan, row: DeltaGenerator) -> None:
     """The file actions: buttons beside the chooser, on a phone in a popover `File`, which closes
     when one is tapped: it would cover the dialog. Each opens its dialog with a fresh list, its
-    title in the language of the session: a dialog takes it where it is made. `Add a job loss`
-    needs a main scenario to extend."""
+    title in the language of the session: a dialog takes it where it is made."""
     phone = is_mobile()
     holder = (
         row.popover(_("File"), icon=":material/folder:", key=FILE, on_change="rerun").container(
@@ -481,13 +425,6 @@ def actions(data_dir: Path, chosen: Chosen | None, plan: Plan, row: DeltaGenerat
             "rename": (N_("Rename file"), N_("Rename the file"), _rename, (data_dir, chosen)),
             "delete": (N_("Delete"), N_("Delete the scenario"), _delete, (data_dir, chosen)),
         }
-    if plan.main is not None:
-        dialogs["job-loss"] = (
-            N_("Add a job loss"),
-            N_("Add a job loss"),
-            _job_loss,
-            (data_dir, plan),
-        )
     for action, (text, title, dialog, args) in dialogs.items():
         if holder.button(
             _(text),

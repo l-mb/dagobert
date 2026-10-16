@@ -82,8 +82,9 @@ the BU` lets it lapse. Its scenario `Unable to work at 51` forces the onset in e
 
 ## Create, copy, rename and delete
 
-The buttons `New`, `Copy`, `Rename file`, `Delete` and `Add a job loss` are next to the list
-`Edit scenario`. On a phone they are in the menu `File`. Each button opens a window. The window lists each change before
+The buttons `New`, `Copy`, `Rename file` and `Delete` are next to the list `Edit scenario`. On a
+phone they are in the menu `File`. The menu `Check a what-if` is next to them (see [Check a
+what-if](#check-a-what-if)). Each button opens a window. The window lists each change before
 you save it. If the app refuses the change, the window shows the reason. If the button of the
 window is off, a line above it says what is missing. After the change, a short message at the
 bottom of the page says what the app did.
@@ -105,12 +106,66 @@ bottom of the page says what the app did.
   main scenario, the first scenario of that list becomes the main scenario. If the list is empty,
   the first scenario file that runs becomes the main scenario. The revisions keep a copy.
 
-## Add a job loss
+## Check a what-if
 
-`Add a job loss` makes a new scenario that extends the main scenario. In this scenario you lose
-your job and get unemployment benefit (ALG1). Type the month of the job loss. If you find a new
-job, type its month too. The name and the file name come from your age, for example `Job loss at
-48`. Type a name if you want another one.
+The menu `Check a what-if` asks five questions about your life. Each question makes a new scenario
+that extends the main scenario and adds it last to the list `Also compare in the Explorer`. The
+[Overview](overview.md#what-ifs) then opens and compares it with your plan. The same questions show
+on the Overview as buttons while your plan has no what-if. Each window has a few fields, most with
+a value already. A field that does not fit your plan shows why in red below it. The name of the
+scenario comes from the question and your age, for example `Stop at 62`. Type a name if you want
+another one. The list `To save` shows every change, and the window saves all of them as one
+revision.
+
+- `Stop earlier`: type the age at which you stop working. The field shows your age at the stop of
+  the plan less five years. The scenario moves the change out of work of the main scenario (for
+  example the change to `Retired`) to the month in which you reach that age, as the slider of the
+  [Explorer](explorer.md) does. Your salary and your savings plan stop then, the statutory pension
+  starts as before. The age must lie before the stop of the main scenario and after the start of
+  the plan. The list `To save` shows the month and your age at the stop before and after, for
+  example `Stop working 2053-06 (age 67) → 2046-06 (age 60)`.
+- `Lose the job`: see [Lose the job](#lose-the-job) below.
+- `Take a course`: a course of some months, six by default, then back to work. Select what the
+  course follows. After `a job loss` you lose your job in the first month of the course, and ALG1
+  pays during the course: a course with a Bildungsgutschein (Arbeitslosengeld bei Weiterbildung)
+  uses half of the days of your claim. In `a career break` nothing pays. In the month after the
+  course the scenario changes back to the phase of the main scenario, so the salary pays again.
+  Type the costs of the course if you pay them yourself. They are spread over its months in whole
+  cents, and the last month takes the cents that are left, so the months add up to the costs that
+  you type. They count as work expenses (Werbungskosten) for the income tax. The course must end
+  before you stop working.
+- `Start a business`: type the month in which you start and the profit per month, before income
+  tax and social insurance. The field shows your gross salary first. From that month the scenario
+  changes to the phase `self-employed`: the salary and the savings plan stop, and the profit pays
+  until you stop working. You pay the income tax and your health insurance yourself and no statutory pension
+  insurance. The tab `Rules` of the [Assumptions](assumptions.md) page changes this
+  (`tax.self_employed`). The month must lie before you stop working.
+- `Buy a property`: type the month, the price, your own funds and the Land (Bundesland) where the
+  property lies. The Land sets the Grunderwerbsteuer, and 5% of the price go to the notary and a
+  broker. A loan pays what your own funds leave, at the refinance rate of the plan with a repayment
+  of 2% a year. When you select the Land, a line shows the cost and the payment of the loan. Until
+  you select it, the Land shows in red. Own funds above the price with the highest
+  Grunderwerbsteuer and the costs show in red at once. The property costs 1% of its value a year
+  for its upkeep. In `Rent that ends (€ a month)`, type the rent and the costs of your current home
+  that the purchase ends. From the month of the purchase they come off your spending: the scenario
+  lowers your living costs (`Living costs` of a quick start) by that amount with a change of a
+  payment (`set_stream`). If your plan has more than one spending row, select the row that holds
+  the rent in `Spending that holds the rent`. The rent cannot be more than that row. Leave the
+  field empty if you do not pay a rent now.
+
+If your plan does not have the parts that a question needs, the question adds them too: a phase on
+the [Assumptions](assumptions.md) page (`unemployed`, `alt` for a career break, `self-employed`),
+the payment ALG1 on the [Cashflows](cashflows.md) page, and the feature on the
+[Features](features.md) page (`Job loss`, `Self-employment`, `Property`, `Deductions` for the costs
+of a course).
+
+## Lose the job
+
+`Lose the job` makes a new scenario that extends the main scenario. In this scenario you lose your
+job and get unemployment benefit (ALG1). Type the month of the job loss. If you find a new job,
+type its month too. The name and the file name come from your age, for example `Job loss at 48`.
+Type a name if you want another one. The month must lie from the start of the plan to before you
+stop working, and the plan needs a salary.
 
 The scenario changes to the phase of unemployment in the month of the job loss. A salary that
 pays only in the phases of work stops then. In the month of the new job, the scenario changes back
@@ -126,8 +181,8 @@ If your plan does not have these parts yet, the action adds them too:
 - The feature `Job loss` on the [Features](features.md) page.
 
 If a salary has no phases, it pays in every phase, also while you are unemployed. If no scenario
-uses the phase of unemployment yet, the action limits such a salary to the other phases. The list
-`To save` shows every change before you save it. The action saves all of them as one revision.
+uses the phase of unemployment yet, the action limits such a salary to the other phases. The same
+holds for a course and a business.
 
 A file name can contain letters, digits, spaces, dots, underscores and dashes. It must start with a
 letter or a digit. The app refuses a file name that YAML reads as a value, such as `on`, `no`,

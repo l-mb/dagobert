@@ -83,6 +83,31 @@ tile `Chance to run out, lifetime` uses it and shows another figure. If your pla
 90, the tile, the target and the answers use the last age of the plan instead, for example `Target,
 chance to run out by 80 (%)`.
 
+## What-ifs
+
+A what-if is a question about your life: what if I stop working earlier, lose my job, take a
+course, start a business or buy a property? Each question makes a scenario that extends your main
+scenario. The section `What-ifs` below the outlook compares these scenarios with your plan.
+
+If your plan has no what-if yet, the section shows the five questions as buttons. A plan from the
+[quick start](start-a-plan.md) shows them first. A button opens a small window with a few fields.
+Most fields have a value already, so you can often press `Add and compare` at once. The window lists
+what it saves before you save it, and a field that does not fit your plan shows why in red below
+it. [Check a what-if](scenarios.md#check-a-what-if) on the Scenarios page explains each question.
+
+After the save the Overview opens again. The section shows one row for each scenario of the list
+`Also compare in the Explorer` (see [Main scenario](scenarios.md#main-scenario)): its name, its
+`Chance to run out by 90` and its `Net worth at 67`, the same figures as the tiles above. In
+brackets is the change against your main scenario: `67% (+41.2 pt)` means 41.2 percentage points
+more than the plan. The link `Compare` opens the [Explorer](explorer.md) with the scenario and the
+main scenario, with the difference path by path. Below the rows, the menu `Check a what-if` holds
+the five questions again.
+
+The rows come from the same simulation as the Explorer, so `Compare` shows at once. After you change
+an input, the section simulates every row again: a bar shows the progress. A scenario that does not
+load or run shows `does not run`, and the link `Open` shows it on the Scenarios page. On a phone a
+row shows the name above the two figures.
+
 ## Needs attention
 
 The table lists what you must update or know about:

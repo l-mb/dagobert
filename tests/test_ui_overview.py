@@ -15,14 +15,16 @@ from builders import ASSETS, spent
 from german import ACTIVATE, words
 from streamlit.testing.v1 import AppTest
 
-from dagobert import datadir, goalseek, i18n, revisions, rollforward, schema
+from dagobert import datadir, goalseek, i18n, revisions, rollforward, schema, whatifs
 from dagobert.loader import APP, load_assumptions, load_plan
 from dagobert.model.assets import Assets
 from dagobert.model.months import add_months, months_between
 from dagobert.money import format_eur
 from dagobert.result import RunResult
 from dagobert.runner import DATA_ENV
+from dagobert.scenariofiles import act
 from dagobert.ui import PAGES, SCENARIO, TAB, day_said, mode, outlook, overview, runs
+from dagobert.ui import whatifs as steps
 
 PHASES = "phases: [{from: 2026-01-01, phase: work}]\nnote: then\n"
 POLICY = {
@@ -139,6 +141,31 @@ def test_overview_shows_the_plan(data: Path) -> None:
     assert any(m.value.startswith("No phase of the scenario pays") for m in at.markdown)
     stop = next(m for m in at.metric if m.label == goalseek.STOP)
     assert (stop.value, stop.delta) == ("–", "see the answer below")
+
+
+@pytest.mark.parametrize("phone", [False, True])
+def test_the_overview_invites_to_a_what_if_and_then_compares_it(quick: Path, phone: bool) -> None:
+    """A quick start without a what-if: the invitation with a button per step; a what-if in the
+    comparison: its row with the figures of the tiles and their change against the plan, and
+    the menu."""
+    at = AppTest.from_string(OVERVIEW.format(data=str(quick)), default_timeout=60)
+    at.query_params["mobile"] = str(int(phone))
+    at.run()
+    assert not at.exception
+    assert "What-ifs" in [s.value for s in at.subheader]
+    assert overview.INVITE in [m.value for m in at.markdown]
+    labels = [label for label, _dialog in steps.STEPS.values()]
+    assert [b.label for b in at.button if b.label in labels] == labels
+    act(quick, whatifs.Earlier("plan", 60, "Stop at 60", "stop-at-60").edits, source="test")
+    at.run()
+    assert not at.exception
+    assert overview.INVITE not in [m.value for m in at.markdown]
+    cells = [m.value for m in at.markdown]
+    row = cells[cells.index("Stop at 60") + 1 : cells.index("Stop at 60") + 3]
+    assert row[0].endswith(" pt)")  # the chance by 90, against the plan
+    assert row[1].endswith(" €)")  # the net worth at 67
+    assert any("in brackets the change against" in c.value for c in at.caption)
+    assert [p.proto.popover.label for p in at.get("popover")] == ["Check a what-if"]
 
 
 def test_the_recorded_net_worth_stands_beside_the_assets_once_it_has_a_chart(data: Path) -> None:

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import streamlit as st
 
-from dagobert import actuals, cashplan, revisions, rollforward
+from dagobert import actuals, cashplan, report, revisions, rollforward
 from dagobert.history import actual_values
 from dagobert.i18n import N_, _, ngettext
 from dagobert.loader import load_assets, load_assumptions, load_plan, load_scenario, written
@@ -23,14 +23,23 @@ from dagobert.model.plan import Plan, Scenario
 from dagobert.model.streams import StreamKind
 from dagobert.money import format_eur
 from dagobert.report.tracker import history_figure
-from dagobert.scenariofiles import concrete_scenarios, first_scenario, scenario_file
+from dagobert.result import RunResult
+from dagobert.scenariofiles import (
+    concrete_scenarios,
+    default_scenarios,
+    first_scenario,
+    raw_scenarios,
+    scenario_file,
+)
 from dagobert.store import RowFile, streams_file
 from dagobert.ui import (
+    COMPARE,
     EVENT,
     SCENARIO,
     TAB,
     cashflows,
     chart,
+    fileactions,
     fixed,
     fold,
     is_mobile,
@@ -43,6 +52,7 @@ from dagobert.ui import (
     save,
     source,
     summary,
+    whatifs,
 )
 from dagobert.ui.assets import TRADES, opened
 from dagobert.ui.save import VALUE_FIELD, reason
@@ -780,6 +790,7 @@ def page(streams: RowFile) -> None:
     st.title(_("Overview"))
     summary.tiles(data_dir, "overview")
     plan = st.empty()  # filled last: its Monte Carlo run must not hold up the rest of the page
+    whatif = st.empty()  # after it: the runs of the what-ifs
     if not runs.files_cached(data_dir, concrete_scenarios(data_dir)[scenario]):  # a hit: no wait
         plan.caption(_("Simulating the plan …"))
     _attention(data_dir, view)
@@ -800,9 +811,83 @@ def page(streams: RowFile) -> None:
     mode.off_note(data_dir)
     with plan.container():
         outlook.plan(data_dir, scenario)
+    with whatif.container():
+        _whatifs(data_dir, scenario)
     if view.shows(RECORDS):
         outlook.on_track(data_dir, scenario, months, loaded)
     page_link("Cashflows", _("Cashflows: where the money goes"))
+
+
+INVITE = N_(
+    "What if you stopped working earlier, lost your job, took a course, started a business or "
+    "bought a property? Each question adds a scenario that extends your main scenario, and this "
+    "place compares it with your plan."
+)
+
+
+def _whatifs(data_dir: Path, main: str) -> None:
+    """The what-ifs below the plan (owner 2026-10-16): each scenario of the comparison of the
+    Explorer but the main one, against the main one, by the chance to run out by 90 and the net
+    worth at 67 as the tiles say them, with a link to both in the Explorer (`?compare=`), and the
+    menu `Check a what-if`; without one an invitation with the steps as buttons. The runs are
+    those of the Explorer (`runs.files_run`), with a progress bar on a cache miss only. One that
+    does not run links to its scenario."""
+    st.subheader(_("What-ifs"))
+    concrete, plan = concrete_scenarios(data_dir), fileactions.Plan(raw_scenarios(data_dir), main)
+    stems = [s for s in default_scenarios(data_dir) if s != main]
+    if not stems:
+        st.markdown(_(INVITE))
+        whatifs.menu(
+            data_dir, plan, st.container(horizontal=True, wrap=True), "overview", inline=True
+        )
+        return
+    base = runs.files_run(data_dir, concrete[main])
+    missing = not all(runs.files_cached(data_dir, concrete[s]) for s in stems)
+    bar = st.progress(0.0, _("Simulating the what-ifs …")) if missing else None
+    results: dict[str, RunResult | None] = {}
+    for n, stem in enumerate(stems, 1):
+        try:
+            results[stem] = runs.files_run(data_dir, concrete[stem])
+        except ValueError:  # inputs that do not load, a refusal of the engine
+            results[stem] = None
+        if bar is not None:
+            bar.progress(n / len(stems), _("Simulating the what-ifs …"))
+    if bar is not None:
+        bar.empty()
+    if base is None:
+        return
+    terms = (report.BROKE_AT, report.TOTAL_AT)
+    shown = {c.term: c for c in report.summary_columns([base, *filter(None, results.values())])}
+    _linked(
+        "overview-whatifs",
+        (_("scenario"), *(shown[t].label for t in terms), ""),
+        [_whatif(stem, result, base, terms) for stem, result in results.items()],
+    )
+    st.caption(
+        _(
+            "{broke} and {worth} of each what-if, in brackets the change against your main "
+            "scenario, {scenario}. **Compare** opens both in the Explorer."
+        ).format(
+            broke=shown[report.BROKE_AT].label,
+            worth=shown[report.TOTAL_AT].label,
+            scenario=literal(base.scenario),
+        )
+    )
+    whatifs.menu(data_dir, plan, st.container(), "overview")
+
+
+def _whatif(
+    stem: str, result: RunResult | None, base: RunResult, terms: Sequence[str]
+) -> tuple[Sequence[str], Link]:
+    """A row of the what-ifs: the name and the figures of `terms` of the run, each with its change
+    against `base`; a scenario that does not run by its file, with a link there."""
+    if result is None:
+        cells = (literal(stem), _("does not run"), "")
+        return cells, Link("Scenarios", _("Open"), {SCENARIO: stem})
+    row = report.summary_table([result])[0]
+    moved = report.changes(report.summary_row(result), report.summary_row(base))
+    figures = (f"{row[t]} ({moved[t]})" if t in moved else row[t] for t in terms)
+    return (literal(result.scenario), *figures), Link("Explorer", _("Compare"), {COMPARE: stem})
 
 
 def _explore(view: mode.View) -> None:

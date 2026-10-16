@@ -668,10 +668,11 @@ def test_a_job_loss_adds_what_the_plan_lacks_and_stops_the_salary(data: Path) ->
         "**cashflows.yaml streams Gehalt phases** empty → Work, Career break, Retired",
         "**cashflows.yaml streams** name ALG1, cat ALG1, kind Unemployment benefit (ALG1), "
         "phases Arbeitslos",
+        "**app.yaml scenarios** base → base, job-loss",  # the Explorer compares it
         "**job loss** off → on",
     ]
     act(data, lambda d: scenariofiles.lost_job(d, loss), source="test")
-    assert read_yaml(data / APP)["features_off"] == ["care"]
+    assert read_yaml(data / APP) == {"scenarios": ["base", "job-loss"], "features_off": ["care"]}
     with pytest.raises(ValueError, match="exists"):
         scenariofiles.lost_job(data, loss)  # once
     base, lost = fixed_run(data), fixed_run(data, "job-loss")
@@ -704,7 +705,7 @@ def test_a_job_loss_limits_a_salary_only_where_no_scenario_runs_the_phase(
         (date(2025, 6, 1), None, "before the start 2026-01"),
         (date(2026, 6, 1), date(2026, 6, 1), "the new job starts before the job loss"),
         # the main scenario is unemployed then: the new job would change no phase
-        (date(2039, 6, 1), date(2041, 1, 1), "is unemployed or has no phase in 2041-01"),
+        (date(2039, 6, 1), date(2041, 1, 1), "has the phase unemployed or none in 2041-01"),
     ],
 )
 def test_a_job_loss_refuses_a_month_out_of_order(
@@ -717,35 +718,3 @@ def test_a_job_loss_refuses_a_month_out_of_order(
     loss = scenariofiles.JobLoss("base", lost, back, "Lost", "lost", "Unemployed")
     with pytest.raises(ValueError, match=refused):
         scenariofiles.lost_job(family, loss)
-
-
-@pytest.mark.parametrize("phone", [False, True])
-def test_the_job_loss_dialog_writes_one_revision(family: Path, phone: bool) -> None:
-    """`AppTest` draws a dialog only in the run of the click of its button: the months come
-    through the session state, the confirm with that click."""
-    at = AppTest.from_string(PAGE.format(data=str(family)), default_timeout=30)
-    at.query_params["mobile"] = str(int(phone))
-    at.run()
-    action = next(b for b in at.button if b.key == "scenarios-job-loss")
-    action.click().run()
-    assert not at.exception
-    assert next(b for b in at.button if b.key == "scenarios-confirm").disabled
-    at.session_state["scenarios-loss-lost"] = "2027-03"
-    at.session_state["scenarios-loss-back"] = "2028-01"
-    next(b for b in at.button if b.key == "scenarios-job-loss").click().run()
-    assert at.text_input(key="scenarios-loss-name").placeholder == "Job loss at 50"
-    listed = next(c.value for c in at.caption if c.value.startswith("To save"))
-    assert "Unemployed from 2027-03, Work from 2028-01" in listed
-    next(b for b in at.button if b.key == "scenarios-job-loss").click()
-    next(b for b in at.button if b.key == "scenarios-confirm").click().run()
-    assert not at.exception
-    last = revisions.entries(family)[-1]
-    assert (last.source, last.files) == (
-        "app: job loss job-loss-at-50",
-        ("cashflows.yaml", "scenarios/job-loss-at-50.yaml"),
-    )
-    lost = load_scenario(family / "scenarios" / "job-loss-at-50.yaml")
-    assert [(p.at, p.phase) for p in lost.phases][1:3] == [
-        (date(2027, 3, 1), "unemployed"),
-        (date(2028, 1, 1), "work"),
-    ]

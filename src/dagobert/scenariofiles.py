@@ -1,12 +1,13 @@
 """The scenario files as a whole: which of them run, which the pages open with, and the file
-actions of the Scenarios page (new, copy, rename, delete, a job loss), each a list of
-`store.Edit`s that `act` writes as one revision."""
+actions of the Scenarios page (new, copy, rename, delete) and of the what-ifs (a stretch out of
+work, a job loss, the comparison of `app.yaml`), each a list of `store.Edit`s that `act` writes as
+one revision."""
 
 from __future__ import annotations
 
 import ntpath
 import re
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Collection, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 from itertools import chain, count
@@ -100,10 +101,13 @@ def created(
     name: str,
     extends: str | None = None,
     overrides: Mapping[str, Any] | None = None,
+    *,
+    events: Sequence[Mapping[str, Any]] = (),
 ) -> list[Edit]:
-    """The edit of a new scenario file `{name, extends, overrides}` (`New` of the Scenarios page,
-    the scenario of the explorer). One of its own starts in the first phase of `assumptions.yaml`
-    from the start: a run needs a phase there. One that does not load is not written."""
+    """The edit of a new scenario file `{name, extends, events, overrides}` (`New` of the
+    Scenarios page, the scenario of the explorer, a what-if). One of its own starts in the first
+    phase of `assumptions.yaml` from the start: a run needs a phase there. One that does not load
+    is not written."""
     _fresh(data_dir, stem, name)
     values: dict[Keys, Any] = {("name",): name}
     if extends is not None:
@@ -111,9 +115,26 @@ def created(
     elif (first := next(iter(references.phases(data_dir)), None)) is not None:
         start = references.read(data_dir, "assumptions.yaml").get("start")
         values["phases",] = [{"from": start, "phase": first}]
+    if events:
+        values["events",] = list(map(dict, events))
     if overrides:
         values["overrides",] = dict(overrides)
     return [Edit(scenario_file(stem), values, create=True)]
+
+
+def compared(data_dir: Path, main: str, stem: str, features: Collection[Feature] = ()) -> Edit:
+    """The edit of `app.yaml` that adds the new scenario `stem` last to the comparison of the
+    Explorer, after the main one (`main` first where the list lacks it: else the new one could
+    become the main one), and turns `features` on: out of `features_off`, the key gone with the
+    last one."""
+    app = references.read(data_dir, APP)
+    held = app.get("scenarios")
+    listed = [s for s in held if isinstance(s, str)] if isinstance(held, list) else []
+    values: dict[Keys, Any] = {("scenarios",): [*([] if main in listed else [main]), *listed, stem]}
+    off = app.get("features_off")
+    if isinstance(off, list) and any(f in off for f in features):
+        values["features_off",] = [f for f in off if f not in features] or None
+    return Edit(APP, values)
 
 
 def copied(data_dir: Path, stem: str, new: str, name: str) -> list[Edit]:
@@ -171,6 +192,28 @@ LOSS_IDS = ("job-loss", "new-job")  # the ids of its phase changes, numbered whe
 
 
 @dataclass(frozen=True)
+class Leave:
+    """A stretch out of the work of the main scenario `main` as a scenario of its own that extends
+    it (`away`): from `start` in `phase`, which `assumptions.yaml` gets with `label` where it lacks
+    it, and back in `back` to the phase that the main scenario has then (None: no return). `ids`
+    are those of the two changes (numbered where taken), `what` names them in a refusal. The
+    scenario holds `events`, `cashflows.yaml` gets `rows`, and `features` turn on."""
+
+    main: str
+    phase: str
+    label: str
+    start: date
+    back: date | None
+    name: str
+    stem: str
+    ids: tuple[str, str]
+    what: tuple[str, str]
+    events: tuple[Mapping[str, Any], ...] = ()
+    rows: tuple[Mapping[str, Any], ...] = ()
+    features: tuple[Feature, ...] = ()
+
+
+@dataclass(frozen=True)
 class JobLoss:
     """A job loss to add as a scenario (`lost_job`): the scenario that it extends (`main`), the
     month of the loss and of a new job (None: none), the name and the file name of the scenario,
@@ -204,55 +247,56 @@ def _phase_at(data_dir: Path, stem: str, month: date) -> str | None:
     return next((phase for at, phase in reversed(changes) if at <= month), None)
 
 
-def _id(name: str, taken: set[str]) -> str:
+def unique(name: str, taken: set[str]) -> str:
+    """`name`, else the first of `name-2`, `name-3` … that is not `taken`, which then holds it."""
     made = next(i for i in chain([name], (f"{name}-{n}" for n in count(2))) if i not in taken)
     taken.add(made)
     return made
 
 
-def lost_job(data_dir: Path, loss: JobLoss) -> list[Edit]:
-    """The edits of a job loss as a scenario of its own, which extends `loss.main`: the change to
-    the phase of unemployment in the month of the loss, and back to the phase that the main
-    scenario has in the month of a new job, if any; an ALG1 stream in that phase where
-    `cashflows.yaml` has none (its amount comes from the salary before), that phase in
-    `assumptions.yaml` where the plan has none, a salary without phases limited to the other
-    phases while no scenario runs that phase (a change of no scenario), so it stops, and the
-    feature `job_loss` on. Raises ValueError with the reason: a loss before the start, a new
-    job before the loss or in a month where the main scenario has no phase or that of
-    unemployment (it would change no phase), a taken file name or name."""
-    _fresh(data_dir, loss.stem, loss.name)
-    assumptions = references.read(data_dir, "assumptions.yaml")
-    start = assumptions.get("start")
-    if isinstance(start, date) and loss.lost < start.replace(day=1):
-        msg = f"the job loss lies before the start {start:%Y-%m}"
+def away(data_dir: Path, leave: Leave) -> list[Edit]:
+    """The edits of `leave`: the scenario file with the change to its phase and, with a return,
+    back to the phase that the main scenario has then; that phase in `assumptions.yaml` where the
+    plan lacks it; its rows in `cashflows.yaml`, and each salary without phases limited to the
+    other phases while no scenario runs that phase (a change of no scenario), so it stops; the
+    scenario last in the comparison of `app.yaml`, with its features on (`compared`). Raises
+    ValueError with the reason: a change before the start, a return before it or in a month
+    where the main scenario has no phase or that one (it would change no phase), a taken file
+    name or name."""
+    _fresh(data_dir, leave.stem, leave.name)
+    change, then = leave.what
+    start = references.read(data_dir, "assumptions.yaml").get("start")
+    if isinstance(start, date) and leave.start < start.replace(day=1):
+        msg = f"the {change} lies before the start {start:%Y-%m}"
         raise ValueError(msg)
-    if loss.back is not None and loss.back <= loss.lost:
-        msg = "the new job starts before the job loss"
+    if leave.back is not None and leave.back <= leave.start:
+        msg = f"the {then} starts before the {change}"
         raise ValueError(msg)
     phases, streams = references.phases(data_dir), streams_file(data_dir).rows()
-    idle = _idle(phases, streams) or IDLE
-    back = _phase_at(data_dir, loss.main, loss.back) if loss.back else None
-    if loss.back is not None and back in (None, idle):
+    back = _phase_at(data_dir, leave.main, leave.back) if leave.back else None
+    if leave.back is not None and back in (None, leave.phase):
         msg = (
-            f"the main scenario {loss.main} is unemployed or has no phase in {loss.back:%Y-%m}, "
-            "the month of the new job: type a later month"
+            f"the main scenario {leave.main} has the phase {leave.phase} or none in "
+            f"{leave.back:%Y-%m}, the month of the {then}: type a later month"
         )
         raise ValueError(msg)
-    taken = set(references.of(data_dir).names(Kind.ITEM, loss.main))
-    changes = [{"from": loss.lost, "phase": idle, "id": _id(LOSS_IDS[0], taken)}]
-    if loss.back is not None:
-        changes.append({"from": loss.back, "phase": back, "id": _id(LOSS_IDS[1], taken)})
+    taken = set(references.of(data_dir).names(Kind.ITEM, leave.main))
+    changes = [{"from": leave.start, "phase": leave.phase, "id": unique(leave.ids[0], taken)}]
+    if leave.back is not None:
+        changes.append({"from": leave.back, "phase": back, "id": unique(leave.ids[1], taken)})
     scenario: dict[Keys, Any] = {
-        ("name",): loss.name,
-        ("extends",): loss.main,
+        ("name",): leave.name,
+        ("extends",): leave.main,
         ("phases",): changes,
     }
-    edits = [Edit(scenario_file(loss.stem), scenario, create=True)]
-    if idle not in phases:
-        edits.append(Edit("assumptions.yaml", {("phases", idle): {"label": loss.label}}))
-    others = [p for p in phases if p != idle]
+    if leave.events:
+        scenario["events",] = list(map(dict, leave.events))
+    edits = [Edit(scenario_file(leave.stem), scenario, create=True)]
+    if leave.phase not in phases:
+        edits.append(Edit("assumptions.yaml", {("phases", leave.phase): {"label": leave.label}}))
+    others = [p for p in phases if p != leave.phase]
     unused = not any(  # so a limit of the salary changes no scenario
-        isinstance(row, dict) and row.get("phase") == idle
+        isinstance(row, dict) and row.get("phase") == leave.phase
         for doc in raw_scenarios(data_dir).values()
         for row in doc.get("phases") or []
     )
@@ -262,15 +306,41 @@ def lost_job(data_dir: Path, loss: JobLoss) -> list[Edit]:
             for i, s in enumerate(streams)
             if unused and s.get("kind") == "salary" and not s.get("phases")
         },
-        added=[] if any(s.get("kind") == "alg1" for s in streams) else [ALG1 | {"phases": [idle]}],
+        added=list(map(dict, leave.rows)),
     )
     if rows:
         edits.append(Edit("cashflows.yaml", rows={("streams",): rows}))
-    off = references.read(data_dir, APP).get("features_off")
-    if isinstance(off, list) and Feature.JOB_LOSS in off:
-        rest = [f for f in off if f != Feature.JOB_LOSS]
-        edits.append(Edit(APP, {("features_off",): rest or None}))
-    return edits
+    return [*edits, compared(data_dir, leave.main, leave.stem, leave.features)]
+
+
+def jobless(data_dir: Path, loss: JobLoss) -> Leave:
+    """A job loss as a `Leave`: in the phase of unemployment (`_idle`: the first phase of an ALG1
+    stream, else `unemployed`, which the plan gets with `loss.label`), an ALG1 stream in it where
+    `cashflows.yaml` has none (its amount comes from the salary before), the feature `job_loss`
+    on."""
+    phases, streams = references.phases(data_dir), streams_file(data_dir).rows()
+    idle = _idle(phases, streams) or IDLE
+    held = any(s.get("kind") == "alg1" for s in streams)
+    return Leave(
+        loss.main,
+        idle,
+        loss.label,
+        loss.lost,
+        loss.back,
+        loss.name,
+        loss.stem,
+        LOSS_IDS,
+        ("job loss", "new job"),
+        rows=() if held else (ALG1 | {"phases": [idle]},),
+        features=(Feature.JOB_LOSS,),
+    )
+
+
+def lost_job(data_dir: Path, loss: JobLoss) -> list[Edit]:
+    """The edits of a job loss as a scenario of its own, which extends `loss.main` (`jobless`,
+    `away`): from the month of the loss unemployed, back to work in the month of a new job, if
+    any. Raises ValueError with the reason (`away`)."""
+    return away(data_dir, jobless(data_dir, loss))
 
 
 Action = Callable[[Path], list[Edit]]  # the edits of a file action from the files now

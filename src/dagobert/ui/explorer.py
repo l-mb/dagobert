@@ -570,19 +570,10 @@ def compared(results: list[RunResult], *, nominal: bool) -> list[dict[str, str]]
         row = report.summary_table([r], nominal=nominal)[0]
         if files is not None:
             mine, theirs = (report.summary_row(x, nominal=nominal) for x in (r, files))
-            for term, change in changes(mine, theirs).items():
+            for term, change in report.changes(mine, theirs).items():
                 row[term] += f" ({change})"
         rows.append(row)
     return rows
-
-
-def changes(mine: report.SummaryRow, theirs: report.SummaryRow) -> dict[str, str]:
-    """The change of each column of the summary that has a value, by term."""
-    return {
-        c.term: change
-        for c in report.COLUMNS
-        if c.change and (change := c.change(mine, theirs)) is not None
-    }
 
 
 def strip(results: list[RunResult], *, nominal: bool) -> str:
@@ -594,7 +585,7 @@ def strip(results: list[RunResult], *, nominal: bool) -> str:
         row = report.summary_row(r, nominal=nominal)
         broke, worth = f"{row.p_broke:.0%}", format_eur(row.median_total)
         if files is not None:
-            moved = changes(row, report.summary_row(files, nominal=nominal))
+            moved = report.changes(row, report.summary_row(files, nominal=nominal))
             broke += f" ({moved[report.BROKE_AT]})"
             worth += f" ({moved[report.TOTAL_AT]})"
         lines.append(f"**{literal(r.label)}** {broke} · {worth}")

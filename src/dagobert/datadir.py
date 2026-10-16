@@ -18,7 +18,6 @@ from dagobert.model.months import aged, months_of_age
 from dagobert.model.plan import Feature
 from dagobert.model.taxes import TaxOptions, default_tax_year
 from dagobert.problems import InputError, Problem
-from dagobert.store import Edit
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
@@ -283,7 +282,7 @@ def starts_retired(born: date) -> bool:
     return aged(born, REGELALTERSGRENZE) <= first_month()
 
 
-def _whole(euros: float) -> float:
+def whole(euros: float) -> float:
     """Euros as the files write them, whole ones without a decimal point."""
     return int(euros) if euros.is_integer() else euros
 
@@ -293,9 +292,9 @@ def _assets(quick: Quick, names: Names) -> Iterator[dict[str, object]]:
     scenario), its loan dated today, at `LOAN_RATE` and `Quick.payment`."""
     if quick.cash:
         cash, name = names.cash
-        yield {"id": cash, "name": name, "kind": "cash", "value": _whole(quick.cash)}
+        yield {"id": cash, "name": name, "kind": "cash", "value": whole(quick.cash)}
     if quick.savings or quick.plan:  # a savings plan buys into the depot, a new one at 0
-        value = _whole(quick.savings or 0.0)
+        value = whole(quick.savings or 0.0)
         depot, name = names.depot
         yield {"id": depot, "name": name, "kind": "equity", "value": value, "cost_basis": value}
     if quick.home:
@@ -305,7 +304,7 @@ def _assets(quick: Quick, names: Names) -> Iterator[dict[str, object]]:
             "name": name,
             "kind": "property",
             "sqm": 1,
-            "per_sqm": _whole(quick.home),
+            "per_sqm": whole(quick.home),
         }
         if quick.owed:
             loan, name = names.loan
@@ -313,9 +312,9 @@ def _assets(quick: Quick, names: Names) -> Iterator[dict[str, object]]:
                 "id": loan,
                 "name": name,
                 "kind": "loan",
-                "balance": -_whole(quick.owed),
+                "balance": -whole(quick.owed),
                 "rate": LOAN_RATE,
-                "annuity": _whole(quick.payment),
+                "annuity": whole(quick.payment),
                 "asof": date.today(),
                 "finances": home,
             }
@@ -329,7 +328,7 @@ def _streams(quick: Quick, names: Names, start: date) -> Iterator[dict[str, obje
             "name": names.salary[0],
             "cat": names.salary[1],
             "kind": "salary",
-            "gross": _whole(quick.gross),
+            "gross": whole(quick.gross),
             "phases": [NEW_PHASES[0]],
         }
     if quick.gross or quick.points:
@@ -345,12 +344,12 @@ def _streams(quick: Quick, names: Names, start: date) -> Iterator[dict[str, obje
         }
     if quick.spending:
         name, cat = names.living
-        yield {"name": name, "cat": cat, "amount": -_whole(quick.spending)}
+        yield {"name": name, "cat": cat, "amount": -whole(quick.spending)}
     if quick.plan:
         yield {
             "name": names.savings,
             "kind": "savings",
-            "amount": -_whole(quick.plan),
+            "amount": -whole(quick.plan),
             "into": names.depot[0],
             "phases": [NEW_PHASES[0]],
         }
@@ -403,8 +402,8 @@ def texts(quick: Quick) -> dict[str, str]:
 
 def _lost(plan: Mapping[str, str], born: date, lost: date, names: Names) -> dict[str, str]:
     """The files `plan` with a job loss in `lost` as a scenario of its own that extends the plan,
-    without a new job (`scenariofiles.lost_job`, on a copy of the files), and second in
-    `app.yaml`: the Explorer compares it."""
+    without a new job, second in `app.yaml`: the Explorer compares it (`scenariofiles.lost_job`,
+    on a copy of the files)."""
     stem, name = names.job_loss
     loss = scenariofiles.JobLoss(
         SCENARIO,
@@ -420,7 +419,7 @@ def _lost(plan: Mapping[str, str], born: date, lost: date, names: Names) -> dict
             (Path(copy) / file).write_text(text, encoding="utf-8")
         edits = scenariofiles.lost_job(Path(copy), loss)
     out = dict(plan)
-    for edit in [*edits, Edit(APP, {("scenarios",): [SCENARIO, stem]})]:
+    for edit in edits:
         out[edit.name] = edit.onto(out.get(edit.name)) or ""
     return out
 

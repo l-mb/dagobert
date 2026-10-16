@@ -98,7 +98,8 @@ The goals are optional. Each goal adds to the plan, in the same first revision:
   stop working. The Explorer opens with both scenarios, so you can compare them. On the
   Scenarios page you can add a new job. The month must lie from the current month to before the
   month in which you stop working, and the plan needs a salary. The scenario is the same that
-  `Add a job loss` on the Scenarios page writes. The feature `Job loss` stays on.
+  `Lose the job` of the menu `Check a what-if` on the Scenarios page writes. The feature `Job loss`
+  stays on.
 - `I own a property`: turn it on for your home or a flat that you own. Then type
   `Value of the property €`, what it can sell for today. The plan writes the asset `Home` as 1 m²
   at this price. On the Assets page you can enter the real living space and the price per m².
@@ -139,7 +140,10 @@ Every plan of the quick start holds:
   [Features](features.md) page names them and turns a feature on.
 
 With a salary, the Overview opens next. It runs `Find when to stop working` once by itself, so the
-tile `Stop working` shows by when you can stop. Without a salary, or if you are 67 or older, the
+tile `Stop working` shows by when you can stop. Below the tiles, the section
+[What-ifs](overview.md#what-ifs) asks what if you stop working earlier, lose your job, take a
+course, start a business or buy a property: each question adds a scenario in a few fields and
+compares it with your plan. Without a salary, or if you are 67 or older, the
 Assumptions page opens. Make sure that the person
 and the markets are correct. Then add your assets on the Assets page, your income and spending on
 the Cashflows page, and the phases of your life on the Scenarios page. Then explore your plan on the

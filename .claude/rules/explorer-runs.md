@@ -57,4 +57,8 @@ page: rule `explorer`; the sensitivity run: rule `analyses`; the memory in a con
   with no overrides), so an explorer opened with the same scenario shows at once. The seek runs in
   the explorer's pool (`runs.seek`) under a progress bar per round (`runs.tick`, also in the
   explorer); `runs.keep` bounds its answers and `_found` at `runs.KEPT`. The page fills `plan` into
-  an `st.empty` below the tiles as its last step, so the rest of the page draws before the run.
+  an `st.empty` below the tiles as its last step, so the rest of the page draws before the run,
+  then its what-ifs into the one after it (`overview._whatifs`, rule `whatifs`): `files_run` of each
+  compared scenario in turn, in the process as the Explorer runs its scenarios (the pool serves the
+  seeks and the sensitivity), so `Compare` opens the Explorer on cached runs. A step writes plan
+  files: the next Overview runs the plan and every what-if again (`run_stamp`).

@@ -353,6 +353,17 @@ def summary_columns(results: list[RunResult], *, nominal: bool = False) -> list[
     return [shown(c) for c in COLUMNS]
 
 
+def changes(mine: SummaryRow, theirs: SummaryRow) -> dict[str, str]:
+    """The change of each column of the summary from `theirs` to `mine` that has a value, by
+    term: against the run of the files in the Explorer, against the main scenario in the
+    what-ifs of the Overview."""
+    return {
+        c.term: change
+        for c in COLUMNS
+        if c.change and (change := c.change(mine, theirs)) is not None
+    }
+
+
 def summary_table(results: list[RunResult], *, nominal: bool = False) -> list[dict[str, str]]:
     """One dict per scenario, keyed by the terms of the columns."""
     return [

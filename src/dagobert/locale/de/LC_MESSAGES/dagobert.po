@@ -720,7 +720,7 @@ msgid "until_age"
 msgstr "Bis Alter"
 
 #: model/assets.py model/events.py model/plan.py model/streams.py
-#: ui/fileactions.py ui/tradeform.py ui/tradeimport.py
+#: ui/fileactions.py ui/tradeform.py ui/tradeimport.py ui/whatifs.py
 msgid "Name"
 msgstr "Name"
 
@@ -1190,10 +1190,6 @@ msgid "{key} in the {phase} phase, empty means 1"
 msgstr "{key} in der Phase {phase}, leer heißt 1"
 
 #: model/assumptions.py model/events.py model/plan.py model/taxes.py
-msgid "Land"
-msgstr "Bundesland"
-
-#: model/assumptions.py model/events.py model/plan.py model/taxes.py
 msgctxt "key"
 msgid "land"
 msgstr "Bundesland"
@@ -1261,6 +1257,11 @@ msgstr "Sachsen-Anhalt"
 #: model/assumptions.py model/events.py model/plan.py model/taxes.py
 msgid "Thuringia"
 msgstr "Thüringen"
+
+#: model/assumptions.py model/events.py model/plan.py model/taxes.py
+#: ui/whatifs.py
+msgid "Land"
+msgstr "Bundesland"
 
 #: model/assumptions.py model/events.py model/streams.py
 msgid "Factor"
@@ -3259,12 +3260,11 @@ msgstr ""
 "die du zu einem Datum zahlst, etwa eine Weiterbildung oder Bewerbungen, "
 "auch ohne Job: Sie zählen im Jahr der Zahlung, zusätzlich zu den "
 "jährlichen Werbungskosten der Seite Annahmen, und ein Verlust geht in "
-"andere Jahre. Eine Spende (bis zu 20% der"
-" Einkünfte) und Kinderbetreuung (80% der Kosten eines Kindes unter 14, "
-"höchstens 4.800 € im Jahr je Kind) senken das zu versteuernde Einkommen; "
-"haushaltsnahe Dienstleistungen und Handwerkerleistungen senken die Steuer"
-" um 20% der Kosten, höchstens 4.000 € und 1.200 € im Jahr (§35a EStG). "
-"Die Zahlung bleibt eine Ausgabe"
+"andere Jahre. Eine Spende (bis zu 20% der Einkünfte) und Kinderbetreuung "
+"(80% der Kosten eines Kindes unter 14, höchstens 4.800 € im Jahr je Kind)"
+" senken das zu versteuernde Einkommen; haushaltsnahe Dienstleistungen und"
+" Handwerkerleistungen senken die Steuer um 20% der Kosten, höchstens "
+"4.000 € und 1.200 € im Jahr (§35a EStG). Die Zahlung bleibt eine Ausgabe"
 
 #: model/events.py model/plan.py model/streams.py
 msgctxt "key"
@@ -3502,7 +3502,7 @@ msgstr "Sperrzeit"
 msgid "Training"
 msgstr "Weiterbildung"
 
-#: model/events.py model/streams.py ui/events.py
+#: model/events.py model/streams.py ui/events.py ui/whatifs.py
 msgid "Property"
 msgstr "Immobilie"
 
@@ -7936,54 +7936,6 @@ msgstr "Gib zuerst einen Namen ein."
 
 #: ui/fileactions.py
 #, python-brace-format
-msgid ""
-"A new scenario that extends {scenario}. From the month of the job loss "
-"the salary stops and ALG1 pays, until the month of a new job, if you type"
-" one. Where the plan lacks them, the app adds the payment ALG1, a phase "
-"without a job and the feature Job loss."
-msgstr ""
-"Ein neues Szenario, das auf {scenario} basiert. Ab dem Monat des "
-"Jobverlusts endet das Gehalt, und ALG1 zahlt, bis zum Monat eines neuen "
-"Jobs, wenn du einen eingibst. Wo der Plan sie nicht hat, ergänzt die App "
-"die Zahlung ALG1, eine Phase ohne Job und die Funktion Jobverlust."
-
-#: ui/fileactions.py
-msgid "Month of the job loss"
-msgstr "Monat des Jobverlusts"
-
-#: ui/fileactions.py
-msgid "Month of a new job (optional)"
-msgstr "Monat eines neuen Jobs (optional)"
-
-#: ui/fileactions.py
-#, python-brace-format
-msgid "Job loss at {age}"
-msgstr "Jobverlust mit {age}"
-
-#: ui/fileactions.py
-msgid "Job loss"
-msgstr "Jobverlust"
-
-#: ui/fileactions.py
-msgctxt "phase"
-msgid "Unemployed"
-msgstr "Arbeitslos"
-
-#: ui/fileactions.py
-msgid "Add the job loss"
-msgstr "Jobverlust hinzufügen"
-
-#: ui/fileactions.py
-#, python-brace-format
-msgid "Created {name}: a job loss in {month}"
-msgstr "{name} angelegt: ein Jobverlust ab {month}"
-
-#: ui/fileactions.py
-msgid "Type the month of the job loss first."
-msgstr "Gib zuerst den Monat des Jobverlusts ein."
-
-#: ui/fileactions.py
-#, python-brace-format
 msgid "A copy of `{file}` with its comments, which extends the same parent."
 msgstr ""
 "Eine Kopie von `{file}` mit ihren Kommentaren, die auf demselben Szenario"
@@ -8075,10 +8027,6 @@ msgstr "Datei umbenennen"
 #: ui/fileactions.py
 msgid "Delete the scenario"
 msgstr "Szenario löschen"
-
-#: ui/fileactions.py
-msgid "Add a job loss"
-msgstr "Jobverlust hinzufügen"
 
 #: ui/fileactions.py ui/overview.py ui/transfer.py
 msgid "file"
@@ -9055,10 +9003,6 @@ msgid "Buy gold or crypto"
 msgstr "Gold oder Krypto kaufen"
 
 #: ui/lineage.py
-msgid "Buy a property"
-msgstr "Immobilie kaufen"
-
-#: ui/lineage.py
 msgid "sell an asset"
 msgstr "Vermögenswert verkaufen"
 
@@ -9258,6 +9202,10 @@ msgstr "Eintrag"
 #: ui/lineage.py ui/overview.py
 msgid "what"
 msgstr "Was"
+
+#: ui/lineage.py ui/whatifs.py
+msgid "Buy a property"
+msgstr "Immobilie kaufen"
 
 #: ui/main.py
 msgid "Track"
@@ -10526,6 +10474,52 @@ msgid "Cashflows: where the money goes"
 msgstr "Cashflows: wohin das Geld geht"
 
 #: ui/overview.py
+msgid ""
+"What if you stopped working earlier, lost your job, took a course, "
+"started a business or bought a property? Each question adds a scenario "
+"that extends your main scenario, and this place compares it with your "
+"plan."
+msgstr ""
+"Was wäre, wenn du früher aufhörst zu arbeiten, deinen Job verlierst, eine"
+" Weiterbildung machst, dich selbstständig machst oder eine Immobilie "
+"kaufst? Jede Frage legt ein Szenario an, das auf deinem Hauptszenario "
+"basiert, und hier siehst du es im Vergleich zu deinem Plan."
+
+#: ui/overview.py
+msgid "What-ifs"
+msgstr "Was-wäre-wenn"
+
+#: ui/overview.py
+msgid "Simulating the what-ifs …"
+msgstr "Die Was-wäre-wenn-Szenarien werden simuliert …"
+
+#: ui/overview.py
+msgid "scenario"
+msgstr "Szenario"
+
+#: ui/overview.py
+#, python-brace-format
+msgid ""
+"{broke} and {worth} of each what-if, in brackets the change against your "
+"main scenario, {scenario}. **Compare** opens both in the Explorer."
+msgstr ""
+"{broke} und {worth} je Was-wäre-wenn, in Klammern die Änderung gegenüber "
+"deinem Hauptszenario, {scenario}. **Vergleichen** öffnet beide im "
+"Explorer."
+
+#: ui/overview.py
+msgid "does not run"
+msgstr "läuft nicht"
+
+#: ui/overview.py
+msgid "Open"
+msgstr "Öffnen"
+
+#: ui/overview.py
+msgid "Compare"
+msgstr "Vergleichen"
+
+#: ui/overview.py
 msgid "Explore scenarios"
 msgstr "Szenarien erkunden"
 
@@ -10739,10 +10733,6 @@ msgid "{asset} {value} as of {day}"
 msgstr "{asset} {value} zum {day}"
 
 #: ui/pricing.py
-msgid "Price €"
-msgstr "Preis €"
-
-#: ui/pricing.py
 msgid ""
 "The price of one unit on a day, also a past one, saved at once. No "
 "thousands groups: 5432, or 5,4320 for a fraction."
@@ -10877,6 +10867,10 @@ msgstr "keine: als EUR lesen"
 msgid "Not imported: {reason}"
 msgstr "Nicht importiert: {reason}"
 
+#: ui/pricing.py ui/whatifs.py
+msgid "Price €"
+msgstr "Preis €"
+
 #: ui/refusals.py
 #, python-brace-format
 msgid ""
@@ -10999,7 +10993,6 @@ msgstr "neue Zeile"
 #, python-brace-format
 msgid "{field} holds no value that it can read: enter it again"
 msgstr "{field} enthält keinen lesbaren Wert: Gib ihn neu ein"
-
 
 #: ui/rename.py
 msgid ""
@@ -12930,10 +12923,6 @@ msgid "Goes into the depot each month until you stop working."
 msgstr "Fließt jeden Monat ins Depot, bis du aufhörst zu arbeiten."
 
 #: ui/welcome.py
-msgid "Stop working at age"
-msgstr "Arbeitsende im Alter von"
-
-#: ui/welcome.py
 msgid ""
 "The age at which the salary and the savings plan stop. Empty: 67. The "
 "statutory pension starts at 67, from 63 after 35 years of insurance, with"
@@ -13090,6 +13079,271 @@ msgstr "Ein Export"
 msgid "Data directory: {path}"
 msgstr "Datenverzeichnis: {path}"
 
+#: ui/welcome.py ui/whatifs.py
+msgid "Stop working at age"
+msgstr "Arbeitsende im Alter von"
+
+#: ui/whatifs.py
+msgid "Check a what-if"
+msgstr "Was-wäre-wenn prüfen"
+
+#: ui/whatifs.py
+msgid "a job loss"
+msgstr "einen Jobverlust"
+
+#: ui/whatifs.py
+msgid "a career break"
+msgstr "eine Auszeit"
+
+#: ui/whatifs.py
+msgid "Fill in the fields above first."
+msgstr "Fülle zuerst die Felder oben aus."
+
+#: ui/whatifs.py
+msgid "Change the fields marked above."
+msgstr "Ändere die markierten Felder oben."
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid "Added {name}: the Overview compares it with your plan."
+msgstr "{name} hinzugefügt: Die Übersicht vergleicht es mit deinem Plan."
+
+#: ui/whatifs.py
+msgid "Add and compare"
+msgstr "Hinzufügen und vergleichen"
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid ""
+"A new scenario that extends {scenario} and stops working at the age that "
+"you type: the salary and the savings plan end, the pension starts as "
+"before. It moves the change out of work as the slider of the Explorer "
+"does."
+msgstr ""
+"Ein neues Szenario, das auf {scenario} basiert und in dem du mit dem "
+"Alter aufhörst zu arbeiten, das du eingibst: Gehalt und Sparplan enden, "
+"die Rente beginnt wie bisher. Es verschiebt den Wechsel aus der Arbeit, "
+"wie es der Regler im Explorer tut."
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid "Your plan stops working at {age} now."
+msgstr "Dein Arbeitsende liegt jetzt bei {age}."
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid "Stop at {age}"
+msgstr "Aufhören mit {age}"
+
+#: ui/whatifs.py
+msgid "Stop earlier"
+msgstr "Früher aufhören"
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid ""
+"A new scenario that extends {scenario}. From the month of the job loss "
+"the salary stops and ALG1 pays, until the month of a new job, if you type"
+" one. Where the plan lacks them, the app adds the payment ALG1, a phase "
+"without a job and the feature Job loss."
+msgstr ""
+"Ein neues Szenario, das auf {scenario} basiert. Ab dem Monat des "
+"Jobverlusts endet das Gehalt, und ALG1 zahlt, bis zum Monat eines neuen "
+"Jobs, wenn du einen eingibst. Wo der Plan sie nicht hat, ergänzt die App "
+"die Zahlung ALG1, eine Phase ohne Job und die Funktion Jobverlust."
+
+#: ui/whatifs.py
+msgid "Month of the job loss"
+msgstr "Monat des Jobverlusts"
+
+#: ui/whatifs.py
+msgid "Month of a new job (optional)"
+msgstr "Monat eines neuen Jobs (optional)"
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid "Job loss at {age}"
+msgstr "Jobverlust mit {age}"
+
+#: ui/whatifs.py
+msgid "Job loss"
+msgstr "Jobverlust"
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid ""
+"A new scenario that extends {scenario}: a course of some months, then "
+"back to work. After a job loss ALG1 pays during the course and uses half "
+"of the days of the claim (Arbeitslosengeld bei Weiterbildung); in a "
+"career break nothing pays. The costs count as work expenses for the "
+"income tax."
+msgstr ""
+"Ein neues Szenario, das auf {scenario} basiert: eine Weiterbildung über "
+"einige Monate, danach wieder Arbeit. Nach einem Jobverlust zahlt ALG1 "
+"während der Weiterbildung und verbraucht die Hälfte der Tage des "
+"Anspruchs (Arbeitslosengeld bei Weiterbildung); in einer Auszeit zahlt "
+"nichts. Die Kosten zählen als Werbungskosten für die Einkommensteuer."
+
+#: ui/whatifs.py
+msgid "The course follows"
+msgstr "Die Weiterbildung folgt auf"
+
+#: ui/whatifs.py
+msgid "Course starts in (month)"
+msgstr "Beginn der Weiterbildung (Monat)"
+
+#: ui/whatifs.py
+msgid "Months of the course"
+msgstr "Monate der Weiterbildung"
+
+#: ui/whatifs.py
+msgid "Costs of the course €"
+msgstr "Kosten der Weiterbildung €"
+
+#: ui/whatifs.py
+msgid ""
+"All that the course costs you, spread over its months. With a "
+"Bildungsgutschein after a job loss the Agentur für Arbeit pays them: type"
+" 0."
+msgstr ""
+"Alles, was dich die Weiterbildung kostet, verteilt auf ihre Monate. Mit "
+"einem Bildungsgutschein nach einem Jobverlust zahlt sie die Agentur für "
+"Arbeit: Gib 0 ein."
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid "Course at {age}"
+msgstr "Weiterbildung mit {age}"
+
+#: ui/whatifs.py
+msgid "Course"
+msgstr "Weiterbildung"
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid ""
+"A new scenario that extends {scenario}: from the month that you type you "
+"run a business instead of your job, until the plan stops working. In this"
+" phase the salary and the savings plan stop and the profit pays. You pay "
+"its income tax and your health insurance yourself, and no statutory "
+"pension insurance: the Assumptions page changes that."
+msgstr ""
+"Ein neues Szenario, das auf {scenario} basiert: Ab dem Monat, den du "
+"eingibst, führst du statt deines Jobs einen Betrieb, bis zum Arbeitsende "
+"deines Plans. In dieser Phase enden Gehalt und Sparplan, stattdessen "
+"kommt der Gewinn. Du zahlst seine Einkommensteuer und deine "
+"Krankenversicherung selbst und keine gesetzliche Rentenversicherung: Die "
+"Seite Annahmen ändert das."
+
+#: ui/whatifs.py
+msgid "Start the business in (month)"
+msgstr "Beginn der Selbstständigkeit (Monat)"
+
+#: ui/whatifs.py
+msgid "Profit per month €"
+msgstr "Gewinn pro Monat €"
+
+#: ui/whatifs.py
+msgid ""
+"What the business earns in a month after its costs, before income tax and"
+" social insurance. Your gross salary at first."
+msgstr ""
+"Was der Betrieb in einem Monat nach seinen Kosten verdient, vor "
+"Einkommensteuer und Sozialversicherung. Zuerst dein Bruttogehalt."
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid "Business at {age}"
+msgstr "Selbstständig mit {age}"
+
+#: ui/whatifs.py
+msgid "Business"
+msgstr "Selbstständig"
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid ""
+"A new scenario that extends {scenario}: you buy a property, pay the "
+"Grunderwerbsteuer and {costs} of the price for the notary and a broker "
+"from your own funds and borrow the rest. The rent that you type ends with"
+" the purchase."
+msgstr ""
+"Ein neues Szenario, das auf {scenario} basiert: Du kaufst eine Immobilie,"
+" zahlst die Grunderwerbsteuer und {costs} des Preises für Notar und "
+"Makler aus Eigenkapital und leihst dir den Rest. Die Miete, die du "
+"eingibst, endet mit dem Kauf."
+
+#: ui/whatifs.py
+msgid "Buy in (month)"
+msgstr "Kauf im (Monat)"
+
+#: ui/whatifs.py
+msgid "Own funds €"
+msgstr "Eigenkapital €"
+
+#: ui/whatifs.py
+msgid "What you pay from your cash and savings. A loan pays the rest."
+msgstr "Was du aus Bargeld und Ersparnissen zahlst. Den Rest zahlt ein Darlehen."
+
+#: ui/whatifs.py
+msgid "Choose the Land"
+msgstr "Bundesland wählen"
+
+#: ui/whatifs.py
+msgid "Where the property lies: the Land sets the Grunderwerbsteuer."
+msgstr "Wo die Immobilie liegt: Das Bundesland bestimmt die Grunderwerbsteuer."
+
+#: ui/whatifs.py
+msgid "Rent that ends (€ a month)"
+msgstr "Entfallende Miete (€ pro Monat)"
+
+#: ui/whatifs.py
+msgid ""
+"The rent and the costs of your current home that the purchase ends: from "
+"its month they come off your spending."
+msgstr ""
+"Die Miete und die Kosten deiner jetzigen Wohnung, die mit dem Kauf enden:"
+" Ab seinem Monat gehen sie von deinen Ausgaben ab."
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid "Property at {age}"
+msgstr "Immobilie mit {age}"
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid ""
+"It costs {cost} with tax and costs. The loan of {loan} at {rate} with "
+"{repayment} repayment a year pays {payment} a month."
+msgstr ""
+"Sie kostet {cost} mit Steuer und Kosten. Das Darlehen über {loan} mit "
+"{rate} Zinsen und {repayment} Tilgung im Jahr kostet {payment} im Monat."
+
+#: ui/whatifs.py
+msgid "Spending that holds the rent"
+msgstr "Ausgabe mit der Miete"
+
+#: ui/whatifs.py
+msgid "The rent ends in this spending, a row of the Cashflows page."
+msgstr "Die Miete endet in dieser Ausgabe, einer Zeile der Seite Cashflows."
+
+#: ui/whatifs.py
+msgid "Lose the job"
+msgstr "Job verlieren"
+
+#: ui/whatifs.py
+msgid "Take a course"
+msgstr "Weiterbildung machen"
+
+#: ui/whatifs.py
+msgid "Start a business"
+msgstr "Selbstständig machen"
+
+#: ui/whatifs.py whatifs.py
+msgctxt "phase"
+msgid "Unemployed"
+msgstr "Arbeitslos"
+
 #: ui/widgets.py
 msgid "YYYY-MM or MM.YYYY"
 msgstr "JJJJ-MM oder MM.JJJJ"
@@ -13135,4 +13389,100 @@ msgstr "Geerbt vom Standard:"
 #, python-brace-format
 msgid "Inherited from {source}:"
 msgstr "Geerbt von {source}:"
+
+#: whatifs.py
+#, python-brace-format
+msgid "type an age below {age}, at which your plan stops working now"
+msgstr "gib ein Alter unter {age} ein, deinem Arbeitsende jetzt"
+
+#: whatifs.py
+#, python-brace-format
+msgid "type an age from {age} on: your plan can stop in {month} at the earliest"
+msgstr "gib ein Alter ab {age} ein: Dein Plan kann frühestens ab {month} aufhören"
+
+#: whatifs.py
+#, python-brace-format
+msgid "the course ends after you stop working in {month}: type fewer months"
+msgstr ""
+"die Weiterbildung endet nach deinem Arbeitsende ({month}): Gib weniger "
+"Monate ein"
+
+#: whatifs.py
+msgid "a job loss needs a salary: the Cashflows page adds one"
+msgstr "ein Jobverlust braucht ein Gehalt: Die Seite Cashflows fügt eines hinzu"
+
+#: whatifs.py
+msgid "type a month after the job loss"
+msgstr "gib einen Monat nach dem Jobverlust ein"
+
+#: whatifs.py
+#, python-brace-format
+msgid "type at most the price with tax and costs, {cost}"
+msgstr "gib höchstens den Preis mit Steuer und Kosten ein, {cost}"
+
+#: whatifs.py
+#, python-brace-format
+msgid ""
+"type at most the price with the highest Grunderwerbsteuer and costs, "
+"{cost}"
+msgstr ""
+"gib höchstens den Preis mit der höchsten Grunderwerbsteuer und den Kosten"
+" ein, {cost}"
+
+#: whatifs.py
+msgid "choose the Land where the property lies"
+msgstr "wähle das Bundesland, in dem die Immobilie liegt"
+
+#: whatifs.py
+msgid ""
+"your plan has no spending that the rent is part of: the Cashflows page "
+"adds it"
+msgstr ""
+"dein Plan hat keine Ausgabe, zu der die Miete gehört: Die Seite Cashflows"
+" fügt sie hinzu"
+
+#: whatifs.py
+#, python-brace-format
+msgid "type at most the amount of {stream}, {amount} a month"
+msgstr "gib höchstens den Betrag von {stream} ein, {amount} im Monat"
+
+#: whatifs.py
+msgctxt "data"
+msgid "ALG1 during the course"
+msgstr "ALG1 während der Weiterbildung"
+
+#: whatifs.py
+msgctxt "phase"
+msgid "Career break"
+msgstr "Auszeit"
+
+#: whatifs.py
+msgctxt "data"
+msgid "Course costs"
+msgstr "Kosten der Weiterbildung"
+
+#: whatifs.py
+msgctxt "data"
+msgid "course"
+msgstr "Weiterbildung"
+
+#: whatifs.py
+msgctxt "data"
+msgid "Business"
+msgstr "Betrieb"
+
+#: whatifs.py
+msgctxt "phase"
+msgid "Self-employed"
+msgstr "Selbstständig"
+
+#: whatifs.py
+msgctxt "data"
+msgid "New property"
+msgstr "Neue Immobilie"
+
+#: whatifs.py
+msgctxt "data"
+msgid "Loan of the new property"
+msgstr "Darlehen der neuen Immobilie"
 

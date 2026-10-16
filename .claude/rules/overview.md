@@ -123,6 +123,21 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   one that its engine refuses (a ValueError, `runs.Refused`) a warning with the reason, never a
   traceback. The roll help says that the roll is one revision, which `Changes since` of the
   Cashflows page shows. Last the link `Cashflows: where the money goes` (`ui.page_link`).
+- `What-ifs` (`overview._whatifs`, owner 2026-10-16, rule `whatifs`), between the plan and `Needs
+  attention`: an `st.empty` after the one of the plan, filled after it (rule `explorer-runs`). A
+  row per scenario of the comparison of `app.yaml` but the main one
+  (`scenariofiles.default_scenarios`; not the children of the main one: the steps write there,
+  and `?compare=` pairs a scenario with its parent): its name, `Chance to run out by 90` and `Net
+  worth at 67` (the labels of the tiles, `report.summary_columns`), each with its change against
+  the main scenario in brackets (`report.changes`, as the Explorer against its run of the files),
+  and `Compare` (`?compare=<stem>`, `ui.COMPARE`); a caption names the figures, also for a phone,
+  whose rows are cards without the header (`overview-whatifs`, `ui/page.css`: the name in bold on
+  top, the figures below, the link on the right). The runs are `runs.files_run` of each (the
+  Explorer's), a progress bar `Simulating the what-ifs …` only while one misses the cache. A
+  scenario that does not load or run (a ValueError) shows `does not run` and `Open` to it on the
+  Scenarios page. Below the rows the menu `Check a what-if`. Without a what-if an invitation
+  (`INVITE`) with the steps as buttons (`whatifs.menu(inline=True)`): a plan of the quick start
+  opens with it. Both modes.
 - Simple mode and the features (rule `mode`; `page` takes `mode.view` once): the notices `last
   updated …` and `the value has no date yet` (`attention(stale=)`) while `View` shows the data
   `records` or `trades` (in simple mode: once kept); the recorded net worth and `Records against
@@ -132,8 +147,9 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   values to the Snapshot page while it shows, else to the Assets page (`VALUES`, `OUTCOME`), and
   an estimated consumer price links `Data: fetch newer consumer prices` (`ui.page_link`: none for
   a page left out).
-- The attention table and the items before the new start are `_linked` tables: `st.table` takes no
-  widget, and a Markdown link opens a new tab, a new session. The container `overview-attention` or
+- The attention table, the items before the new start and the what-ifs (their own grid, above) are
+  `_linked` tables: `st.table` takes no widget, and a Markdown link opens a new tab, a new
+  session. The container `overview-attention` or
   `overview-passed-<kind>` is a CSS grid of four columns (`ui/page.css`), its header and each row a
   container on those columns (`subgrid`), the last column the `ui.page_link` to the page that fixes
   the row (`Link`), empty without one. Cells are Markdown (`ui.literal`), a late date `:red[**…**]`

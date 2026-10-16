@@ -9,9 +9,9 @@ from pathlib import Path
 
 import pytest
 import yaml
-from builders import ASSETS, PHASES_TEXT
+from builders import ASSETS, PHASES_TEXT, QUICK
 
-from dagobert import tax
+from dagobert import datadir, tax
 from dagobert.model import taxes
 from dagobert.model.taxes import TAX_DIR, TAX_YEARS
 from dagobert.ui import mode
@@ -54,6 +54,13 @@ def data(tmp_path: Path) -> Path:
         "name: base\nphases: [{from: 2026-01-01, phase: work}]\n"
     )
     return tmp_path
+
+
+@pytest.fixture
+def quick(tmp_path: Path) -> Path:
+    """A data directory of a quick start (`builders.QUICK`), with its one scenario `plan`."""
+    datadir.start_quick(data := tmp_path / "plan", QUICK)
+    return data
 
 
 @pytest.fixture

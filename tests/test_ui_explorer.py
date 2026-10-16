@@ -887,7 +887,7 @@ def test_the_table_shows_the_change_as_saved_in_every_column() -> None:
         median_liquid=401_500.0, median_taxes=90_000.0, liquid_p5_zero_age=77.0,
         reduced_months=7, raised_months=1, p_care=0.3, p_disability=0.25,
     )  # fmt: skip
-    changes = explorer.changes(mine, _row())
+    changes = report.changes(mine, _row())
     assert changes == {
         report.BROKE_AT: "+2.5 pt",
         report.BROKE_ALIVE: "-5.0 pt",
@@ -902,10 +902,10 @@ def test_the_table_shows_the_change_as_saved_in_every_column() -> None:
         "P(disability)": "+5.0 pt",
     }
     never, shortfall = _row(liquid_p5_zero_age=None), _row(shortfall=None)
-    assert explorer.changes(never, _row())["Liquid p5<0"] == "as saved: 80"
-    assert explorer.changes(_row(), never)["Liquid p5<0"] == "as saved: never"
-    assert explorer.changes(_row(), shortfall)["Shortfall"] == "as saved: none"
-    assert "Shortfall" not in explorer.changes(shortfall, shortfall)
+    assert report.changes(never, _row())["Liquid p5<0"] == "as saved: 80"
+    assert report.changes(_row(), never)["Liquid p5<0"] == "as saved: never"
+    assert report.changes(_row(), shortfall)["Shortfall"] == "as saved: none"
+    assert "Shortfall" not in report.changes(shortfall, shortfall)
     assert set(explorer.CHANGED_WIDTHS) == set(changes)
 
 

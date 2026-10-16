@@ -124,8 +124,8 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   `rename.py` renames by it [references].
 - `src/dagobert/schema.py`, `datadir.py`: the schema version and its migrations, `open`, which
   brings a data directory to it [migrations], a start [first-run]. `transfer.py`: zips [transfer].
-- `src/dagobert/store.py`: writes the YAML inputs with `ruamel.yaml`, `yamlcomments.py` its
-  comments, `textedit.py` as text, `scenariofiles.py` scenario file actions [store, revisions].
+- `src/dagobert/store.py`: YAML writes (`ruamel.yaml`), `yamlcomments.py` comments, `textedit.py`
+  as text, `scenariofiles.py` actions [store, revisions]; `whatifs.py`, `ui/whatifs.py` [whatifs].
 - `src/dagobert/revisions.py`: the revision store, the one writer of the inputs: `write` under the
   lock, one revision per write, the inputs at a time (Overview, Changes since, Flows) [revisions].
 - `src/dagobert/files.py`: `atomic_write` (synced temp file, `os.replace`) under `revisions.write`;

@@ -34,16 +34,42 @@ from dagobert.ui import (
     tables,
     tell,
 )
-from dagobert.ui.assets import opened
+from dagobert.ui.assets import TITLES, opened
 from dagobert.ui.save import value_field, worth
 
 SAME = "unchanged"  # the checkbox that confirms the current value as observed
-# what to enter first, then what to check: `new` beside `current` and `estimate` on a phone too
-COLUMNS = ("asset", "current", "estimate", "new", SAME, "asof", "kind", "measure", "cost_basis")
-# what `current` and `new` hold, by the value field of the asset
-MEASURES = {"value": N_("value"), "balance": N_("balance"), "per_sqm": N_("price per m²")}
-PHONE_ASSET = 140  # pixels of the pinned name on a phone: current, estimate and new fit beside it
-PHONE_NAME = 19  # characters of a name that fit the pinned column, 3 less beside the mark
+PER_SQM = "per_sqm"  # the price per m² of a property, whose `current` is its value
+# what to enter first, then what to check
+COLUMNS = (
+    "asset",
+    "current",
+    "estimate",
+    "new",
+    SAME,
+    "asof",
+    "kind",
+    "measure",
+    PER_SQM,
+    "cost_basis",
+)
+# on a phone `unchanged` in view beside `new`, `estimate` after it: `Take estimates` fills it
+PHONE_COLUMNS = (
+    "asset",
+    "current",
+    "new",
+    SAME,
+    "estimate",
+    "asof",
+    "kind",
+    "measure",
+    PER_SQM,
+    "cost_basis",
+)
+# what `current` and `new` hold, by the value field of the asset: a property its value too
+MEASURES = {"value": N_("value"), "balance": N_("balance"), PER_SQM: N_("value")}
+# pixels of a row on a phone: Streamlit 1.65 wraps the text of a cell only in a row above 4rem,
+# so a long name wraps in the pinned column, never cut (check it after an upgrade)
+PHONE_ROW = 65
 KIND_WIDTH = 160  # pixels of the kind: the longest in words, `Altersvorsorgedepot`, fits
 # on the name of an asset that needs an update: no red reaches 4.5:1 on both themes, and the
 # pinned column of a phone mutes it, so the name stays gray there
@@ -67,8 +93,8 @@ HOW = N_(
     "trades at the last prices of its securities. For gold (XAU) and Bitcoin (BTC) that is the "
     "last month of their series when it is newer than your last price.\n"
     "- **new** takes the value that you observed: for a loan its balance, with or without the "
-    "minus, for a property the price per m² (see **measure**). A term deposit takes none: its "
-    "contract gives the value.\n"
+    "minus, for a property its whole value, which the app saves as its **price per m²**. A term "
+    "deposit takes none: its contract gives the value.\n"
     "- **unchanged** confirms a value that is still correct: **Record** dates it with the day "
     "above, without a new value.\n"
     "- **⚠** marks a value that needs an update, as in the attention table of the Overview: its "
@@ -85,14 +111,16 @@ HOW = N_(
 )
 
 
-def asset_cell(name: str, *, stale: bool, phone: bool) -> str:
-    """The `asset` cell: `STALE_MARK` before the name of an asset that needs an update. On a
-    phone a long name keeps its start and its end in the pinned column, which tells two loans of
-    one bank apart."""
-    mark, room = (STALE_MARK, PHONE_NAME - 3) if stale else ("", PHONE_NAME)
-    if not phone or len(name) <= room:
-        return mark + name
-    return f"{mark}{name[: room - room // 2 - 1]}…{name[-(room // 2) :]}"
+def current(row: dict[str, Any]) -> float:
+    """What `current` shows: the value of the asset, of a property its price per m² times its
+    m²."""
+    return worth(row, row[value_field(row)])
+
+
+def stored(row: dict[str, Any], value: float) -> float:
+    """The value field of `row` for a `value` in `new`: of a property its price per m², to four
+    decimals, so the value typed comes back to the cent (400.000 € over 53 m²)."""
+    return round(value / row["sqm"], 4) if row["kind"] == "property" else value
 
 
 def takes(row: dict[str, Any], column: str) -> bool:
@@ -168,22 +196,23 @@ def snapshot_edits(
     """File edits and history values for the cells entered per table row. `shown` holds the
     file index and the row per table row. A value in `new` or a ticked `unchanged`, which
     observes the current value, gives a new `asof` and a history row; a cost basis alone keeps
-    the date of the value. A pension policy takes with its new `asof` the `paid` of its estimate:
-    `paid` counts the contributions by `asof`. An entry that the row does not take is left out
-    (`stray`)."""
+    the date of the value. A property takes its value, saved as its price per m² (`stored`), and
+    the history the value of that price. A pension policy takes with its new `asof` the `paid`
+    of its estimate: `paid` counts the contributions by `asof`. An entry that the row does not
+    take is left out (`stray`)."""
     edits = RowEdits()
     history: list[Observation] = []
     for position, cells in entered.items():
         i, row = shown[position]
         taken = {k: v for k, v in cells.items() if _entered(k, v) and takes(row, k)}
-        same = bool(taken.pop(SAME, False))
+        same, new = bool(taken.pop(SAME, False)), taken.pop("new", None)
         changes = save.signed(
-            {value_field(row) if k == "new" else k: v for k, v in taken.items()},
+            ({} if new is None else {value_field(row): stored(row, new)}) | taken,
             [("balance",)],  # of a loan
         )
         if not (changes or same):
             continue
-        observed = "new" in taken or same
+        observed = new is not None or same
         paid = estimates[position].paid
         moved = {} if not observed or paid in (None, row.get("paid", 0.0)) else {"paid": paid}
         edits.edited[i] = changes | ({"asof": day} if observed else {}) | moved
@@ -210,7 +239,7 @@ def take_estimates(
             DEPOSIT
             if row["kind"] == "term_deposit"
             else EQUAL
-            if estimated == row[value_field(row)]
+            if estimated == current(row)
             else None
         ):
             skipped.setdefault(reason, []).append(_label(row))
@@ -260,7 +289,7 @@ def page(file: RowFile) -> None:
     base, changed = save.base(file, GRID, _part, _held)
     rows, nonce = base.rows, base.nonce
     shown = [(i, rows[i]) for i in _order(rows)]
-    units, names = gridcolumns.asset_units(), gridcolumns.asset_names()
+    units, names = gridcolumns.asset_units(), gridcolumns.asset_names(TITLES)
     if changed is not None:
         save.warn(changed, key=GRID, identity=IDENTITY, units=units, names=names)
     widget = f"{GRID}-{nonce}"
@@ -274,7 +303,7 @@ def page(file: RowFile) -> None:
     table = pd.DataFrame(
         {
             "asset": [
-                asset_cell(_label(r), stale=flag, phone=phone)
+                (STALE_MARK if flag else "") + _label(r)
                 for (_i, r), flag in zip(shown, old, strict=True)
             ],
             "kind": [_(summary.KINDS[r["kind"]]) for _i, r in shown],
@@ -283,7 +312,7 @@ def page(file: RowFile) -> None:
                 for (_i, r), flag in zip(shown, old, strict=True)
             ],
             "measure": [_(MEASURES[value_field(r)]) for _i, r in shown],
-            "current": [float(r[value_field(r)]) for _i, r in shown],
+            "current": [float(current(r)) for _i, r in shown],
             "estimate": [e.value for e in estimates],
             SAME: pd.Series(
                 [taken.get(i, {}).get(SAME) is True for i in range(len(shown))], dtype=bool
@@ -295,15 +324,25 @@ def page(file: RowFile) -> None:
             )
             for column in ("new", "cost_basis")
         }
+        | {PER_SQM: pd.Series([r.get(PER_SQM) for _i, r in shown], dtype=float)}
     )
     money = partial(st.column_config.NumberColumn, format=EUR_COLUMN)
     config = {
-        "asset": st.column_config.TextColumn(_("asset"), width=PHONE_ASSET if phone else None),
-        "current": money(_("current"), help=_("The value in your inputs")),
+        "asset": st.column_config.TextColumn(_("asset")),
+        "current": money(
+            _("current"),
+            help=_("The value in your inputs, of a property its price per m² times its m²"),
+        ),
         "estimate": money(
             _("estimate"), help=_("What the app expects today, see How the columns work")
         ),
-        "new": money(_("new"), help=_("The value that you observed. A term deposit takes none.")),
+        "new": money(
+            _("new"),
+            help=_(
+                "The value that you observed, of a property its whole value. A term deposit "
+                "takes none."
+            ),
+        ),
         SAME: st.column_config.CheckboxColumn(
             _("unchanged"),
             help=_("Still correct: Record dates the current value with the day above"),
@@ -311,21 +350,29 @@ def page(file: RowFile) -> None:
         "asof": st.column_config.TextColumn(_("as of"), help=_("The date of the current value")),
         "kind": st.column_config.TextColumn(_("kind"), width=KIND_WIDTH),
         "measure": st.column_config.TextColumn(_("measure"), help=_("What current and new hold")),
+        PER_SQM: money(
+            _("price per m²"),
+            help=_(
+                "The price per m² of a property in your inputs. A value in new saves the price "
+                "per m² that gives it."
+            ),
+        ),
         "cost_basis": money(
             _("cost basis"), help=_("What you paid, for a depot without trades only")
         ),
     }
-    tables.pin(config, "asset")
+    tables.pin(config, "asset", width=tables.PHONE_PINNED)
     st.data_editor(
         table.style.apply(
             lambda column: [summary.STALE_STYLE if flag else "" for flag in old],
             subset=["asof"] if phone else ["asset", "asof"],
         ),
-        disabled=["asset", "kind", "asof", "measure", "current", "estimate"],
+        disabled=["asset", "kind", "asof", "measure", "current", "estimate", PER_SQM],
         column_config=config,
-        column_order=COLUMNS,
+        column_order=PHONE_COLUMNS if phone else COLUMNS,
         hide_index=True,
         height="content",
+        row_height=PHONE_ROW if phone else None,
         placeholder="",
         key=widget,
     )

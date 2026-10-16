@@ -290,7 +290,7 @@ def test_changes_show_each_field_in_its_unit() -> None:
     }
     assert [c.text for c in formguard.changes(old, new, list(FIELDS.values()))] == [
         "**care hazard 1 factor** 1% → 2%",
-        "**care cost** 1.000,00 € → 1.200,50 €",
+        "**care cost** 1.000 € → 1.200,50 €",
         "**care duration mean** 24 → 30",
         "**tax teilfreistellung** 30% → 15%",
     ]

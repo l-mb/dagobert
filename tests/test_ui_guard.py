@@ -98,7 +98,7 @@ def test_guard_shows_each_number_in_the_unit_of_its_field() -> None:
         RowEdits(edited={0: {"cost": 3500.5}}),
         units=gridcolumns.units(gridcolumns.columns(CareOptions)),
     )
-    assert [c.text for c in care] == ["**cost** 3.000,00 € → 3.500,50 €"]
+    assert [c.text for c in care] == ["**cost** 3.000 € → 3.500,50 €"]
     rows: list[gridcolumns.Row] = [{"id": "kredit", "rate": 0.011, "cost": 0.002}]
     edits = RowEdits(
         edited={0: {"rate": 0.0298, "cost": 0.003}}, added=[{"name": "Bonus", "share": 15.0}]
@@ -166,7 +166,7 @@ def test_guard_lists_the_numbers_to_save() -> None:
         guard.Change("2026-09-02 World units", None, 1.5, Unit.NUMBER),
         guard.Change("value", None, 7.0),
     ]
-    assert found[1].text == r"**Miete\_alt amount** -500,50 € → -520,00 €"
+    assert found[1].text == r"**Miete\_alt amount** -500,50 € → -520 €"
 
 
 @pytest.mark.parametrize(

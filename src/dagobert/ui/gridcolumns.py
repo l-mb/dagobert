@@ -195,11 +195,15 @@ class Column:
 
     @property
     def said_name(self) -> str:
-        """The name of the column in a sentence, such as a line of the save guard: its keys as the
-        pages name them, of an entry its phase as written (`factor work`)."""
+        """The name of the column in a sentence, such as a line of the save guard: its header
+        where the page gives it a label (`as of` for `asof`), of an entry its key and its phase as
+        written (`factor work`), else its keys as the pages name them, after the nested model
+        that it is lifted from."""
         if self.per_phase:
             return f"{keyword(self.key)} {self.part}"
-        return keywords(self.name)
+        if self.label:
+            return self.header
+        return " ".join(filter(None, (self.inner and keyword(self.inner), keywords(self.name))))
 
     @classmethod
     def of(
@@ -495,10 +499,7 @@ def units(cols: Iterable[Column]) -> dict[str, Unit]:
 def names(cols: Iterable[Column]) -> dict[str, str]:
     """Each column in a sentence (`Column.said_name`) by the name that the save guard gives its
     cells."""
-    return {
-        _guard_name(c): " ".join(filter(None, (c.inner and keyword(c.inner), c.said_name)))
-        for c in cols
-    }
+    return {_guard_name(c): c.said_name for c in cols}
 
 
 @cache
@@ -521,7 +522,8 @@ def asset_units() -> dict[str, Unit]:
     return units(_asset_columns())
 
 
-def asset_names() -> dict[str, str]:
-    """The fields of every asset kind as a line of the save guard names them (`names`), in the
-    language of the session, so not cached."""
-    return names(_asset_columns())
+def asset_names(titles: Mapping[str, str]) -> dict[str, str]:
+    """The fields of every asset kind as a line of the save guard names them (`names`): by the
+    headers `titles` of the Assets grids where they give one (`as of`), in the language of the
+    session, so not cached."""
+    return names(replace(c, label=titles.get(c.name, c.label)) for c in _asset_columns())

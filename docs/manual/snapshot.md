@@ -12,10 +12,15 @@ modes.
 
 The table comes right below the tiles. It has a row for each asset. `current` is the value in your
 inputs, `estimate` is what the app expects today, and `new` takes the value that you observed.
-`measure` tells what the numbers are: the value, the balance of a loan, or the price per square
-meter of a property. A `⚠` before an asset marks a value that needs an update. Its date (`as of`)
+`measure` tells what the numbers are: the value, or the balance of a loan. For a property,
+`current` is its whole value: the price per square meter times the square meters. The column
+`price per m²` shows the price per square meter. A `⚠` before an asset marks a value that needs an
+update. Its date (`as of`)
 is older than the update interval of the asset, twelve months unless you set another, or it has
 no date (`never`). The section `How the columns work` below the table explains each column.
+
+On a phone, the table shows `asset`, `current`, `new` and `unchanged` first. To see the other
+columns, swipe the table to the left. A long name takes two or three lines.
 
 This page dates each value with the day of `Observed on`. To type a value together with another
 date, use the links below the table. Each link opens an asset with a `⚠` on the
@@ -23,14 +28,16 @@ date, use the links below the table. Each link opens an asset with a `⚠` on th
 
 1. Set `Observed on` to the day of your values.
 2. Type each value into `new`. For an account, type its balance. For a loan, type the balance that
-   you still owe, with or without a minus. For a property, type the price per square meter.
+   you still owe, with or without a minus. For a property, type its whole value. The app saves the
+   price per square meter that gives this value.
 3. If a value did not change, tick `unchanged` in its row. The app then keeps the value and gives
    it the new date. This also clears the `⚠` of a value that is still correct.
 4. If you want to take over the estimates, press `Take estimates`. It fills the empty `new` cells
    from `estimate`. It skips term deposits, because their value is the amount invested, without
    interest. It also skips an estimate that is equal to the current value. A message tells how many
    estimates it took, and which rows it skipped and why.
-5. Read the list of changes.
+5. Read the list of changes. It names each field as the [Assets](assets.md) page does, for
+   example `as of` for the date. It shows cents only for a value that has cents.
 6. Press `Record` at the top of the page. The button shows the number of changes, for example
    `Record 3 changes`.
 

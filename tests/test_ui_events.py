@@ -398,7 +398,7 @@ def test_a_toggle_leaves_out_an_inherited_event_with_the_save_of_the_type_open(
     listed = [c.value for c in at.caption if c.value.startswith("To save")]  # a list per type
     drop = "**leave out flat-sale (1 event)** no → yes"
     assert all(drop in line for line in listed)
-    assert any("6.000,00 €" in line for line in listed)
+    assert any("6.000 €" in line for line in listed)
     at.button(key=f"events-child-{kind}-save").click()
     at = edited(at, grid, edit)
     assert not at.exception
@@ -528,7 +528,7 @@ def test_a_purchase_makes_its_ids_of_its_names_and_takes_its_loan_without_a_minu
     shown = " ".join(c.value for c in at.caption)
     assert "**Month** 2033-04" in shown
     assert "**Property id** flat-2" in shown
-    assert "**Loan amount** -250.000,00 €" in shown
+    assert "**Loan amount** -250.000 €" in shown
     next(b for b in at.button if b.key == f"{form}-save").click().run()
     assert not at.error, [e.value for e in at.error]
     added = read_yaml(plans / "scenarios" / "child.yaml")["events"][-1]

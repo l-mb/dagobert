@@ -666,7 +666,7 @@ def test_the_mode_switch_keeps_the_edits_of_a_grid(data: Path) -> None:
     assert "tags" not in new.value.columns
     assert new.value["value"].tolist() == [2000]
     at.run()
-    assert "To save:  \n**giro value** 1.000,00 € → 2.000,00 €" in [c.value for c in at.caption]
+    assert "To save:  \n**giro value** 1.000 € → 2.000 €" in [c.value for c in at.caption]
 
 
 def test_a_hidden_option_stays_for_a_row_of_the_file_by_key_and_an_edit_by_name() -> None:

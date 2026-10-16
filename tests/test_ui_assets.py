@@ -52,25 +52,26 @@ assets.securities_tab(assets_file(Path({data!r})))
     [
         pytest.param(
             [
-                {"id": "flat", "kind": "property", "sqm": 100, "per_sqm": 5000},
+                {"id": "flat", "kind": "property", "sqm": 54, "per_sqm": 3600},
                 {"id": "depot", "kind": "equity", "value": 1.0, "cost_basis": 1.0},
                 {"id": "giro", "kind": "cash", "value": 1.0},
                 {"id": "kredit", "kind": "loan", "balance": -9.0},
             ],
             [2, 1, 0, 3],
             {
-                2: {"new": 5100.0},
+                2: {"new": 200000.0},  # the value of a property: saved as its price per m²
                 1: {"new": 9.0, "cost_basis": 8.0},
                 0: {"new": None},
                 3: {"new": 8.0},
             },
-            # a loan typed without the minus
+            # a loan typed without the minus; the history takes the value of the saved price, which
+            # comes back to the cent
             {
-                0: {"per_sqm": 5100.0, "asof": SNAPPED},
+                0: {"per_sqm": 3703.7037, "asof": SNAPPED},
                 1: {"value": 9.0, "cost_basis": 8.0, "asof": SNAPPED},
                 3: {"balance": -8.0, "asof": SNAPPED},
             },
-            [("flat", 510000.0), ("depot", 9.0), ("kredit", -8.0)],
+            [("flat", 3703.7037 * 54), ("depot", 9.0), ("kredit", -8.0)],
             {},
             id="typed",
         ),
@@ -103,7 +104,7 @@ assets.securities_tab(assets_file(Path({data!r})))
             [0, 1, 2],
             {
                 0: {snapshot.SAME: True},
-                1: {snapshot.SAME: True, "new": 5100.0},
+                1: {snapshot.SAME: True, "new": 510000.0},
                 2: {snapshot.SAME: False},
             },
             {0: {"asof": SNAPPED}, 1: {"per_sqm": 5100.0, "asof": SNAPPED}},
@@ -133,17 +134,6 @@ def test_snapshot_edits(
     assert snapshot.stray(shown, entered) == stray
 
 
-def test_a_long_name_keeps_its_end_on_a_phone() -> None:
-    def cell(name: str, *, stale: bool, phone: bool = True) -> str:
-        return snapshot.asset_cell(name, stale=stale, phone=phone)
-
-    loan = "Kredite Wohnung - 2031 - ...17"
-    assert cell(loan, stale=True) == "⚠ Kredite… - ...17"
-    assert cell(loan, stale=False) == "Kredite W…1 - ...17"
-    assert cell(loan, stale=True, phone=False) == "⚠ " + loan
-    assert cell("ETF Depot Geldmarkt", stale=False) == "ETF Depot Geldmarkt"
-
-
 def test_a_correction_takes_what_changes_a_recorded_value() -> None:
     """A tick removes, a loan stays below zero whatever sign is typed, an emptied cell or the
     value as recorded is no correction."""
@@ -157,7 +147,7 @@ def test_a_correction_takes_what_changes_a_recorded_value() -> None:
     fixes = corrections.corrections(rows, edited, {"loan"})
     assert fixes == {1: -49000.0, 2: None}
     found, removed = corrections.listed(rows, fixes, {"loan": "Home loan"})
-    assert [c.text for c in found] == ["**2026-09-01 Home loan** -50.000,00 € → -49.000,00 €"]
+    assert [c.text for c in found] == ["**2026-09-01 Home loan** -50.000 € → -49.000 €"]
     assert removed == ["2026-09-01 depot"]
 
 
@@ -173,7 +163,7 @@ def test_a_recorded_month_is_corrected_through_the_guard(data: Path) -> None:
     assert month.options == ["2026-09", "2026-08"]
     edit = {"edited_rows": {"0": {"value": 1100}, "1": {corrections.REMOVE: True}}}
     german.edited(at, "snapshot-correct-2026-09-0", edit)
-    assert "**2026-09-01 giro** 1.000,00 € → 1.100,00 €  \n**2026-09-15 depot** removed" in [
+    assert "**2026-09-01 giro** 1.000 € → 1.100 €  \n**2026-09-15 depot** removed" in [
         c.value.removeprefix("To save:  \n") for c in at.caption
     ]
     assert any("1 recorded value goes" in w.value for w in at.warning)
@@ -588,6 +578,24 @@ snapshot.page(assets_file(Path({data!r})))
 """
 
 
+def test_the_snapshot_shows_a_property_at_its_value_and_its_fields_by_their_headers(
+    data: Path,
+) -> None:
+    """`current` holds what a property is worth, its price per m² a column of its own, and the
+    guard names a field as the Assets grid heads it: a tick of `unchanged` lists `as of`."""
+    flat = {"id": "flat", "name": "Flat", "kind": "property", "sqm": 54, "per_sqm": 3600.0}
+    (data / "assets.yaml").write_text(
+        yaml.safe_dump({"assets": [flat | {"asof": date(2026, 4, 30)}]})
+    )
+    at = AppTest.from_string(SNAPSHOT.format(data=str(data)), default_timeout=30).run()
+    grid = _grid(at, "asset")
+    assert grid[["current", "per_sqm", "measure"]].values.tolist() == [[194400.0, 3600.0, "value"]]
+    german.edited(at, "snapshot-0", {"edited_rows": {"0": {snapshot.SAME: True}}})
+    assert f"**Flat as of** 2026-04-30 → {date.today()}" in [
+        c.value.removeprefix("To save:  \n") for c in at.caption
+    ]
+
+
 def test_a_typed_price_saves_at_once_and_records_the_depot(data: Path) -> None:
     (data / "assets.yaml").write_text(yaml.safe_dump({"assets": [DEPOT]}))
     at = AppTest.from_string(SNAPSHOT.format(data=str(data)), default_timeout=30).run()
@@ -634,7 +642,7 @@ def test_an_imported_price_history_passes_the_guard(data: Path) -> None:
     assert security.value is None  # nothing preselected: the history of one went into another
     security.set_value(WORLD).run()
     [warning] = [w.value for w in at.warning if w.value.startswith("Check before you save")]
-    assert "**World 2022-01-01** 12,00 € → 1.200,00 €, 100 times the old value" in warning
+    assert "**World 2022-01-01** 12 € → 1.200 €, 100 times the old value" in warning
     assert "the import reads 1.000,00 € on 2021-01-01, the buy of that day paid 10,00 €" in warning
     assert warning.endswith(". Look at the decimal mark.")  # not the language of the browser
     assert any("line 4: 2999-01-01 is in the future" in c.value for c in at.caption)

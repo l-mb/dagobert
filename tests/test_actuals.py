@@ -148,8 +148,22 @@ def test_comparison_counts_the_recorded_categories_only() -> None:
     ]
     wohnen = comparison.by_category()["wohnen"][0]
     assert wohnen.difference == -40.0
-    assert wohnen.share == pytest.approx(-40 / 1920)
-    assert Line(0.0, -40.0).share is None
+    assert wohnen.share(2) == pytest.approx(-40 / 1920)
+
+
+@pytest.mark.parametrize(
+    ("line", "months", "share"),
+    [
+        (Line(-100.0, -120.0), 1, -0.2),  # 100 € a month: a share
+        (Line(-100.0, -475.0), 5, None),  # 20 € a month: -375% would read as a jump
+        (Line(-500.0, -400.0), 5, 0.2),
+        (Line(0.0, -40.0), 1, None),  # no plan
+    ],
+)
+def test_a_share_of_the_plan_needs_a_plan_of_a_hundred_euros_a_month(
+    line: Line, months: int, share: float | None
+) -> None:
+    assert line.share(months) == (None if share is None else pytest.approx(share))
 
 
 FULL = {"wohnen": -1.0, "freizeit": 0.0, "kinder": -1.0}  # the plan of a month in work, 0 counts

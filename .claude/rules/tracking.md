@@ -15,9 +15,18 @@ The price files, their import and the `Prices` expander: rule `prices`.
   `data/history.csv`; under the tiles one line of what to do, a line that names a held security
   without a price, `Observed on` and the grid, the rest of the help (`snapshot.HOW`) folded below it
   on every device (`ui.fold`); rows by kind and name, the columns `asset`, `current`, `estimate`,
-  `new`, `unchanged` first on every device (`snapshot.COLUMNS`; headers `as of`, `measure`: value,
-  balance or price per m², `cost basis`), the asset pinned on a phone at 140 px, the kind 160 px
-  wide (`KIND_WIDTH`: the grid cut `Rentenvertrag`, and `Altersvorsorgedepot` is longer). A tick of
+  `new`, `unchanged` first (`snapshot.COLUMNS`; headers `as of`, `measure`: value or balance,
+  `price per m²`, `cost basis`), on a phone `asset`, `current`, `new`, `unchanged`, then
+  `estimate` (`PHONE_COLUMNS`: `unchanged` in view at 412 px), the asset pinned at
+  `tables.PHONE_PINNED` in rows of `PHONE_ROW` (65 px: Streamlit 1.65 wraps a text cell only in a
+  row above 4rem), so a long name takes two or three lines, never cut (owner 2026-10-16; a single
+  word longer than the column breaks inside), the kind 160 px wide (`KIND_WIDTH`: the grid cut
+  `Rentenvertrag`, and `Altersvorsorgedepot` is longer). A property shows its value, `per_sqm`
+  times `sqm`, in `current` and takes it in `new` (`snapshot.current`, `stored`: saved as its
+  price per m² to four decimals, so the typed value returns to the cent; the history row the value
+  of that price), its `per_sqm` in the read-only column `price per m²` (owner 2026-10-16: a bare
+  price per m² read as the value). The save guard names a field as the Assets grids head it
+  (`gridcolumns.asset_names(assets.TITLES)`: `as of`, `price per m²`, `paid in`). A tick of
   `unchanged` observes the current value: a new `asof` and a history row, unless `new` holds one
   (`snapshot_edits`); a `cost_basis` alone keeps the `asof` of the value (the Assets grid dates a
   new value only, `save.stamp`). A term deposit takes no `new` or `unchanged` (its contract gives
@@ -25,9 +34,8 @@ The price files, their import and the `Prices` expander: rule `prices`.
   entry is dropped with a warning (`snapshot.stray`, `takes`), so it does not block the save. An
   asset whose value needs an update (`summary.needs_update`) with `⚠` before its name, its `asof` in
   red, `never` without one, its name in red on a desktop only: no red reaches 4.5:1 on both themes,
-  and the pinned column of a phone mutes it to 2.4:1, so there the name stays gray; on a phone a
-  name longer than the pinned column keeps its start and its end (`snapshot.asset_cell`: the names
-  of two loans may differ only at the end); below the grid a link per such row to its row on the
+  and the pinned column of a phone mutes it to 2.4:1, so there the name stays gray; below the
+  grid a link per such row to its row on the
   Assets page (`assets.opened` with its value field and `asof`: this page dates a value with
   `Observed on` only), then the expander `Prices` (`ui.pricing`, open at first while a held security
   has no price, `pricing.unpriced`): a table of the held securities, then the price files without

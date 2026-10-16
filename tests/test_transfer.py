@@ -376,14 +376,14 @@ BUY = "      - {{date: 2026-01-02, kind: buy, security: IE00B4L5Y983, units: 10,
             "assets.yaml",
             ROWS,
             "# a comment\nassets:\n  - {id: giro, kind: cash, value: 1200.5}\n",
-            ["**giro value** 1.000,00 € → 1.200,50 €"],
+            ["**giro value** 1.000 € → 1.200,50 €"],
             ["depot"],
         ),
         (
             "assets.yaml",
             f"{DEPOT}{BUY.format(2850)}{BUY.format(290).replace('01-02', '02-02')}",
             f"{DEPOT}{BUY.format(2950)}",
-            ["**depot trades 2026-01-02 IE00B4L5Y983 amount** 2.850,00 € → 2.950,00 €"],
+            ["**depot trades 2026-01-02 IE00B4L5Y983 amount** 2.850 € → 2.950 €"],
             ["depot trades 2026-02-02 IE00B4L5Y983"],
         ),
         (
@@ -391,8 +391,8 @@ BUY = "      - {{date: 2026-01-02, kind: buy, security: IE00B4L5Y983, units: 10,
             "date,asset,value\n2026-01-01,giro,1000.00\n2026-02-01,giro,1100.00\n",
             "date,asset,value\n2026-03-01,giro,900\n2026-01-01,giro,1200.00\n",
             [
-                "**2026-01-01 giro** 1.000,00 € → 1.200,00 €",
-                "**2026-03-01 giro** empty → 900,00 €",
+                "**2026-01-01 giro** 1.000 € → 1.200 €",
+                "**2026-03-01 giro** empty → 900 €",
             ],
             ["2026-02-01 giro"],
         ),
@@ -408,7 +408,8 @@ BUY = "      - {{date: 2026-01-02, kind: buy, security: IE00B4L5Y983, units: 10,
 def test_a_difference_lists_rows_by_their_key(
     path: str, old: str, new: str, found: list[str], removed: list[str]
 ) -> None:
-    """In the format of the save guard: a new order is no change, money shows with cents."""
+    """In the format of the save guard: a new order is no change, money shows its cents where
+    it has any."""
     difference = page.difference(path, Side("here", "zip", old, new))
     assert ([c.text for c in difference.found], difference.removed) == (found, removed)
     assert not difference.diff

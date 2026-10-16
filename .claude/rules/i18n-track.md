@@ -19,8 +19,8 @@ The Overview, Snapshot and Assets pages speak German (rule `i18n`): `ui/overview
   securities as written), the tax of a lot (`assets.FREE`, `PRIVATE_SALE`, `CAPITAL`, compared as
   ids), the reasons of `Take estimates` (`snapshot.DEPOSIT`, `EQUAL`). `assets.titles` gives the
   headers of `TITLES` only: any other column takes its key, in German its word
-  (`gridcolumns.keyword`). The Snapshot guard names a cell by `gridcolumns.asset_names` (uncached,
-  twin of `asset_units`).
+  (`gridcolumns.keyword`). The Snapshot guard names a cell by `gridcolumns.asset_names` with
+  `assets.TITLES`, as the Assets grids head it (uncached, twin of `asset_units`).
 - The Snapshot grid is a fixed editor with a key: Streamlit 1.65 knows it by its key and the
   schema of its data, so a language switch keeps its entries, though its labels and some cells
   change. The editors of the Assets page are `tables.edit_table` grids (rule `i18n`).

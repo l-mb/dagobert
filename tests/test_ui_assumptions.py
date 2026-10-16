@@ -85,7 +85,7 @@ def test_the_gifts_before_the_start_save_alone(tmp_path: Path) -> None:
         {"added_rows": [{"at": "2024-03-01", "value": 50000}]},
     )
     edited(at, grid, edit)
-    assert "To save:  \n**2024-03 value** empty → 50.000,00 €" in [c.value for c in at.caption]
+    assert "To save:  \n**2024-03 value** empty → 50.000 €" in [c.value for c in at.caption]
     at.button(key="assumptions-given-mother-save").click()
     edited(at, grid, edit)  # a browser sends the edits with the press
     assert not at.exception

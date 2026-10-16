@@ -12,7 +12,7 @@ The form `Add` adds one amount to a month at once, for example a receipt.
 
 1. Select a category, or type a new one.
 2. Type the euros that you spent, without a minus.
-3. Select the month in `Add to month`. The current month comes first.
+3. Select the month in `Add to month`. At first, it shows the current month.
 4. Press `Add`.
 
 A line under the form names the amount, the category, the month and what you spent there now,
@@ -25,10 +25,10 @@ the month stay for the next amount. To take an amount back, press `Undo` at the 
 ## Edit a month
 
 The section `A whole month` holds the grid. The grid shows one month: the plan and the recorded
-actual for each category. It opens on the last complete month, or on the month of a link of the
-[Overview](overview.md). The buttons beside the month go to the previous and the next month. A
-line above the grid counts the planned categories that have an actual. A category without an
-actual is not recorded. A 0 counts as recorded.
+actual for each category. It opens on the current month, the same month as `Add to month`, or on
+the month of a link of the [Overview](overview.md). The buttons beside the month go to the
+previous and the next month. A line above the grid counts the planned categories that have an
+actual. A category without an actual is not recorded. A 0 counts as recorded.
 
 1. Type the actual amounts. Spending is negative. A refund can be positive.
 2. If you want to take over the plan, press `Take plan`. It fills the empty actual cells.
@@ -55,7 +55,9 @@ Beside the grid on a wide screen, or below it on a phone, the page compares the 
 recorded months, without the current month until it ends:
 
 - a table with the plan, the actual and the difference for each category, summed over the months in
-  which the category has an actual
+  which the category has an actual. The difference shows in euros and as a percentage of the plan.
+  The percentage shows only if the plan is at least 100 € a month. For a smaller plan, a percentage
+  such as -375% says little.
 - a chart of the spending per month against the plan
 - a chart of the difference per category. A bar to the left means that you spent more than
   planned.

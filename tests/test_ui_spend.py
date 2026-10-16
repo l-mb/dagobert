@@ -44,10 +44,12 @@ def test_spend_page_compares_the_recorded_months(data: Path) -> None:
     spent(data, date(2026, 8, 1), {"wohnen": -500.0})
     at = AppTest.from_string(SPEND.format(data=str(data)), default_timeout=30).run()
     assert not at.exception
-    assert _shown_month(at) == add_months(date.today(), -1)  # last complete
+    # the grid and the quick add start on the current month
+    this = date.today().replace(day=1)
+    assert _shown_month(at) == this == _quick(at)[2]
     next(b for b in at.button if b.help == "Previous month").click().run()
     assert not at.exception
-    assert _shown_month(at) == add_months(date.today(), -2)
+    assert _shown_month(at) == add_months(this, -1)
     table = at.table[0].value
     assert list(table.columns)[1] == "months"  # `ui/page.css` hides it in portrait by position
     assert table["category"].tolist() == ["bargeld", "wohnen", "total"]
@@ -129,6 +131,8 @@ def test_spend_quick_add_saves_at_once_and_adds_to_the_month(data: Path) -> None
         "spent."
     )
     assert not at.toast
+    assert not [b for b in at.button if b.label.startswith("Show ")]  # the grid starts on it
+    next(b for b in at.button if b.help == "Previous month").click().run()
     next(b for b in at.button if b.label == f"Show {month:%Y-%m}").click().run()
     assert _shown_month(at) == month
     assert not [b for b in at.button if b.label.startswith("Show ")]  # the grid shows it
@@ -201,7 +205,7 @@ def _saveable(at: AppTest) -> bool:
 
 
 def test_spend_grid_follows_the_file_and_keeps_its_edits(data: Path) -> None:
-    month = add_months(date.today(), -1)  # the grid opens on it
+    month = date.today().replace(day=1)  # the grid opens on it
     spent(data, month, {"bargeld": -50.0})
     at = AppTest.from_string(SPEND.format(data=str(data)), default_timeout=30).run()
 
@@ -213,13 +217,13 @@ def test_spend_grid_follows_the_file_and_keeps_its_edits(data: Path) -> None:
 
     assert recorded() == ["Recorded: 0 of 1 planned categories."]  # bargeld is unplanned
     _click(at, "Take plan")
-    assert to_save() == ["**wohnen** empty → -500,00 €"]
+    assert to_save() == ["**wohnen** empty → -500 €"]
     _click(at, "Discard")
     assert not to_save() and not _saveable(at)
     _click(at, "Take plan")
     actuals.save_draft(data, month, {"bargeld": (-50.0, -70.0)}, source="test")  # another device
     _add(at, "wohnen", "20", month)  # the edited category takes it too
-    assert to_save() == ["**wohnen** -20,00 € → -520,00 €"]
+    assert to_save() == ["**wohnen** -20 € → -520 €"]
     # a jump: once a toast, and Save carries the mark while it lasts, still enabled
     assert any(t.value.startswith("Check before you save") for t in at.toast)
     at.run()
@@ -231,7 +235,7 @@ def test_spend_grid_follows_the_file_and_keeps_its_edits(data: Path) -> None:
 
 
 def test_spend_save_lists_a_category_changed_elsewhere_and_takes_the_choice(data: Path) -> None:
-    month = add_months(date.today(), -1)  # the grid opens on it
+    month = date.today().replace(day=1)  # the grid opens on it
     spent(data, month, {"bargeld": -50.0})
     at = AppTest.from_string(SPEND.format(data=str(data)), default_timeout=30).run()
 

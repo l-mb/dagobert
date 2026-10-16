@@ -11,11 +11,12 @@ The file `actuals.csv`: `docs/manual/configuration.md`.
 
 ## Spend page
 
-- The actual spending per expense category, entered by hand: first the form `Add` (a category, also
-  a new one typed in; the euros spent, above zero; `Add to month`, the current one first), which
-  adds one amount to the month in `data/actuals.csv` at once. The line under the form (`_said`,
-  always there and at least as high as its button, in portrait as two lines of text beside it, a row
-  that does not wrap, so nothing moves: the button wrapped below the text) holds how to enter, a
+- The actual spending per expense category, entered by hand: first the form `Add` (a category,
+  also a new one typed in; the euros spent, above zero; `Add to month`, at first the current
+  month), which adds one amount to the month in `data/actuals.csv` at once. The line under the
+  form (`_said`, always there and at least as high as its button, in portrait as two lines of text
+  beside it, a row that does not wrap, so nothing moves: the button wrapped below the text) holds
+  how to enter, a
   rejected entry in red, or the last add (`spend.Added`, `LAST`), with cents and one sign, the one
   of the form: `Added 45,50 € to cash, 2026-10: now 45,50 € spent.`, with a warning when the month
   holds more refunds, and `Show 2026-10` while the grid shows another month. No toast: it covered
@@ -23,8 +24,9 @@ The file `actuals.csv`: `docs/manual/configuration.md`.
   empties the amount, and category and month stay for the next one, also after another page
   (`CATEGORY`, `ADD_MONTH`). Then, in a row that wraps (`spend-columns`: the month 25rem, the
   comparison at least 36rem, side by side on a desktop, where the grid of 370 px left most of the
-  page empty), the heading `A whole month`, a month control, at first on the last complete month or
-  on that of a link (`?month=YYYY-MM`, `SHOW`, `linked`; the attention table of the Overview), with
+  page empty), the heading `A whole month`, a month control, at first on the current month like
+  `Add to month` (owner 2026-10-16: both start on one month, `page` gives them `this`), or on that
+  of a link (`?month=YYYY-MM`, `SHOW`, `linked`; the attention table of the Overview), with
   buttons for the previous and the next month, and a caption with the planned categories of the
   month that have an actual (`actuals.Coverage`); a grid with the plan of the month
   (`actuals.planned`) and the recorded actual, the list of the save guard, a total row; `Take plan`
@@ -52,8 +54,11 @@ The file `actuals.csv`: `docs/manual/configuration.md`.
   and drops the line of a quick add into that month, whose sum it names from before. Categories sort
   without regard to case. Beside it, or below on a narrow screen, `Actual against plan`: the last
   twelve recorded months without the current one until it ends: per category plan, actual,
-  difference and its share (in portrait without the number of months, at 13 px), summed over the
-  months in which the category has an actual, the spending per month against the plan, and the
+  difference in euros and its share of the plan (in portrait without the number of months, at 13
+  px), summed over the months in which the category has an actual; the share only where the plan
+  is at least `actuals.SHARE_FROM` (100 €) a month over those months (`Line.share`, else `–`: owner
+  2026-10-16, a plan of 20 € a month showed `-375.0%`), which the fold says; the spending per month
+  against the plan, and the
   difference per category as bars below both, side by side above 960 px.
 
 ## Code

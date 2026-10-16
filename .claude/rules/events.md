@@ -40,9 +40,10 @@ user guide of the tab: `docs/manual/events.md`.
   ones behind `All columns` (`MORE`: the price spread, costs, `taxable` and `end_tagged` of a sale,
   the bAV part of a severance, the factor and the `premium` of `set_stream`, the `building_share`
   and `afa` of a purchase, `building share` and `AfA rate` in `HEADERS`), the headers in words
-  (`HEADERS` through `Table.titles`: `month`, `or at age`, `or when liquid below`; a header only:
-  the pin, the edits and the guard keep the name, `at`); `identity` `("type", "at", "id")`, no field
-  is unique and `store.keyed` counts equals. `FIELDS` names the columns of a type with nested models
+  (`HEADERS` through `Table.titles`: `month`, `or at age`, `or when liquid below`; the pin, the
+  edits and the key of a guard line keep the name, `at`, its words the header); `identity` `("type",
+  "at", "id")`, no field is unique and `store.keyed` counts equals. `FIELDS` names the columns of a
+  type with nested models
   by column name: a `buy_property` shows the property name, the price, `land` and the loan amount
   (12 columns ran past a desktop and a phone), the ids and the rest behind `All columns`;
   `TYPE_HEADERS` and `TYPE_LABELS` call its `costs` `purchase costs`, `LABELS` its ids `Property id`

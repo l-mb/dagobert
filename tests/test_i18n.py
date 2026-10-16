@@ -255,7 +255,7 @@ def test_a_language_switch_keeps_the_edits_of_a_grid(data: Path) -> None:
     at = AppTest.from_string(ACTIVATE + GRID.format(data=str(data)), default_timeout=30).run()
     edit = {"edited_rows": {"0": {"value": 2000}}}
     edited(at, "assets-cash-0", edit)
-    assert [c.value for c in at.caption] == ["To save:  \n**giro value** 1.000,00 € → 2.000,00 €"]
+    assert [c.value for c in at.caption] == ["To save:  \n**giro value** 1.000 € → 2.000 €"]
     old = at.dataframe[0].proto.id
     next(s for s in at.sidebar.segmented_control if s.label == LANGUAGE_LABEL).set_value("de")
     edited(at, "assets-cash-0", edit)  # the old grid sends its edits with the switch
@@ -263,9 +263,7 @@ def test_a_language_switch_keeps_the_edits_of_a_grid(data: Path) -> None:
     assert at.dataframe[0].proto.id != old  # a new editor
     assert at.dataframe[0].value["value"].tolist() == [2000]
     at.run()  # the new grid sends no edits
-    assert [c.value for c in at.caption] == [
-        "Zu speichern:  \n**giro Wert** 1.000,00 € → 2.000,00 €"
-    ]
+    assert [c.value for c in at.caption] == ["Zu speichern:  \n**giro Wert** 1.000 € → 2.000 €"]
     save = at.button(key="assets-cash-save")
     assert (save.label, save.disabled) == ("Speichern", False)
 
@@ -290,13 +288,13 @@ def test_a_language_switch_keeps_the_entries_of_the_snapshot(data: Path) -> None
     at = AppTest.from_string(ACTIVATE + SNAPSHOT.format(data=str(data)), default_timeout=30).run()
     edit = {"edited_rows": {"0": {"new": 2000}}}
     edited(at, "snapshot-0", edit)
-    assert _listed(at) == ["To save:  \n**giro value** 1.000,00 € → 2.000,00 €"]
+    assert _listed(at) == ["To save:  \n**giro value** 1.000 € → 2.000 €"]
     old = at.dataframe[0].proto.id
     next(s for s in at.sidebar.segmented_control if s.label == LANGUAGE_LABEL).set_value("de")
     edited(at, "snapshot-0", edit)
     assert not at.exception
     assert at.dataframe[0].proto.id == old  # the same editor
-    assert _listed(at) == ["Zu speichern:  \n**giro Wert** 1.000,00 € → 2.000,00 €"]
+    assert _listed(at) == ["Zu speichern:  \n**giro Wert** 1.000 € → 2.000 €"]
     assert at.button(key="snapshot-save").label == "1 Änderung erfassen"
 
 

@@ -213,16 +213,16 @@ def _keep(widget: str, month: date, shown: list[tuple[str, float | None]], saved
     _draft(month, entered(shown, st.session_state[widget]), saved)
 
 
-def _add(data_dir: Path, options: list[date], known: list[str]) -> None:
-    """One amount spent, added to a category of a month and saved at once. A rejected entry
-    stays in the form. Category and month stay for the next one, also after another page. The
-    line under the form says what happened."""
+def _add(data_dir: Path, options: list[date], known: list[str], start: date) -> None:
+    """One amount spent, added to a category of a month and saved at once, at first to `start`.
+    A rejected entry stays in the form. Category and month stay for the next one, also after
+    another page. The line under the form says what happened."""
     if st.session_state.pop(ADDED, False):
         st.session_state[SPENT], st.session_state[PICK] = "", st.session_state[CATEGORY]
     st.session_state.setdefault(PICK, st.session_state.get(CATEGORY))
     if st.session_state.get(TO_MONTH) not in options:
         last = st.session_state.get(ADD_MONTH)
-        st.session_state[TO_MONTH] = last if last in options else date.today().replace(day=1)
+        st.session_state[TO_MONTH] = last if last in options else start
     with (
         st.form("spend-quick"),
         st.container(horizontal=True, vertical_alignment="bottom"),
@@ -299,12 +299,12 @@ def linked(month: str) -> date | None:
         return None
 
 
-def _month(options: list[date]) -> date:
-    """The month control, at first on the last complete month, or on the month of a link."""
+def _month(options: list[date], start: date) -> date:
+    """The month control, at first on `start`, or on the month of a link."""
     if (shown := linked(st.query_params.pop(SHOW, ""))) is not None and shown in options:
         _show(shown)
     elif st.session_state.get(MONTH) not in options:
-        st.session_state[MONTH] = add_months(date.today(), -1)
+        st.session_state[MONTH] = start
     with st.container(horizontal=True, vertical_alignment="bottom"):
         step_button(MONTH, options, -1, "month", after=_fresh)
         month: date = st.selectbox(
@@ -541,7 +541,7 @@ def _table(comparison: Comparison) -> None:
                 header["plan"]: line.plan,
                 header["actual"]: line.actual,
                 header["difference"]: line.difference,
-                header["share"]: line.share,
+                header["share"]: line.share(count),
             }
             for cat, (line, count) in [
                 *lines.items(),
@@ -604,15 +604,17 @@ def _comparison(
             "The last {n} recorded month, at most twelve, without the current one until it ends. "
             "A category counts in a month only when that month has an actual for it. The "
             "difference is actual less plan: below zero more was spent than planned, and the bar "
-            "grows to the left. A stream paid every n months counts one n-th in each month, so "
-            "compare over several months.",
+            "grows to the left. The difference as a share of the plan shows only where the plan "
+            "is at least {minimum} a month. A stream paid every n months counts one n-th in each "
+            "month, so compare over several months.",
             "The last {n} recorded months, at most twelve, without the current one until it "
             "ends. A category counts in a month only when that month has an actual for it. The "
             "difference is actual less plan: below zero more was spent than planned, and the bar "
-            "grows to the left. A stream paid every n months counts one n-th in each month, so "
-            "compare over several months.",
+            "grows to the left. The difference as a share of the plan shows only where the plan "
+            "is at least {minimum} a month. A stream paid every n months counts one n-th in each "
+            "month, so compare over several months.",
             n,
-        ).format(n=n),
+        ).format(n=n, minimum=format_eur(actuals.SHARE_FROM)),
         _("How to read the comparison"),
     )
 
@@ -636,18 +638,17 @@ def page(streams: RowFile) -> None:
         assumptions.tax.gkv_from,
     )
     recorded = actuals.read(data_dir)
-    today = date.today()
-    options = months(recorded, today)
+    this = date.today().replace(day=1)  # where the quick add and the grid start
+    options = months(recorded, this)
     known = sorted(
-        {*actuals.planned(rows, scenario, today.replace(day=1)), *actuals.categories(recorded)},
-        key=str.casefold,
+        {*actuals.planned(rows, scenario, this), *actuals.categories(recorded)}, key=str.casefold
     )
-    _add(data_dir, options, known)
+    _add(data_dir, options, known, this)
     # the month and the comparison side by side where both fit (`ui.PAGE_STYLE`), else stacked
     row = st.container(horizontal=True, gap="large", key="spend-columns")
     with row.container(key="spend-whole"):
         st.subheader(_("A whole month"))
-        month = _month(options)
+        month = _month(options, this)
         _status(Coverage.of(recorded, rows, scenario, month))
         # The total row and `Take plan` stick to the bottom of the screen only while the grid
         # shows.

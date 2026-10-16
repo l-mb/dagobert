@@ -1,12 +1,13 @@
-"""The save guard: what a Save writes, money with cents, and a warning for a number that looks
-off.
+"""The save guard: what a Save writes, money with its cents where it has any, and a warning for
+a number that looks off.
 
 A number cell of a grid reads `,` and `.` by the language of the browser: `-20,50` becomes
 -2.050 in an English one, `131.500` becomes 131,5 in a German one. The grid shows whole euros,
 so only this list shows such an entry before it is written. The list sits below its grid, so a
 new warning also shows once as a toast, and the Save button carries `MARK` while one lasts. Each
-number shows in the unit of its field (`model.base.units`): euros with cents, a share or a rate in
-percent as the grids take it, the file keeps the fraction."""
+number shows in the unit of its field (`model.base.units`): euros in the one format, with cents
+where a value has them, a share or a rate in percent as the grids take it, the file keeps the
+fraction."""
 
 from __future__ import annotations
 
@@ -80,8 +81,8 @@ class Change:
         if not _is_number(value):
             return _("empty") if value is None else literal(value)
         match self.unit:
-            case Unit.EUR:
-                return format_eur(value, cents=True)
+            case Unit.EUR:  # cents where it has any
+                return format_eur(value, cents=round(value, 2) % 1 != 0)
             case Unit.PERCENT:
                 return format_percent(value, None)
             case _:
@@ -244,13 +245,13 @@ def review(
     notes: Sequence[str] = (),
     hint: str | None = None,
 ) -> bool:
-    """The cells to save, money with cents, and a warning for the numbers that look off. Saving
-    stays possible: a big change is sometimes real, for example after a sale. `notes` are
-    warnings of no single cell, such as an imported price far from the price of a trade that
-    day. `hint` ends the warning, by default the reading of number cells by the language of the
-    browser (`LOCALE`; a message of the catalogue, said in the language of the session). A
-    warning that is new to the list `key` also shows once as a toast. Returns whether there is a
-    warning."""
+    """The cells to save, money with its cents where it has any, and a warning for the numbers
+    that look off. Saving stays possible: a big change is sometimes real, for example after a
+    sale. `notes` are warnings of no single cell, such as an imported price far from the price of
+    a trade that day. `hint` ends the warning, by default the reading of number cells by the
+    language of the browser (`LOCALE`; a message of the catalogue, said in the language of the
+    session). A warning that is new to the list `key` also shows once as a toast. Returns whether
+    there is a warning."""
     flagged = [c for c in found if c.warning]
     warnings = [f"{c.text}, {c.warning}" for c in flagged] + list(notes)
     if hint is None:

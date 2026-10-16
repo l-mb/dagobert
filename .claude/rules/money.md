@@ -16,7 +16,9 @@ paths:
   `gridcolumns.FORMATS`). Its printf format groups with a dot in any browser locale, but only whole
   numbers. So a grid shows whole euros, and the cell editor shows the exact value. Where cents
   matter, as in the amounts of a roll forward, the cells are text from `format_eur(cents=True)`:
-  `1.234,56 €`. A figure takes `charts.layout()` (`separators` of the language, `money.separators`:
+  `1.234,56 €`, in English too (owner, issue #23). A line of the save guard shows a value with
+  cents only where it has cents (owner 2026-10-16, `guard.Change`: `6.240,10 € → 6.100 €`, not
+  `6.100,00 €`). A figure takes `charts.layout()` (`separators` of the language, `money.separators`:
   a thousands dot, the decimal mark of the language; the app keeps them in its own theme) and a
   euro axis `charts.EUR_TICKS`. Money in a figure is whole euros, so no number there shows both. A
   euro slider (the explorer, the fold of the Flows page) takes the format of a grid column:

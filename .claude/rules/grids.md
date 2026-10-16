@@ -142,8 +142,9 @@ The save guard of the grids is in the rule `save-guard`.
   of the columns into a popover `Columns` (`Table.help_label`, `What the columns mean` on the Assets
   page) beside the `All columns` toggle. `Table.titles` gives a column a readable header
   (`Column.label`, whose help then names the key of the file); the cells, the edits and the key of a
-  guard line keep the field name, its words the keys (`Table.names`). `Table.helps` replaces the
-  help of a column where the schema says another default: the `index` of a savings plan is nominal
+  guard line keep the field name, its words the header (`Table.names`, `Column.said_name`).
+  `Table.helps` replaces the help of a column where the schema says another default: the `index` of
+  a savings plan is nominal
   without one, the field default is `cpi` (`cashflows.SAVINGS`). `Column.width` takes the label only
   for an entry of a mapping (a phase): `ENTRY_PAD` plus `ENTRY_CHAR` per character, at least
   `entry`, so `unemployed` takes 110 px. `Column.stored` keeps an emptied list as `[]` where the

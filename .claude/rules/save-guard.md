@@ -10,8 +10,9 @@ paths:
 - Every save of the inputs passes the save guard (`ui/guard.py`). A number cell reads `,` and `.` by
   the browser language (`-20,50` becomes -2.050 in English, `131.500` becomes 131,5 in German), and
   a grid shows whole euros, so the guard lists what a save writes: each changed cell old to new,
-  money with cents, the numbers of a new row and the cells that its table makes (`Table.made`, of
-  `Table.derived`: the ids of a purchase, which the grid does not show before the save), the removed
+  money with its cents where a value has them (rule `money`), the numbers of a new row and the cells
+  that its table makes (`Table.made`, of `Table.derived`: the ids of a purchase, which the grid does
+  not show before the save), the removed
   rows (`asof` only in a row without a changed amount: `save.stamp` sets it with every new value),
   in the order of the grid (`guard.changes` takes the file indices as shown), each row by its name,
   id or security after the date of a trade or the month of an event, an event without them by the
@@ -64,10 +65,11 @@ paths:
   `listed`, the list that the button of a dialog writes (a file action, a rename): the one of the
   run before, none while the list now refuses.
 - The guard speaks the language of the session (rule `i18n`): its sentences, the warnings, a cell
-  of a grid by `names` beside `units` (`Table.names`, `gridcolumns.names`: its keys as the headers
-  name them), a field of a form by its keys (`formguard.changes`); `Change.key` (`named`) keeps the
-  English for a caller that tells a field by it (`assumptions.hint`, `scenario_overrides._hint`
-  and `changes`). `save.changed_at` names the
+  of a grid by `names` beside `units` (`Table.names`, `gridcolumns.names`: as the grid heads it,
+  `Column.said_name`; owner 2026-10-16: `Depot as of`, never `Depot asof`), a field of a form by its
+  keys (`formguard.changes`); `Change.key` (`named`) keeps the English for a caller that tells a
+  field by it (`assumptions.hint`, `scenario_overrides._hint` and `changes`). `save.changed_at`
+  names the
   page of a change in words (`ui.page_said`; `save.when` one source at its local time:
   `at 14:03 on Snapshot`), `save.reason` why a save failed: a lock, a read-only directory and a
   conflict by their type, any other error as written.

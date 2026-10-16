@@ -29,6 +29,9 @@ Months = dict[date, Amounts]  # by first of the month, oldest first
 Edit = tuple[float | None, float | None]
 Draft = dict[str, Edit]  # the unsaved edits of a month by category
 KEEPING = 3  # months back in which a record shows that the user keeps the actuals (`missing`)
+# euros of plan a month from which the comparison gives a difference as a share of the plan too:
+# of a smaller plan a share reads as a jump: -375% of 20 € a month
+SHARE_FROM = 100.0
 
 
 def read(data_dir: Path) -> Months:
@@ -202,10 +205,14 @@ class Line:
         """Actual less plan: below zero more was spent than planned."""
         return self.actual - self.plan
 
-    @property
-    def share(self) -> float | None:
-        """The difference as a share of the planned spending, None without a plan."""
-        return self.difference / abs(self.plan) if round(self.plan, 2) else None
+    def share(self, months: int = 1) -> float | None:
+        """The difference as a share of the planned spending, None where the plan over `months`
+        months stays below `SHARE_FROM` euros a month."""
+        return (
+            self.difference / abs(self.plan)
+            if round(abs(self.plan), 2) >= SHARE_FROM * months
+            else None
+        )
 
     def __add__(self, other: Line) -> Line:
         return Line(self.plan + other.plan, self.actual + other.actual)

@@ -1,10 +1,10 @@
 # Export and import
 
 An export is a zip file of your data directory. It holds the inputs, your records and the prices of
-your securities. It does not hold the fetched series in `series/` or the report in `out/`. Use an
-export as a backup, or to work on a copy and bring the result back. The page `Export and import` in
-the section Setup does both. The commands `dagobert export` and `dagobert import` do the same on
-the command line.
+your securities. It does not hold the fetched series in `series/`, the report in `out/` or the
+[kept results](data.md#kept-results) in `.cache/`. Use an export as a backup, or to work on a
+copy and bring the result back. The page `Export and import` in the section Setup does both. The
+commands `dagobert export` and `dagobert import` do the same on the command line.
 
 ## Make an export
 
@@ -51,7 +51,8 @@ directory, so leave out `uv run` before it.
 `uv run dagobert app --data dagobert-<revision>.zip` unpacks the zip into the directory
 `dagobert-<revision>` next to it and opens the app on that directory. If you start the app again
 with the same zip, it uses the same directory, with your changes. The copy has no fetched series.
-Fetch the series that you need again on its Data page.
+Fetch the series that you need again on its Data page. The app keeps the results of the copy in
+memory only, until it stops.
 
 `uv run dagobert run --data dagobert-<revision>.zip plan.yaml` computes a scenario of the zip
 without a copy. Name each scenario by its file name.

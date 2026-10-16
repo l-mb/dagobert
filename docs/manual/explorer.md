@@ -26,12 +26,17 @@ Above the table, one line tells you what the app does. While it computes, the li
 example `Simulating 2 scenarios, Monte Carlo, 500 paths`. The old table stays grey until the new
 results arrive. If you move a slider again during this time, the app stops the wait at once and
 starts the runs for the new position. When the work is done, the line starts with `Up to date`.
+Your inputs do not allow some positions of the sliders, for example a spending rule whose increase
+starts at or below the wealth where its cut starts. Then the line starts with `Not simulated`, a
+message below it names the problem, and the page shows no results. Move a slider back to see them
+again.
+
 The app keeps the results that it computed. When you come back to them, also from another page,
-they show at once without that line. A new default choice of scenarios or a change on the
-Features page keeps them too. Your inputs do not allow some positions of the sliders, for example
-a spending rule whose increase starts at or below the wealth where its cut starts. Then the line
-starts with `Not simulated`, a message below it names the problem, and the page shows no results.
-Move a slider back to see them again.
+they show at once without that line. A new default choice of scenarios or a change on the Features
+page keeps them too. The app also keeps results in your data directory: the runs of 500 paths, the
+sensitivity charts and the goal seek. After a restart of the app, these results also show at once.
+When you change your inputs or install a new version of the app, the app computes them again. The
+[Data](data.md#kept-results) page shows the space that they take and clears them.
 
 The next line names the sliders that you moved, each as `from → to`. When you moved more than three
 sliders, the line shows how many, for example `16 sliders moved`. Click or tap it to see the list.
@@ -226,6 +231,7 @@ Each scenario has a tab. When you moved a slider, the run as saved has a tab too
 The sensitivity charts are in the group `What moves the result`, which starts closed, also on a
 computer. They need many runs, about half a minute for each scenario at 500 paths. So the app
 computes them only while the group is open, and only when you did not move a slider for 2 seconds.
+Charts that the app computed once for the same sliders show at once, also after a restart.
 While the app waits or computes, the group shows a bar. Below the bar, the charts of your last
 position show in grey, with the line `For the sliders before your last move`. When the new charts
 are ready, they replace the grey ones. If you move a slider during this time, the app stops and

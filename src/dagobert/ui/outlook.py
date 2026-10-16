@@ -11,7 +11,7 @@ from pathlib import Path
 import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 
-from dagobert import goalseek, report, revisions
+from dagobert import cache, goalseek, report, revisions
 from dagobert.i18n import N_, _
 from dagobert.loader import load_plan
 from dagobert.model.assets import Asset, AvDepot, PensionPolicy
@@ -91,13 +91,6 @@ VPW_SEEKS = N_(
 )
 
 
-@st.cache_resource(show_spinner=False)
-def _seeks() -> dict[tuple[object, ...], Seek]:
-    """The answer of each seek per run options, scenario, target and state of the inputs, without
-    words: the page says it in the language of its session."""
-    return {}
-
-
 def _allowed(found: goalseek.Found, dial: goalseek.Dial, target: float) -> str:
     """The spending at the edge that the seek found, as a factor and per month, and the chance to
     run out by the age of its runs; under VPW the floor (`_floor`)."""
@@ -175,18 +168,48 @@ SEEKS: dict[
 }
 
 
-def _seek(
-    job: goalseek.Job,
-    dial_of: Callable[[Plan], goalseek.Dial],
-    plan: Plan,
-    progress: Callable[[float], object],
-) -> Seek:
-    """What a seek of the dial of `plan` finds, None for a plan without that dial."""
+def _dial(dial_of: Callable[[Plan], goalseek.Dial], plan: Plan) -> goalseek.Dial | None:
+    """The dial of `plan` that `dial_of` gives, None for a plan without it."""
     try:
-        dial = dial_of(plan)
+        return dial_of(plan)
     except goalseek.NoChangeError:
         return None
-    return runs.seek(job, dial, progress), dial
+
+
+def _sought(
+    answers: DeltaGenerator, job: goalseek.Job, label: str, dial: goalseek.Dial | None
+) -> Seek:
+    """What the seek of `dial` finds, under a progress bar in `answers` that goes when it ends or
+    raises; None for a plan without the dial."""
+    if dial is None:
+        return None
+    bar = answers.progress(0.0)
+    try:
+        text = _("{seek}: round by round").format(seek=_(label))
+        return runs.seek(job, dial, partial(runs.tick, bar, text, 0, 1)), dial
+    finally:
+        bar.empty()
+
+
+def _stored(job: goalseek.Job, button: str, dial: goalseek.Dial | None) -> str:
+    """The name on disk of the answer of the seek of `button` (`cache.key`), by its dial too:
+    `SEEKS`, which gives it, is a page, which the engine code leaves out."""
+    return cache.key(runs.PLAN_SEEK, job.opts, job.scenario, job.target, button, dial)
+
+
+def _recall(
+    seeks: dict[tuple[object, ...], Seek],
+    key: tuple[object, ...],
+    job: goalseek.Job,
+    button: str,
+    dial: goalseek.Dial | None,
+) -> None:
+    """The answer of the seek of `button` on `dial` from the disk into `seeks` under `key`."""
+    match cache.read(job.opts.data, _stored(job, button, dial)):
+        case None:
+            runs.keep(seeks, key, None)
+        case (goalseek.Found() as found, goalseek.Dial() as held):
+            runs.keep(seeks, key, (found, held))
 
 
 def stopped(kept: Seek, target: float) -> tuple[date, int | None] | None:
@@ -318,21 +341,27 @@ def plan(data_dir: Path, scenario: str) -> None:
     seek = st.container(horizontal=True, vertical_alignment="bottom")
     typed = target_field(seek, aim, "overview-seek-target")  # beside the button on a phone
     job = goalseek.Job(runs.options(data_dir), path, {}, (TARGET if typed is None else typed) / 100)
-    seeks = _seeks()
+    # the answer of each seek per run options, scenario, target, state of the inputs and button,
+    # without words: the page says it in the language of its session
+    seeks: dict[tuple[object, ...], Seek] = runs.answers(runs.PLAN_SEEK)
+    stamp = run_stamp(data_dir)
     # a target that does not read keeps no answer
-    key = (job.opts, path, None if typed is None else job.target, run_stamp(data_dir))
+    key = (job.opts, path, None if typed is None else job.target, stamp)
     answers = st.container()
     first = st.session_state.pop(SEEK_FIRST, False)  # a new plan: its stop tile not left empty
     for button, (label, dial_of, _say) in SEEKS.items():
-        pressed = seek.button(_(label), key=button, disabled=typed is None)
-        if typed is not None and (pressed or (first and button == STOP)):
-            bar = answers.progress(0.0)
-            text = _("{seek}: round by round").format(seek=_(label))
-            try:
-                found = _seek(job, dial_of, scenario_plan, partial(runs.tick, bar, text, 0, 1))
-                runs.keep(seeks, (*key, button), found)
-            finally:
-                bar.empty()
+        asked = seek.button(_(label), key=button, disabled=typed is None) or (
+            first and button == STOP
+        )
+        if typed is None or (not asked and (*key, button) in seeks):
+            continue
+        dial = _dial(dial_of, scenario_plan)
+        if asked:
+            sought = partial(_sought, answers, job, label, dial)
+            named = partial(_stored, job, button, dial)
+            runs.keep(seeks, (*key, button), cache.kept(data_dir, named, sought))
+        else:
+            _recall(seeks, (*key, button), job, button, dial)
     for button in SEEKS:
         if (*key, button) in seeks:
             _answer(

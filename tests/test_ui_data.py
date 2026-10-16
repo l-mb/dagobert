@@ -10,8 +10,9 @@ import yaml
 from builders import FakeGet
 from streamlit.testing.v1 import AppTest
 
-from dagobert import prices, series
+from dagobert import cache, prices, series
 from dagobert.model.months import add_months
+from dagobert.runner import Options
 from dagobert.ui import data as data_page
 
 DATA = """
@@ -102,3 +103,27 @@ def test_an_imported_history_keeps_the_last_value_of_each_month(data: Path) -> N
     assert (errors, disabled) == ([], False)
     assert warnings[0].endswith(": 2024-01 go, the file lacks them; another value in 1 month.")
     assert any(b.label == "Import 2 months ⚠" for b in at.button)  # the replace shows
+
+
+def test_clear_cache_asks_first_and_names_what_it_frees(
+    data: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The size of the kept results on the button, a confirmation, then an empty cache and the
+    button off; a data directory without a cache on disk says that it keeps them in memory."""
+    opts = Options(data, data, "montecarlo", 500, seed=42, mortality=True)
+    name = cache.key(cache.RUN, opts, data / "scenarios" / "base.yaml", "{}")
+    cache.write(data, name, opts.run_one(data / "scenarios" / "base.yaml"))
+    at = AppTest.from_string(DATA.format(data=str(data)), default_timeout=30).run()
+    clear = at.button(key="data-cache-clear")
+    assert clear.label.startswith("Clear cache (") and clear.label.endswith(" MB)")
+    clear.click().run()
+    assert cache.size(data)
+    assert [w.value for w in at.warning if w.value.startswith("Clear the ")]
+    at.button(key="data-cache-confirm").click().run()
+    assert not at.exception
+    assert cache.size(data) == 0
+    assert at.button(key="data-cache-clear").disabled
+    monkeypatch.setenv(cache.MEMORY_ENV, "memory")
+    at.run()
+    assert any(c.value == data_page.IN_MEMORY for c in at.caption)
+    assert not [b for b in at.button if b.key == "data-cache-clear"]

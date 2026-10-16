@@ -152,8 +152,8 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 - `src/dagobert/prices.py`: the price files and the series of XAU and BTC, `market_value` of
   lots, `record`. `csvimport.py`: a downloaded table of dated values [prices].
 - `src/dagobert/actuals.py`: `actuals.csv` [spend].
-- `src/dagobert/cli.py`: the commands, the options of `dagobert app` [container, money];
-  `runner.py`: `Options` and the runs, which the explorer's workers unpickle [money].
+- `src/dagobert/cli.py`: the commands, the options of `dagobert app` [container, money]; `runner.py`:
+  `Options` and the runs, which the workers unpickle [money]; `cache.py`: `data/.cache` [explorer-runs].
 - `src/dagobert/i18n.py`: `_()`, the language of a session; `i18n_check.py` checks `locale/` [i18n].
 - `src/dagobert/report/`: plotly HTML, rich table [charts, money]: `page.py`, `summary.py`
   [disability], `charts.py` shared parts, the others a figure each; `*.css`, `tabs.js` package data.

@@ -125,6 +125,14 @@ The sources and terms of each shipped file: `src/dagobert/data/SOURCES.md`.
   (`data.NOTES`) names the join of `series.cpi` under `vpi` and the conversion of `series.in_euros`
   under `usd-eur`. Nothing fetches on start or on a timer. In portrait the fetch and import buttons
   take the full width (`ui/page.css`).
+- Last a bordered box `Kept results` (`data._cache`, owner 2026-10-16, issue #28): the folder
+  `.cache` of the results kept over a restart (`KEPT`, its bound `cache.BYTES`, rule
+  `explorer-runs`) and `Clear cache (<size>)` (`money.format_size`), off while empty. A tap asks
+  `Clear the … of kept results?` with `Clear` and `Cancel` (session state `CLEARING`); `Clear`
+  empties the cache on disk and in the process (`runs.forget`), with a toast of what it freed and
+  no revision: the results are no input. Without a cache on disk (`cache.folder` None: a data
+  directory that takes no write, an export zip as `--data`) a caption says that the app keeps them
+  in memory (`IN_MEMORY`), no button. Simple mode shows the page only with a series (rule `mode`).
 - Words of the page (rule `i18n`): `Series.title`, `used_by` and `licence` hold English marked
   `N_` (a German term, `Datenlizenz Deutschland`, unmarked), said where the page shows them; the
   source note stays as written (the terms). `data.updated` says an `Update` in a sentence (the CLI

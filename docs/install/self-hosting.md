@@ -93,7 +93,9 @@ The lines of the service `dagobert` do these things:
   change before you edit the line.
 - `dagobert-data:/data` keeps your data in a named volume, a storage area that Docker manages. The
   volume holds your inputs, your records, the revisions, the fetched series and the reports. A
-  revision is a copy of each file that a save changed.
+  revision is a copy of each file that a save changed. The volume also holds the folder `.cache`,
+  which keeps up to 1 GB of results of the Explorer and the Overview. With it, the pages show at
+  once after a restart of the container. A new version of Dagobert computes them again.
 - The service has no `user` line. The image user (UID 10001) owns the new volume and writes the
   files.
 - `STREAMLIT_SERVER_ALLOWED_HOSTS` is the host name of your server. The app then refuses a
@@ -259,10 +261,11 @@ chmod 700 /srv/dagobert
    docker compose stop dagobert
    ```
 
-3. Copy the volume into a file in the current directory:
+3. Copy the volume into a file in the current directory. The command leaves out the folder
+   `.cache`, because the app can compute its results again:
 
    ```sh
-   docker compose run --rm -T --entrypoint tar dagobert -C /data -czf - . > dagobert-backup.tar.gz
+   docker compose run --rm -T --entrypoint tar dagobert -C /data --exclude=./.cache -czf - . > dagobert-backup.tar.gz
    ```
 
 4. Start Dagobert again:
@@ -276,7 +279,8 @@ chmod 700 /srv/dagobert
 
 The page `Export and import` of the app also makes a backup: an export with `Include change
 history`. The export holds the inputs, your records and the revisions. It does not hold the
-fetched series and the reports. You do not have to stop Dagobert for an export.
+fetched series, the reports and the folder `.cache`. You do not have to stop Dagobert for an
+export.
 
 ## Restore a backup
 

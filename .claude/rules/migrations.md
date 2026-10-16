@@ -29,9 +29,10 @@ The input model: rule `persistence`; the writes and the revision store: rule `re
   writes a new manifest (`Manifest`: `schema`, `app`, `base`) for a migration, the first open and an
   export. A migration keeps the `base` of the old one, which an export and a directory unpacked from
   it carry (rule `transfer`); the manifest of an instance has none. `Tree` reads the files of
-  `INPUTS` on access. `migrate_dir` migrates a temporary copy in place, unchecked
-  (`revisions.materialize`); `cashplan.plan_at` migrates the texts of a revision in memory.
-  `dagobert.__version__` comes from the package metadata.
+  `INPUTS` on access, never `.cache/` (rule `explorer-runs`): no step migrates the results kept on
+  disk, the changed inputs and the new code name new ones (`cache.key`). `migrate_dir` migrates a
+  temporary copy in place, unchecked (`revisions.materialize`); `cashplan.plan_at` migrates the
+  texts of a revision in memory. `dagobert.__version__` comes from the package metadata.
 - The steps: `to_2` renames the `isin` of a trade to `security`, in `assets.yaml` and in the
   `overrides.assets` of every scenario (`_trades`; `_rename` keeps the position of the key and its
   comments). `to_3` makes the phases inputs: `PHASES` (today's four with the labels of a new plan,

@@ -25,7 +25,8 @@ rule `store`.
   path, `revisions/.lock` the lock. The id is the UTC time, `20261012T140312.123456Z` (`time_of`
   reads it), at least one microsecond after the head; a page shows a time, never the id.
   `is_tracked` takes the patterns of `schema.INPUTS` without dotfiles and `;`, `is_plan` the
-  manifest, the plan files and the scenarios.
+  manifest, the plan files and the scenarios. So `.cache/`, the results kept on disk (rule
+  `explorer-runs`), gets no revision: they are no input, and `Clear cache` writes none.
 - `revisions.write(dir, source, edit, *, validate)` runs under `lock` (a `filelock.FileLock` on
   `.lock` per call, so threads and processes take turns; `BusyError`, a `TimeoutError`, after
   `LOCK_WAIT`, 10 s; `ReadOnlyError`, a `PermissionError`, in a read-only directory (`os.access`, on

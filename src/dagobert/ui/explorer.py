@@ -9,6 +9,7 @@ import math
 import time
 from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass, field, replace
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +17,17 @@ import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 from streamlit.elements.lib.column_types import ColumnConfig
 
-from dagobert import anatomy, budget, goalseek, loader, report, revisions, sensitivity, series
+from dagobert import (
+    anatomy,
+    budget,
+    cache,
+    goalseek,
+    loader,
+    report,
+    revisions,
+    sensitivity,
+    series,
+)
 from dagobert.difference import Difference
 from dagobert.history import actual_totals
 from dagobert.i18n import N_, _, ngettext
@@ -66,7 +77,9 @@ from dagobert.ui.gridcolumns import on_off
 from dagobert.ui.knobs import NO_SALARIES, STANDING, Salaries, classes, knobs, switches
 from dagobert.ui.runs import (
     PATHS,
+    SENSITIVITY,
     TICK,
+    answers,
     cached,
     cached_run,
     keep,
@@ -152,13 +165,6 @@ def measures(s: Sensitivity) -> list[str]:
     return [run_out(s.base.ages[-1]), *(worth.format(age=age) for age in s.base.ages)]
 
 
-@st.cache_resource(show_spinner=False)
-def _found() -> dict[tuple[object, ...], Sensitivity]:
-    """Not `st.cache_data`: the run reports progress, and a call into Streamlit is also where
-    a moved slider interrupts it."""
-    return {}
-
-
 def said(s: Sensitivity, levers: Sequence[Lever]) -> Sensitivity:
     """`s` in the words of `levers`, those of this run: a lever keys the caches without its words.
     An effect whose lever this run lacks goes (an old result of other sliders, `_levers`)."""
@@ -239,9 +245,13 @@ def _levers(
     last result of the scenario that this session showed, faded (`explorer-stale-`), while the
     charts of the run before go at once; a moved slider stops the wait and the run at their next
     tick. A tick draws the bar and the `Status` line at most every `REDRAW` seconds, else it only
-    yields (`throttled`). A hit updates the charts in place."""
-    found, shown = _found(), _shown()
-    key = (job.opts, job.scenario, json.dumps(job.overrides), levers, stamp)
+    yields (`throttled`). A hit, also on disk, updates the charts in place."""
+    found: dict[tuple[object, ...], Sensitivity] = answers(SENSITIVITY)
+    shown, overrides = _shown(), json.dumps(job.overrides)
+    key = (job.opts, job.scenario, overrides, levers, stamp)
+    on_disk = partial(cache.key, SENSITIVITY, job.opts, job.scenario, overrides, levers)
+    if key not in found and isinstance(kept := cache.read(job.opts.data, on_disk()), Sensitivity):
+        keep(found, key, kept)
     waiting = st.empty()  # on a hit too: the charts keep their place
     if (result := found.get(key)) is None:
         with waiting.container():
@@ -266,11 +276,10 @@ def _levers(
             bar.progress(share, text.format(n=n))
             status.busy(busy.format(n=n, scenario=name, share=format_percent(share, 0)))
 
-        result = keep(
-            found,
-            key,
-            sensitivity.run(job, levers, pool(), workers(), throttled(progress), every=TICK),
+        run = partial(
+            sensitivity.run, job, levers, pool(), workers(), throttled(progress), every=TICK
         )
+        result = keep(found, key, cache.kept(job.opts.data, on_disk, run))
         waiting.empty()
         box = drawn.container()
     else:

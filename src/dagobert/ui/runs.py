@@ -1,9 +1,9 @@
 """The runs of the explorer, which the Overview shares: cached by their options, overrides and the
-inputs, and the process pool that makes them, the goal seek and the sensitivity."""
+inputs, in the process and on disk (`cache`), and the process pool that makes them, the goal seek
+and the sensitivity."""
 
 from __future__ import annotations
 
-import json
 import multiprocessing
 import os
 import tempfile
@@ -13,19 +13,19 @@ from concurrent.futures import Future, ProcessPoolExecutor, wait
 from dataclasses import dataclass, fields
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, get_args
+from typing import TYPE_CHECKING, Any, Literal, get_args
 
 import numpy as np
 import streamlit as st
 
-from dagobert import goalseek, revisions, series
+from dagobert import cache, goalseek, revisions, series
 from dagobert.i18n import _
 from dagobert.loader import load_plan
 from dagobert.problems import InputError
 from dagobert.result import RunResult
 from dagobert.runner import WORKERS_ENV, ModelName, Options
 from dagobert.schema import SchemaError
-from dagobert.ui import RUN_INPUTS, Stamp, fixed, literal, run_stamp
+from dagobert.ui import Stamp, fixed, literal, run_stamp
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -45,6 +45,8 @@ _KEEPING = threading.Lock()  # sessions run in threads of their own
 _STARTING = threading.Lock()  # `_MAKING`
 # the runs in the pool by their key, for all sessions: a key never starts twice (`_making`)
 _MAKING: dict[tuple[object, ...], Future[RunResult | None]] = {}
+# the kinds of the answers that the caches keep, also on disk, beside the runs (`cache.RUN`)
+SENSITIVITY, SEEK, PLAN_SEEK = "sensitivity", "seek", "plan seek"
 
 type Tick = Callable[[], object]
 
@@ -52,6 +54,26 @@ type Tick = Callable[[], object]
 @st.cache_resource(show_spinner=False)
 def _runs() -> dict[tuple[object, ...], RunResult | None]:
     return {}
+
+
+@st.cache_resource(show_spinner=False)
+def answers(kind: str) -> dict[tuple[object, ...], Any]:
+    """The answers of one kind for every session, without words, up to `KEPT` (`keep`): the
+    sensitivity of the Explorer (`SENSITIVITY`), its goal seek (`SEEK`), the seeks of the Overview
+    (`PLAN_SEEK`). Not `st.cache_data`: a run reports progress, and a call into Streamlit is also
+    where a moved slider interrupts it."""
+    return {}
+
+
+def forget(data: Path) -> None:
+    """The cache cleared, on the disk of `data` and in the process: the runs, the `fixed` runs, the
+    answers and the baselines of every session, so each computes again."""
+    cache.clear(data)
+    with _KEEPING:
+        _runs().clear()
+    answers.clear()
+    _baseline.clear()
+    fixed.forget()
 
 
 def nbytes(run: RunResult | None) -> int:
@@ -99,18 +121,33 @@ def cached_run(
     opts: Options, scenario: Path, overrides: str, stamp: Stamp, tick: Tick = yielded
 ) -> RunResult | None:
     """The run of `scenario` with the `overrides` (JSON) on the inputs of `stamp`, kept by the
-    process for every session up to `RUNS_BYTES`, the least recently used out first. A miss runs
-    in the pool (`submit`), and the page waits with a `tick` each `TICK`: a move stops the wait at
-    once, and the run lands in the cache all the same. The page says that it simulates before,
-    on a miss (`cached`)."""
+    process for every session up to `RUNS_BYTES`, the least recently used out first, below it on
+    disk (`_recalled`). A miss runs in the pool (`submit`), and the page waits with a `tick` each
+    `TICK`: a move stops the wait at once, and the run lands in the cache all the same. The page
+    says that it simulates before, on a miss (`cached`)."""
     runs, key = _runs(), (opts, scenario, overrides, stamp)
     try:
         run = runs[key]
     except KeyError:
-        future = submit(opts, scenario, overrides, stamp)
-        settle(future.done, tick, lambda seconds: wait([future], seconds))
-        run = future.result()
+        if (run := _recalled(opts, scenario, overrides)) is None:
+            future = submit(opts, scenario, overrides, stamp)
+            settle(future.done, tick, lambda seconds: wait([future], seconds))
+            run = future.result()
     return keep(runs, key, run, RUNS_BYTES, nbytes)
+
+
+def _disk(opts: Options) -> Path | None:
+    """The data directory whose cache keeps a run on disk, None for one of other paths than
+    `PATHS`: its results take 10 times the room at 5000 paths."""
+    return opts.data if opts.paths == PATHS else None
+
+
+def _recalled(opts: Options, scenario: Path, overrides: str) -> RunResult | None:
+    """The run of `cached_run` from the disk, None without (`cache.read`)."""
+    if (store := _disk(opts)) is None:
+        return None
+    run = cache.read(store, cache.key(cache.RUN, opts, scenario, overrides))
+    return run if isinstance(run, RunResult) else None
 
 
 def submit(opts: Options, scenario: Path, overrides: str, stamp: Stamp) -> Future[RunResult | None]:
@@ -118,7 +155,8 @@ def submit(opts: Options, scenario: Path, overrides: str, stamp: Stamp) -> Futur
     session, and a run that `_made` kept since the caller missed it, as a future done: no key
     starts twice. The runs of a page start together, a worker each. The main process makes no
     run: the results arrive one at a time, in the thread of the pool that keeps them (`_made`),
-    so it holds at most one in the making."""
+    so it holds at most one in the making. The worker writes it to disk (`cache.made`): it reads
+    the inputs when it starts, after a save that came while the run waited in the queue."""
     runs, key = _runs(), (opts, scenario, overrides, stamp)
     with _STARTING:
         if (future := _MAKING.get(key)) is not None:
@@ -126,7 +164,9 @@ def submit(opts: Options, scenario: Path, overrides: str, stamp: Stamp) -> Futur
         try:
             run = runs[key]
         except KeyError:
-            future = _MAKING[key] = pool().submit(opts.run_one, scenario, json.loads(overrides))
+            future = _MAKING[key] = pool().submit(
+                cache.made, opts, scenario, overrides, _disk(opts)
+            )
         else:
             future = Future()
             future.set_result(run)
@@ -151,9 +191,12 @@ def _made(
 
 
 def cached(opts: Options, scenario: Path, overrides: str, stamp: Stamp) -> bool:
-    """Whether `cached_run` holds this run: a page says that it simulates on a miss only, so a hit
-    never looks like a run."""
-    return (opts, scenario, overrides, stamp) in _runs()
+    """Whether `cached_run` holds this run, in the process or on disk, which the process then
+    keeps: a page says that it simulates on a miss only, so a hit never looks like a run."""
+    runs, key = _runs(), (opts, scenario, overrides, stamp)
+    if key not in runs and (run := _recalled(opts, scenario, overrides)) is not None:
+        keep(runs, key, run, RUNS_BYTES, nbytes)
+    return key in runs
 
 
 def options(data: Path, model: ModelName = "montecarlo", paths: int = PATHS) -> Options:
@@ -193,11 +236,11 @@ def baseline(
     data: Path, file: str, at: str, model: Literal["fixed", "explorer"]
 ) -> RunResult | Refused | None:
     """The `fixed` run or the explorer's run of the scenario `file` on the inputs at the revision
-    `at`. While no later revision changed what a run reads (`ui.RUN_INPUTS`), the run of the
+    `at`. While no later revision changed what a run reads (`cache.RUN_INPUTS`), the run of the
     files, which `datadir.open` keeps at the head: a first Overview runs nothing more, and a
     ValueError of the engine raises as in `files_run` (the tiles ran those files first). Else
     `at_revision` in a directory of its own, which gives a refusal as `Refused`."""
-    if revisions.changed_after(data, at, RUN_INPUTS):
+    if revisions.changed_after(data, at, cache.RUN_INPUTS):
         return _baseline(str(data), file, at, model)
     if model == "fixed":
         return fixed.result(data, Path(file).stem)
@@ -208,14 +251,9 @@ def baseline(
 def _baseline(
     data_dir: str, file: str, at: str, model: Literal["fixed", "explorer"]
 ) -> RunResult | Refused | None:
-    return at_revision(
-        Path(data_dir),
-        at,
-        file,
-        (lambda d, f: fixed.run(d, f.stem))
-        if model == "fixed"
-        else (lambda d, f: options(d).run_one(f)),
-    )
+    data = Path(data_dir)
+    made = fixed.options if model == "fixed" else options
+    return at_revision(data, at, file, lambda then, f: cache.kept_run(data, made(then), f))
 
 
 def refusal(past: Refused | None, subject: str) -> str:

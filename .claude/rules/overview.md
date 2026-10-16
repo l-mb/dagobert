@@ -27,8 +27,9 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   whose help starts with the column (the two of the chance to run out add why the lifetime figure
   can be the lower: `LIFETIME_HELP`), a fifth tile `Stop working` (`goalseek.STOP`): the month that
   `Find when to stop working` found for the target, its age below it in gray (`outlook.stopped`,
-  `Dial.month`), from `outlook._seeks`, so it stays until an input or the target changes; before the
-  seek a dash and `not searched yet`, without a month a dash and `see the answer below` (no effect,
+  `Dial.month`), from `runs.answers(PLAN_SEEK)`, so it stays until an input or the target
+  changes, also over a restart (on disk, rule `explorer-runs`); before the seek a dash and `not
+  searched yet`, without a month a dash and `see the answer below` (no effect,
   no such change), when even the latest month misses the target `not even at <age of that month>`
   (`outlook.latest`) (a seek takes about 10 s: it runs by itself once only, on the Overview of a
   plan that the start page started, `outlook.SEEK_FIRST`, owner 2026-10-16); on request (`Find

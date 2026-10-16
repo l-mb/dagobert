@@ -20,7 +20,7 @@ from dagobert.i18n import N_, _, ngettext, pgettext
 from dagobert.model.assets import Trade
 from dagobert.model.base import Unit
 from dagobert.model.streams import Stream
-from dagobert.money import format_number
+from dagobert.money import format_size
 from dagobert.problems import InputError
 from dagobert.schema import SchemaError
 from dagobert.store import NULL, RowEdits
@@ -288,10 +288,6 @@ def stamp(revision: str) -> str:
     return format_datetime(at, _("d MMM y, HH:mm"), locale=i18n.language())
 
 
-def _size(n: int) -> str:
-    return f"{format_number(n / 2**20, 1)} MB" if n >= 2**20 // 10 else f"{n / 2**10:.0f} kB"
-
-
 def _export(data_dir: Path) -> None:
     """The toggle of the revisions and the download, which builds the zip on the click: a zip that
     an import would refuse shows why instead (a failed callable reaches the browser without its
@@ -300,7 +296,7 @@ def _export(data_dir: Path) -> None:
     taken = transfer.export(data_dir)
     history = st.toggle(
         _("Include change history ({size})").format(
-            size=_size(sum(p.stat().st_size for p in taken.copies.values()))
+            size=format_size(sum(p.stat().st_size for p in taken.copies.values()))
         ),
         key="transfer-history",
         help=_(

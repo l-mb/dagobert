@@ -1,7 +1,8 @@
 """The `Data` page: a summary of the series that are ready and the optional ones not fetched yet,
 then the external series with their months, source note, license and terms, a fetch per series
-that has one and the import of a series that takes one (`Series.imports`). Nothing fetches by
-itself: a fetch runs only on its button."""
+that has one and the import of a series that takes one (`Series.imports`), and last the results
+that the app keeps on disk, with `Clear cache`. Nothing fetches by itself: a fetch runs only on its
+button."""
 
 from __future__ import annotations
 
@@ -10,11 +11,11 @@ from typing import TYPE_CHECKING
 
 import streamlit as st
 
-from dagobert import csvimport, prices, series
+from dagobert import cache, csvimport, prices, series
 from dagobert.i18n import N_, _, ngettext
 from dagobert.model.months import add_months
-from dagobert.money import format_number
-from dagobert.ui import Outcome, fold, guard, mode, source
+from dagobert.money import format_number, format_size
+from dagobert.ui import Outcome, fold, guard, mode, runs, source, tell
 from dagobert.ui.csvcolumns import ends, refused
 from dagobert.ui.pricing import mapper, recorded
 from dagobert.ui.save import reason
@@ -42,6 +43,17 @@ LIFE_TABLE_USE = N_(
 )
 # what a preview counts against the stored months
 NEW, CHANGED, DROPPED = N_("{n} new"), N_("{n} changed"), N_("{n} dropped")
+CLEARING = "data-cache-clearing"  # session state: `Clear cache` asks to confirm
+KEPT = N_(
+    "The app keeps the results of the Explorer and the Overview in the folder `.cache` of your "
+    "data directory, up to {limit}, so that they show at once after a restart. A change of your "
+    "inputs or of the app computes new ones, and the results that you used least recently go "
+    "first when the folder is full. An export leaves the folder out."
+)
+IN_MEMORY = N_(
+    "The app keeps the results of the Explorer and the Overview in memory only, until it stops: "
+    "it cannot write into this data directory, or it serves an export zip."
+)
 
 
 def _month(day: date) -> str:
@@ -423,6 +435,44 @@ def _life_table() -> None:
         _terms(LIFE_TABLE_USE, table)
 
 
+def _clearing(ask: bool) -> None:
+    st.session_state[CLEARING] = ask
+
+
+def _cache(data_dir: Path) -> None:
+    """The results that the app keeps on disk (`cache`), their size and `Clear cache`, which asks
+    to confirm. It clears them in the process too (`runs.forget`): no input, so no revision."""
+    with st.container(border=True, key="data-cache"):
+        st.markdown(f"**{_('Kept results')}**")
+        if cache.folder(data_dir) is None:
+            st.caption(_(IN_MEMORY))
+            return
+        st.caption(_(KEPT).format(limit=format_size(cache.BYTES)))
+        size = format_size(held := cache.size(data_dir))
+        if not st.session_state.get(CLEARING):
+            st.button(
+                _("Clear cache ({size})").format(size=size),
+                key="data-cache-clear",
+                disabled=not held,
+                on_click=_clearing,
+                args=(True,),
+            )
+            return
+        st.warning(
+            _(
+                "Clear the {size} of kept results? The Explorer and the Overview then compute "
+                "them again."
+            ).format(size=size)
+        )
+        row = st.container(horizontal=True)
+        if row.button(_("Clear"), key="data-cache-confirm", type="primary"):
+            runs.forget(data_dir)
+            _clearing(False)
+            tell(_("Cleared the cache: {size}.").format(size=size))
+            st.rerun()
+        row.button(_("Cancel"), key="data-cache-cancel", on_click=_clearing, args=(False,))
+
+
 def page(data_dir: Path) -> None:
     st.title(_("Data"))
     st.caption(_(INTRO))
@@ -434,3 +484,4 @@ def page(data_dir: Path) -> None:
         if told := NOTES.get(entry.name):
             st.caption(told(data_dir))
     _life_table()
+    _cache(data_dir)

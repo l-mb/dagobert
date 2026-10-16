@@ -26,8 +26,8 @@ The Overview, Snapshot and Assets pages speak German (rule `i18n`): `ui/overview
   change. The editors of the Assets page are `tables.edit_table` grids (rule `i18n`).
 - `overview.Link.said`: `Open <page>` in words, a file of the roll forward as written.
   `ui.day_said` names the pages of the sources of a day in words (`ui.page_said`).
-- `outlook._seeks` keeps what a seek found, `(Found, Dial)`, or None for a plan without the dial,
-  never its words: each run says it (`SEEKS`: the dial of a plan and the answer), and a plan
+- `runs.answers(PLAN_SEEK)` keeps what a seek found, `(Found, Dial)`, or None for a plan without the
+  dial, never its words: each run says it (`SEEKS`: the dial of a plan and the answer), and a plan
   without the dial gives its reason again.
 - The roll forward keeps the keys of the files in its sentences (`start`, `founded`,
   `inflation.mean`), the items of its grids (`Passed.what`, `Change.item`), the headers `every`

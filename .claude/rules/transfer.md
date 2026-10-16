@@ -20,13 +20,15 @@ The revision store: rule `revisions`. The manifest and the migrations: rule `mig
   (`is_tracked`, `prices/` included), a new manifest (`schema.manifest_text`) whose `base` is the
   head, or the `base` of the directory's own manifest (an unpacked export keeps the revision it
   started from), and with `--revisions` `revisions/log.csv` up to the head and the copies that it
-  names. Never `series/`, `out/`, `.lock`, `.entry`, an orphan or an untracked file.
+  names. Never `series/`, `out/`, `.cache/` (the results kept on disk, rule `explorer-runs`),
+  `.lock`, `.entry`, an orphan or an untracked file.
   `Export.zip` refuses more than `LIMIT` (64 MB) unpacked (`Export.check`, of `Export.size`): the
   import would refuse it. A message rounds a size up (`megabytes`): never `64 MB, more than 64 MB`.
 - `transfer.read` takes a path or an upload (`IO[bytes]`) and refuses before a byte unpacks
   (`ArchiveError`, one line per entry): a path outside the data directory (absolute, `..`, `.`,
   `//`, a backslash, a drive letter), a symbolic link (`external_attr`), a name twice, a file that
-  no data directory holds (an input, `revisions/log.csv`, `revisions/<id>/<input>`), more than
+  no data directory holds (an input, `revisions/log.csv`, `revisions/<id>/<input>`; so a `.cache/`
+  entry: a pickle runs code, an import brings no results), more than
   `LIMIT` unpacked. `zipfile` stops at the declared size, so the sizes bound what it reads (no ratio
   check: it refused a uniform CSV). `LIMIT` is low because the import holds the zip, its files and
   their text in memory, an upload and the page too, beside the runs of the Explorer (`mem_limit`,
@@ -76,8 +78,9 @@ The revision store: rule `revisions`. The manifest and the migrations: rule `mig
   temporary directory and a rename) and serves it (`datadir.open`): a zip with a manifest or a
   history unpacks as it is, and the open migrates it as a `migrate` revision; one with neither
   unpacks migrated (only the baseline, no `migrate` revision). An existing `x/` serves only when its
-  manifest holds the `base` of the zip, else `ArchiveError`. `cli.PROBLEMS` end a command with their
-  lines, exit 1.
+  manifest holds the `base` of the zip, else `ArchiveError`. The app then keeps its results in
+  memory only (`DAGOBERT_CACHE=memory`, rule `explorer-runs`): the copy gets no `.cache/`. An
+  import keeps the `.cache/` of its target. `cli.PROBLEMS` end a command with their lines, exit 1.
 - Upload: `transfer.UPLOAD_MB` (`LIMIT` in MB) is `server.maxUploadSize` of the app (rule
   `container`), which the server enforces whatever the uploader says; every export fits.
 - `src/dagobert/ui/transfer.py`: the page `Export and import` (`Setup`, `/transfer`; at the end of

@@ -31,7 +31,8 @@ paths:
   loan rate `2.25%`, a full claim `100%`; never grouped), `format_number` (a plain number, fixed
   decimals or ten significant digits, the thousands grouped by a narrow no-break space, U+202F:
   `1 234,5678`), `decimal_mark` (a number that Python wrote with a point: an age `67,5`, a line of
-  the guard, a hint). Every text, metric, caption, cell of an `st.table`, hover and title of the
+  the guard, a hint), `format_size` (bytes by 1024: `456 kB`, `12,3 MB`, `1,5 GB`; the revisions
+  of an export, `Clear cache`). Every text, metric, caption, cell of an `st.table`, hover and title of the
   app and the report takes them; the console summary prints outside `i18n.use`, so in English. A
   form shows a share or a rate in percent in its mark (`fields.shown`: `2,5` for 0.025) and reads
   either mark (`5,5`, `5.5`); a switch of the language rewrites the text of an untouched field in

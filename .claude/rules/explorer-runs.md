@@ -1,19 +1,20 @@
 ---
 paths:
-  - "src/dagobert/ui/{explorer,runs,seek,outlook,main}.py"
-  - "tests/test_ui_explorer.py"
+  - "src/dagobert/ui/{explorer,runs,seek,outlook,main,fixed}.py"
+  - "src/dagobert/cache.py"
+  - "tests/test_{ui_explorer,cache}.py"
 ---
 
 # Explorer runs
 
-The runs of the Explorer, their caches and the process pool, which the Overview shares. The
-page: rule `explorer`; the sensitivity run: rule `analyses`; the memory in a container: rule
-`container`.
+The runs of the Explorer, their caches in the process and on disk and the process pool, which the
+Overview shares. The page: rule `explorer`; the sensitivity run: rule `analyses`; the memory in a
+container: rule `container`.
 
 - No cache key holds words, so a page in another language finds the runs (rule `i18n`):
   `sensitivity.Lever` (`label`, `format`, `step`) and `goalseek.Dial` compare without their words
-  (`_found`, `_seeks`), and `explorer.said` names the effects by the levers of this run. A run
-  carries the label of its scenario (`scenario_labels`: a shared name with its file), so tabs,
+  (`runs.answers`, `cache.key`), and `explorer.said` names the effects by the levers of this run. A
+  run carries the label of its scenario (`scenario_labels`: a shared name with its file), so tabs,
   table, strip and difference tell them apart, and `extended` pairs by it; a run of the files is
   `RunResult.twin` (rule `charts`).
 - Every run of the Explorer and of the plan of the Overview runs in a spawned process pool (kept by
@@ -62,7 +63,7 @@ page: rule `explorer`; the sensitivity run: rule `analyses`; the memory in a con
   one of them frees (at 500 paths and 8 workers a run takes about 2 s, so some 0.25 s on average;
   at 5000 paths ten times as long). The tick, the progress bar that also writes the `Status` line
   above the table, is where a moved slider interrupts it. So no `st.cache_data` there:
-  `explorer._found` keeps the results.
+  `runs.answers(SENSITIVITY)` keeps the results.
 - Measured on 2026-10-16 in Chrome (example `engineer`, two scenarios, 500 paths, 8 workers,
   desktop; a host of 16 CPUs shared with other work, load 7 to 15; `ArrowRight` on `Inflation`, the
   first engine run of the new position in the worker): a release to the main results 1.6 s (2.6 to
@@ -78,32 +79,77 @@ page: rule `explorer`; the sensitivity run: rule `analyses`; the memory in a con
   to 1.3 s (the bound of #27), the floor 0.25 to 0.34 s to the first moved frame of an idle page,
   1.2 to 1.3 s after a restart of the server. Unverified: the rest sits in the build of the page
   before `_levers`. The sensitivity goes to the pool by `sensitivity.run`, not through
-  `runs.submit`: two sessions of one key compute its runs twice (about 110), `_found` takes them
+  `runs.submit`: two sessions of one key compute its runs twice (about 110), `answers` takes them
   when the whole sensitivity ends.
-- The runs and what they give key by `ui.run_stamp`: the latest mtime and count of `RUN_INPUTS`,
-  the plan files of `revisions.PLAN` without the manifest and `series/*.csv`, what a run reads
-  (`load_plan`, `make_provider`; the life table ships). So `cached_run`, `files_run`, `fixed`,
-  `explorer._found`, `seek._seeks` and `_dial` and `outlook._seeks` keep their runs over a save of
-  `app.yaml` (`Set as default`, Features, the order of the scenarios), a price and `revisions/`. No
-  run reads `app.yaml`: `features_off` and the mode only hide sliders, and a hidden slider stands at
-  its file value, so the overrides of a key hold all that they change. The other caches of the
-  inputs keep `ui.data_stamp` (`STAMPED`, also `app.yaml`). A profile of 2026-10-16 found no engine
-  run on a page switch. `runs.cached` tells a hit: `Simulating …` of the Explorer (`_results`) and
-  `Simulating the plan …` of the Overview (`runs.files_cached`) draw on a miss only, as a hit looked
-  like a run.
+- The runs and what they give key by `ui.run_stamp`: the latest mtime and count of
+  `cache.RUN_INPUTS`, the plan files of `revisions.PLAN` without the manifest and `series/*.csv`,
+  what a run reads (`load_plan`, `make_provider`; the life table ships). So `cached_run`,
+  `files_run`, `fixed`, `runs.answers` (the sensitivity, the seeks) and `seek._dial` keep their runs
+  over a save of `app.yaml` (`Set as default`, Features, the order of the scenarios), a price and
+  `revisions/`. No run reads `app.yaml`: `features_off` and the mode only hide sliders, and a hidden
+  slider stands at its file value, so the overrides of a key hold all that they change. The other
+  caches of the inputs keep `ui.data_stamp` (`STAMPED`, also `app.yaml`). A profile of 2026-10-16
+  found no engine run on a page switch. `runs.cached` tells a hit: `Simulating …` of the Explorer
+  (`_results`) and `Simulating the plan …` of the Overview (`runs.files_cached`) draw on a miss
+  only, as a hit looked like a run.
+- Below the caches of the process the cache on disk (`src/dagobert/cache.py`, owner 2026-10-16,
+  issue #28): `data/.cache`, one `.npz` per entry, so the pages after a restart show at once. It
+  keeps a run at `runs.PATHS` (`cached_run`, `cached`: a hit on disk fills the process cache, so
+  `Simulating …` stays off; the worker writes it, `cache.made`, about 30 ms at 500 paths; a run of
+  other paths stays in memory, 10 times the room at 5000), the `fixed` run of the files
+  (`fixed.result`) and a baseline of a revision (`cache.kept_run`), and every answer of
+  `runs.answers` (`SENSITIVITY`, `SEEK`, `PLAN_SEEK`; a plan without the dial as None; a seek also
+  by its dial, `outlook._stored` too: `SEEKS` names the dial of a button, a page that the engine
+  code leaves out). Each through `cache.kept`: named as it starts, a run in its worker (not as it
+  went into the queue, where a save gave the result of the new inputs the name of the old, which an
+  undo back to them found), written only when the name still holds after it, so a save while it runs
+  leaves it unnamed (a save and its undo within one run slip past). The name (`cache.key`) hashes
+  the kind, the engine code (`cache.code`, once per process: every module of the package but those
+  of `ui/` and `report/`, every file of `data/` with the tax years, and `cache.libraries`: Python
+  and every installed distribution with its version, as a new numpy draws other numbers and a new
+  pydantic or YAML parser may read an input otherwise; all, so a new import cannot slip past, and a
+  new Streamlit drops the entries too; not `locale/` nor `examples/`, so a page or a translation
+  keeps the entries), the contents of `RUN_INPUTS` (`cache.digest`; not their times, so a restored
+  file hits; hashed again, `_digest`, when a file changes its size or its mtime in ns, comes or
+  goes: a file put back with an older time while another is newer, `cp -p`, keeps `run_stamp`, so
+  the caches of the process keep their runs until a restart or the next change, a weakness older
+  than #28, while the names on disk follow the contents), the `Options` without `data` and `out` (a
+  moved folder keeps its entries), the scenario by its path in the data, the overrides and the other
+  parts of the key that compare (a `Lever` and a `Dial` without their words). A file holds the
+  arrays and one JSON text of the rest (`_plain`: dates, tuples, dicts of any key, the dataclasses
+  of `cache.TYPES` by name), read by `np.load(allow_pickle=False)`: an import may bring the folder
+  of another person, and a pickle runs code as it loads. A file that does not read (`cache.UNREAD`:
+  torn, foreign, a pickle, a type or fields of no entry, a JSON text nested too deep, an array too
+  large to hold) is a miss and goes, never an error; an array that claims a few GiB allocates them
+  for a moment before the miss. A hit touches its file; a write evicts the least recently used files
+  beyond `cache.BYTES`, 1 GiB (about 50 runs at 500 paths), the newest kept. Every write goes
+  through `files.atomic_write`; one that fails (`OSError`: a read-only folder on Windows, a full
+  disk) keeps nothing, never an error on a page. Memory only (`cache.folder` is None): a data
+  directory that `os.access` finds read-only, and `DAGOBERT_CACHE=memory`, which `dagobert app
+  --data x.zip` sets (a copy to work on). `.cache` is no input: `is_tracked`, `schema.Tree`, the
+  stamps and the export take none of it, an import keeps the one here and refuses a zip that holds
+  one (`test_cache.test_the_cache_is_no_input`). `Clear cache` on the Data page (rule `series`)
+  empties it and, by `runs.forget`, the runs, `fixed` runs, answers and baselines of the process; no
+  revision. Measured on 2026-10-17 (example `engineer`, two scenarios, 500 paths, 8 workers, a
+  desktop, load 8 to 12 on 16 CPUs; Playwright from `goto` to the first tile, to `Up to date` and to
+  the first chart of the opened fold `What moves the result`): the first Overview after a restart
+  3.9 to 4.6 s before, 2.0 s after (0.9 s on a warm server; the `fixed` run took 0.9 s of it); the
+  first Explorer 1.6 s before, 1.1 s after, with the sensitivity of the first tab 25 to 32 s before,
+  2.5 s after.
 - `runs.baseline`, the plan of a day of `Records against the plan` and the Flows comparison: while
-  no revision after it changed a path of `RUN_INPUTS` (`revisions.changed_after`; `datadir.open`
-  keeps the files at the head) the run of the files (`files_run`, `fixed.result`), else
-  `at_revision` in a temporary directory (`_baseline`, `st.cache_resource` by revision): about 1.1 s
-  less on the first Overview after a restart. The tiles ran `files_run` before, so it is a hit.
+  no revision after it changed a path of `cache.RUN_INPUTS` (`revisions.changed_after`;
+  `datadir.open` keeps the files at the head) the run of the files (`files_run`, `fixed.result`),
+  else `at_revision` in a temporary directory (`_baseline`, `st.cache_resource` by revision, below
+  it the disk, `cache.kept_run`): about 1.1 s less on the first Overview after a restart. The tiles
+  ran `files_run` before, so it is a hit.
 - `src/dagobert/ui/outlook.py`: the plan on the Overview, `plan` (tiles, spending and work seek) and
   `on_track`. The tiles take the explorer's cached run (`runs.files_run`, the key of `runs.options`
   with no overrides), so an explorer opened with the same scenario shows at once; a miss waits in
-  the pool under `Simulating the plan …`, drawn once (`runs.files_cached`). The seek runs in
-  the explorer's pool (`runs.seek`) under a progress bar per round (`runs.tick`, also in the
-  explorer); `runs.keep` bounds its answers and `_found` at `runs.KEPT`. The page fills `plan` into
-  an `st.empty` below the tiles as its last step, so the rest of the page draws before the run,
-  then its what-ifs into the one after it (`overview._whatifs`, rule `whatifs`): `files_run` of each
+  the pool under `Simulating the plan …`, drawn once (`runs.files_cached`). The seek runs in the
+  explorer's pool (`runs.seek`) under a progress bar per round (`runs.tick`, also in the explorer);
+  `runs.keep` bounds each kind of `runs.answers` at `runs.KEPT`. The page fills `plan` into an
+  `st.empty` below the tiles as its last step, so the rest of the page draws before the run, then
+  its what-ifs into the one after it (`overview._whatifs`, rule `whatifs`): `files_run` of each
   compared scenario in turn, in the pool as the Explorer runs its scenarios, so `Compare` opens the
-  Explorer on cached runs. A step writes plan
-  files: the next Overview runs the plan and every what-if again (`run_stamp`).
+  Explorer on cached runs. A step writes plan files: the next Overview runs the plan and every
+  what-if again (`run_stamp`).

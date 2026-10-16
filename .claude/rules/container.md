@@ -52,13 +52,13 @@ CI builds and scans the image: rule `tooling`.
   entry point is `dagobert`, the command `app`; a glob needs `--entrypoint sh`. The
   `HEALTHCHECK` asks `/_stcore/health` on `DAGOBERT_PORT` below
   `STREAMLIT_SERVER_BASE_URL_PATH`, with Python (slim has no curl). A read-only root works: the
-  app writes only `/data` (also the fetched series, `/data/series`), `/tmp` (a tmpfs) and
-  `/dev/shm` (the worker pool). `.dockerignore` is an allow list (`pyproject.toml`,
-  `uv.lock`, `src/`), so no data reaches a layer; the examples are package data under `src/`. An
-  empty `/data` (the anonymous volume, an empty bind mount) opens the page `Start a plan` (rule
-  `first-run`); `docker compose run --rm dagobert init --example` starts one on the command line. No
-  architecture in the file: `docker buildx --platform linux/arm64` works as is. The image is about
-  640 MB.
+  app writes only `/data` (also the fetched series, `/data/series`, and up to 1 GiB of results,
+  `/data/.cache`: rule `explorer-runs`), `/tmp` (a tmpfs) and `/dev/shm` (the worker pool).
+  `.dockerignore` is an allow list (`pyproject.toml`, `uv.lock`, `src/`), so no data reaches a
+  layer; the examples are package data under `src/`. An empty `/data` (the anonymous volume, an
+  empty bind mount) opens the page `Start a plan` (rule `first-run`); `docker compose run --rm
+  dagobert init --example` starts one on the command line. No architecture in the file: `docker
+  buildx --platform linux/arm64` works as is. The image is about 640 MB.
 - `compose.yaml` runs the image locally as the owner of the data directory
   (`DAGOBERT_USER=$(id -u):$(id -g) docker compose up -d`; `DAGOBERT_DATA_DIR`, default
   `./data`; bash keeps `UID` read-only and does not export it): `atomic_write` replaces a file by a
@@ -105,9 +105,11 @@ CI builds and scans the image: rule `tooling`.
   (both checked: the compose schema, `caddy adapt --validate`); Traefik and nginx in words (Traefik
   passes WebSockets and the Host, `passHostHeader`, by default, doc.traefik.io; nginx needs the
   WebSocket headers and `Host $host`: its default `$proxy_host` fails the Origin check;
-  Streamlit pings every 30 s, within the 60 s of `proxy_read_timeout`). Backup and restore with
-  the app stopped, `tar` to stdout through `docker compose run --rm -T --entrypoint tar` as the
-  image user (no root-owned file on the host; slim has tar and gzip), into an empty volume. The
+  Streamlit pings every 30 s, within the 60 s of `proxy_read_timeout`). The volume holds
+  `.cache`, the results kept over a restart (rule `explorer-runs`), up to 1 GiB. Backup and
+  restore with the app stopped, `tar` to stdout through `docker compose run --rm -T --entrypoint
+  tar` as the image user (no root-owned file on the host; slim has tar and gzip), without
+  `.cache` (`--exclude=./.cache`, GNU tar: the app computes it again), into an empty volume. The
   update with a backup first, the migration at the first page (`datadir.open`), the way back
   (`SchemaError` names the newer schema: restore the backup). The language switch. An expired
   login is the proxy's concern (owner decision 2026-10-13): one sentence in the guide. The Caddy

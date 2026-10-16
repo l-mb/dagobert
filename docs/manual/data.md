@@ -19,7 +19,7 @@ Nothing is fetched by itself. The app sends a request to a source only when you 
 button. Fetched and imported months stay in the folder `series/` of your data directory.
 
 In simple mode, the navigation shows this page only when your plan holds a fetched or imported
-series.
+series. Switch to `Advanced` to clear the [kept results](#kept-results) without a series.
 
 ## The series
 
@@ -81,5 +81,24 @@ follows it:
 The import replaces all stored months, because an ETF and the index have different scales. The
 app keeps the last value of each month. A gap of missing months between two months stops the
 import. The command `uv run dagobert series import msci-world FILE` does the same.
+
+## Kept results
+
+The app keeps the results of the Explorer and the Overview in the folder `.cache` of your data
+directory: the runs of 500 paths, the sensitivity charts, the answers of the goal seek and of the
+seeks of the Overview. After a restart of the app, these pages show the results at once. The
+folder takes up to 1 GB. When it is full, the results that you used least recently go first. A
+change of your inputs, a new version of the app or a new version of a Python package that the app
+uses makes the app compute new results. The folder is no input: an export, an import and `Undo`
+leave it as it is.
+
+The box `Kept results` at the end of the page shows the space that the folder takes.
+
+1. Press `Clear cache` to delete the kept results.
+2. Read the question below the button, then press `Clear`, or `Cancel` to keep the results.
+
+After a clear, the Explorer and the Overview compute their results again. If the app cannot
+write into your data directory, or if it serves an export zip (`dagobert app --data x.zip`), it
+keeps the results in memory only, until it stops. The box then says so and has no button.
 
 The page [Export and import](transfer.md) makes a zip of your data directory and imports one.

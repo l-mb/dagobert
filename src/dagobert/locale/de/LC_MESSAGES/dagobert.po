@@ -6983,6 +6983,31 @@ msgstr "{n} entfallen"
 
 #: ui/data.py
 #, python-brace-format
+msgid ""
+"The app keeps the results of the Explorer and the Overview in the folder "
+"`.cache` of your data directory, up to {limit}, so that they show at once"
+" after a restart. A change of your inputs or of the app computes new "
+"ones, and the results that you used least recently go first when the "
+"folder is full. An export leaves the folder out."
+msgstr ""
+"Die App behält die Ergebnisse der Seiten Explorer und Übersicht im Ordner"
+" `.cache` deines Datenverzeichnisses, bis zu {limit}, damit sie nach "
+"einem Neustart sofort erscheinen. Ändern sich deine Eingaben oder die "
+"App, rechnet sie neu; ist der Ordner voll, gehen zuerst die Ergebnisse, "
+"die du am längsten nicht genutzt hast. Ein Export lässt den Ordner aus."
+
+#: ui/data.py
+msgid ""
+"The app keeps the results of the Explorer and the Overview in memory "
+"only, until it stops: it cannot write into this data directory, or it "
+"serves an export zip."
+msgstr ""
+"Die App behält die Ergebnisse der Seiten Explorer und Übersicht nur im "
+"Speicher, bis sie beendet wird: Sie kann nicht in dieses "
+"Datenverzeichnis schreiben, oder sie arbeitet auf einer Export-Zip-Datei."
+
+#: ui/data.py
+#, python-brace-format
 msgid "{span}, {months} an estimate."
 msgstr "{span}, {months} geschätzt."
 
@@ -7278,6 +7303,37 @@ msgid "Period {period}. Shipped: a release brings the next table."
 msgstr ""
 "Zeitraum {period}. Mitgeliefert: Das nächste Release bringt die nächste "
 "Tafel."
+
+#: ui/data.py
+msgid "Kept results"
+msgstr "Gespeicherte Ergebnisse"
+
+#: ui/data.py
+#, python-brace-format
+msgid "Clear cache ({size})"
+msgstr "Cache leeren ({size})"
+
+#: ui/data.py
+#, python-brace-format
+msgid ""
+"Clear the {size} of kept results? The Explorer and the Overview then "
+"compute them again."
+msgstr ""
+"{size} gespeicherte Ergebnisse löschen? Explorer und Übersicht berechnen "
+"sie dann neu."
+
+#: ui/data.py
+msgid "Clear"
+msgstr "Leeren"
+
+#: ui/data.py
+#, python-brace-format
+msgid "Cleared the cache: {size}."
+msgstr "Cache geleert: {size}."
+
+#: ui/data.py
+msgid "Cancel"
+msgstr "Abbrechen"
 
 #: ui/data.py ui/main.py
 msgid "Data"

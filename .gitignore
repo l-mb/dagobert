@@ -6,6 +6,8 @@ __pycache__/
 .pytest_cache/
 out/
 tmp/
+# the results that the app keeps in a data directory, also in an example of the package
+.cache/
 *~
 # personal inputs, licensed series and prices: never in git
 /data/

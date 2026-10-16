@@ -73,6 +73,16 @@ def format_percent(fraction: float, decimals: int | None = 1, *, signed: bool = 
     return decimal_mark(text) + PERCENT[language()]
 
 
+def format_size(size: int) -> str:
+    """Bytes as a size of files, by 1024: `456 kB` below a tenth of a MB, `12.3 MB`, from a GB
+    `1.2 GB`, in the decimal mark of the language (`12,3 MB`)."""
+    if size < 2**20 // 10:
+        return f"{size / 2**10:.0f} kB"
+    if size < 2**30:
+        return f"{format_number(size / 2**20, 1)} MB"
+    return f"{format_number(size / 2**30, 1)} GB"
+
+
 def printf(fmt: str, value: float) -> str:
     """`fmt % value` as Streamlit's sprintf shows it, in the decimal mark of the language, so a
     text reads like its slider: `GROUPED` groups like `format_eur`. Streamlit's sprintf writes a

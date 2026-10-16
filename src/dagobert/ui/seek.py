@@ -15,14 +15,14 @@ from typing import TYPE_CHECKING
 import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 
-from dagobert import goalseek, report
+from dagobert import cache, goalseek, report
 from dagobert.i18n import N_, _
 from dagobert.loader import load_plan
 from dagobert.money import format_number, format_percent
 from dagobert.problems import InputError
 from dagobert.result import BROKE_AGE, RunResult
 from dagobert.ui import Stamp, fields, literal, note
-from dagobert.ui.runs import keep, seek, tick
+from dagobert.ui.runs import SEEK, answers, keep, seek, tick
 from dagobert.ui.sliders import KEY, Knob
 
 if TYPE_CHECKING:
@@ -87,11 +87,6 @@ def target_field(row: DeltaGenerator, aim: Target, key: str) -> float | None:
     return None
 
 
-@st.cache_resource(show_spinner=False)
-def _seeks() -> dict[tuple[object, ...], goalseek.Found]:
-    return {}
-
-
 def goal_seek(
     side: Sidebar, chosen: Mapping[Path, str], stamp: Stamp, results: Sequence[RunResult]
 ) -> None:
@@ -123,7 +118,7 @@ def goal_seek(
             )
             for p in chosen
         ]
-        found = _seeks()
+        found: dict[tuple[object, ...], goalseek.Found] = answers(SEEK)
         keys = [
             (job.opts, job.scenario, json.dumps(job.overrides), job.target, dial, stamp)
             for job, dial in jobs
@@ -136,7 +131,7 @@ def goal_seek(
             if isinstance(dial, goalseek.NoChange):  # a scenario without the lever says why at once
                 st.markdown(f"**{literal(name)}** · {literal(dial.said())}")
                 continue
-            if typed is None or key not in found:
+            if typed is None or not _recalled(found, key, job, dial):
                 continue
             answer = st.container(horizontal=True, vertical_alignment="center")
             answer.markdown(seek_answer(name, dial, found[key], job.target, work=lever == WORK))
@@ -160,13 +155,32 @@ def _named(dial: goalseek.Dial | goalseek.NoChange) -> goalseek.Dial | goalseek.
     return replace(dial, label=_(dial.label))
 
 
+def _stored(job: goalseek.Job, dial: goalseek.Dial) -> str:
+    """The name on disk of the answer of a seek (`cache.key`)."""
+    return cache.key(SEEK, job.opts, job.scenario, json.dumps(job.overrides), job.target, dial)
+
+
+def _recalled(
+    found: dict[tuple[object, ...], goalseek.Found],
+    key: tuple[object, ...],
+    job: goalseek.Job,
+    dial: goalseek.Dial,
+) -> bool:
+    """Whether `found` holds the answer of `key`, also after it took it from the disk."""
+    if key not in found and isinstance(
+        kept := cache.read(job.opts.data, _stored(job, dial)), goalseek.Found
+    ):
+        keep(found, key, kept)
+    return key in found
+
+
 def _find(
     found: dict[tuple[object, ...], goalseek.Found],
     jobs: Mapping[tuple[object, ...], tuple[goalseek.Job, goalseek.Dial | goalseek.NoChange]],
     chosen: Mapping[Path, str],
 ) -> None:
-    """The seek of each scenario with a dial, by its key in `found`, under one progress bar, which
-    goes when they end or one raises."""
+    """The seek of each scenario with a dial, by its key in `found` and on disk, under one progress
+    bar, which goes when they end or one raises."""
     dialed = [
         (key, job, dial) for key, (job, dial) in jobs.items() if isinstance(dial, goalseek.Dial)
     ]
@@ -176,7 +190,14 @@ def _find(
             text = _("Seeking in {scenario}: round by round").format(
                 scenario=literal(chosen[job.scenario])
             )
-            keep(found, key, seek(job, dial, partial(tick, bar, text, n, len(dialed))))
+            ticked = partial(tick, bar, text, n, len(dialed))
+            keep(
+                found,
+                key,
+                cache.kept(
+                    job.opts.data, partial(_stored, job, dial), partial(seek, job, dial, ticked)
+                ),
+            )
     finally:
         bar.empty()
 

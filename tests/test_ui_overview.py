@@ -4,6 +4,7 @@ that need attention and their links."""
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import date
 from pathlib import Path
@@ -371,6 +372,34 @@ def test_the_overview_says_why_a_plan_has_no_work_seek_in_german(data: Path) -> 
     at.run().button(key="overview-stop").click().run()
     assert not at.exception
     assert any(m.value.startswith("In keiner Phase des Szenarios fließt") for m in at.markdown)
+
+
+def test_a_restart_takes_a_seek_from_the_disk_by_its_dial(
+    data: Path, monkeypatch: pytest.MonkeyPatch, threads: ThreadPoolExecutor
+) -> None:
+    """After a restart the Overview shows the answer of `Find the spending limit` from `.cache`,
+    but not one of another dial, as a release of the app that seeks other bounds leaves it."""
+    found = goalseek.Found(0.86, 0.049, 34, rising=True)
+    monkeypatch.setattr(runs, "seek", lambda *_args: found)
+
+    def answered(at: AppTest) -> bool:
+        assert not at.exception
+        return any(m.value.startswith("Spend at most") for m in at.markdown)
+
+    def restarted() -> bool:
+        runs.answers.clear()
+        return answered(
+            AppTest.from_string(OVERVIEW.format(data=str(data)), default_timeout=60).run()
+        )
+
+    at = AppTest.from_string(OVERVIEW.format(data=str(data)), default_timeout=60).run()
+    assert not answered(at)
+    assert answered(at.button(key="overview-seek").click().run())
+    assert restarted()
+    label, dial_of, say = outlook.SEEKS["overview-seek"]
+    wider = (label, lambda plan: replace(dial_of(plan), high=9.0), say)
+    monkeypatch.setitem(outlook.SEEKS, "overview-seek", wider)
+    assert not restarted()
 
 
 @pytest.mark.parametrize(

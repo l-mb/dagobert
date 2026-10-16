@@ -20,6 +20,7 @@ from rich.console import Console
 from rich.table import Table
 
 from dagobert import (
+    cache,
     csvimport,
     datadir,
     files,
@@ -320,12 +321,14 @@ def ui(
     ] = None,
 ) -> None:
     """Serve the app (overview, editors, explorer) and open it in the browser. An export zip as
-    `--data` unpacks into the directory beside it of its name, which the app then serves."""
+    `--data` unpacks into the directory beside it of its name, which the app then serves, its
+    results kept in memory only."""
     from streamlit.web import cli as streamlit_cli  # noqa: PLC0415
 
     if data.is_file():
         with _reported():
             data = transfer.unpacked(data)
+        os.environ[cache.MEMORY_ENV] = "memory"  # a copy to work on: no results on its disk
     os.environ[DATA_ENV] = str(data.resolve())
     if workers:
         os.environ[WORKERS_ENV] = str(workers)

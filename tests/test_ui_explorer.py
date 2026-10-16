@@ -44,7 +44,7 @@ from dagobert.model.streams import Stream, StreamKind
 from dagobert.report.summary import Shown
 from dagobert.result import RunResult
 from dagobert.runner import WORKERS_ENV, Options
-from dagobert.ui import explorer, knobs, mode, runs, seek, sliders, tables
+from dagobert.ui import explorer, fixed, knobs, mode, runs, seek, sliders, tables
 from dagobert.ui.explorer import Drawn
 
 
@@ -784,6 +784,41 @@ def test_a_run_from_the_cache_shows_no_progress(
     at.run()
     assert not at.exception
     assert not any(text.startswith("Simulating") for text in said)
+
+
+def test_a_restart_takes_the_runs_and_the_sensitivity_from_the_disk(
+    data: Path, monkeypatch: pytest.MonkeyPatch, threads: ThreadPoolExecutor
+) -> None:
+    """A new process forgets the runs, the `fixed` run and the sensitivity; the next page takes
+    them from `.cache`, also in German (the names hold no words), and runs no engine."""
+    ran: dict[str, int] = {"runs": 0, "sensitivity": 0}
+    run_one, run = Options.run_one, sensitivity.run
+
+    def counted(self: Options, *args: Any) -> RunResult | None:
+        ran["runs"] += 1
+        return run_one(self, *args)
+
+    def sensed(*args: Any, **kwargs: Any) -> sensitivity.Sensitivity:
+        ran["sensitivity"] += 1
+        return run(*args, **kwargs)
+
+    monkeypatch.setattr(Options, "run_one", counted)
+    monkeypatch.setattr(sensitivity, "run", sensed)
+    opened(AppTest.from_string(EXPLORER.format(data=str(data)), default_timeout=60))
+    threads.shutdown()  # the runs done, and what they keep: a run after it raises
+    assert all(ran.values())
+    restarted: dict[tuple[object, ...], RunResult | None] = {}
+    monkeypatch.setattr(runs, "_runs", lambda: restarted)
+    runs.answers.clear()
+    fixed.forget()
+    ran.update(dict.fromkeys(ran, 0))
+    at = AppTest.from_string(ACTIVATE + EXPLORER.format(data=str(data)), default_timeout=60)
+    at.query_params["lang"] = "de"
+    opened(at)
+    assert not at.exception
+    assert ran == {"runs": 0, "sensitivity": 0}
+    assert restarted
+    assert figures(at) == 2
 
 
 def test_explorer_workers_follow_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:

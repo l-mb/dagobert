@@ -18,6 +18,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import streamlit as st
 
 from dagobert import i18n, revisions, schema, series
+from dagobert.cache import RUN_INPUTS
 from dagobert.i18n import N_, _
 from dagobert.loader import load_scenario
 from dagobert.model.months import months_of_age
@@ -439,9 +440,6 @@ def keyboard() -> None:
 
 # The files that a cache of what the inputs give follows: the YAML inputs and the fetched series
 STAMPED = (*(p for p in schema.INPUTS if p.endswith(".yaml")), f"{series.FETCHED}/*.csv")
-# What an engine run reads of them: neither the manifest nor `app.yaml`, which names what the app
-# shows (the scenarios that it opens with, the features off), not what a run computes
-RUN_INPUTS = (*(p for p in revisions.PLAN if p != schema.MANIFEST), f"{series.FETCHED}/*.csv")
 
 
 type Stamp = tuple[float, int]
@@ -455,8 +453,8 @@ def data_stamp(data_dir: Path, inputs: Sequence[str] = STAMPED) -> Stamp:
 
 
 def run_stamp(data_dir: Path) -> Stamp:
-    """The `data_stamp` of what a run reads (`RUN_INPUTS`): the cache key of the runs and of what
-    they give, which a save of `app.yaml` keeps."""
+    """The `data_stamp` of what a run reads (`cache.RUN_INPUTS`): the cache key of the runs and of
+    what they give, which a save of `app.yaml` keeps."""
     return data_stamp(data_dir, RUN_INPUTS)
 
 

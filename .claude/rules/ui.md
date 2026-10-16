@@ -107,8 +107,8 @@ style of the pages (`ui/page.css`): rule `page-style`.
   euros of the Spend quick add and the target of the goal seek, `nocaps-` no capital first letter,
   the category of the quick add), `step_button` (a chevron that moves a select control to the
   previous or the next option, off at the end: the Spend month and the Flows year, `after` runs
-  after the step; its help names the unit, `STEPS`), `uploader_words`, `page_link` (a link to
-  a page of the navigation, an arrow by default: the `st.Page` that `main.py` registers and keeps in
+  after the step; its help names the unit, `STEPS`), `uploader_words`, `page_link` (a link to a page
+  of the navigation, an arrow by default: the `st.Page` that `main.py` registers and keeps in
   `PAGES` by its English title, None for a page that the navigation leaves out, which then shows no
   link; Streamlit finds a page by the hash of its `url_path`, so a link never builds a page again; a
   page drawn alone shows none; `SCENARIO`, `EVENT`, `TAB` and `MAIN` name the query of the Scenarios
@@ -128,12 +128,12 @@ style of the pages (`ui/page.css`): rule `page-style`.
   chart in one of n columns: `DESKTOP_MONTHS` at 1,500 px with the sidebar open, `PHONE_MONTHS` on a
   phone) and `per_control` (`Amounts` with its help, its options the ids `month` and `year`, `PER`
   their words, English, and multiplier, wrap in a narrow column), `data_stamp` (a cache key of the
-  inputs: the latest mtime and count of `STAMPED`, the YAML files of `schema.INPUTS`, `series/*.csv`;
-  `run_stamp` that of the runs, `cache.RUN_INPUTS`: rule `explorer-runs`), `timezone` (of the browser,
-  `st.context.timezone`, UTC without one: a day of the revisions is a local day) and `since` (the
-  days with a revision of some files that have a revision before them, each with the last revision
-  before the day began: `Changes since` and the Flows comparison; a data directory with only the
-  baseline has none, so both are off).
+  inputs: the latest mtime and count of `STAMPED`, the YAML files of `schema.INPUTS`,
+  `series/*.csv`; `run_stamp` that of the runs, `cache.RUN_INPUTS`: rule `explorer-runs`),
+  `timezone` (of the browser, `st.context.timezone`, UTC without one: a day of the revisions is a
+  local day) and `since` (the days with a revision of some files that have a revision before them,
+  each with the last revision before the day began: `Changes since` and the Flows comparison; a data
+  directory with only the baseline has none, so both are off).
 - `fixed.py` holds the single-path `fixed` run of a scenario: `result` cached by `run_stamp`, on
   disk too (`cache.kept_run`), `options` also for the inputs of a revision (rule `explorer-runs`).
 

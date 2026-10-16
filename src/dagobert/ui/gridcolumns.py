@@ -163,6 +163,9 @@ class Column:
     named: object = None  # the default that the help names (`default_said`): `30%`
     more: tuple[str, ...] = ()
     per_phase: bool = False  # an entry of a mapping per phase: `label` is the label of the phase
+    # the cell of a new row of a select or a number (`Table.starts`): the kind of a stream, its
+    # factor in a phase. Without it a gated entry starts at 1, any other cell empty
+    start: str | float | None = None
 
     @property
     def header(self) -> str:
@@ -287,7 +290,7 @@ class Column:
         takes the format, the bounds and the step of its unit: a minimum of 0 keeps the minus off
         the cell editor. A share or a rate takes no maximum, which the grid would put in silently:
         the guard warns above 100%, the model refuses the bound on save. Without a step of its
-        unit a float takes any decimals."""
+        unit a float takes any decimals. A new row starts with `start`."""
         common: dict[str, Any] = {
             "width": self.width if fixed_width else None,
             "label": self.header,
@@ -303,7 +306,7 @@ class Column:
                     min_value=low,
                     max_value=None if self.unit is Unit.PERCENT else high,
                     step=1 if self.type == "integer" else self.unit.step if self.unit else None,
-                    default=1 if self.gate else None,
+                    default=self.start if number(self.start) else 1 if self.gate else None,
                 )
             case "boolean":
                 return st.column_config.CheckboxColumn(
@@ -328,6 +331,7 @@ class Column:
                         *(["null"] if self.null else []),
                     ],
                     format_func=(lambda o: titles.get(str(o), str(o))) if titles else None,
+                    default=self.start,
                 )
             case _:
                 return st.column_config.TextColumn(**common)

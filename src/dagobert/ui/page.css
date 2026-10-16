@@ -237,9 +237,10 @@
 
 /* Spend: in portrait the comparison table leaves out its months column, the second
    (`spend._table`), takes 13 px and lets a header wrap, so it fits without a swipe. The total row
-   and the buttons under the grid stay at the bottom of the screen while the grid scrolls
-   (`spend-grid` bounds them); what the browser scrolls into view, a focused field, stops above
-   them (`scroll-padding-bottom`, their height). Up to 960 px the charts stack. The line under the quick add
+   and `Take plan` under the grid stay at the bottom of the screen while the grid scrolls
+   (`spend-grid` bounds them; Discard and Save sit in the page header, `spend-header`); what the
+   browser scrolls into view, a focused field, stops above them (`scroll-padding-bottom`, their
+   height). Up to 960 px the charts stack. The line under the quick add
    (`spend-said`, a row that does not wrap) keeps the height of its button, in portrait of two lines
    of text beside it, so it does not move the page when one comes. On touch the toolbar of the grid
    keeps add row and fullscreen: three columns need no column menu, search or download (by the

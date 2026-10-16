@@ -11,9 +11,11 @@ from pathlib import Path
 import pytest
 from apps import reach_every_phase
 from builders import PHASE_LABELS, PHASES, phases, plan
+from german import edited, leaks
+from pydantic import ValidationError
 from streamlit.testing.v1 import AppTest
 
-from dagobert import budget
+from dagobert import budget, i18n
 from dagobert.budget import Budget
 from dagobert.model.assets import PensionPolicy
 from dagobert.model.assumptions import PhaseSpec
@@ -25,6 +27,7 @@ from dagobert.result import CONVERSION, LOAN_PRINCIPAL
 from dagobert.sv import alg1_month
 from dagobert.tax import for_year
 from dagobert.ui import bars, cashflows, gridcolumns
+from dagobert.ui.refusals import refusals
 
 OUTFLOWS = """
 from dagobert.report.tracker import Slice
@@ -69,6 +72,70 @@ from dagobert.store import streams_file
 from dagobert.ui import cashflows
 cashflows.page(streams_file(Path({data!r})))
 """
+
+
+def test_a_tab_without_rows_takes_a_salary_in_the_phase_of_the_start(data: Path) -> None:
+    """The income tab of `data` holds no row: one grid without blocks, with `cat`. Its new row is
+    a salary that pays in `work`, the phase of the start, an expense in every phase. A row that
+    the model refuses says why under its grid, in words, before Save."""
+    at = AppTest.from_string(CASHFLOWS.format(data=str(data)), default_timeout=30).run()
+    income = next(g for g in at.dataframe if g.key == "streams-income-0")
+    config = json.loads(income.proto.columns)
+    assert "cat" in income.value.columns
+    assert config["kind"]["default"] == cashflows.FIRST_INCOME
+    assert [config[f"factor {p}"]["default"] for p in PHASE_LABELS] == [1, 0, 0, 0]
+    new = {"name": "Bonus", "cat": "Gehalt", "kind": "expense", "amount": 500}
+    edited(at, "streams-income-0", {"added_rows": [new]})
+    assert not at.exception
+    assert any("**Bonus**: the kind Expense is money out" in w.value for w in at.warning)
+
+
+# A row per check of the model that the grids say in words, and a bound of a field
+REFUSED: list[gridcolumns.Row] = [
+    {"kind": "salary", "gross": 1000, "amount": 900},
+    {"amount": -100, "deductible": 0.5},
+    {"amount": -60, "deduct": "donation", "health": "kv"},
+    {"kind": "other_income", "amount": 26, "repays": "loan"},
+    {"amount": -60, "health": "kv", "property": "flat"},
+    {"kind": "other_income", "amount": 500, "property": "flat", "taxable": False},
+    {"kind": "salary", "of": "Salary"},
+    {"kind": "salary", "of": "Salary", "share": 0.1, "gross": 1},
+    {"kind": "alg1", "training": True, "sperrzeit": True},
+    {"kind": "bu", "amount": 1000, "every": 12},
+    {"kind": "pension"},
+    {"kind": "salary"},
+    {"amount": 100},
+    {"kind": "bu", "amount": -1},
+    {"kind": "salary", "of": "Salary", "share": 2},
+    {"kind": "expense", "amount": -100, "start": "soon"},
+]
+
+
+@pytest.mark.parametrize("lang", ["en", "de"])
+def test_a_refused_stream_says_which_field_and_what_to_enter(lang: i18n.Language) -> None:
+    """Each check of `Stream` by its type, in the language of the session, never the English of
+    the model, which the command line keeps."""
+    rows = [{"name": f"s{n}"} | row for n, row in enumerate(REFUSED)]
+    with i18n.use(lang):
+        said = refusals(rows, {"amount": "Monthly benefit €"})
+    assert [line.split("**")[1] for line in said] == [row["name"] for row in rows]
+    for row, line in zip(rows, said, strict=True):
+        with pytest.raises(ValidationError) as caught:
+            Stream.model_validate(row)
+        assert caught.value.errors()[0]["msg"].removeprefix(f"{row['name']}: ") not in line
+    assert said[12] == (
+        "**s12**: the kind Expense is money out: enter `Monthly benefit €` with a minus, or choose "
+        "another kind"
+        if lang == "en"
+        else "**s12**: Die Art Ausgabe gibt Geld aus: Gib `Monatliche BU-Rente €` mit Minus ein "
+        "oder wähle eine andere Art"
+    )
+    assert lang == "en" or leaks(said) == []
+    with i18n.use(lang):
+        (nameless,) = refusals([{"kind": "expense", "amount": -100}])
+    assert nameless == (
+        "**new row**: enter `name`" if lang == "en" else "**neue Zeile**: Gib `Name` ein"
+    )
 
 
 def test_a_savings_plan_without_an_index_is_nominal_in_its_help() -> None:

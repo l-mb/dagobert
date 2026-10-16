@@ -1,7 +1,7 @@
 ---
 paths:
   - "src/dagobert/cashplan.py"
-  - "src/dagobert/ui/{cashflows,bars,overview,flows}.py"
+  - "src/dagobert/ui/{cashflows,bars,overview,flows,refusals}.py"
   - "tests/test_{cashplan,ui_cashflows}.py"
 ---
 
@@ -80,10 +80,22 @@ The rows of the run on the Cashflows sheet come from the ledger: rule `ledger`.
   negative), `until_age` as `Pays until age`, `start`, `end`; the expenses tab leaves it out
   (`EXPENSES.match`). `cashplan.monthly` counts its premium, an expense of its `cat`, never the
   benefit, which the run draws: the rows of the run show it (`<name>: benefit`).
+- A new row (owner 2026-10-16: first-timer first, rule `grids`): in a block the kind of an income
+  that most of its rows hold, then per phase the factor of most rows of that kind (`Table.common`:
+  a new salary stops when the salaries stop, though the rents go on); a tab without rows draws one
+  grid with `cat` (`Table.flat`), where an income starts a salary (`FIRST_INCOME`), an income or a
+  savings plan only in the phase of the scenario at the start (`first_phases`: so it stops in
+  retirement), an expense in every phase. An expense is an expense by the model's default. A row
+  that the model refuses says why under its grid, in words, before Save (`checked`: `Table.check`
+  with `refusals.refusals`): the row, the field as the grid heads it (`Table.titles`, else the key
+  in words), what to enter, a bound in the unit of its field, by the type of the check of `Stream`
+  (rule `persistence`); an error of no known type as the model writes it. A Save that the inputs
+  refuse still shows `Not saved: <file:line problem>` in English, as the command line does.
 - Simple mode and the features (rule `mode`): the four stream grids take `grid` `streams` and the
   `mode.View` of the page (rule `grids`): a column of `mode.EXPERT` or of a feature off that no row
-  holds goes behind `All columns` (`tags` of the expenses, `of` and `share` of the income, `index`
-  of the savings), and `kind` offers the stream kinds that `View` shows and those that a row or an
+  holds goes behind `All columns` (`tags` of the expenses, `of` and `share` of the income until a
+  salary exists, `mode.BRINGS`, `index` of the savings), and `kind` offers the stream kinds that
+  `View` shows and those that a row or an
   edit holds (a kind outside `CORE` hides until used: `alg1`, `self_employed`, `rv_voluntary`, a
   new kind too, no line here). The tab `disability insurance` shows while `View` shows the kind
   `bu` (outside `CORE`; the feature `disability` off hides it in both modes) or its grid holds
@@ -121,7 +133,8 @@ The rows of the run on the Cashflows sheet come from the ledger: rule `ledger`.
   salary), each from its salary as the engine takes it (`_salary_of`: the one that `salary` names,
   else the first without `of`; none that pays then, no conversion). A stream of a non-cumulative
   index counts at the level that a `fixed` run pays, the clipped mean (`Index.at_mean`):
-  `with_levels` adds it to the row as `level`, and `monthly` multiplies by it, so a bonus with a
+  `with_levels` adds it to the row as `level`, and `monthly` multiplies by it (a row that a grid
+  holds half typed counts what it holds: a bonus without `share` 0), so a bonus with a
   payout ratio of 0.9 counts 90 %. A cumulative index starts at 1 in the euros of the start, so its
   streams count in full. `ui.cashflows.estimated` applies both to the rows of the Cashflows page and
   of the Overview, with the assumptions of the chosen scenario on the Cashflows page;

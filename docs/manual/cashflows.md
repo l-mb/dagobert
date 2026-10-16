@@ -112,8 +112,21 @@ modes only while a row holds a BU policy.
 
 1. Open the block of the category.
 2. Change a cell, or add a row. A new row takes the category of its block.
-3. Read the list of changes.
+3. Read the list of changes, and the notes under the table.
 4. Press `Save` at the top of the page.
+
+A new row starts like most rows of its block. In the income tab it takes their kind, for example
+`Salary` in a block of salaries. Its phase columns take the value that most rows of that kind in
+the block have. So a new salary does not pay in retirement when the other salaries do not. If a
+tab has no rows yet, it shows one table without blocks, with the column `cat` for the category.
+There a new income is a `Salary` and a new savings plan pays only in the phase that your scenario
+starts in. A new expense pays in every phase. You can change each of these cells.
+
+If a row cannot be saved, a note under its table says why before you press `Save`. The note names
+the row and the column as the table heads it, and says what to enter. For example: "**Bonus**:
+the kind Expense is money out: enter `amount` with a minus, or choose another kind". A row without
+a name shows as "new row". If you press `Save` anyway, the page saves
+nothing. It shows `Not saved:` with the file, the line and the problem, in English.
 
 Some rules help you:
 
@@ -124,7 +137,8 @@ Some rules help you:
   same name, the new amount and a `start`.
 - A bonus is a salary stream with `of` and `share`. One payment is `share` of the base salary of
   `every` months. With `share` 10 and `every` 12, it pays 10% of the yearly base salary. The help
-  of the columns `of` and `share` says the same.
+  of the columns `of` and `share` says the same. In simple mode the two columns show as soon as
+  your plan has a salary.
 - The column `kind` names the kind of income in words, for example `Salary` or `Self-employed
   profit`. In simple mode it offers the kinds of an employee (salary, pension, other income, an
   expense and a savings plan) and each kind that a row holds. A feature that is off hides its

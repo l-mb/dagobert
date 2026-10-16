@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import builtins
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, LiteralString
 
 from pydantic import Field, model_validator
+from pydantic_core import PydanticCustomError
 
 from dagobert.model.assumptions import CPI_INDEX
 from dagobert.model.base import (
@@ -97,6 +98,15 @@ TAKES: dict[StreamKind, frozenset[str]] = {
     StreamKind.BU: frozenset({"cat", "amount", "premium", "until_age"}),
 }
 KIND_FIELDS = frozenset().union(*TAKES.values())
+
+
+def _refusal(
+    error: LiteralString, message: LiteralString, name: str, **context: str
+) -> PydanticCustomError:
+    """A check of the stream `name` that fails: `message` with its `name` and `context`, as the
+    problem of the inputs writes it; a page says it in words by its type `error` and `context`
+    (`ui.refusals`)."""
+    return PydanticCustomError(error, message, {"name": name, **context})
 
 
 class Stream(Strict):
@@ -259,52 +269,71 @@ class Stream(Strict):
         """A field of another kind (`TAKES`) stays at its default: the engine would ignore it, or
         read it where it means something else (`health` of an income as a premium)."""
         fields = type(self).model_fields
-        if odd := [
+        if odd := sorted(
             f for f in KIND_FIELDS - TAKES[self.kind] if getattr(self, f) != fields[f].default
-        ]:
-            msg = f"{self.name}: a stream of kind {self.kind} takes no {', '.join(sorted(odd))}"
-            raise ValueError(msg)
+        ):
+            message = "{name}: a stream of kind {kind} takes no {fields}"
+            raise _refusal("kind", message, self.name, kind=self.kind, fields=", ".join(odd))
         return self
 
     @model_validator(mode="after")
     def _together(self) -> Stream:
-        """The fields that need each other within a kind."""
-        if self.deductible is not None and self.health is None and self.deduct is None:
-            msg = f"{self.name}: `deductible` belongs to a `health` premium or a `deduct` expense"
-            raise ValueError(msg)
-        # a deduction is an expense of the person: no premium of the health insurance, no cost of
-        # a let property, which the rent deducts and §35a Abs. 5 S. 1 EStG excludes
-        if self.deduct is not None and (self.health or self.property is not None):
-            msg = f"{self.name}: deduct takes no health premium and no cost of a let property"
-            raise ValueError(msg)
-        if self.repays is not None and self.index is not None:
-            msg = f"{self.name}: repays needs index null"
-            raise ValueError(msg)
-        if self.property is not None and self.health is not None:
-            msg = f"{self.name}: a cost of a let property is no health premium"
-            raise ValueError(msg)
-        if self.property is not None and not self.taxable:
-            msg = f"{self.name}: the rent of a property is taxable: remove taxable: false"
-            raise ValueError(msg)
-        if exactly_one(self.of is not None, self.share is not None):
-            msg = f"{self.name}: of and share go together"
-            raise ValueError(msg)
-        if self.of is not None and self.gross is not None:
-            msg = f"{self.name}: of takes no gross"
-            raise ValueError(msg)
-        if self.sperrzeit and self.training:
-            msg = (
-                f"{self.name}: a course takes no Sperrzeit: mark the Sperrzeit on the ALG1 row "
-                "before the course"
-            )
-            raise ValueError(msg)
-        phased = self.phases is not None or self.factor or self.every > 1
-        if self.kind == StreamKind.BU and phased:
-            msg = (
-                f"{self.name}: a BU policy runs by its contract, not by phase: it takes no phases, "
-                "factor or every (a yearly premium: its twelfth a month)"
-            )
-            raise ValueError(msg)
+        """The fields that need each other within a kind, each check by its type."""
+        phased = self.phases is not None or bool(self.factor) or self.every > 1
+        checks: list[tuple[bool, LiteralString, LiteralString]] = [
+            (
+                self.deductible is not None and self.health is None and self.deduct is None,
+                "deductible",
+                "{name}: `deductible` belongs to a `health` premium or a `deduct` expense",
+            ),
+            # a deduction is an expense of the person: no premium of the health insurance, no
+            # cost of a let property, which the rent deducts and §35a Abs. 5 S. 1 EStG excludes
+            (
+                self.deduct is not None and (self.health is not None or self.property is not None),
+                "deduct",
+                "{name}: deduct takes no health premium and no cost of a let property",
+            ),
+            (
+                self.repays is not None and self.index is not None,
+                "repays",
+                "{name}: repays needs index null",
+            ),
+            (
+                self.property is not None and self.health is not None,
+                "let_health",
+                "{name}: a cost of a let property is no health premium",
+            ),
+            (
+                self.property is not None and not self.taxable,
+                "let_taxable",
+                "{name}: the rent of a property is taxable: remove taxable: false",
+            ),
+            (
+                exactly_one(self.of is not None, self.share is not None),
+                "bonus",
+                "{name}: of and share go together",
+            ),
+            (
+                self.of is not None and self.gross is not None,
+                "bonus_gross",
+                "{name}: of takes no gross",
+            ),
+            (
+                self.sperrzeit and self.training,
+                "course",
+                "{name}: a course takes no Sperrzeit: mark the Sperrzeit on the ALG1 row before "
+                "the course",
+            ),
+            (
+                self.kind == StreamKind.BU and phased,
+                "contract",
+                "{name}: a BU policy runs by its contract, not by phase: it takes no phases, "
+                "factor or every (a yearly premium: its twelfth a month)",
+            ),
+        ]
+        for fails, error, message in checks:
+            if fails:
+                raise _refusal(error, message, self.name)
         return self
 
     @model_validator(mode="after")
@@ -315,30 +344,32 @@ class Stream(Strict):
         match self.kind:
             case StreamKind.PENSION:
                 points = self.points is not None and self.point_value is not None
-                problem = (
-                    "pension needs either gross or points with point_value"
-                    if not exactly_one(self.gross is not None, points)
-                    else None
-                )
+                if not exactly_one(self.gross is not None, points):
+                    message = "{name}: pension needs either gross or points with point_value"
+                    raise _refusal("pension", message, self.name)
+            case StreamKind.SALARY if self.gross is None:
+                raise _refusal("needs", "{name}: salary needs gross", self.name, field="gross")
             case StreamKind.SALARY:
-                problem = "salary needs gross" if self.gross is None else None
+                pass
+            case _ if self.amount is None:
+                raise _refusal("needs", "{name}: needs amount", self.name, field="amount")
             case _:
-                problem = self._amount_problem()
-        if problem:
-            msg = f"{self.name}: {problem}"
-            raise ValueError(msg)
+                self._signed(self.amount)
         return self
 
-    def _amount_problem(self) -> str | None:
-        if self.amount is None:
-            return "needs amount"
-        if self.kind == StreamKind.RV_VOLUNTARY and self.amount >= 0:
-            return "rv_voluntary needs a negative amount"
-        if self.kind in (StreamKind.EXPENSE, StreamKind.SAVINGS) and self.amount > 0:
-            return f"{self.kind} needs a non-positive amount"
-        if self.kind == StreamKind.BU and self.amount < 0:
-            return "bu needs a benefit of 0 or more"
-        return None
+    def _signed(self, amount: float) -> None:
+        """The sign of the amount of its kind: money out of an expense, a savings plan and a
+        voluntary contribution (which pays something), the benefit of a BU policy not."""
+        kind = self.kind
+        if kind == StreamKind.RV_VOLUNTARY and amount >= 0:
+            message: LiteralString = "{name}: rv_voluntary needs a negative amount"
+        elif kind in (StreamKind.EXPENSE, StreamKind.SAVINGS) and amount > 0:
+            message = "{name}: {kind} needs a non-positive amount"
+        elif kind == StreamKind.BU and amount < 0:
+            raise _refusal("benefit", "{name}: bu needs a benefit of 0 or more", self.name)
+        else:
+            return
+        raise _refusal("outflow", message, self.name, kind=kind)
 
 
 class Cashflows(Strict):

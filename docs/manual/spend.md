@@ -32,11 +32,12 @@ actual is not recorded. A 0 counts as recorded.
 1. Type the actual amounts. Spending is negative. A refund can be positive.
 2. If you want to take over the plan, press `Take plan`. It fills the empty actual cells.
 3. If you spent money in a category that the plan does not have, add a row.
-4. Press `Save`.
+4. Press `Save` at the top of the page.
 
-Your unsaved edits stay with their month while you look at another month. `Discard` drops them.
-`Save` is under the grid and not at the top of the page, because it saves only the month that
-the grid shows. On a phone, the total and the buttons stay at the bottom of the screen.
+`Save` saves only the month that the grid shows. Your unsaved edits stay with their month while
+you look at another month. `Discard`, beside `Save`, drops the edits of the month. `Save` and
+`Discard` are at the top of the page, as on the other pages with tables. The quick add keeps its
+own `Add` button. On a phone, the total and `Take plan` stay at the bottom of the screen.
 
 A category can change elsewhere while you edit it, for example on your phone. Then the page shows
 both amounts and asks which one to keep: `Take the file` or `Keep yours`.

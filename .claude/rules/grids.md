@@ -65,7 +65,15 @@ The save guard of the grids is in the rule `save-guard`.
   `Table.derived` fills the cells that a new row lacks from its others before the guard
   (`Table.filled`, as `forms.Form.derived`: the ids of a purchase, `events.purchase_ids`).
   `Table.check` adds warnings of no single cell about the edited and added rows to the same `notes`
-  (the price of a trade of gold or Bitcoin against its series).
+  (the price of a trade of gold or Bitcoin against its series; why the model refuses a stream row,
+  `ui.refusals`, rule `cashflows`).
+- A new row starts with `Column.start`, the `default` of its column config (`Table.starts`, in
+  `_editor`): in the columns of `Table.common` (by key or name), in their order, the cell that
+  most rows like it hold, those with its cells so far, a tie the first: the kind of most rows of an
+  income block, then per phase the factor of most rows of that kind. In a table without rows
+  `Table.first` by column name; without it a gate cell starts at 1. It reads the rows of the base:
+  a new config is a new editor, without the edits. A grouped table without rows draws one grid
+  (`Table.flat`, `_grids`), its `group_by` column after the first: no block holds a new row.
 - An editable table is a `tables.Table` spec (row filter, fields, sort, grouping, hooks). A mapping
   of numbers by name (`factor` per phase; `Column.of` gives one `object` column with the unit and
   bounds of its numbers) becomes one number column per name of `Table.entries` (the phases of the
@@ -148,9 +156,11 @@ The save guard of the grids is in the rule `save-guard`.
   the digest (a save of the row: the base follows the file only without edits) or lacks it ends the
   focus (`_lead`). Streamlit 1.65 styles no editable cell (a `Styler` reaches the disabled columns
   only, `data_editor` docstring), and the canvas takes no CSS per cell.
-- The Save button of `edit_table` and `Record` of the Snapshot page are pinned into the page header
-  by CSS on their key class (`tables.save_in_header`, `SAVE_IN_HEADER`). The style is the first
-  element of `edit_table` and of the Snapshot page: an element before it that comes or goes (the
+- The Save button of `edit_table`, `Record` of the Snapshot page and Discard and Save of the Spend
+  page (their container, `spend.HEADER`; one place for Save on every page with grids, owner
+  2026-10-16) are pinned into the page header by CSS on their key class (`tables.save_in_header`,
+  `SAVE_IN_HEADER`). The style is the first element of `edit_table`, of the Snapshot page and of
+  the Spend page: an element before it that comes or goes (the
   list of the guard) would move it, and in a rerun the button then dropped into the page for a
   moment. A hidden tab hides its button, so only one shows at a time. Up to 768 px the open sidebar
   overlays the page and its close button lies under Save, so Save hides while the sidebar is open.

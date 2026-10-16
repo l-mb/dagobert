@@ -53,7 +53,7 @@ from dagobert.ui import (
 from dagobert.ui.fields import euros
 from dagobert.ui.gridcolumns import Column
 from dagobert.ui.save import reason
-from dagobert.ui.tables import row_colors, total_row
+from dagobert.ui.tables import row_colors, save_in_header, total_row
 
 MONTH, NONCE = "spend-month", "spend-nonce"
 SHOW = "month"  # the query of a link that opens a month on the grid: `?month=2026-01`
@@ -64,6 +64,7 @@ ADD_MONTH = "spend-add-month"  # the month of the last quick add
 ADDED = "spend-added"  # a quick add saved: the next run empties the amount
 LAST = "spend-last"  # the last quick add saved, which the line under the form names
 CLASHES = "spend-clashes"  # the clashes of the last run: a toast names only new ones
+HEADER = "spend-header"  # Discard and Save of the grid, pinned into the page header
 # the quick add fields, keyed for the keyboard of a phone (`ui.KEYBOARD`)
 PICK, SPENT, TO_MONTH = "nocaps-spend-pick", "decimal-spend-spent", "spend-to-month"
 MONTHS_BACK = 24  # months before the current one to choose from, besides the recorded ones
@@ -325,7 +326,8 @@ def _status(coverage: Coverage) -> None:
 
 
 def _entry(data_dir: Path, plan: Amounts, recorded: Months, month: date) -> None:
-    """The grid of one month, its total row and the buttons."""
+    """The grid of one month, its total row with `Take plan`, and Discard and Save, which the page
+    pins into its header."""
     saved = recorded.get(month, {})
     # The key holds what the rows come from besides the draft, so a grid starts again from the
     # draft when they change: the editor would lose its edits with its rows. So does the language
@@ -392,25 +394,27 @@ def _entry(data_dir: Path, plan: Amounts, recorded: Months, month: date) -> None
                 },
             )
         )
-        with st.container(horizontal=True):
-            # A new grid shows the filled cells: the editor cannot take them as edits.
-            if st.button(_("Take plan"), key="spend-plan", disabled=filled == amounts):
-                _draft(month, filled, saved)
-                _fresh()
-                st.rerun()
-            if st.button(_("Discard"), key="spend-discard", disabled=not draft):
-                st.session_state[DRAFTS].pop(month, None)
-                _fresh()
-                st.rerun()
-            # keyed, so the label mark does not change its identity: a tap that comes with the
-            # edit that turns the mark on or off would be lost
-            if st.button(
-                guard.marked(_("Save"), flagged),
-                key="spend-save",
-                type="primary",
-                disabled=not draft or bool(clashes),
-            ):
-                _save(data_dir, month, draft)
+        # A new grid shows the filled cells: the editor cannot take them as edits.
+        if st.button(_("Take plan"), key="spend-plan", disabled=filled == amounts):
+            _draft(month, filled, saved)
+            _fresh()
+            st.rerun()
+    with st.container(key=HEADER, horizontal=True):  # in the page header, `page` pins it
+        discard = st.button(_("Discard"), key="spend-discard", disabled=not draft)
+        # keyed, so the label mark does not change its identity: a tap that comes with the edit
+        # that turns the mark on or off would be lost
+        save = st.button(
+            guard.marked(_("Save"), flagged),
+            key="spend-save",
+            type="primary",
+            disabled=not draft or bool(clashes),
+        )
+    if discard:
+        st.session_state[DRAFTS].pop(month, None)
+        _fresh()
+        st.rerun()
+    if save:  # outside the header: a failed save shows its error under the grid
+        _save(data_dir, month, draft)
 
 
 def _cents(value: float | None) -> str:
@@ -616,6 +620,7 @@ def _phase(assumptions: Assumptions, scenario: Scenario, month: date) -> str:
 
 
 def page(streams: RowFile) -> None:
+    save_in_header(HEADER)  # Save and Discard at the top as on the other pages with grids
     data_dir = streams.data_dir
     st.title(_("Spend"))
     keyboard()
@@ -640,7 +645,8 @@ def page(streams: RowFile) -> None:
         st.subheader(_("A whole month"))
         month = _month(options)
         _status(Coverage.of(recorded, rows, scenario, month))
-        # The total row and the buttons stick to the bottom of the screen only while the grid shows.
+        # The total row and `Take plan` stick to the bottom of the screen only while the grid
+        # shows.
         with st.container(key="spend-grid"):
             _entry(data_dir, actuals.planned(rows, scenario, month), recorded, month)
         fold(
@@ -655,8 +661,8 @@ def page(streams: RowFile) -> None:
                 "cells with the plan, so you only change what differs. An empty cell records "
                 "nothing: enter 0 for a category without spending. A new row records a category "
                 "that the plan does not have, for example cash. Rows of one category add up, a "
-                "deleted row records nothing. `Save` sits under the grid, beside `Take plan` and "
-                "`Discard`, and saves the month that the grid shows into `actuals.csv`. The other "
+                "deleted row records nothing. `Save` at the top of the page, as on the other "
+                "pages, saves the month that the grid shows into `actuals.csv`. The other "
                 "categories keep what the file holds by then, also after a quick add on another "
                 "device. A category that you edited and that changed elsewhere since shows both "
                 "amounts: take the file or keep yours. Unsaved edits stay with their month while "

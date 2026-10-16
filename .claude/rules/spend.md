@@ -29,7 +29,9 @@ The file `actuals.csv`: `docs/manual/configuration.md`.
   month that have an actual (`actuals.Coverage`); a grid with the plan of the month
   (`actuals.planned`) and the recorded actual, the list of the save guard, a total row; `Take plan`
   fills the empty `actual` cells with the plan, a new row adds a category that the plan does not
-  have, and `Save` writes the edits into the month as the file holds it then: a category edited here
+  have, and `Save` (with `Discard` in the page header, `HEADER`, as on the other pages with grids;
+  the quick add keeps its `Add`: owner 2026-10-16) writes the edits into the month as the file
+  holds it then: a category edited here
   and changed elsewhere since (a quick add or a save on another device) is a clash, every other
   category takes the newer side. The clashes show above the grid, under a warning, one line each,
   `<category>: file …, yours …, at the start …`, with `Take the file` (drops the edit, a fresh grid)
@@ -39,14 +41,14 @@ The file `actuals.csv`: `docs/manual/configuration.md`.
   off while one shows. A clash that comes between the run and the save saves nothing, a toast says
   `Not saved: …`, and the rerun lists it. Unsaved edits of the grid stay with their month while
   another one shows, and the caption names those months; `Discard` drops those of the month. In
-  portrait the total row and the buttons stay at the bottom of the screen while the grid shows (the
+  portrait the total row and `Take plan` stay at the bottom of the screen while the grid shows (the
   container `spend-grid` bounds them; they cover its last rows until the page reaches its end, but a
   field that the browser scrolls into view stops above them, `scroll-padding-bottom`, not a row that
   the canvas grid scrolls itself; padding under the grid would only add a gap at its end). Its empty
   last row, where a new row goes, has no label (`placeholder` fills empty cells only). Streamlit
   1.65 cannot do better for either (rule `ui`). On touch its toolbar keeps add row and fullscreen.
-  The rest of the help folds into `How to enter a month`, which says why Save sits under the grid:
-  it saves the month that the grid shows. A save says `Saved <month>` after its rerun (`ui.tell`)
+  The rest of the help folds into `How to enter a month`, which says that Save at the top saves the
+  month that the grid shows. A save says `Saved <month>` after its rerun (`ui.tell`)
   and drops the line of a quick add into that month, whose sum it names from before. Categories sort
   without regard to case. Beside it, or below on a narrow screen, `Actual against plan`: the last
   twelve recorded months without the current one until it ends: per category plan, actual,

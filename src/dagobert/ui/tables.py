@@ -38,6 +38,7 @@ from dagobert.ui.gridcolumns import (
     keyword,
     keywords,
     names,
+    number,
     units,
 )
 from dagobert.ui.gridstate import carry, drawn, edits_from_state, frame, grid_state, touched
@@ -212,6 +213,11 @@ class Table:
     # the grid of `mode` that names its columns (`assets`, `streams`): a column that the mode or a
     # feature hides goes behind `All columns`, an option of a select that they hide goes
     grid: str | None = None
+    # what a new row starts with (`starts`): in the columns of `common` (by key or name) the cell
+    # that most rows of its grid hold, the kind of a stream and its factor per phase; in a table
+    # without rows the cells of `first` by column name
+    common: tuple[str, ...] = ()
+    first: Mapping[str, str | float] = field(default_factory=dict)
 
     def keeps(self, row: Row) -> bool:
         return (
@@ -347,6 +353,39 @@ class Table:
             replace(c, options=names(ref), new=ref.new) if (ref := self.options.get(c.name)) else c
             for c in cols
         ]
+
+    def starts(self, cols: list[Column], rows: list[Row]) -> list[Column]:
+        """`cols` of a grid of `rows` with the cell that a new row starts with (`Column.start`): in
+        the columns of `common`, in their order, the one that most of the rows like it hold, the
+        rows with its cells so far (a tie: the first in the grid). So a new income takes the kind
+        of most rows, then the factor per phase of most rows of that kind. Without rows the cells
+        of `first`. The rows are those of the base, which stay while the grid holds edits: a new
+        start would be a new editor, without them."""
+        if not rows:
+            return [
+                replace(c, start=self.first[c.name]) if c.name in self.first else c for c in cols
+            ]
+        started, like = [], rows
+        for col in cols:
+            value = None
+            if col.key in self.common or col.name in self.common:
+                value = Counter(col.shown(row) for row in like).most_common(1)[0][0]
+                like = [row for row in like if col.shown(row) == value]
+            started.append(
+                replace(col, start=value) if isinstance(value, str) or number(value) else col
+            )
+        return started
+
+    def flat(self) -> Table:
+        """The table of a file without its rows as one grid: no block holds a new row, so the
+        column of `group_by` shows, after the first."""
+        by = str(self.group_by)
+        return replace(
+            self,
+            group_by=None,
+            fields=(*self.fields[:1], by, *self.fields[1:]),
+            more=tuple(m for m in self.more if m != by),
+        )
 
     def phone_order(self, cols: list[Column]) -> list[Column]:
         """`cols` with the pinned ones first, then the fields of `focus` and `lead`: a phone shows
@@ -575,9 +614,11 @@ def column_help(helps: Mapping[str, str], label: str = COLUMNS_HELP) -> None:
 def _editor(
     table: Table, cols: list[Column], shown: list[tuple[int, Row]], widget: str, group: str | None
 ) -> None:
-    """One grid. In a group the columns get fixed widths, so the grids line up. On a phone it
-    grows with its rows: an inner scroll would hold the swipe that should scroll the page. There
-    the `lead` columns follow the pinned ones, which in a group narrow to `PHONE_PINNED`."""
+    """One grid, whose new row starts with the cells of `Table.starts`. In a group the columns get
+    fixed widths, so the grids line up. On a phone it grows with its rows: an inner scroll would
+    hold the swipe that should scroll the page. There the `lead` columns follow the pinned ones,
+    which in a group narrow to `PHONE_PINNED`."""
+    cols = table.starts(cols, [row for _i, row in shown])
     if is_mobile():
         cols = table.phone_order(cols)
     config = {c.name: c.config(fixed_width=group is not None) for c in cols}
@@ -721,9 +762,10 @@ def _widget(table: Table, base: save.Base) -> str:
 
 
 def _grids(table: Table, base: save.Base) -> dict[str, int]:
-    """The key of each grid of `table` on `base`, one or one per block, with its number of rows."""
+    """The key of each grid of `table` on `base`, one or one per block, with its number of rows:
+    one without rows too (`Table.flat`)."""
     widget, part = _widget(table, base), table.part(base.rows)
-    if table.group_by is None:
+    if table.group_by is None or not part:
         return {widget: len(part)}
     return {
         f"{widget}-{group}": count
@@ -815,6 +857,8 @@ def edit_table(
         refs=lambda: known(file.data_dir) if table.options else None,
         hidden=partial(_hidden, table, view) if table.grid else dict,
     )
+    if table.group_by is not None and not table.part(base.rows):
+        table = table.flat()
     hidden = base.hidden.get(view.advanced, frozenset())
     rare = {i.key[1] for i in hidden if i.sort is mode.Sort.COLUMN}
     if (lead := _lead(table, base.rows)) is None:

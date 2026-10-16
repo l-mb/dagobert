@@ -6,6 +6,7 @@ import math
 from collections.abc import Collection, Mapping, Sequence
 from dataclasses import replace
 from datetime import date
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +41,7 @@ from dagobert.ui import (
     since,
 )
 from dagobert.ui.bars import NONCASH_NOTE, RUN, income_chart, outflows_chart, phase_control, reached
+from dagobert.ui.refusals import refusals
 from dagobert.ui.tables import Ref, Table, edit_table, unsaved
 
 _WHEN = ("every", "start", "end", "factor")
@@ -165,6 +167,7 @@ EXPENSES = Table(
     pinned=("name",),
     negative=("amount",),
     group_by="cat",
+    common=("factor",),
     options=_REFS,
     locked=("name",),
     rename=Kind.STREAM,
@@ -204,6 +207,7 @@ INCOME = Table(
     sort_by=("cat", "name", "start"),
     pinned=("name",),
     group_by="cat",
+    common=("kind", "factor"),
     options=_REFS,
     locked=("name",),
     rename=Kind.STREAM,
@@ -255,6 +259,7 @@ SAVINGS = Table(
     pinned=("name",),
     negative=("amount",),
     options=_REFS | {"into": Ref(Kind.ASSET, sorts=SAVINGS_TARGETS)},
+    common=("factor",),
     grid="streams",
     locked=("name",),
     rename=Kind.STREAM,
@@ -266,6 +271,25 @@ SAVINGS = Table(
         )
     },
 )
+
+
+# the kind of a new income in a tab without rows: the first income of a first-timer is the salary,
+# and its `amount` gets the refusal at the row (`refusals`), not the tax of other income
+FIRST_INCOME = StreamKind.SALARY.value
+
+
+def first_phases(plan: Plan) -> dict[str, float]:
+    """The factor per phase of a new income or savings plan in a tab without rows
+    (`Table.first`): 1 in the phase of the scenario at the start, the one with pay, 0 in the
+    others, so it stops in retirement. An expense starts in every phase."""
+    paying = plan.scenario.phase_of(plan.assumptions.start)
+    return {f"factor {p}": float(p == paying) for p in plan.assumptions.phase_labels}
+
+
+def checked(table: Table) -> Table:
+    """`table` with the refusals of the model in words under the grid of each row (`Table.check`):
+    the field and what to enter, before the save refuses it."""
+    return replace(table, check=partial(refusals, titles=table.titles))
 
 
 def _alg1(rows: list[cashplan.Row], day: date, plan: Plan) -> float:
@@ -748,17 +772,20 @@ def _streams(file: RowFile, day: date, plan: Plan) -> None:
     insured = view.shows(mode.Item(mode.Sort.STREAM, (StreamKind.BU.value,))) or unsaved(BU)
     tabs = (N_("expenses"), N_("income"), N_("savings"), *[N_("disability insurance")] * insured)
     expenses, income, savings, *bu = st.tabs([_(t) for t in tabs], key="cashflows-tabs")
+    earned = first_phases(plan)
     with expenses:
-        edit_table(file, _with_totals(EXPENSES, day, plan), view)
+        edit_table(file, checked(_with_totals(EXPENSES, day, plan)), view)
     with income:
-        edit_table(file, _with_totals(INCOME, day, plan), view)
+        first = earned | {"kind": FIRST_INCOME}
+        edit_table(file, checked(replace(_with_totals(INCOME, day, plan), first=first)), view)
     with savings:
         fold(_(SAVINGS_NOTE), _("How savings plans work"))
-        edit_table(file, with_phases(SAVINGS, plan.assumptions.phase_labels), view)
+        table = replace(with_phases(SAVINGS, plan.assumptions.phase_labels), first=earned)
+        edit_table(file, checked(table), view)
     for policies in bu:
         with policies:
             fold(_(BU_NOTE), _("How a disability insurance works"))
-            edit_table(file, BU, view)
+            edit_table(file, checked(BU), view)
     kinds = {mode.Item(mode.Sort.STREAM, (k,)): title for k, title in StreamKind.titles().items()}
     view.note(
         {k: _(title) for k, title in kinds.items() if not view.shows(k)}, held=mode.Held.KINDS

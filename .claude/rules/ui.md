@@ -26,7 +26,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
 | `pricing.py` | `prices`, `save-guard`, `i18n-track` |
 | `csvcolumns.py` | `prices` (the column selects of a CSV import), `i18n-track` |
 | `tradeform.py`, `tradeimport.py` | `tracking` (the trade form and import of the Assets page), `save-guard`, `i18n-track` |
-| `cashflows.py` | `cashflows` (the page), `ledger`, `grids`, `save-guard` |
+| `cashflows.py`, `refusals.py` | `cashflows` (the page), `ledger`, `grids`, `save-guard` |
 | `bars.py` | `cashflows` (the bars of a phase, which the Cashflows page and the Flows page share), `ledger` |
 | `spend.py` | `spend` (the page), `save-guard` |
 | `data.py` | `series` (the page), `prices` |

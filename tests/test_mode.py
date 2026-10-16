@@ -121,6 +121,16 @@ def test_only_what_acts_counts_as_used(data: Path) -> None:
     assert [f for f in locks if mode.uses(data).used(f)] == [Feature.CHILDREN, Feature.TRACKING]
 
 
+def test_a_salary_brings_the_columns_of_a_bonus_into_view(data: Path) -> None:
+    """A bonus is a salary row with `of` and `share`: simple mode shows them once a salary
+    exists, so a first-timer can add one."""
+    bonus = [_item(Sort.COLUMN, f"streams.{c}") for c in ("of", "share")]
+    assert not any(shown(i, mode.uses(data), NOTHING, advanced=False) for i in bonus)
+    with (data / "cashflows.yaml").open("a") as fh:
+        fh.write("  - {name: Gehalt, kind: salary, cat: gehalt, gross: 4000}\n")
+    assert all(shown(i, mode.uses(data), NOTHING, advanced=False) for i in bonus)
+
+
 def _listed() -> list[Item]:
     """Every item that a table of `mode` names."""
     return sorted(

@@ -39,7 +39,10 @@ paths:
   (`Stream._nominal_plan`, before validation, so a full dump keeps it); a reader of raw rows takes
   `model.streams.stream_index` (the roll forward). A stream keeps the fields that its kind does not
   take (`streams.TAKES`) at their defaults, by value (`Stream._fits_its_kind`): `amount` beside the
-  `gross` of a salary, `health` of an income. Every number and date field carries a `Unit` in its
+  `gross` of a salary, `health` of an income. Each check of a `Stream` raises a
+  `PydanticCustomError` (`streams._refusal`): a type (`kind`, `bonus`, `needs`, `outflow`, …) and
+  its context, which the grids say in words (`ui.refusals`, rule `cashflows`), and the English text
+  of the problem as before. Every number and date field carries a `Unit` in its
   JSON schema through an alias (`Euros`, `Percent`, `Factor`, `Months`, `Years`, `Number`, `Day`,
   `Month`, `Annotated[int, unit(...)]`; `Shift` for `overrides.shift`): `units` gives them by key
   path (`EACH` for a key or an item, the tag of a discriminated union) and raises for one without, a

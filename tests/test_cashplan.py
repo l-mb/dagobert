@@ -41,6 +41,9 @@ def test_monthly_equivalents() -> None:
     amounts = [cashplan.monthly(r, ROWS, "work") for r in ROWS]
     assert amounts == [9000.0, 900.0, None, -900.0, -100.0, -10.0, -12.0]
     assert cashplan.monthly(ROWS[3], ROWS, "retired") == -450.0
+    # a row of a grid half typed, whose totals the header of its block shows
+    half: list[cashplan.Row] = [{"name": "B", "kind": "salary", "of": "Gehalt"}, {"points": 10.0}]
+    assert [cashplan.monthly(r, ROWS, "work") for r in half] == [0.0, 0.0]
 
 
 def test_derived_stream_follows_the_row_active_on_the_day() -> None:

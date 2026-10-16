@@ -10877,6 +10877,130 @@ msgstr "keine: als EUR lesen"
 msgid "Not imported: {reason}"
 msgstr "Nicht importiert: {reason}"
 
+#: ui/refusals.py
+#, python-brace-format
+msgid ""
+"{deductible} needs {health} or {deduct}: fill one of them, or empty "
+"{deductible}"
+msgstr ""
+"{deductible} braucht {health} oder {deduct}: Fülle eines davon aus oder "
+"leere {deductible}"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "{deduct} takes no {health} and no {property}: empty one of them"
+msgstr "{deduct} geht nicht mit {health} oder {property}: Leere eines davon"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "{repays} needs null in {index}"
+msgstr "{repays} braucht null in {index}"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid ""
+"a cost of a let property ({property}) is no health premium ({health}): "
+"empty one of them"
+msgstr ""
+"Kosten einer vermieteten Immobilie ({property}) sind kein Beitrag der "
+"Krankenversicherung ({health}): Leere eines davon"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "the rent of a property is taxable: tick {taxable}"
+msgstr "Die Miete einer Immobilie ist steuerpflichtig: Hake {taxable} an"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "a bonus needs both {of} and {share}: fill the other one, or empty both"
+msgstr "Ein Bonus braucht {of} und {share}: Fülle das andere aus oder leere beide"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "a bonus takes its amount from {of} and {share}: empty {gross}"
+msgstr "Ein Bonus nimmt seinen Betrag aus {of} und {share}: Leere {gross}"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "a course takes no {sperrzeit}: tick it on the ALG1 row before the course"
+msgstr ""
+"Eine Weiterbildung hat keine {sperrzeit}: Hake sie in der ALG1-Zeile vor "
+"der Weiterbildung an"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "a BU policy runs by its contract: set every phase to 1 and {every} to 1"
+msgstr ""
+"Eine BU-Versicherung läuft nach ihrem Vertrag: Setze jede Phase auf 1 und"
+" {every} auf 1"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "enter either {gross} or {points} with {point_value}"
+msgstr "Gib entweder {gross} oder {points} mit {point_value} ein"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "enter {field}"
+msgstr "Gib {field} ein"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid ""
+"the kind {kind} is money out: enter {amount} with a minus, or choose "
+"another kind"
+msgstr ""
+"Die Art {kind} gibt Geld aus: Gib {amount} mit Minus ein oder wähle eine "
+"andere Art"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "enter {amount} as 0 or more"
+msgstr "Gib {amount} als 0 oder mehr ein"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "enter {field} of at most {limit}"
+msgstr "Gib {field} von höchstens {limit} ein"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "enter {field} of at least {limit}"
+msgstr "Gib {field} von mindestens {limit} ein"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "enter {field} below {limit}"
+msgstr "Gib {field} unter {limit} ein"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "enter {field} above {limit}"
+msgstr "Gib {field} über {limit} ein"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid ""
+"{fields} does not belong to the kind {kind}: empty it, or choose another "
+"kind"
+msgid_plural ""
+"{fields} do not belong to the kind {kind}: empty them, or choose another "
+"kind"
+msgstr[0] "{fields} gehört nicht zur Art {kind}: Leere es oder wähle eine andere Art"
+msgstr[1] ""
+"{fields} gehören nicht zur Art {kind}: Leere sie oder wähle eine andere "
+"Art"
+
+#: ui/refusals.py
+msgid "new row"
+msgstr "neue Zeile"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "{field} holds no value that it can read: enter it again"
+msgstr "{field} enthält keinen lesbaren Wert: Gib ihn neu ein"
+
+
 #: ui/rename.py
 msgid ""
 "The id changes in every input that names the asset: the sales, repayments"
@@ -11822,8 +11946,8 @@ msgid ""
 "you only change what differs. An empty cell records nothing: enter 0 for "
 "a category without spending. A new row records a category that the plan "
 "does not have, for example cash. Rows of one category add up, a deleted "
-"row records nothing. `Save` sits under the grid, beside `Take plan` and "
-"`Discard`, and saves the month that the grid shows into `actuals.csv`. "
+"row records nothing. `Save` at the top of the page, as on the other pages,"
+" saves the month that the grid shows into `actuals.csv`. "
 "The other categories keep what the file holds by then, also after a quick"
 " add on another device. A category that you edited and that changed "
 "elsewhere since shows both amounts: take the file or keep yours. Unsaved "
@@ -11843,9 +11967,9 @@ msgstr ""
 "änderst, was abweicht. Eine leere Zelle erfasst nichts: gib 0 für eine "
 "Kategorie ohne Ausgaben ein. Eine neue Zeile erfasst eine Kategorie, die "
 "der Plan nicht hat, etwa Bargeld. Zeilen einer Kategorie addieren sich, "
-"eine gelöschte Zeile erfasst nichts. `Speichern` steht unter der Tabelle,"
-" neben `Plan übernehmen` und `Verwerfen`, und speichert den Monat, den "
-"die Tabelle zeigt, in `actuals.csv`. Die anderen Kategorien behalten, was"
+"eine gelöschte Zeile erfasst nichts. `Speichern` oben auf der Seite, wie "
+"auf den anderen Seiten, speichert den Monat, den die Tabelle zeigt, in "
+"`actuals.csv`. Die anderen Kategorien behalten, was"
 " die Datei dann enthält, auch nach einem schnellen Eintrag auf einem "
 "anderen Gerät. Eine Kategorie, die du geändert hast und die sich seitdem "
 "anderswo geändert hat, zeigt beide Beträge: übernimm die Datei oder "

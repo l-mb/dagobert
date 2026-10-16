@@ -65,10 +65,11 @@ def _base(row: Row, rows: list[Row], phase: str, day: date | None) -> Row | None
 def monthly(row: Row, rows: list[Row], phase: str, day: date | None = None) -> float | None:
     """Monthly equivalent in `phase`, None when the stream has no amount of its own (ALG1). A
     row from `with_levels` counts at the level of its index. A BU policy counts its premium: its
-    benefit pays only after the onset of a disability, which the run draws."""
+    benefit pays only after the onset of a disability, which the run draws. A row that a grid
+    holds half typed counts what it holds: a bonus without its `share` 0."""
     base = _base(row, rows, phase, day)
     if base is not None:
-        amount = row["share"] * (monthly(base, rows, phase) or 0.0) * row.get("every", 1)
+        amount = row.get("share", 0.0) * (monthly(base, rows, phase) or 0.0) * row.get("every", 1)
     elif row.get("kind") == "bu":
         amount = row.get("premium", 0.0)
     elif "amount" in row:
@@ -76,7 +77,7 @@ def monthly(row: Row, rows: list[Row], phase: str, day: date | None = None) -> f
     elif "gross" in row:
         amount = row["gross"] * row.get("part", 1.0)
     elif "points" in row:
-        amount = row["points"] * row["point_value"]
+        amount = row["points"] * row.get("point_value", 0.0)
     else:
         return None
     return float(

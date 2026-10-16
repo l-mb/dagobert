@@ -31,15 +31,16 @@ paths:
   sits below its grid, often out of view on a phone while Save in the header is not: so a warning
   that is new to its list also shows once as an `st.toast` (`guard.review` keeps the warnings of the
   last run per list in `guard-<key>`, so a rerun repeats none and a value typed again warns again),
-  and while a warning lasts the button carries `guard.MARK` (`Record ⚠`, `Save ⚠`, also in the
-  sticky bar of the Spend page). Each of these buttons has a key: without one Streamlit puts the
-  label into the widget ID, and a tap that comes with the cell edit that sets or clears the mark is
-  lost. Saving stays possible and takes no second tap: a big change is sometimes real. The caller of
-  `save.button` shows the list (`guard.check`, which returns whether it warns) with the rows it
-  holds, since a second read of `assets.yaml` costs about 26 ms per grid, and the Assets page draws
-  one per asset kind and per depot: `edit_table` under its grid or under each grid of a block, the
-  Snapshot page above `Take estimates`. A page that saves something else (the Spend page, the price
-  import, the trade import with its slips only, a form: `formguard.changes`, a rename:
+  and while a warning lasts the button carries `guard.MARK` (`Record ⚠`, `Save ⚠`, also on the
+  Spend page, all in the page header). Each of these buttons has a key: without one Streamlit puts
+  the label into the widget ID, and a tap that comes with the cell edit that sets or clears the mark
+  is lost. Saving stays possible and takes no second tap: a big change is sometimes real, and a row
+  that the model refuses (a stream, `ui.refusals`, rule `cashflows`) gets its `Not saved:`. The
+  caller of `save.button` shows the list (`guard.check`, which returns whether it warns) with the
+  rows it holds, since a second read of `assets.yaml` costs about 26 ms per grid, and the Assets
+  page draws one per asset kind and per depot: `edit_table` under its grid or under each grid of a
+  block, the Snapshot page above `Take estimates`. A page that saves something else (the Spend page,
+  the price import, the trade import with its slips only, a form: `formguard.changes`, a rename:
   `rename.listing`) builds `guard.Change`s and calls `guard.review` before it writes. `notes` add
   warnings of no single cell (a price against a trade), `hint` replaces the sentence on the language
   of the browser (the import has its own decimal mark). Its quick add saves at once and warns only

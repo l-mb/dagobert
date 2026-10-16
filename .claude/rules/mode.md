@@ -49,17 +49,18 @@ section on the mode and the features) and `features.md`.
   scenario but `shift`, `events` and `assets`, with every path above it (an override counts also at
   a default; a key of `assumptions.yaml` at the default of its field, `fields.of`, holds nothing
   that acts: `children: 0`, `relatives: {}`), the asset kinds and every key of an asset row, the
-  stream kinds and keys of `cashflows.yaml` and of each `add_stream`, the option of a select column
-  that a feature names (`OPTIONS`: `deduct: childcare`), the event types of every scenario file
-  (templates too), `property` and `loan` for a `buy_property`, `DATA` with its page (`RECORDED`: a
-  row of `history.csv` or `actuals.csv`, counted in bytes, so a file that does not decode counts
-  too, an asset with `trades`, a file under `prices/` or `series/`). `where`: per feature the first
-  `SHOWN` (3) places as ids (`Source`: the file and the row with why, `coins (gold)`, `buy 2027-03`,
-  a key path, or the rows of a CSV; `said` words them at draw time: a cached value holds no words),
-  a key below a listed one left out. `overrides(stem)`: the scenario holds `overrides` or `drop`
-  (the Overrides tab, rule `scenarios`). `used(feature)`: a place exists. A file that does not parse
-  (`InputError`) gives `ALL` (`everything`: every item used, `where` empty): the error screen of
-  `main.py` comes with every page.
+  stream kinds and keys of `cashflows.yaml` and of each `add_stream` with the columns that a kind
+  brings (`BRINGS`: `of` and `share` of a salary, so a first-timer can add a bonus), the option of
+  a select column that a feature names (`OPTIONS`: `deduct: childcare`), the event types of every
+  scenario file (templates too), `property` and `loan` for a `buy_property`, `DATA` with its page
+  (`RECORDED`: a row of `history.csv` or `actuals.csv`, counted in bytes, so a file that does not
+  decode counts too, an asset with `trades`, a file under `prices/` or `series/`). `where`: per
+  feature the first `SHOWN` (3) places as ids (`Source`: the file and the row with why, `coins
+  (gold)`, `buy 2027-03`, a key path, or the rows of a CSV; `said` words them at draw time: a cached
+  value holds no words), a key below a listed one left out. `overrides(stem)`: the scenario holds
+  `overrides` or `drop` (the Overrides tab, rule `scenarios`). `used(feature)`: a place exists. A
+  file that does not parse (`InputError`) gives `ALL` (`everything`: every item used, `where`
+  empty): the error screen of `main.py` comes with every page.
 - A feature also turns on by an action that adds its items: `Add a job loss` of the Scenarios page
   drops `job_loss` from `features_off` in its revision (`scenariofiles.lost_job`, rule `store`), a
   goal of the quick start leaves its feature on (`job_loss`, `property`; `datadir.unused`).
@@ -144,7 +145,8 @@ section on the mode and the features) and `features.md`.
 - `tests/test_mode.py`: `Uses` of `starter` against `engineer` (what the newcomer lacks and holds),
   every feature with items locked on `engineer`, only what acts in use (a default, a PKV
   `deductible`; a lone `update_every` locks `tracking`), `ALL` for a scenario that does not parse,
-  the predicate in both modes and with a feature off, `head`, every listed item exists, a required
+  the predicate in both modes and with a feature off, a salary that brings the columns of a bonus,
+  `head`, every listed item exists, a required
   field of a section shares its tier, `pages` of an empty plan, the navigation of `main.py`
   (`ui.PAGES`: None for a page left out), the mode by query, switch, cookie and default, simple (a
   script of a few lines), `features_off` against the model, the note, the Features page (the lock, a

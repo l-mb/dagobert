@@ -54,6 +54,9 @@ ASSUMPTIONS = "assumptions.yaml"
 FEATURES_OFF = "features_off"  # the key of `app.yaml`
 ITEM_OVERRIDES = ("shift", "events", "assets")  # overrides of items by id, no key path
 SELLABLE = ("property", "gold", "crypto")  # the kinds that a `sell` takes: it shows with one
+# the stream columns that a kind brings into view as if a row used them: a salary may get a bonus,
+# a row with `of` and `share`, which a first-timer could not add while they hid
+BRINGS = {"salary": ("of", "share")}
 PLACES_SHOWN = 3  # the places in use that the Features page names per feature
 
 
@@ -511,7 +514,9 @@ def _cells(file: str, table: str, name: object, row: dict[str, object]) -> Itera
 
 def _stream(file: str, row: dict[str, object]) -> Iterator[Use]:
     kind, name = row.get("kind", "expense"), row.get("name")
-    yield Item(Sort.STREAM, (str(kind),)), Source(file, f"{name} ({kind})")
+    where = Source(file, f"{name} ({kind})")
+    yield Item(Sort.STREAM, (str(kind),)), where
+    yield from ((Item(Sort.COLUMN, ("streams", c)), where) for c in BRINGS.get(str(kind), ()))
     yield from _cells(file, "streams", name, row)
 
 

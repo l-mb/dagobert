@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
@@ -524,6 +525,37 @@ def test_phase_cells_carry_phases_and_factor() -> None:
         2: {"factor": None, "phases": None},
         3: {"amount": -7.0},
     }
+
+
+def test_a_new_row_starts_like_most_rows_of_its_grid() -> None:
+    """The kind of most rows of a block (a tie: the first), then the factor per phase of most rows
+    of that kind: a new salary stops in retirement though most rows pay then. A table without rows
+    takes `first`. The editor shows them in a new row."""
+    first: dict[str, str | float] = {"kind": "salary", "factor work": 1.0, "factor retired": 0.0}
+    income = replace(cashflows.with_phases(cashflows.INCOME, PHASE_LABELS), first=first)
+
+    def starts(rows: list[gridcolumns.Row]) -> dict[str, str | float | None]:
+        return {
+            c.name: c.start for c in income.starts(income.columns(), rows) if c.start is not None
+        }
+
+    rows: list[gridcolumns.Row] = [
+        {"name": "Salary", "kind": "salary", "gross": 5000, "phases": ["work"]},
+        {"name": "Bonus", "kind": "salary", "of": "Salary", "share": 0.1, "phases": ["work"]},
+        {"name": "VL", "kind": "other_income", "amount": 26},
+        {"name": "Rent", "kind": "other_income", "amount": 500},
+        {"name": "Pension", "kind": "pension", "gross": 1500, "phases": ["retired"]},
+    ]
+    factors = {"work": 1.0, "unemployed": 0.0, "alt": 0.0, "retired": 0.0}
+    assert starts([{"name": "Half", "kind": "salary", "factor": {"alt": 2}}])["factor alt"] == 2
+    assert starts(rows) == {"kind": "salary"} | {f"factor {p}": f for p, f in factors.items()}
+    assert starts(rows[2:])["kind"] == "other_income"
+    assert starts([]) == first
+    configs = {c.name: c.config() for c in income.starts(income.columns(), rows)}
+    assert (configs["kind"].get("default"), configs["factor retired"].get("default")) == (
+        "salary",
+        0.0,
+    )
 
 
 def test_rare_and_hidden_columns_show_only_with_all_columns() -> None:

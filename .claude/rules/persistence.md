@@ -63,9 +63,9 @@ paths:
   `label` (`phase_labels`: the label, else the name; no two show alike). The engine reads no name. A
   use names a defined phase (`Plan._phases_known`, one `unknown_phase` per use at its key path: the
   `phases` and `factor` of a stream and of an `add_stream`, the `phases` of a bAV policy, required,
-  `[]` for none, a phase change; `Assumptions._phases_named`: `scale.salary`), and a concrete
-  scenario has a phase change at or before `start` (`NO_PHASE`, of the type `missing`, so it names
-  `phases`): no fallback, as the order of the definitions is the order of the columns.
+  `[]` for none, a phase change; `Assumptions._phases_named`: `scale.salary`, `scale.growth`), and
+  a concrete scenario has a phase change at or before `start` (`NO_PHASE`, of the type `missing`, so
+  it names `phases`): no fallback, as the order of the definitions is the order of the columns.
   `Plan.phase_at` raises before it, `Scenario.phase_of` takes the first change for a month before it
   (a past month of Spend). `Person.relatives` (rule `estates`): a `RelativeName` (the rules of a
   phase name) to a `Relative` (`label`, `born` before the person's, `sex`, `relation`, a

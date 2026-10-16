@@ -22,7 +22,8 @@ The inputs that it reads and their model: rule `persistence`; their writes: rule
   `scale` and the age curve take it, `Stream.managed`), phase (defined by the keys of `phases` in
   `assumptions.yaml` only, `PHASE_DEFINE`, so it counts in every scenario; used by the `phases` and
   `factor` keys of a stream, also of an `add_stream`, the `phases` of a bAV policy, also in
-  `overrides.assets`, the `phase` of a phase change, `CHANGE_USE`, and the keys of `scale.salary`),
+  `overrides.assets`, the `phase` of a phase change, `CHANGE_USE`, and the keys of `scale.salary`
+  and `scale.growth`),
   relative (defined by the keys of `person.relatives`, `SETTINGS_DEFINE`, also in the overrides of a
   scenario; used by `from` of an inheritance or a gift, one name or a list), index, return class,
   item id (of a phase change or an event, `CHANGE_DEFINE`, for `overrides.shift`), event id (for

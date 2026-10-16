@@ -39,7 +39,9 @@ field and save.
   `Salary and profit in Work €` shows the salary and the profit of a business of a usual month in
   euros of the start, as the slider of the [Explorer](explorer.md) shows it. The file keeps a
   factor on every salary payment and profit of the phase, so a bonus changes by the same share. A
-  phase that pays neither in the plan shows the factor, `Salary and profit in Work`.
+  phase that pays neither in the plan shows the factor, `Salary and profit in Work`. Below the
+  salaries, `Raises in Work %` is the growth per year of the same payments, in percent: `2`
+  adds 2% each January from the start of the phase. An empty field counts as 0.
 - `Dates`: moves the phases and events with an id by months. Below the table, each moved group
   shows its month before and after: `job-loss 2039-06 → 2039-09`. When you type a month into a
   phase change of a parent in the tab `Phases`, the app writes the same move here.

@@ -59,18 +59,20 @@ table sideways.
 - The slider groups, the parts of your plan first. On a computer the first group, `Total spending`,
   is open, the others are closed. `Total spending` holds `All spending`, one factor on every expense
   stream (the categories, the spending cut and the age curve apply on top). Then `Spending by
-  category`, `Income` (the salary and the profit per phase, then the growth of the indices that your
-  income streams follow, and `Pension growth`), `Savings plans` (the rate of each plan), `Events and
-  phases` (their dates and amounts), `Assets` (the contribution of an Altersvorsorgedepot), then the
-  world: `Markets` (the inflation, then the growth of an index that only costs follow, such as
-  `insurance`, then the returns), `Gold and crypto` (the return, spread and correlation of the gold
-  and crypto that you hold), `Spending rule`, `Care`, `Allocation`, and `Spread per year (Monte
-  Carlo)`. Each slider has a help text. The help of a growth slider names the streams that follow
-  that index: a stream follows it only with `index:` of that name, so a row of another phase may
-  follow the consumer prices instead. An index that both income and costs follow, or that no stream
-  follows, is in `Markets`. `Spending rule` holds the cut, and the increase when the reference
-  wealth comes from the first month without pay (see [How the simulation
-  works](models.md#spending-rules)). With VPW it holds `VPW growth`, `Spend down to age` and
+  category`, `Income` (the salary and the profit per phase, each with its growth per year beside
+  it, then the growth of the indices that your income streams follow, and `Pension growth`),
+  `Savings plans` (the rate of each plan), `Events and phases` (their dates and amounts), `Assets`
+  (the contribution of an Altersvorsorgedepot), then the world: `Markets` (the inflation, then the
+  growth of an index that only costs follow, such as `insurance`, then the returns), `Gold and
+  crypto` (the return, spread and correlation of the gold and crypto that you hold), `Spending
+  rule`, `Care`, `Allocation`, and `Spread per year (Monte Carlo)`. Each slider has a help text.
+  `Raises in Work` adds a real growth per year to the salary and the profit of that phase
+  only, on top of their index (see [How the simulation works](models.md#each-month)). The help of
+  the growth slider of an index names the streams that follow that index: a stream follows it only
+  with `index:` of that name, so a row of another phase may follow the consumer prices instead. An
+  index that both income and costs follow, or that no stream follows, is in `Markets`. `Spending
+  rule` holds the cut, and the increase when the reference wealth comes from the first month
+  without pay (see [How the simulation works](models.md#spending-rules)). With VPW it holds `VPW growth`, `Spend down to age` and
   `Spending floor` instead. Then the slider of a flexible category sets its share of the VPW
   spending in a month without pay, and its level in a month with pay. A slider of VPW reaches only
   the selected scenarios with VPW, and a slider of the cut or the increase only those without it.

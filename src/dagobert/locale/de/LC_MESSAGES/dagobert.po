@@ -1997,6 +1997,20 @@ msgstr ""
 "Steuer und SV"
 
 #: model/assumptions.py model/plan.py
+msgid ""
+"Growth per year of every salary payment and profit of a business in a "
+"phase, on top of their `index` and of `salary`. Over the default index, "
+"the consumer prices, it is the real growth. It steps each January from "
+"the start of the phase, and a phase that comes back starts again at the "
+"amounts of its streams"
+msgstr ""
+"Wachstum pro Jahr jeder Gehaltszahlung und jedes Gewinns eines Betriebs "
+"in einer Phase, zusätzlich zu ihrem `index` und zu `salary`. Über dem "
+"Standardindex, den Verbraucherpreisen, ist es das reale Wachstum. Es "
+"greift jeden Januar ab dem Beginn der Phase um eine Stufe, und eine "
+"Phase, die wiederkommt, beginnt wieder bei den Beträgen ihrer Zahlungen"
+
+#: model/assumptions.py model/plan.py
 msgid "The rate of a savings plan, by the name of its stream"
 msgstr "Die Rate eines Sparplans, nach dem Namen seiner Zahlung"
 
@@ -7917,6 +7931,10 @@ msgid "Empty counts as 1."
 msgstr "Leer zählt als 1."
 
 #: ui/fields.py
+msgid "Empty counts as 0."
+msgstr "Leer zählt als 0."
+
+#: ui/fields.py
 #, python-brace-format
 msgid "one of {options}"
 msgstr "eines von {options}"
@@ -8882,19 +8900,39 @@ msgid ""
 "Gross salary and profit of a business of a usual month in the phase "
 "`{phase}`, in euros of {month}: a stream that follows an index which "
 "grows faster than prices lies above its amount in the file in a later "
-"phase. {scenario} pays {amount}. The slider sets a factor on every salary"
-" payment and profit of the phase, so a bonus and the other scenarios "
-"change by the same share. Tax, SV, pension points and a later ALG1 follow"
-" the new gross."
+"phase, and so does a phase with a growth. {scenario} pays {amount}. The "
+"slider sets a factor on every salary payment and profit of the phase, so "
+"a bonus and the other scenarios change by the same share. Tax, SV, "
+"pension points and a later ALG1 follow the new gross."
 msgstr ""
 "Bruttogehalt und Gewinn eines Betriebs in einem üblichen Monat der Phase "
 "`{phase}`, in Euro in Kaufkraft von {month}: Eine Zahlung, die einem "
 "Index folgt, der schneller wächst als die Preise, liegt in einer späteren"
-" Phase über ihrem Betrag in der Datei. {scenario} zahlt {amount}. Der "
-"Regler setzt einen Faktor auf jede Gehaltszahlung und jeden Gewinn der "
-"Phase, sodass sich ein Bonus und die anderen Szenarien im selben "
-"Verhältnis ändern. Steuer, SV, Rentenpunkte und ein späteres ALG1 folgen "
-"dem neuen Brutto."
+" Phase über ihrem Betrag in der Datei, ebenso eine Phase mit einer "
+"Steigerung. {scenario} zahlt {amount}. Der Regler setzt einen Faktor auf "
+"jede Gehaltszahlung und jeden Gewinn der Phase, sodass sich ein Bonus und"
+" die anderen Szenarien im selben Verhältnis ändern. Steuer, SV, "
+"Rentenpunkte und ein späteres ALG1 folgen dem neuen Brutto."
+
+#: ui/knobs.py
+#, python-brace-format
+msgid ""
+"Growth per year of the salary and the profit of a business in the phase "
+"`{phase}`, on top of the index of their streams and of the slider above: "
+"over the consumer prices, the default index, the real growth. It steps "
+"each January from the start of the phase, so the first January after it "
+"is the first step, and a phase that comes back starts again at the "
+"amounts of the file. A bonus follows its salary, a later ALG1 the grown "
+"last salary; pensions and other income stay as they are."
+msgstr ""
+"Wachstum pro Jahr von Gehalt und Gewinn eines Betriebs in der Phase "
+"`{phase}`, zusätzlich zum Index ihrer Zahlungen und zum Regler darüber: "
+"über den Verbraucherpreisen, dem Standardindex, das reale Wachstum. Es "
+"greift jeden Januar ab dem Beginn der Phase, der erste Januar danach ist "
+"also die erste Stufe, und eine Phase, die wiederkommt, beginnt wieder bei"
+" den Beträgen der Datei. Ein Bonus folgt seinem Gehalt, ein späteres ALG1"
+" dem gestiegenen letzten Gehalt; Renten und andere Einnahmen bleiben, wie"
+" sie sind."
 
 #: ui/knobs.py
 #, python-brace-format
@@ -9064,6 +9102,11 @@ msgstr "Gewinne realisieren"
 #, python-brace-format
 msgid "Salary and profit in {phase}"
 msgstr "Gehalt oder Gewinn in {phase}"
+
+#: ui/knobs.py ui/scenario_overrides.py
+#, python-brace-format
+msgid "Raises in {phase}"
+msgstr "Gehaltssteigerung in {phase}"
 
 #: ui/lineage.py
 msgid "Sell an asset"
@@ -11119,12 +11162,12 @@ msgstr ""
 msgid ""
 "The short name changes in every input that names the phase: the streams "
 "and pension policies that pay in it, the phase changes of the scenarios "
-"and their salary scale. Its name on the pages stays."
+"and their salary scale and growth. Its name on the pages stays."
 msgstr ""
 "Der Kurzname ändert sich in jeder Eingabe, die die Phase nennt: in den "
 "Zahlungen und Rentenverträgen, die in ihr zahlen, in den Phasenwechseln "
-"der Szenarien und ihrer Gehaltsskalierung. Der Name auf den Seiten bleibt"
-" gleich."
+"der Szenarien und ihrer Gehaltsskalierung und Gehaltssteigerung. Der Name"
+" auf den Seiten bleibt gleich."
 
 #: ui/rename.py
 msgid ""
@@ -11355,17 +11398,25 @@ msgid ""
 "A salary shows as the gross of a usual month in the phase, in euros of "
 "the start, as on the slider of the Explorer. The file keeps a factor on "
 "every salary payment of the phase, so a bonus changes by the same share. "
-"A phase without a salary in the run shows the factor."
+"A phase without a salary in the run shows the factor. The growth of a "
+"phase is a rate per year in percent on top of the index of the streams, "
+"stepped each January from the start of the phase."
 msgstr ""
 "Ein Gehalt erscheint als Brutto eines üblichen Monats der Phase, in Euro "
 "in Kaufkraft des Starts, wie auf dem Regler des Explorers. Die Datei "
 "speichert einen Faktor auf jede Gehaltszahlung der Phase, also ändert "
 "sich ein Bonus um denselben Anteil. Eine Phase ohne Gehalt in der "
-"Simulation zeigt den Faktor."
+"Simulation zeigt den Faktor. Die Steigerung einer Phase ist eine Rate pro"
+" Jahr in Prozent zusätzlich zum Index der Zahlungen, gestuft jeden Januar"
+" ab dem Beginn der Phase."
 
 #: ui/scenario_overrides.py
 msgid "Scale salary"
 msgstr "Gehalt nach Phase"
+
+#: ui/scenario_overrides.py
+msgid "Raises per year"
+msgstr "Gehaltssteigerung pro Jahr"
 
 #: ui/scenario_overrides.py
 #, python-brace-format

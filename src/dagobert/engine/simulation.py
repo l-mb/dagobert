@@ -34,7 +34,7 @@ class Engine(Events, Settlement):
         last_phase: str | None = None
         for i, month in enumerate(months):
             phase = self.plan.phase_at(month)
-            self.m = MonthState(i, month, phase)
+            self.m = MonthState(i, month, phase, self.m.since if phase == self.m.phase else month)
             self.flows = MonthFlows.new(p)
             for pool in self.pools.values() if i else ():
                 pool.age(i)

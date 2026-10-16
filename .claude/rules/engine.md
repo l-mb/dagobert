@@ -40,8 +40,8 @@ simplifications): change it with the behaviour.
   `/ self.deflator` before the law, `* self.deflator` after, and returns nominal euros unless its
   docstring says real (`_pay_salary`, `_convert`, `_sv_bases`, `Profit._business`). `Core._balance`:
   the nominal `BALANCE_CLASSES` of a month, `simulation.liquid_of` sums those of `result.LIQUID`.
-- `Engine.m` is the `MonthState` (index, month, phase) of the step. Helpers read it, so they take no
-  `month`, `phase` or `i` parameters. The phase is a name of `assumptions.yaml` (`Plan.phase_at`),
+- `Engine.m` is the `MonthState` (index, month, phase, `since`: rule `pay-growth`) of the step.
+  Helpers read it, so they take no `month`, `phase` or `i` parameters. The phase is a name of `assumptions.yaml` (`Plan.phase_at`),
   and no rule reads a name: a stream pays in the `phases` of its row at its `factor`, a bAV policy
   takes its contribution in its `phases`, `scale.salary` scales by name, the PKV subsidies follow
   what the month pays (rule `tax`). The marker of a change shows the label, not the name, as every
@@ -120,7 +120,7 @@ simplifications): change it with the behaviour.
   pension too (`Income._pension_gross`: its `gross` or `points` times `point_value`, the claim
   factor), with `pension_growth` on top, a real growth over the default `cpi`, stepped each January
   (§68 SGB VI: the Rentenwert follows the wages of its time, so a path of high inflation does not
-  erode it).
+  erode it). A salary and a profit take `scale.growth` of their phase on top: rule `pay-growth`.
 - Order within a month: the pools age, the sales on a condition (`_check_triggers`), events
   (`Events._apply_events`: the inheritances and gifts first, rule `estates`), returns, the term
   deposits that mature (`Portfolio._pay_matured_deposits`: flat tax, then the net into the bucket or

@@ -22,7 +22,8 @@ The rows of the run on the Cashflows sheet come from the ledger: rule `ledger`.
   (`reached`: its phase changes, in the order of `assumptions.yaml`, headed by the label, as the
   Flows page; also the bars, the scheduled changes and `Changes since`: `Labels`, `_phase_table`)
   and the rows `income` and `expenses` of the plan (a stream of a non-cumulative index, such as a
-  bonus, at the clipped mean of the index in the scenario), then the rows `from the run`: what no
+  bonus, at the clipped mean of the index in the scenario; no `scale`, no growth of a phase, rule
+  `pay-growth`), then the rows `from the run`: what no
   stream pays in the `fixed` run of the scenario (PKV subsidy, taxes and SV, a salary conversion,
   loan interest and principal, property upkeep, capital gains tax), the mean over the first 12
   months of each phase from the date on (`budget.beyond_streams`, run rate on, `–` for a phase that

@@ -45,6 +45,62 @@ def test_scale_changes_the_salary_of_one_phase_and_its_derived_bonus_once() -> N
     assert r.income[0, 12] == pytest.approx(6000 + 1.5 * 4800)
 
 
+@pytest.mark.parametrize(
+    "pay",
+    [
+        Stream(name="g", kind=StreamKind.SALARY, gross=4000, index=None),
+        Stream(name="g", kind=StreamKind.SELF_EMPLOYED, amount=4000, index=None),
+    ],
+)
+def test_the_growth_of_a_phase_steps_each_january_from_each_of_its_starts(pay: Stream) -> None:
+    """The salary or the profit of `work` only, the other income stays; `work` comes back in
+    2029-06 at the amount of the stream. A growth of 0 is the run without it."""
+    scenario = Scenario(
+        name="s",
+        phases=phases(
+            (date(2026, 1, 1), "work"), (date(2028, 3, 1), "alt"), (date(2029, 6, 1), "work")
+        ),
+    )
+    other = Stream(name="o", kind=StreamKind.OTHER_INCOME, amount=1000, index=None)
+
+    def run(growth: dict[str, float]) -> RunResult:
+        return zero_run(plan([pay, other], [cash()], scenario, scale={"growth": growth}), 60)
+
+    base = run({}).income[0]
+    steps = np.ones(60)
+    steps[12:24], steps[24:26], steps[48:] = 1.1, 1.21, 1.1  # 2027, 2028-01 to 02, 2030
+    np.testing.assert_array_equal(run({"work": 0.0}).income[0], base)
+    assert run({"work": 0.1}).income[0] == pytest.approx(base + 4000 * (steps - 1))
+
+
+def test_the_growth_stacks_on_the_index_and_the_scale_and_alg1_takes_the_grown_salary() -> None:
+    """10% on `work` pays from its first January as a salary 10% higher: its index and its scale
+    alike, the bonus of it once, and ALG1 after the phase on the grown last salary."""
+    scenario = Scenario(
+        name="s", phases=phases((date(2026, 1, 1), "work"), (date(2028, 1, 1), "unemployed"))
+    )
+
+    def run(gross: float, growth: dict[str, float]) -> RunResult:
+        streams = [
+            Stream(name="g", kind=StreamKind.SALARY, gross=gross, index="salary", phases=["work"]),
+            Stream.model_validate(
+                {"name": "b", "kind": "salary", "of": "g", "share": 0.1, "every": 12}
+                | {"index": None, "start": date(2026, 12, 1), "phases": ["work"]}
+            ),
+            Stream(name="a", kind=StreamKind.ALG1, phases=["unemployed"]),
+        ]
+        scale = {"salary": {"work": 1.5}, "growth": growth}
+        p = plan(streams, [cash()], scenario, indices={"salary": {"mean": 0.03}}, scale=scale)
+        returns = zero_returns(36)
+        returns.indices["salary"] = (1.03 ** (np.arange(36) // 12))[None, :].astype(np.float64)
+        return simulate(p, returns, "fixed")
+
+    grown = run(3000, {"work": 0.1}).income[0]
+    assert grown[:12] == pytest.approx(run(3000, {}).income[0, :12])
+    assert grown[12:] == pytest.approx(run(3300, {}).income[0, 12:])
+    assert grown[24] > 0  # ALG1
+
+
 def test_derived_salary_follows_the_active_row_after_a_raise() -> None:
     p = plan(
         [

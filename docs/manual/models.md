@@ -90,6 +90,13 @@ The statutory pension follows the consumer prices of each path, like every amoun
 the start. `pension_growth` adds a real growth on top of that. So a path with high inflation keeps
 the buying power of the pension.
 
+A salary and the profit of a business follow the index of their stream in the same way.
+`scale.growth` adds a real growth for each phase on top of that, for example 2% a year in a job
+with raises and 0% in a job without them. The first step comes in the first January after the
+phase starts. If the phase comes back later, it starts again at the amounts in `cashflows.yaml`. A
+bonus follows its salary, and the unemployment benefit after the phase takes the last salary with
+its growth. A pension and other income do not take it.
+
 An old-age pension that starts before the statutory pension age loses 0.3% for each month before
 it. From the age of 50 you can pay contributions that make up for this deduction (§187a SGB VI).
 The pension insurance tells you the amount on request, and you can pay it in parts until the

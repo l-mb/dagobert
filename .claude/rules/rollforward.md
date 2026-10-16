@@ -39,8 +39,9 @@ texts of `textedit.scalars`: rule `revisions`.
   also an event that only a child of a template writes, less an id that a file below drops):
   `amount` and `gross` where those are `set_stream`s on such streams (with a nominal event amount or
   another index under the id it raises), `when.liquid_below` of a sale, and a `stream` (`_added`, so
-  `periodic` finds it too). The real `pension_growth` of the months between is left out. Nominal
-  amounts, the other indices and the event amounts that are nominal at their date stay too. A stream
+  `periodic` finds it too). The real `pension_growth` of the months between is left out, and
+  `scale.growth` steps again from the new start (rule `pay-growth`). Nominal amounts, the other
+  indices and the event amounts that are nominal at their date stay too. A stream
   paid every n months without `start` counts its payment months from the simulation start:
   `periodic` finds them in `cashflows.yaml` and in `add_stream` events, and the roll writes the old
   start as their `start` (`textedit.After`, behind `every`), so they pay in the same months. A

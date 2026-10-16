@@ -165,6 +165,7 @@ SETTINGS_DEFINE: Rules = (
 )
 SETTINGS_USE: Rules = (
     (Kind.PHASE, ("scale", "salary", KEY)),
+    (Kind.PHASE, ("scale", "growth", KEY)),
     (Kind.INDEX, ("care", "index")),
     (Kind.CATEGORY, ("scale", "categories", KEY)),
     (Kind.STREAM, ("scale", "savings", KEY)),

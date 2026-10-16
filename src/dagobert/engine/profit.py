@@ -15,9 +15,10 @@ from dagobert.result import INCOME_TAX, PROFIT, RV, SOURCE, TAX, FloatArray
 
 class Profit(Core):
     def _profit_nominal(self, s: StreamState) -> FloatArray:
-        """Nominal profit of one payment this month: its factor, the `scale.salary` of the phase
-        and its index, none after the onset of a disability (`working`)."""
-        return s.amount * s.earned_scale(self.m.phase, self.a) * self._index(s) * self.working
+        """Nominal profit of one payment this month: its factor, the `scale.salary` and the
+        growth of the phase (`_earned`) and its index, none after the onset of a disability
+        (`working`)."""
+        return s.amount * self._earned(s) * self._index(s) * self.working
 
     def _running(self) -> list[StreamState]:
         """The self-employed streams of the month: active by dates and phases at a factor other

@@ -693,10 +693,10 @@ class Income(Health):
         return paid
 
     def _salary_nominal(self, s: StreamState) -> FloatArray:
-        """Nominal gross of one salary payment this month: its factor, the `scale` of the
-        phase and its index, none after the onset of a disability (`working`)."""
-        scale = s.earned_scale(self.m.phase, self.a)
-        return self._salary_gross(s) * scale * self._index(s) * self.working
+        """Nominal gross of one salary payment this month: its factor, the `scale` and growth of
+        the phase (`_earned`, once on a share `of` another) and its index, none after the onset
+        of a disability (`working`)."""
+        return self._salary_gross(s) * self._earned(s) * self._index(s) * self.working
 
     def _salary_gross(self, s: StreamState) -> FloatArray:
         """Nominal gross for one payment before the stream's own factor and index.

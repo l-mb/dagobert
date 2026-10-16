@@ -38,7 +38,9 @@ insurance) and PKV (private health insurance). The sheet shows the plan on the s
   `As of` date. A salary conversion lowers it by its part that is free of social insurance, while
   the policy runs. The estimate is net, and it pays only for the 12 to 24 months of the claim. A
   Sperrzeit (`sperrzeit`, after you quit) pays nothing for 12 weeks, which the sheet does not
-  show. A course row (`training`) shows no amount: the ALG1 row beside it shows the payment.
+  show. A course row (`training`) shows no amount: the ALG1 row beside it shows the payment. The
+  factors and the growth of a phase that a scenario sets in `scale` do not change these rows: a
+  salary shows at its amount in the file.
 - The rows `from the run`: what no stream pays. These rows come from a single run of the scenario
   with the mean returns. They are the health insurance subsidy, the taxes and social insurance, the
   salary conversion (the part of the gross salary that goes into a company pension), the loan

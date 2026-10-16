@@ -120,6 +120,7 @@ EXPERT = _items(
     "returns.*.equity_correlation",
     "refinance_rate",
     "pension_growth",
+    "scale.growth",
     "cash_buffer_months",
     "invest_rest",
     "seed",

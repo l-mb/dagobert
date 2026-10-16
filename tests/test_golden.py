@@ -179,7 +179,8 @@ def rich_plan() -> Plan:
     quarter of the claim gone) with a course of six months at half the days, years without
     income with voluntary contributions, self-employed at 55
     (a trade business with the Regelbeitrag of the GRV, a yearly project fee), part time at 58 in a
-    phase of its own (half the salary, scaled by 1.2, the bAV goes on), the pension at 64 with 35
+    phase of its own (half the salary, scaled by 1.2, 2% more each January from 2036 on top of its
+    index, the bAV goes on), the pension at 64 with 35
     years, a let flat at a loss against the salary (AfA, Hausgeld, upkeep, the interest of its
     loan), its taxable sale within ten years that repays the loan before its fixed rate ends (the
     basis less the AfA, the penalty a cost), a bAV by salary conversion, a severance with a bAV
@@ -211,7 +212,7 @@ def rich_plan() -> Plan:
                 "part-time": {"label": "Teilzeit"},
                 "freelance": {"label": "Selbständig"},
             },
-            "scale": {"salary": {"part-time": 1.2}},
+            "scale": {"salary": {"part-time": 1.2}, "growth": {"part-time": 0.02}},
             "inflation": {"mean": 0.02},
             "indices": {
                 "salary": {"mean": 0.03},
@@ -321,7 +322,8 @@ def _renamed(p: Plan, to: Callable[[str], str]) -> Plan:
     data = p.model_dump(by_alias=True)
     a, scenario = data["assumptions"], data["scenario"]
     a["phases"] = {to(n): {"label": label} for n, label in p.assumptions.phase_labels.items()}
-    a["scale"]["salary"] = {to(n): f for n, f in a["scale"]["salary"].items()}
+    for key in ("salary", "growth"):
+        a["scale"][key] = {to(n): f for n, f in a["scale"][key].items()}
     added = [e["stream"] for e in scenario["events"] if e["type"] == "add_stream"]
     for s in [*data["streams"], *added]:
         s["phases"] = s["phases"] and [to(n) for n in s["phases"]]

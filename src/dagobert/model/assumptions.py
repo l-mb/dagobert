@@ -613,7 +613,8 @@ class DisabilityOptions(Strict):
 
 
 class Scale(Strict):
-    """What-if factors on the plan, 1 when absent. The explorer's sliders write them."""
+    """What-if factors on the plan, 1 when absent, and the growth of the pay of a phase, 0 when
+    absent. The explorer's sliders write them."""
 
     spending: Factor = Field(
         default=1.0,
@@ -627,6 +628,13 @@ class Scale(Strict):
     salary: dict[str, Factor] = Field(
         default={},
         description="Every salary payment and profit of a business in a phase, before tax and SV",
+    )
+    growth: dict[str, Annotated[Percent, Field(gt=-1)]] = Field(
+        default={},
+        description="Growth per year of every salary payment and profit of a business in a phase, "
+        "on top of their `index` and of `salary`. Over the default index, the consumer prices, it "
+        "is the real growth. It steps each January from the start of the phase, and a phase that "
+        "comes back starts again at the amounts of its streams",
     )
     savings: dict[str, Factor] = Field(
         default={}, description="The rate of a savings plan, by the name of its stream"
@@ -843,10 +851,11 @@ class Assumptions(Strict):
 
     @model_validator(mode="after")
     def _phases_named(self) -> Assumptions:
-        """The salary scale names defined phases, and no two phases show alike."""
+        """The salary scale and growth name defined phases, and no two phases show alike."""
         found = [
-            unknown_phase(("scale", "salary", name), name, self.phases)
-            for name in self.scale.salary
+            unknown_phase(("scale", key, name), name, self.phases)
+            for key, named in (("salary", self.scale.salary), ("growth", self.scale.growth))
+            for name in named
             if name not in self.phases
         ]
         shown = Counter(self.phase_labels.values())

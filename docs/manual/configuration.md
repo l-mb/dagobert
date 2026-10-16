@@ -228,8 +228,15 @@ Overview moves it) and `scale` (the overrides of a scenario).
   it. A name without such a stream is rejected, and the sliders of the Explorer leave out a plan
   that a chosen scenario lacks. `salary` as `{<phase>: factor}` acts on every salary payment and
   every profit of a business in a phase of `phases`, also of streams that a scenario adds. A derived
-  stream (`of`) scales once. The Explorer writes them: one slider for all spending, one per
-  category, per phase with a salary or a profit and per savings plan. A savings plan slider shows
+  stream (`of`) scales once. `growth` as `{<phase>: rate}` (a rate per year, default 0, also below
+  0) acts on the same payments, on top of their `index` and of `salary`. Over the default index,
+  the consumer prices, it is the real growth. It adds one step each January: the first January
+  after the phase starts is the first step, and a phase that starts before `start` counts from
+  `start`. If the phase comes back later, it starts again at the amounts of its streams. A derived
+  stream takes it once, and ALG1 after the phase takes the last salary with its growth. A pension,
+  ALG1 and other income do not take it. A plan that gives a phase an index of its own keeps
+  working. The Explorer writes them: one slider for all spending, one per category, per phase with
+  a salary or a profit (with its growth beside it) and per savings plan. A savings plan slider shows
   euros per month: the rate of its first row times the factor. A slider of the group `Salary and
   profit` shows euros too, in steps of 500: the gross salary and profit of a usual month in the
   phase, from a `fixed` run of the first chosen scenario (the median month, so without a bonus). The

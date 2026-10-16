@@ -15,7 +15,7 @@ The `scale` overrides that the sliders write: `docs/manual/configuration.md`.
   through `model.base.named`: `bAV return`), become assumption overrides (the world, and through
   `scale` the plan: salary and profit per phase with a salary or a profit in the run, group `Income`
   (`sliders.SALARY`, German `Einnahmen`, the key stays `scale.salary`), in the order of `phases`,
-  named by its label, spending as a whole (group `Total spending`, `sliders.ALL_SPENDING`,
+  named by its label, each followed by its growth (`scale.growth`, rule `pay-growth`), spending as a whole (group `Total spending`, `sliders.ALL_SPENDING`,
   `scale.spending`, core in simple mode; the one group a desktop opens) and per category (`Spending
   by category`, closed everywhere); through `shift` and `events` the dated items with an `id` of the
   first chosen scenario: a month slider per group (its position shows the month with the age then,
@@ -37,8 +37,8 @@ The `scale` overrides that the sliders write: `docs/manual/configuration.md`.
   and two sensitivity charts, the plan (`scale`, `shift`, `events`) and the assumptions: every
   slider one step down and up around its position. The groups start closed (a desktop opens `Total
   spending`), keyed by their id (`Knob.group`, its words `sliders.GROUPS`), the plan first (`knobs`:
-  all spending, spending by category, income (salary and profit, then the income indices and
-  `Pension growth`), savings plans, events, assets, then markets (`Inflation`, the indices that
+  all spending, spending by category, income (salary and profit and its growth per phase, then the
+  income indices and `Pension growth`), savings plans, events, assets, then markets (`Inflation`, the indices that
   costs follow, the returns), gold and crypto, the spending rule, care, allocation, spreads; the
   spending rule its cut and, with `base: no_pay` only, as the model refuses an increase without it,
   `Increase in good months` and `Increase when wealth rises above`, `knobs.CEILING` from 100%, the

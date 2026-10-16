@@ -539,13 +539,19 @@ UNKNOWN = "the phase job is not defined: add it under phases in assumptions.yaml
             "{scale: {salary: {job: 1.1}}}",
             "scenarios/child.yaml:5: overrides.scale.salary.job",
         ),
+        (
+            "scenarios/child.yaml",
+            "{inflation: {mean: 0.04}}",
+            "{scale: {growth: {job: 0.01}}}",
+            "scenarios/child.yaml:5: overrides.scale.growth.job",
+        ),
     ],
 )
 def test_an_unknown_phase_names_where_it_is_written(
     data_dir: Path, file: str, old: str, new: str, expected: str
 ) -> None:
     """In a stream, a factor, a bAV policy, a phase change of a parent, an added stream, the
-    salary scale of the assumptions and of an override."""
+    salary scale of the assumptions and of an override, the growth of an override."""
     path = data_dir / file
     path.write_text(path.read_text().replace(old, new, 1))
     with pytest.raises(InputError) as caught:

@@ -44,7 +44,8 @@ HINT: dict[Unit | None, str] = {
     Unit.MONTH: N_("A month: 2027-05 or 05.2027, any day counts as the first."),
     Unit.DATE: N_("A date: 1965-03-14 or 14.03.1965."),
 }
-EMPTY_ONE = N_("Empty counts as 1.")  # the help of an entry of a mapping of numbers (`entries`)
+# the help of an entry of a mapping of numbers (`entries`): a factor, a growth
+EMPTY_ONE, EMPTY_ZERO = N_("Empty counts as 1."), N_("Empty counts as 0.")
 # euros with a decimal comma or point: groups of three after a mark are thousands
 _EUROS = re.compile(r"(-?)(\d{1,3}(?:([.,])\d{3})+|\d+)(?:([.,])(\d{1,2}))?")
 _DECIMAL = re.compile(r"-?(?:\d+(?:[.,]\d*)?|[.,]\d+)")  # one mark, always decimal
@@ -171,9 +172,9 @@ def _walk(
             yield replace(_leaf(at, value, union, schema), nullable=nullable, **common)
 
 
-def entries(field: Field, names: Iterable[str]) -> list[Field]:
+def entries(field: Field, names: Iterable[str], empty: str = EMPTY_ONE) -> list[Field]:
     """A mapping of numbers by name (`scale.salary`, a `MAP` with a `value` column) as one number
-    per name of `names`, a phase: empty counts as 1."""
+    per name of `names`, a phase: empty counts as 1, or as `empty` says (`EMPTY_ZERO`)."""
     value = field.columns[0]
     return [
         Field(
@@ -184,7 +185,7 @@ def entries(field: Field, names: Iterable[str]) -> list[Field]:
             high=value.bounds[1],
             about=field.about,
             named=field.named,
-            more=(*field.more, EMPTY_ONE),
+            more=(*field.more, empty),
             section=field.section,
             entry=True,
         )

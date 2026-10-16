@@ -352,8 +352,10 @@ class MonthPay:
 
 @dataclass(frozen=True)
 class MonthState:
-    """The month being simulated."""
+    """The month being simulated, with the first month of the stretch of its phase (at the
+    earliest the start): the growth of its pay steps from there (`Core._earned`)."""
 
     i: int
     month: date
     phase: str
+    since: date

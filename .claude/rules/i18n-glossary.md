@@ -49,6 +49,7 @@ text too (owner, issue #23: `auf der Seite Snapshot`), as do Explorer, Cashflows
 | Monte Carlo / historical / fixed / spread | Monte Carlo / historisch / fest / Schwankung | |
 | severance / one-off payment, lump sum / write-off | Abfindung / Einmalzahlung / Ausbuchung | not „Abschreibung" (AfA), not „Einmalauszahlung" |
 | pension / bAV policy / care | Rente / bAV-Vertrag / Pflege, Pflegefall | company pension: Betriebsrente |
+| Pension growth / Raises in (a phase, `scale.growth`) | Rentensteigerung / Gehaltssteigerung in | the key `growth` „Wachstum“; a growth of a phase in a sentence „Steigerung“ |
 | self-employment / profit / business | Selbstständigkeit / Gewinn / Betrieb | |
 | income tax / Soli / capital gains tax / SV | Einkommensteuer / Soli / Abgeltungsteuer / Sozialversicherung (SV) | |
 | Vorabpauschale, Teilfreistellung, Sparer-Pauschbetrag, Grunderwerbsteuer, Fünftelregelung, Gewerbesteuer, Hebesatz, Vorsorgepauschale, Basisrente, Altersvorsorgedepot, Hausgeld, ALG1, Rentenpunkte, Krankengeld, PKV, GKV, KVdR, Bundesland | as is | the English UI uses them; PKV, GKV spelled out once in help |

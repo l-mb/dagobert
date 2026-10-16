@@ -164,6 +164,15 @@ def test_knobs_cover_the_optional_sections(data: Path) -> None:
     dial = salary.dial(1.0)
     assert (dial.low, dial.text(1.0)) == (0.0, "3.612 €")
     assert (dial.high, dial.step) == pytest.approx((7500 / 3612.4, 500 / 3612.4))
+    # beside it the growth of the phase, a rate per year from -5%: a lever and a dial; none for a
+    # phase without pay in the run
+    growth = found["scale", "growth", "alt"]
+    paths = list(found)
+    assert paths[paths.index(salary.path) + 1] == growth.path
+    assert ("scale", "growth", "work") not in found
+    assert (growth.group, growth.unit, growth.value) == (sliders.SALARY, sliders.RAISES, 0.0)
+    assert (growth.lever(0.0).low, growth.lever(0.0).high) == (-0.005, 0.005)
+    assert (growth.dial(0.0).low, growth.dial(0.0).text(0.02)) == (-0.05, "2.0%")
     assert "about 510 € per month" in found["scale", "categories", "wohnen"].help
     overall = found["scale", "spending"]
     assert (overall.group, overall.unit, overall.value) == (

@@ -128,6 +128,7 @@ CRYPTO_RATE = Unit(-20.0, 60.0, 1.0, NP_("sprintf", "%.0f%%"), delta=5.0, scale=
 CRYPTO_SPREAD = Unit(0.0, 150.0, 5.0, NP_("sprintf", "%.0f%%"), delta=10.0, scale=100)
 CORRELATION = Unit(-1.0, 1.0, 0.05, "%.2f", delta=0.2)
 TREND = Unit(0.0, 8.0, 0.1, NP_("sprintf", "%.1f%%"), delta=0.5, scale=100)  # a real growth: VPW
+RAISES = replace(TREND, low=-5.0)  # the real growth of the pay of a phase
 AGE = Unit(80.0, 110.0, 1.0, "%.0f", delta=5.0, whole=True)
 
 MARKETS = "markets"  # the sidebar groups by id, `GROUPS` their words

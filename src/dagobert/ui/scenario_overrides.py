@@ -12,7 +12,7 @@ from __future__ import annotations
 import dataclasses
 import shutil
 import tempfile
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Collection, Mapping, Sequence
 from dataclasses import dataclass, replace
 from datetime import date
 from pathlib import Path
@@ -51,6 +51,7 @@ from dagobert.ui.widgets import Names
 
 SCALE = Tab("scale", N_("Scale"), ("scale",))
 SALARY: KeyPath = ("scale", "salary")
+GROWTH: KeyPath = ("scale", "growth")
 SPENDING: KeyPath = ("scale", "spending")
 CATEGORIES: KeyPath = ("scale", "categories")
 SAVINGS: KeyPath = ("scale", "savings")
@@ -82,7 +83,9 @@ FACTOR_HELP = {
 SCALE_HELP = N_(
     "A salary shows as the gross of a usual month in the phase, in euros of the start, as on the "
     "slider of the Explorer. The file keeps a factor on every salary payment of the phase, so a "
-    "bonus changes by the same share. A phase without a salary in the run shows the factor."
+    "bonus changes by the same share. A phase without a salary in the run shows the factor. The "
+    "growth of a phase is a rate per year in percent on top of the index of the streams, stepped "
+    "each January from the start of the phase."
 )
 
 
@@ -105,14 +108,19 @@ class ScaleForm(AssumptionsForm):
 
     def leaves(self, data_dir: Path, candidate: Mapping[str, Any]) -> dict[KeyPath, Leaf]:
         """The fallback of `AssumptionsForm` in euros, a salary without one at the factor 1: the
-        gross that the streams pay."""
+        gross that the streams pay; a growth without one 0, the default."""
         found = super().leaves(data_dir, self.factors(candidate))
-        return found | {
-            (*SALARY, phase): Leaf(self.euros(phase, held.value), held.source)
-            if (held := found.get((*SALARY, phase)))
-            else Leaf(gross, STREAMS)
-            for phase, gross in self.gross.items()
-        }
+        growth = [f.path for f in self.fields if f.path[:2] == GROWTH and f.path not in found]
+        return (
+            found
+            | {
+                (*SALARY, phase): Leaf(self.euros(phase, held.value), held.source)
+                if (held := found.get((*SALARY, phase)))
+                else Leaf(gross, STREAMS)
+                for phase, gross in self.gross.items()
+            }
+            | dict.fromkeys(growth, Leaf(0.0, DEFAULT))
+        )
 
     def problems(
         self, data_dir: Path, doc: Mapping[str, Any], candidate: Mapping[str, Any]
@@ -133,6 +141,11 @@ class ScaleForm(AssumptionsForm):
 
 def _phase(path: KeyPath) -> str | None:
     return path[-1] if len(path) == 3 and path[:2] == SALARY else None
+
+
+def _per_phase(path: KeyPath) -> bool:
+    """A salary or a growth of a phase."""
+    return len(path) == 3 and path[:2] in (SALARY, GROWTH)
 
 
 def _salaries(part: Mapping[str, Any], convert: Callable[[str, Any], Any]) -> dict[str, Any]:
@@ -168,23 +181,32 @@ def scale_form(
     file: str,
     stem: str,
     salaries: Mapping[str, float] | None,
-    held: Sequence[str],
+    held: Collection[KeyPath],
     phases: Mapping[str, str],
 ) -> ScaleForm:
     """The form of `scale` in the scenario file `file`: the factors by category, then of the
     `phases` (each with how the pages name it) per phase with a salary in the run (`salaries`) its
-    gross in euros, per phase whose factor the chain holds (`held`) the factor; without a run every
-    phase with its factor. Keyed by the gross: a value shown in euros means another factor once
-    the run changes."""
+    gross in euros and its growth, per phase without one the factor and the growth that the chain
+    holds (`held`, by key path); without a run every phase with both. Keyed by the gross: a value
+    shown in euros means another factor once the run changes."""
     gross = {p: g for p, g in (salaries or {}).items() if g}
-    found, labels = [], {SALARY: N_("Scale salary")}  # the heading of the salaries
+    found, labels = [], {SALARY: N_("Scale salary"), GROWTH: N_("Raises per year")}
+    empty = {SALARY: fields.EMPTY_ONE, GROWTH: fields.EMPTY_ZERO}
     for field in (
         entry
         for top in SCALE.fields
-        for entry in (fields.entries(top, phases) if top.path == SALARY else [top])
+        for entry in (fields.entries(top, phases, empty[top.path]) if top.path in empty else [top])
     ):
         phase = _phase(field.path)
-        if phase in gross:
+        if _per_phase(field.path) and not (
+            salaries is None or field.path[-1] in gross or field.path in held
+        ):
+            continue  # a phase without pay in the run, which the chain sets nothing for
+        if field.path[:2] == GROWTH:
+            found.append(field)
+            label = _("Raises in {phase}").format(phase=phases[field.path[-1]])
+            labels[field.path] = f"{label} %"
+        elif phase in gross:
             # in words of the session here, with the label of the phase as written; `said` formats
             # `about` once more, so its braces double
             usual = _("A usual month in `{phase}` pays {amount} at the factor 1.").format(
@@ -204,7 +226,7 @@ def scale_form(
                 if cols
                 else replace(field, unit=Unit.PERCENT, about=text, named=None, more=())
             )
-        elif phase is None or salaries is None or phase in held:
+        else:
             found.append(field)
             if phase is not None:
                 labels[field.path] = _("Salary and profit in {phase}").format(phase=phases[phase])
@@ -327,7 +349,7 @@ def tab(path: Path) -> None:
         CATEGORIES: Names(tuple(here.refs.names(Kind.CATEGORY, here.stem))),
         SAVINGS: Names(tuple(here.refs.names(Kind.STREAM, here.stem, sorts=("savings",)))),
     }
-    held = [p[2] for p in leaves if _phase(p)]
+    held = [p for p in leaves if _per_phase(p)]
     salaries = gross(data_dir, here.stem, leaves)
     view = mode.view(data_dir)
     tabs = {

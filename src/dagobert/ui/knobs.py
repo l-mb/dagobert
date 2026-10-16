@@ -45,6 +45,7 @@ from dagobert.ui.sliders import (
     MONTHS,
     PER_YEAR,
     PERIOD,
+    RAISES,
     RATE,
     SALARY,
     SAVINGS,
@@ -396,40 +397,63 @@ NO_SALARIES = Salaries()
 
 
 def _salary_knobs(a: Assumptions, salaries: Salaries) -> list[Knob]:
-    """A `scale` factor on the salary and the profit of each phase with one, in the order of
-    `phases`, shown as the gross of a usual month."""
+    """Per phase with a salary or a profit, in the order of `phases`: a `scale` factor on both,
+    shown as the gross of a usual month, and their growth beside it."""
     return [
-        Knob(
-            SALARY,
-            _("Salary and profit in {phase}").format(phase=label),
-            ("scale", "salary", phase),
-            a.scale.salary.get(phase, 1.0),
-            replace(
-                EUR,
-                high=SALARY_STEP * math.ceil(2 * gross / SALARY_STEP),
-                step=SALARY_STEP,
-                delta=SALARY_STEP,
-                # the gross at the factor 1: the run paid it with the factor of the scenario
-                # (a factor 0 pays nothing, the run's gross is then the only one there is)
-                scale=gross / (a.scale.salary.get(phase, 1.0) or 1.0),
-            ),
-            _(
-                "Gross salary and profit of a business of a usual month in the phase "
-                "`{phase}`, in euros of {month}: a stream that follows an index which grows "
-                "faster than prices lies above its amount in the file in a later phase. "
-                "{scenario} pays {amount}. The slider sets a factor on every salary payment "
-                "and profit of the phase, so a bonus and the other scenarios change by the "
-                "same share. Tax, SV, pension points and a later ALG1 follow the new gross."
-            ).format(
-                phase=label,
-                month=f"{a.start:%Y-%m}",
-                scenario=salaries.scenario,
-                amount=format_eur(gross),
-            ),
-        )
+        knob
         for phase, label in a.phase_labels.items()
         if (gross := salaries.by_phase.get(phase)) is not None
+        for knob in (_salary_knob(a, salaries, phase, label, gross), _growth_knob(a, phase, label))
     ]
+
+
+def _salary_knob(a: Assumptions, salaries: Salaries, phase: str, label: str, gross: float) -> Knob:
+    return Knob(
+        SALARY,
+        _("Salary and profit in {phase}").format(phase=label),
+        ("scale", "salary", phase),
+        a.scale.salary.get(phase, 1.0),
+        replace(
+            EUR,
+            high=SALARY_STEP * math.ceil(2 * gross / SALARY_STEP),
+            step=SALARY_STEP,
+            delta=SALARY_STEP,
+            # the gross at the factor 1: the run paid it with the factor of the scenario
+            # (a factor 0 pays nothing, the run's gross is then the only one there is)
+            scale=gross / (a.scale.salary.get(phase, 1.0) or 1.0),
+        ),
+        _(
+            "Gross salary and profit of a business of a usual month in the phase "
+            "`{phase}`, in euros of {month}: a stream that follows an index which grows "
+            "faster than prices lies above its amount in the file in a later phase, and so does "
+            "a phase with a growth. {scenario} pays {amount}. The slider sets a factor on every "
+            "salary payment and profit of the phase, so a bonus and the other scenarios change "
+            "by the same share. Tax, SV, pension points and a later ALG1 follow the new gross."
+        ).format(
+            phase=label,
+            month=f"{a.start:%Y-%m}",
+            scenario=salaries.scenario,
+            amount=format_eur(gross),
+        ),
+    )
+
+
+def _growth_knob(a: Assumptions, phase: str, label: str) -> Knob:
+    return Knob(
+        SALARY,
+        _("Raises in {phase}").format(phase=label),
+        ("scale", "growth", phase),
+        a.scale.growth.get(phase, 0.0),
+        RAISES,
+        _(
+            "Growth per year of the salary and the profit of a business in the phase `{phase}`, "
+            "on top of the index of their streams and of the slider above: over the consumer "
+            "prices, the default index, the real growth. It steps each January from the start "
+            "of the phase, so the first January after it is the first step, and a phase that "
+            "comes back starts again at the amounts of the file. A bonus follows its salary, a "
+            "later ALG1 the grown last salary; pensions and other income stay as they are."
+        ).format(phase=label),
+    )
 
 
 def _savings_knobs(a: Assumptions, streams: list[Stream]) -> list[Knob]:

@@ -46,8 +46,8 @@ ABOUT = {
     ),
     Kind.PHASE: N_(
         "The short name changes in every input that names the phase: the streams and pension "
-        "policies that pay in it, the phase changes of the scenarios and their salary scale. Its "
-        "name on the pages stays."
+        "policies that pay in it, the phase changes of the scenarios and their salary scale and "
+        "growth. Its name on the pages stays."
     ),
     Kind.RELATIVE: N_(
         "The short name changes in every input that names the relative: the inheritances and "

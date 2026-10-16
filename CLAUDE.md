@@ -132,11 +132,11 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   `yaml()`, `dump()`: the YAML of the store; `read_csv`: the CSV inputs [revisions].
 - `src/dagobert/rollforward.py`: moves `start` to a later month [rollforward].
 - `src/dagobert/engine/`: monthly path simulation [engine, tax, ledger, bav, harvest, spending,
-  disability, children]: `simulation.py` month loop, `core.py` setup, helpers, `state.py`,
-  `income.py` streams, `portfolio.py` holdings and sales, `events.py`, `settlement.py` December
-  settlement, `profit.py` [self-employment], `alg1.py` the claim to ALG1 [alg1], `health.py`
-  [gkv]. Also `holdings.py` gold, crypto pools, `carry.py` values from `asof`, `result.py`
-  `RunResult`, `Ledger` [money].
+  disability, children, pay-growth]: `simulation.py` month loop, `core.py` setup, helpers,
+  `state.py`, `income.py` streams, `portfolio.py` holdings and sales, `events.py`, `settlement.py`
+  December settlement, `profit.py` [self-employment], `alg1.py` the claim to ALG1 [alg1],
+  `health.py` [gkv]. Also `holdings.py` gold, crypto pools, `carry.py` values from `asof`,
+  `result.py` `RunResult`, `Ledger` [money].
 - `src/dagobert/tax.py`, `sv.py` (SV): array functions, a year a file in `src/dagobert/data/tax/`
   [tax, tax-options, bav, gkv, rental, deductions, harvest, disability, children, alg1].
 - `src/dagobert/returns.py`: the return providers [returns]; `mortality.py`: the survival curve of
@@ -158,17 +158,17 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 - `src/dagobert/report/`: plotly HTML, rich table [charts, money]: `page.py`, `summary.py`
   [disability], `charts.py` shared parts, the others a figure each; `*.css`, `tabs.js` package data.
 - `src/dagobert/money.py`: `format_eur` and the grid formats, one euro format everywhere [money].
-- `src/dagobert/ui/`: Streamlit pages [ui, money]: `main.py` the entry script, `__init__.py` shared
-  helpers, `page.css` the style, `fixed.py` the cached `fixed` run, `mode.py` mode and features
-  [mode]. `tables.py`, `gridstate.py`, `gridcolumns.py` [grids], `guard.py`, `save.py`, `undo.py`
+- `src/dagobert/ui/`: Streamlit pages [ui, money, pay-growth]: `main.py` the entry, `__init__.py`
+  helpers, `page.css` style, `fixed.py` the cached `fixed` run, `mode.py` mode and features [mode].
+  `tables.py`, `gridstate.py`, `gridcolumns.py` [grids], `guard.py`, `save.py`, `undo.py`
   [save-guard], `rename.py` [references], `summary.py` [tracking], `pricing.py`, `csvcolumns.py`
-  [prices], `fields.py`, `widgets.py`, `forms.py`, `formguard.py` [forms]. `outlook.py`: the plan on
-  the Overview, `runs.py` its runs, `sliders.py`, `knobs.py` its sliders, `seek.py` its goal seek
-  [overview, explorer, explorer-runs]. Pages: `overview.py`, `snapshot.py` (`corrections.py`),
-  `assets.py` (`tradeform.py`, `tradeimport.py`) [grids, tracking], `cashflows.py` (`bars.py`,
-  `refusals.py`), `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode], `data.py`,
-  `assumptions.py`, `transfer.py`, `welcome.py`, `scenarios.py` (`fileactions.py`; tabs `phases.py`,
-  `events.py`, `scenario_overrides.py`, `overridegrids.py`; `lineage.py`).
+  [prices], `fields.py`, `widgets.py`, `forms.py`, `formguard.py` [forms]. `outlook.py` the plan of
+  the Overview, `runs.py` its runs, `sliders.py`, `knobs.py`, `seek.py` [overview, explorer,
+  explorer-runs]. Pages: `overview.py`, `snapshot.py` (`corrections.py`), `assets.py`
+  (`tradeform.py`, `tradeimport.py`) [grids, tracking], `cashflows.py` (`bars.py`, `refusals.py`),
+  `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode], `data.py`, `assumptions.py`,
+  `transfer.py`, `welcome.py`, `scenarios.py` (`fileactions.py`; tabs `phases.py`, `events.py`,
+  `scenario_overrides.py`, `overridegrids.py`; `lineage.py`).
 - `src/dagobert/data/`: shipped series, read only, see `SOURCES.md` there [series].
 - `data/`: personal inputs; `tmp/`: scratch files; both gitignored. In `data/`: `history.csv`
   [tracking], `actuals.csv` [spend], `prices/` [prices], `revisions/` [revisions], `series/`: the

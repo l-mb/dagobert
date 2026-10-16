@@ -111,7 +111,7 @@ class Core:
         self.markers: list[Marker] = []
         self.ledger = Ledger(self.n_months) if self.paths == 1 else None
         self.earned = np.zeros(self.n_months)  # taxable income of the year so far, with a ledger
-        self.m = MonthState(0, self.start, self.plan.phase_at(self.start))
+        self.m = MonthState(0, self.start, self.plan.phase_at(self.start), self.start)
         self._init_paths()
         self._init_assets()
         self._init_streams()
@@ -529,6 +529,14 @@ class Core:
             and s.spec.managed
             and s.spec.cat in rule.categories
         )
+
+    def _earned(self, s: StreamState) -> float:
+        """What an earned stream pays of its amount this month: its factor, `scale.salary` and
+        the growth of the phase (`scale.growth`), stepped each January from the start of its
+        stretch (`MonthState.since`)."""
+        m = self.m
+        growth = (1 + self.a.scale.growth.get(m.phase, 0.0)) ** (m.month.year - m.since.year)
+        return s.earned_scale(m.phase, self.a) * growth
 
     def _nominal(self, s: StreamState) -> FloatArray:
         """Nominal amount of one plain stream this month."""

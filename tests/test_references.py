@@ -76,7 +76,7 @@ overrides:
   shift: {job-end: 3, exit: 1}
   events: {flat-sale: {price: 300000}, job-end: {amount: 2000}}
   assets: {policy-a: {growth: equity}}
-  scale: {categories: {Wohnen: 0.9}, savings: {ETF: 1.5}, salary: {work: 1.1}}
+  scale: {categories: {Wohnen: 0.9}, savings: {ETF: 1.5}, salary: {work: 1.1}, growth: {alt: 0.01}}
   indices: {salary: {mean: 0.03}, pension: {mean: 0.01}}
 """
 
@@ -155,7 +155,10 @@ USES = {
         "scenarios/base.yaml: phases[0].phase",
         "scenarios/early-exit.yaml: overrides.scale.salary.work",
     ],
-    (Kind.PHASE, "alt"): ["scenarios/early-exit.yaml: events[5].stream.factor.alt"],
+    (Kind.PHASE, "alt"): [
+        "scenarios/early-exit.yaml: events[5].stream.factor.alt",
+        "scenarios/early-exit.yaml: overrides.scale.growth.alt",
+    ],
     (Kind.SCENARIO, "base"): ["scenarios/early-exit.yaml: extends"],
     (Kind.SCENARIO, "early-exit"): ["app.yaml: scenarios[0]"],
     # defined, but used nowhere

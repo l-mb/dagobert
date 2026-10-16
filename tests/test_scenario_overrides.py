@@ -18,7 +18,7 @@ from dagobert.store import Edit, RowEdits
 from dagobert.ui import fields, forms
 from dagobert.ui.assumptions import LABELS, TABS, TAX_YEAR
 from dagobert.ui.overridegrids import OWN, ById, Here, edited, moved, text
-from dagobert.ui.scenario_overrides import changes, scale_form, trial
+from dagobert.ui.scenario_overrides import GROWTH, SALARY, changes, scale_form, trial
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -117,7 +117,9 @@ def test_the_parts_write_one_mapping_of_overrides(plans: Path) -> None:
         grids |= found
     written = [
         _shown(plans, markets, {("inflation", "mean"): 0.025}).edit(),
-        _shown(plans, scale, {("scale", "salary", "work"): 5500, CATEGORY: 0.9}).edit(),
+        _shown(
+            plans, scale, {(*SALARY, "work"): 5500, (*GROWTH, "work"): 0.02, CATEGORY: 0.9}
+        ).edit(),
         Edit(file, {(*OWN, *path): v for path, v in grids.items()}),
     ]
     store.write(plans, forms.merged(written), source="test")
@@ -125,7 +127,11 @@ def test_the_parts_write_one_mapping_of_overrides(plans: Path) -> None:
         "refinance_rate": 0.05,  # set equal to the inherited one, it stays
         "events": {"flat-sale": {"price": 175000.5}},
         "inflation": {"mean": 0.025},
-        "scale": {"salary": {"work": 1.1}, "categories": {"housing": 0.9}},
+        "scale": {
+            "salary": {"work": 1.1},
+            "growth": {"work": 0.02},
+            "categories": {"housing": 0.9},
+        },
         "shift": {"retirement": 6},
         "assets": {"avd": {"contribution": 1200}},
     }
@@ -218,15 +224,25 @@ def test_all_spending_reads_in_percent_and_keeps_its_factor(plans: Path) -> None
     assert [(c.text, c.warning) for c in found] == [("**scale spending** empty → 75%", None)]
 
 
-def test_the_salary_shows_in_euros_and_keeps_its_factor() -> None:
+def test_the_salary_shows_in_euros_and_keeps_its_factor(plans: Path) -> None:
     form = scale_form("scenarios/child.yaml", "child", {"work": 4000.0}, [], PHASE_LABELS)
     doc = {"overrides": {"scale": {"salary": {"work": 1.05, "alt": 0.5}}}}
     assert form.mapping(doc)["scale"]["salary"] == {"work": 4200.0, "alt": 0.5}
     assert form.stored(("scale", "salary", "work"), 4400) == 1.1
     assert form.stored(("scale", "salary", "alt"), 0.4) == 0.4  # no gross: the factor
     labels = {f.path: form.label(f) for f in form.fields}
-    assert labels[("scale", "salary", "work")] == "Salary and profit in Work €"
-    assert ("scale", "salary", "retired") not in labels  # no salary, no factor held
+    assert labels[(*SALARY, "work")] == "Salary and profit in Work €"
+    assert (*SALARY, "retired") not in labels  # no salary, no factor held
+    # the growth of a phase with pay in percent, empty at 0; of a phase without pay as the chain
+    # holds it
+    assert labels[(*GROWTH, "work")] == "Raises in Work %"
+    assert form.leaves(plans, {})[(*GROWTH, "work")].value == 0
+    assert form.stored((*GROWTH, "work"), 0.02) == 0.02
+    assert (*GROWTH, "retired") not in labels
+    held = scale_form(
+        "scenarios/child.yaml", "child", {"work": 4000.0}, [(*GROWTH, "retired")], PHASE_LABELS
+    )
+    assert {f.path for f in held.fields} - {f.path for f in form.fields} == {(*GROWTH, "retired")}
 
 
 def test_a_phase_label_with_braces_shows_as_written() -> None:

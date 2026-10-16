@@ -44,7 +44,8 @@ The forms, their fallbacks and Save: rule `forms`; the override algebra (`overri
   and without one the gross itself, `from cashflows.yaml`. A phase without a salary in the run
   keeps its factor field while the chain holds a factor; without a run (a template, a plan that
   does not load) every phase takes its factor. The form key holds a digest of the gross: a value
-  shown in euros means another factor once the run changes, so a new run starts a new form.
+  shown in euros means another factor once the run changes, so a new run starts a new form. The
+  growth of each phase follows the salaries, in percent (rule `pay-growth`).
 - `src/dagobert/ui/overridegrids.py`: the overrides by id as grids (`ById`, the rows of
   `overrides.rows`): `Dates` (`shift`: `id`, `months`), `Event fields` (`events`: `id`, `field`,
   `value`) and `Assets` (`assets`: `asset`, `field`, `value`); the first column a select of

@@ -22,6 +22,7 @@ from dagobert.money import EUR_COLUMN
 from dagobert.scenariofiles import first_scenario, scenario_file
 from dagobert.store import RowEdits, RowFile
 from dagobert.ui import (
+    corrections,
     fold,
     gridcolumns,
     guard,
@@ -369,6 +370,7 @@ def page(file: RowFile) -> None:
         ),
         flagged=flagged,
     )
+    corrections.section(file.data_dir, rows)
     pricing.section(file.data_dir, securities, stored)  # a saved price reruns the page
 
 

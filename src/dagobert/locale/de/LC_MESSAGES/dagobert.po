@@ -5438,12 +5438,13 @@ msgstr "Zu Gold und Krypto"
 msgid "Fund gains tax-free %"
 msgstr "Teilfreistellung %"
 
-#: ui/assets.py ui/assumptions.py ui/data.py ui/overridegrids.py ui/overview.py
-#: ui/snapshot.py
+#: ui/assets.py ui/assumptions.py ui/corrections.py ui/data.py
+#: ui/overridegrids.py ui/overview.py ui/snapshot.py
 msgid "value"
 msgstr "Wert"
 
-#: ui/assets.py ui/cashflows.py ui/overview.py ui/pricing.py ui/tradeimport.py
+#: ui/assets.py ui/cashflows.py ui/corrections.py ui/overview.py ui/pricing.py
+#: ui/tradeimport.py
 msgid "date"
 msgstr "Datum"
 
@@ -6787,6 +6788,83 @@ msgstr "Zahlung"
 msgid "category"
 msgstr "Kategorie"
 
+#: ui/corrections.py
+msgid ""
+"Change or remove a value that you recorded by mistake. The charts of your"
+" records take the correction. The value in your inputs, **current** "
+"above, stays: record it again above, or change it on the Assets page."
+msgstr ""
+"Ändere oder entferne einen Wert, den du versehentlich erfasst hast. Die "
+"Diagramme deiner erfassten Werte übernehmen die Korrektur. Der Wert in "
+"deinen Eingaben, **Aktuell** oben, bleibt: Erfasse ihn oben neu oder "
+"ändere ihn auf der Seite Vermögen."
+
+#: ui/corrections.py
+msgid "As recorded: a property its full value, a loan its balance below zero"
+msgstr ""
+"Wie erfasst: eine Immobilie mit ihrem vollen Wert, ein Darlehen mit "
+"seiner Restschuld unter null"
+
+#: ui/corrections.py
+msgid "Correct a recorded month"
+msgstr "Einen erfassten Monat korrigieren"
+
+#: ui/corrections.py
+#, python-brace-format
+msgid ""
+"{changed} since this table was drawn. Save refuses your edits: discard "
+"them to see the month as it is now."
+msgstr ""
+"{changed}, seit diese Tabelle angezeigt wurde. Speichern lehnt deine "
+"Änderungen ab: Verwirf sie, um den Monat zu sehen, wie er jetzt ist."
+
+#: ui/corrections.py
+msgid "Removes the recorded value"
+msgstr "Entfernt den erfassten Wert"
+
+#: ui/corrections.py
+#, python-brace-format
+msgid "{n} recorded value goes: the charts of your records lose it"
+msgid_plural "{n} recorded values go: the charts of your records lose them"
+msgstr[0] ""
+"{n} erfasster Wert entfällt: Den Diagrammen deiner erfassten Werte fehlt "
+"er dann"
+msgstr[1] ""
+"{n} erfasste Werte entfallen: Den Diagrammen deiner erfassten Werte "
+"fehlen sie dann"
+
+#: ui/corrections.py
+msgid "Save the correction"
+msgstr "Korrektur speichern"
+
+#: ui/corrections.py
+#, python-brace-format
+msgid "Not saved: {changed} since this table was drawn"
+msgstr "Nicht gespeichert: {changed}, seit diese Tabelle angezeigt wurde"
+
+#: ui/corrections.py
+#, python-brace-format
+msgid "Corrected {month}"
+msgstr "{month} korrigiert"
+
+#: ui/corrections.py ui/data.py ui/explorer.py ui/fileactions.py ui/rename.py
+#: ui/save.py ui/scenarios.py ui/spend.py
+#, python-brace-format
+msgid "Not saved: {reason}"
+msgstr "Nicht gespeichert: {reason}"
+
+#: ui/corrections.py ui/events.py ui/spend.py
+msgid "Month"
+msgstr "Monat"
+
+#: ui/corrections.py ui/snapshot.py
+msgid "asset"
+msgstr "Vermögenswert"
+
+#: ui/corrections.py ui/transfer.py
+msgid "remove"
+msgstr "entfernen"
+
 #: ui/csvcolumns.py
 msgid "Look at the decimal mark"
 msgstr "Prüfe das Dezimalzeichen"
@@ -7170,12 +7248,6 @@ msgstr ""
 "Zeitraum {period}. Mitgeliefert: Das nächste Release bringt die nächste "
 "Tafel."
 
-#: ui/data.py ui/explorer.py ui/fileactions.py ui/rename.py ui/save.py
-#: ui/scenarios.py ui/spend.py
-#, python-brace-format
-msgid "Not saved: {reason}"
-msgstr "Nicht gespeichert: {reason}"
-
 #: ui/data.py ui/main.py
 msgid "Data"
 msgstr "Daten"
@@ -7496,10 +7568,6 @@ msgstr ""
 #: ui/events.py
 msgid "About inherited events"
 msgstr "Zu geerbten Ereignissen"
-
-#: ui/events.py ui/spend.py
-msgid "Month"
-msgstr "Monat"
 
 #: ui/explorer.py
 msgid "Fixed"
@@ -10973,6 +11041,10 @@ msgid "enter {field} above {limit}"
 msgstr "Gib {field} über {limit} ein"
 
 #: ui/refusals.py
+msgid "new row"
+msgstr "neue Zeile"
+
+#: ui/refusals.py
 #, python-brace-format
 msgid ""
 "{fields} does not belong to the kind {kind}: empty it, or choose another "
@@ -10984,10 +11056,6 @@ msgstr[0] "{fields} gehört nicht zur Art {kind}: Leere es oder wähle eine ande
 msgstr[1] ""
 "{fields} gehören nicht zur Art {kind}: Leere sie oder wähle eine andere "
 "Art"
-
-#: ui/refusals.py
-msgid "new row"
-msgstr "neue Zeile"
 
 #: ui/refusals.py
 #, python-brace-format
@@ -11695,10 +11763,6 @@ msgid "Observed on"
 msgstr "Abgelesen am"
 
 #: ui/snapshot.py
-msgid "asset"
-msgstr "Vermögenswert"
-
-#: ui/snapshot.py
 msgid "current"
 msgstr "Aktuell"
 
@@ -12383,10 +12447,6 @@ msgid "add"
 msgstr "hinzufügen"
 
 #: ui/transfer.py
-msgid "remove"
-msgstr "entfernen"
-
-#: ui/transfer.py
 msgid "replace"
 msgstr "ersetzen"
 
@@ -12681,6 +12741,57 @@ msgstr "{name} importiert am {time}: {effect}."
 #, python-brace-format
 msgid "Imported {name}: {effect}."
 msgstr "{name} importiert: {effect}."
+
+#: ui/undo.py
+msgid ""
+"Writes the files of this save as they were before it, as a new save: both"
+" stay in the record of the changes. A later save of the same files, here,"
+" on another device or by a command, keeps it off."
+msgstr ""
+"Schreibt die Dateien dieses Speicherns, wie sie davor waren, als neues "
+"Speichern: Beide bleiben in den Versionen erhalten. Ein späteres "
+"Speichern derselben Dateien, hier, auf einem anderen Gerät oder durch "
+"einen Befehl, sperrt „Rückgängig“."
+
+#: ui/undo.py
+#, python-brace-format
+msgid "Took back the save {when}."
+msgstr "Rückgängig gemacht: das Speichern {when}."
+
+#: ui/undo.py
+#, python-brace-format
+msgid "Saved {when}."
+msgstr "Gespeichert {when}."
+
+#: ui/undo.py
+#, python-brace-format
+msgid "Last save {when}."
+msgstr "Zuletzt gespeichert {when}."
+
+#: ui/undo.py
+#, python-brace-format
+msgid "{text} Undo is off: {reason}."
+msgstr "{text} „Rückgängig“ bleibt gesperrt: {reason}."
+
+#: ui/undo.py
+msgid "Undo"
+msgstr "Rückgängig"
+
+#: ui/undo.py
+#, python-brace-format
+msgid "Not undone: {reason}"
+msgstr "Nicht rückgängig gemacht: {reason}"
+
+#: ui/undo.py
+msgid "Nothing to take back: the files are as before this save"
+msgstr ""
+"Nichts rückgängig zu machen: Die Dateien sind schon wie vor diesem "
+"Speichern"
+
+#: ui/undo.py
+#, python-brace-format
+msgid "Took back the save {when}"
+msgstr "Rückgängig gemacht: das Speichern {when}"
 
 #: ui/welcome.py
 msgid "Start simple"

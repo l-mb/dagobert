@@ -12,7 +12,8 @@ brackets, for example `Buy (buy)`. The results use the same names without `(main
 charts, the tabs and the difference of two runs. The help icon beside `Scenarios` shows the file of
 each scenario and the start of its note.
 
-`Set as default, the first as main` saves the selected scenarios. The Explorer opens with them. The
+`Set as default, the first as main` saves the selected scenarios. `Undo` at the top of the page
+takes this save back ([Undo a save](index.md#undo-a-save)). The Explorer opens with them. The
 first of them becomes your main scenario: the Overview, the Cashflows page, the Flows page and the
 Spend page show it. The top of the [Scenarios](scenarios.md#main-scenario) page sets the same
 choice. The help of the button names the new main scenario, or says why the button is off: no

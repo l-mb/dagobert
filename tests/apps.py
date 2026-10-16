@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from builders import PHASE_LABELS, PHASES, PHASES_TEXT
+from builders import HISTORY, PHASE_LABELS, PHASES, PHASES_TEXT
 from german import ACTIVATE
 from streamlit.testing.v1 import AppTest
 
@@ -87,8 +87,8 @@ def render(
     mode: str | None = None,
 ) -> AppTest:
     """`pages` of a plan with the note of `note`, a fifth phase, gold and crypto with their tax
-    columns, a savings plan into the crypto wallet and VPW on the rent, in the `mode` of
-    `?mode=`."""
+    columns, a savings plan into the crypto wallet, VPW on the rent and a recorded value (its
+    correction on the Snapshot page), in the `mode` of `?mode=`."""
     scenario = data / "scenarios" / "base.yaml"
     scenario.write_text(f"{scenario.read_text()}note: {note(pages)}\n")
     with (data / "assumptions.yaml").open("a") as fh:  # gold and crypto with their tax columns
@@ -107,6 +107,7 @@ def render(
     (data / "assets.yaml").write_text(yaml.safe_dump({"assets": [*held, COINS, wallet]}))
     with (data / "cashflows.yaml").open("a") as fh:  # its tab, its row and its slider
         fh.write("  - {name: Coins, kind: savings, amount: -150, into: wallet, every: 3}\n")
+    (data / "history.csv").write_text(HISTORY)
     at = AppTest.from_string(ACTIVATE + pages.format(data=str(data)), default_timeout=60)
     at.query_params["mobile"] = str(int(phone))
     at.query_params["lang"] = lang

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import csv
 import io
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import date
 from pathlib import Path
 
@@ -43,6 +43,45 @@ def renamed(data_dir: Path, old: str, new: str) -> dict[str, str]:
     lines = _text(data_dir / FILE).splitlines(keepends=True)
     out = lines[:1] + [_renamed(line, old, new) for line in lines[1:]]
     return {FILE: "".join(out)} if out != lines else {}
+
+
+def corrected(data_dir: Path, month: date, changes: Mapping[int, float | None]) -> dict[str, str]:
+    """The text of `history.csv` with rows of `month` corrected, each by its place among the rows
+    of the month in the file (`of_month`): a new value, None removes the row. Every other
+    character stays but the line ends, for the write of the caller. Nothing without a change.
+    ValueError where the file holds other columns than `FIELDS`, as a hand edit may leave it."""
+    lines = _text(data_dir / FILE).splitlines(keepends=True)
+    places = [i for i, line in enumerate(lines) if i and _month(line) == month]
+    columns = [h.strip().lstrip("\ufeff") for h in next(csv.reader(lines[:1]), [])]
+    if columns != list(FIELDS) or max(changes, default=-1) >= len(places):
+        msg = f"{FILE} holds other columns than {', '.join(FIELDS)}: correct it by hand"
+        raise ValueError(msg)
+    out = list(lines)
+    for place, value in changes.items():
+        line = lines[places[place]]
+        cut = line.rindex(",") + 1
+        ending = line[len(line.rstrip("\n")) :]
+        out[places[place]] = "" if value is None else f"{line[:cut]}{value:.2f}{ending}"
+    return {FILE: "".join(out)} if out != lines else {}
+
+
+def _month(line: str) -> date | None:
+    """The month of a row of `history.csv`, None for a line that holds no row."""
+    row = next(csv.reader([line]), [])
+    try:
+        return date.fromisoformat(row[0]).replace(day=1) if len(row) == len(FIELDS) else None
+    except ValueError:
+        return None
+
+
+def months(observed: Sequence[Observation]) -> list[date]:
+    """The months with a recorded value, as their first day, newest first."""
+    return sorted({day.replace(day=1) for day, _, _ in observed}, reverse=True)
+
+
+def of_month(observed: Sequence[Observation], month: date) -> list[Observation]:
+    """The recorded values of `month`, in the order of the file: the places of `corrected`."""
+    return [o for o in observed if o[0].replace(day=1) == month]
 
 
 def _text(path: Path) -> str:

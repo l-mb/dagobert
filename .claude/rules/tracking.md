@@ -1,7 +1,7 @@
 ---
 paths:
   - "src/dagobert/{history,lots,tradeimport}.py"
-  - "src/dagobert/ui/{summary,snapshot,assets,tradeform,overview,tradeimport}.py"
+  - "src/dagobert/ui/{summary,snapshot,assets,tradeform,overview,tradeimport,corrections}.py"
   - "tests/test_{history,lots,tradeimport,ui_assets}.py"
 ---
 
@@ -62,6 +62,20 @@ The price files, their import and the `Prices` expander: rule `prices`.
   `engine`) in the plan of the main scenario, which the page loads once; of a policy also `paid`
   (`snapshot.Estimate`), which `Record` writes with each new `asof` (typed, estimated or
   `unchanged`): the contributions by `asof`, the base of the next carry and of the guarantee.
+- `Correct a recorded month` (`ui/corrections.py`, owner 2026-10-16), a keyed expander between
+  `Take estimates` and `Prices` while `history.csv` holds a row: `ABOUT` (the value of `assets.yaml`
+  stays: record it again or change it on the Assets page), `Month` (`history.months`, newest
+  first), a fixed grid of its rows (`date`, `asset` by name, `value` as recorded, `remove`; on a
+  phone `PHONE_COLUMNS`, the name last, so value and `remove` fit), the save guard (`listed`: each
+  value old to new, each removed row by date and asset; a removal always warns, a `notes` line with
+  the count, so `Save the correction ⚠`) and `Save the correction` in the expander (the header
+  holds `Record`): `corrections` (a tick removes, a loan stays below zero whatever sign is typed,
+  the value as recorded or an emptied cell is none), one revision `Snapshot: correct 2026-09`
+  (`history.corrected` inside the write), refused (`Not saved: … since this table was drawn`)
+  while the rows of the month changed since the grid drew: `Base` per nonce and month, kept while
+  the grid holds edits (`save.stays`, the `Seen` of the rows of the month, as rule `grids`), with
+  a warning and `Discard my edits`. A mistake just recorded is the job of `Undo` (rule
+  `save-guard`), which also takes a correction back.
 
 ## Assets page
 
@@ -110,10 +124,10 @@ The price files, their import and the `Prices` expander: rule `prices`.
   so a slip of a mark shows. A trade of `XAU` or `BTC` far from its series (`prices.off_series`,
   rule `prices`) adds a toast after the save, and in the grid a warning of the guard (`Table.check`,
   `tradeform.series_notes`): grams typed as troy ounces. Then on every device the expander `Import
-  trades` (`ui.tradeimport`, see the code below): one sentence, folded `Where to get the file`
-  (`WHERE`: the menu of each broker, as far as public sources name it), an upload (a file that is no
-  table: `Not read:` with `NOT_READ`), its columns in the expander `COLUMNS` (`ui.csvcolumns`, each
-  preselected with the guess; open only while the guess lacks a field of `REQUIRED`, which then
+  trades` (`ui.tradeimport`, its code: rule `tradeimport`): one sentence, folded `Where to get the
+  file` (`WHERE`: the menu of each broker, as far as public sources name it), an upload (a file that
+  is no table: `Not read:` with `NOT_READ`), its columns in the expander `COLUMNS` (`ui.csvcolumns`,
+  each preselected with the guess; open only while the guess lacks a field of `REQUIRED`, which then
   waits for a choice, named by its label), a preview (`tradeimport.summary`, two lines: the new
   trades by kind with their dates and those held already; then the other rows by kind or status and
   the refused lines; per security the new trades and the units net of sales, so a stray security
@@ -132,42 +146,6 @@ The price files, their import and the `Prices` expander: rule `prices`.
 
 ## Code
 
-- `uv run dagobert trades import ASSET FILE` adds the buys and sales of a broker export (CSV) to the
-  trades of the asset `ASSET` (equity, fixed income, gold, crypto) as one revision `trades import`,
-  after `datadir.open`. `--column FIELD=HEADER` (once per field, `''` for none), `--decimal` and
-  `--dates` default to the guess; it prints the mapping, the refused lines, `tradeimport.summary`
-  and the slips, which stop it unless `--force`. `--dry-run` saves nothing. It exits with 1 for an
-  asset that is gone or holds no securities, a missing column, a refused line without a trade added
-  or held already (`no trade to add`) and a conflict.
-- `src/dagobert/tradeimport.py`: `guess` maps the columns by header (`ALIASES`, without case, whole
-  before start, each column for one field), after the exports described in public: the transaction
-  export of Trade Republic (`date`, `type`, `symbol` with the ISIN, `shares`, `amount`, `fee`,
-  `name`, `currency`; a decimal point, amount and fee signed), the transactions of Scalable Capital
-  (`date`, `type`, `isin`, `shares`, `amount`, `fee`, `description`, `currency`, `status`; a decimal
-  comma, the newest first) and the Depotumsätze of comdirect (`Datum`, `Art`, `ISIN`, `Menge`,
-  `Kurswert`, `Bezeichnung`, `Kurswertwährung`: the currency of the amount, not of the price; no
-  fees). ING and consorsbank describe no export of the depot: the user picks the columns. Without a
-  header the security is the first column of ISINs; the date column and the decimal mark come from
-  `csvimport.guess`. `read` takes a kind by the start of its cell (`KINDS`: `Kauf`, `Buy`,
-  `Sparplan`, `Savings plan`; `Verkauf`, `Sell`; `Vorabpauschale`) and leaves out, with its line
-  (`Parsed.others`), any other kind (`Distribution`, `Umbuchung`, `DIVIDEND`; the `Taxes` of
-  Scalable are the tax, not the Vorabpauschale, which stays typed by hand) and a status that is no
-  execution (`DONE`: `Executed`, not `Cancelled`), `NoTrade`. Without a kind column a minus before
-  the units sells. Units, amount and fees lose their sign, amount and fees round to cents. Refused
-  with its line: a missing cell, a date or number that does not read, a date after today, a currency
-  other than EUR (an empty cell is EUR), a buy or sale without units, a row without amount or ISIN.
-  A file whose first date is newer than its last reads backwards, so a sale follows the buy of its
-  day. `merge`, oldest first, against the trades of the asset (`holding`: the asset of one read and
-  the `Seen` of its trades): a row with the date, security, units and amount of a trade is held
-  already, each trade once (a file that repeats an execution of a day adds the second); refused are
-  a row that the model refuses (a Vorabpauschale out of January), a security that the asset does not
-  take (`HoldingsAsset.securities`) and one that the trades so far cannot replay (`lots.book`: a
-  sale of more units than held). A security without a name takes that of its first row. `slips`:
-  `prices.off_series` and `prices.off_trades` against the price file of each security. `save`:
-  `RowFile.apply` with `seen`, and a depot drops its `cost_basis` like at its first buy.
-  `replaced_basis` warns of that drop (the lots of recent months only would leave out the cost
-  of what the depot held before): a `Check:` line of the command, a note of the guard of the
-  import, the trades grid (`tradeform.basis_check`, `Table.check`) and a toast of the form.
 - `src/dagobert/history.py`: `history.csv` (`date,asset,value`: a property its full value, a loan
   its negative balance; `appended`: its text with new rows for the write of the caller,
   `RowFile.apply(observed=…)` and `prices.record`; nothing without rows), `observations` and
@@ -176,6 +154,10 @@ The price files, their import and the `Prices` expander: rule `prices`.
   month between two holds none: people record rarely, owner 2026-10-13). They start in the first
   month in which every asset has an observation (the value in `assets.yaml` counts at `asof`, else
   at `start`), so entries never look like growth. Without an asset, nothing.
+  `corrected`: the text with rows of a month changed or removed (None), each by its place among
+  the rows of the month in the file (`of_month`, in file order; `months` the months with a row),
+  every other character kept but the line ends, for the write of the caller; nothing without a
+  change.
 - `src/dagobert/lots.py`: replays the `trades` of an asset into a `Book`: open lots by `security`,
   oldest first, and the sales with the part of each lot they took (`Sale.taken`): the oldest units
   first (FIFO, §20 Abs. 4 S. 7 EStG; gold and crypto: rule `tax`). A Vorabpauschale raises the basis

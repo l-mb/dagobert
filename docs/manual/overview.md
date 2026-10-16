@@ -205,6 +205,15 @@ inflation of your assumptions. The link `Data: fetch newer consumer prices` open
 [Data](data.md) page, which can fetch newer months. In simple mode the link shows only when your
 plan holds a fetched or imported series.
 
+## Last save
+
+Below the roll forward, a line names the last save of your data directory, for example `Last save
+at 14:03 on Cashflows.`. This save can come from another device, from a command or from an edit of
+a file by hand. The button `Undo` takes it back, as described in [Undo a save](index.md#undo-a-save).
+The line does not show when the last save is your own: the line at the top of the page offers its
+undo. It does not show either for the first revision of the folder or for a migration to a new
+version of the app, because they have nothing to take back.
+
 ## Assets
 
 On a desktop, this section and `Recorded net worth` stand side by side, and the two charts have the

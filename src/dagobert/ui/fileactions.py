@@ -31,6 +31,7 @@ from dagobert.ui import (
     literal,
     main_marked,
     mode,
+    recording,
     slug,
     source,
     tell,
@@ -251,7 +252,8 @@ def confirm(
     if not st.button(button, key=f"{KEY}confirm", type="primary", disabled=shown is None):
         return
     try:
-        scenariofiles.act(data_dir, action, source=source(what), shown=shown)
+        with recording():  # a dialog reruns alone, without `main.py`
+            scenariofiles.act(data_dir, action, source=source(what), shown=shown)
     except revisions.ConflictError as err:
         st.error(
             _("Not saved: {changed} since this list. Look at it again.").format(
@@ -263,7 +265,7 @@ def confirm(
         st.error(_("Not saved: {reason}").format(reason=reason(err)))
         return
     if moved is not None:
-        _follow(*moved)
+        follow(*moved)
     st.session_state.pop(LISTED, None)
     st.session_state[PENDING] = then
     tell(done)
@@ -272,7 +274,7 @@ def confirm(
     st.rerun()
 
 
-def _follow(old: str, new: str | None) -> None:
+def follow(old: str, new: str | None) -> None:
     """The selections of other pages in the session take the stem `new` for `old` (`followed`)."""
     for key in [k for k in FOLLOW if k in st.session_state]:
         if (value := followed(st.session_state[key], old, new)) is None:

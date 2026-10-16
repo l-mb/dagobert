@@ -31,7 +31,9 @@ of a data directory. An export writes a copy into its zip.
 Written by the app, never by hand. Each save of the app, each command that writes and each
 migration is one revision: a folder named after the UTC time of the save, with a copy of each
 input file that it changed, and a line in `log.csv` (`time,files,removed,source`). The source is
-the page, such as `Snapshot`, or the command. The first open records every input as `baseline`.
+the page, such as `Snapshot`, or the command. An `Undo` of the app is a revision too, with the
+source `<page>: undo`: it writes the files of a save as they were before it, so the log keeps both
+([Undo a save](index.md#undo-a-save)). The first open records every input as `baseline`.
 A file that you edit by hand is recorded as `outside the app` at the next open or save. The data
 directory must be on a local file system, because the lock of a save does not work on every
 network file system. In a read-only data directory the app runs, but it refuses every save, and a
@@ -721,9 +723,10 @@ loan row the negative balance. The `Snapshot` page appends rows with `Record`, a
 value in a table of the Assets page. A saved price, and a fetch that changes the price of gold or
 Bitcoin, append the market value of the assets whose securities all have a price. Each of them
 also sets `value` and `asof` in `assets.yaml`. `Rename` on the Assets page renames the asset in
-its rows and keeps every other character. Every write leaves the line ends LF (`\n`), also in the
-rows that an earlier version appended with CRLF. The pages read the value in `assets.yaml` at its
-`asof` (the simulation start without one) as one more row.
+its rows and keeps every other character. `Correct a recorded month` on the Snapshot page changes
+the value of a row or removes the row, and keeps every other row as it is. Every write leaves the
+line ends LF (`\n`), also in the rows that an earlier version appended with CRLF. The pages read
+the value in `assets.yaml` at its `asof` (the simulation start without one) as one more row.
 
 ## `data/prices/<security>.csv`
 

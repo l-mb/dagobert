@@ -80,6 +80,17 @@ rule `store`.
   inside `edit` instead (`actuals.merge`, rule `spend`). A page names a conflict with
   `save.changed_at`: `` `assets.yaml` changed at 14:03 on Snapshot ``, each source at the local time
   of its last revision.
+- `undo(dir, at, source=)` takes back the revision `at` as one new revision (owner 2026-10-16;
+  its buttons: rule `save-guard`): each path that `at` wrote or removed as the revision before it
+  left it (`state`), removed where it was absent then, so the log keeps both and an undo of the
+  undo restores `at`. Inside the write `check_undo` refuses the first revision and one that the
+  log lacks (`UndoError`, a `ValueError`) and a later revision that wrote or removed a path of
+  `at` (`ConflictError` with those revisions: another session, the CLI, an import, `_adopt`); a
+  copy that the store lacks raises `UndoError`. Pages call `check_undo` as they draw too. The undo
+  of a rename ends its source with the rename back (`renaming`), so `named` follows the file
+  through both. `recorded()` gives the entries that `write` commits in its thread inside the block
+  (thread-local, nested blocks each get them; a write of another thread does not count): a page
+  knows its own save without a return value of every writer (`ui.recording`).
 - `files.atomic_write` syncs the temp file before `os.replace`, `files.fsync_dir` a directory, but
   not on Windows (`files.WINDOWS`), which opens no directory. Windows refuses a replace while
   another process holds the file (a reader, a virus scanner): it tries again after `REPLACE_WAITS`.

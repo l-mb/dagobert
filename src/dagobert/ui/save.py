@@ -207,21 +207,24 @@ def listed[T](key: str, params: object, now: T | None) -> T | None:
     return held[1] if now is not None and held and held[0] == params and held[1] else now
 
 
+def when(by: str, at: datetime, *, action: bool = True) -> str:
+    """`at 14:03 on Snapshot`, in the language of the session: a revision of the source `by` at
+    the time `at` in the time zone of the browser, with the date before today, its page in words
+    (`ui.page_said`, with its action unless `action` is off)."""
+    local = at.astimezone(timezone())
+    today = local.date() == datetime.now(local.tzinfo).date()
+    shown = f"{local:%H:%M}" if today else f"{local:%Y-%m-%d %H:%M}"
+    if by == revisions.OUTSIDE:
+        return _("at {time} outside the app").format(time=shown)
+    return _("at {time} on {page}").format(time=shown, page=page_said(by, action=action))
+
+
 def changed_at(err: revisions.ConflictError) -> str:
     """`` `assets.yaml` changed at 14:03 on Snapshot ``, in the language of the session: each
-    source of the revisions since, at the time of its last one in the time zone of the browser,
-    with the date before today, its page in words (`ui.page_said`). Without a revision since, the
-    file alone."""
-    tz = timezone()
-    today, last = datetime.now(tz).date(), {e.source: e.time.astimezone(tz) for e in err.since}
-
-    def one(by: str, at: datetime) -> str:
-        when = f"{at:%H:%M}" if at.date() == today else f"{at:%Y-%m-%d %H:%M}"
-        if by == revisions.OUTSIDE:
-            return _("at {time} outside the app").format(time=when)
-        return _("at {time} on {page}").format(time=when, page=page_said(by))
-
-    times = [one(*item) for item in sorted(last.items(), key=lambda item: item[1])]
+    source of the revisions since at the time of its last one (`when`). Without a revision since,
+    the file alone."""
+    last = {e.source: e.time for e in err.since}
+    times = [when(*item) for item in sorted(last.items(), key=lambda item: item[1])]
     if not times:
         return _("`{file}` changed").format(file=err.file)
     return _("`{file}` changed {times}").format(file=err.file, times=joined(times))

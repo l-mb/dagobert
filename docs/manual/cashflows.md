@@ -115,6 +115,8 @@ modes only while a row holds a BU policy.
 3. Read the list of changes, and the notes under the table.
 4. Press `Save` at the top of the page.
 
+To take a save back, press `Undo` at the top of the page ([Undo a save](index.md#undo-a-save)).
+
 A new row starts like most rows of its block. In the income tab it takes their kind, for example
 `Salary` in a block of salaries. Its phase columns take the value that most rows of that kind in
 the block have. So a new salary does not pay in retirement when the other salaries do not. If a

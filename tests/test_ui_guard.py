@@ -4,18 +4,24 @@ session, the date of a new value, why a save failed."""
 from __future__ import annotations
 
 from datetime import date
+from typing import TYPE_CHECKING
 
 import pytest
 from apps import STREAMS
+from streamlit.testing.v1 import AppTest
 
 from dagobert import i18n, revisions
-from dagobert.model.assets import Trade
+from dagobert.loader import load_assets
+from dagobert.model.assets import CashAsset, Trade
 from dagobert.model.assumptions import CareOptions
 from dagobert.model.base import Unit
 from dagobert.model.streams import Stream, StreamKind
 from dagobert.store import RowEdits
 from dagobert.ui import assumptions as assumptions_page
 from dagobert.ui import cashflows, formguard, gridcolumns, guard, save
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_stamp_dates_new_values() -> None:
@@ -209,3 +215,67 @@ def test_a_failed_save_says_why_in_the_language_of_the_session(
     refusal of the model or the inputs as they write it, in English."""
     with i18n.use("de"):
         assert save.reason(err) == (said or str(err))
+
+
+# a save of a page inside `recording`, under the line of the session and the last save of the
+# Overview, as `main.py` and the Overview draw them
+SAVES = """
+from pathlib import Path
+import streamlit as st
+from dagobert.store import RowEdits, assets_file
+from dagobert.ui import recording, told, undo
+data = Path({data!r})
+told()
+with st.container(key=undo.LINE):
+    undo.line(data)
+with recording():
+    undo.last(data)
+    if st.button("Save", key="save"):
+        assets_file(data).apply(RowEdits({{0: {{"value": 1500}}}}), source="Snapshot")
+        st.rerun()
+"""
+
+
+def _giro(data: Path) -> float:
+    giro = next(a for a in load_assets(data) if a.id == "giro")
+    assert isinstance(giro, CashAsset)
+    return giro.value
+
+
+def _undo_line(at: AppTest) -> str:
+    return next(c.value for c in at.caption if c.value.startswith(":material/history:"))
+
+
+def _phone(data: Path) -> None:
+    """A save of the same file on another device."""
+    text = (data / "assets.yaml").read_text().replace("1500", "1600")
+    revisions.write(data, "Phone", lambda: {"assets.yaml": text})
+
+
+def test_the_last_save_of_the_session_offers_its_undo(data: Path) -> None:
+    """Until the next save: an undo writes the files as before the save, and its own undo
+    restores it; a later save of the same files elsewhere keeps it off, and then the Overview
+    offers that one."""
+    at = AppTest.from_string(SAVES.format(data=str(data)), default_timeout=30).run()
+    assert not [b for b in at.button if b.key in ("undo", "overview-undo")]  # nothing saved yet
+    at.button(key="save").click().run()
+    assert _undo_line(at).startswith(":material/history: Saved at ")
+    assert _undo_line(at).endswith(" on Snapshot.")
+    assert "overview-undo" not in [b.key for b in at.button]  # the line of the session has it
+    at.button(key="undo").click().run()
+    assert not at.exception
+    assert _giro(data) == 1000
+    assert revisions.entries(data)[-1].source == "app: undo"
+    assert _undo_line(at).startswith(":material/history: Took back the save at ")
+    assert at.toast[0].value.startswith("Took back the save at ")
+    at.button(key="undo").click().run()  # the undo of the undo
+    assert _giro(data) == 1500
+    _phone(data)
+    at.run()
+    assert "Undo is off: `assets.yaml` changed at " in _undo_line(at)
+    assert "undo" not in [b.key for b in at.button]
+    at.button(key="overview-undo").click().run()
+    assert not at.exception
+    assert _giro(data) == 1500
+    assert _undo_line(at).endswith(" on Phone.")  # what it took back, though the page records
+    assert _undo_line(at).startswith(":material/history: Took back the save at ")

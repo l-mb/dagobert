@@ -117,7 +117,7 @@ paths:
   onto the rows now: what changed in other rows stays, also a new row before.
   `RowFile.apply(seen=…)` instead refuses any change of the rows since a `Seen` of all of them
   (`revisions.unchanged` on `rows()` inside the write): new rows that were checked against every
-  row, the trade import (rule `tracking`).
+  row, the trade import (rule `tradeimport`).
   A key path step `Where(key, value)` names an item by a value, found at each read and write
   (`_found`; `RowFile.child(row_id, key)`: the trades of an asset by its id); none raises
   `problems.RefusedError`, `assets holds no row with id … any more`. A hand edit that holds another

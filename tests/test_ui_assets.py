@@ -9,6 +9,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+import german
 import pytest
 import yaml
 from apps import COINS, MAIN, XAU_TRADES
@@ -23,7 +24,17 @@ from dagobert.model.plan import Scenario
 from dagobert.money import NUMBER_COLUMN
 from dagobert.runner import DATA_ENV
 from dagobert.store import RowEdits, assets_file
-from dagobert.ui import CAME, PAGE, PAGES, assets, gridcolumns, snapshot, summary, tradeform
+from dagobert.ui import (
+    CAME,
+    PAGE,
+    PAGES,
+    assets,
+    corrections,
+    gridcolumns,
+    snapshot,
+    summary,
+    tradeform,
+)
 from dagobert.ui import tradeimport as tradeimport_ui
 
 SNAPPED = date(2026, 9, 1)  # the day of `test_snapshot_edits`
@@ -131,6 +142,51 @@ def test_a_long_name_keeps_its_end_on_a_phone() -> None:
     assert cell(loan, stale=False) == "Kredite W…1 - ...17"
     assert cell(loan, stale=True, phone=False) == "⚠ " + loan
     assert cell("ETF Depot Geldmarkt", stale=False) == "ETF Depot Geldmarkt"
+
+
+def test_a_correction_takes_what_changes_a_recorded_value() -> None:
+    """A tick removes, a loan stays below zero whatever sign is typed, an emptied cell or the
+    value as recorded is no correction."""
+    day = date(2026, 9, 1)
+    rows = [(day, "giro", 1000.0), (day, "loan", -50000.0), (day, "depot", 5000.0)]
+    edited: dict[int, dict[str, Any]] = {
+        0: {"value": 1000.004},
+        1: {"value": 49000},
+        2: {"value": None, corrections.REMOVE: True},
+    }
+    fixes = corrections.corrections(rows, edited, {"loan"})
+    assert fixes == {1: -49000.0, 2: None}
+    found, removed = corrections.listed(rows, fixes, {"loan": "Home loan"})
+    assert [c.text for c in found] == ["**2026-09-01 Home loan** -50.000,00 € → -49.000,00 €"]
+    assert removed == ["2026-09-01 depot"]
+
+
+def test_a_recorded_month_is_corrected_through_the_guard(data: Path) -> None:
+    """The month of the grid, a value changed and one removed by its place there: the guard
+    lists both and warns of the removal, and Save writes them as one revision."""
+    (data / "history.csv").write_text(
+        "date,asset,value\n2026-08-01,giro,900.00\n2026-09-01,giro,1000.00\n"
+        "2026-09-15,depot,5000.00\n"
+    )
+    at = AppTest.from_string(SNAPSHOT.format(data=str(data)), default_timeout=30).run()
+    month = at.selectbox(key="snapshot-correct-month")
+    assert month.options == ["2026-09", "2026-08"]
+    edit = {"edited_rows": {"0": {"value": 1100}, "1": {corrections.REMOVE: True}}}
+    german.edited(at, "snapshot-correct-2026-09-0", edit)
+    assert "**2026-09-01 giro** 1.000,00 € → 1.100,00 €  \n**2026-09-15 depot** removed" in [
+        c.value.removeprefix("To save:  \n") for c in at.caption
+    ]
+    assert any("1 recorded value goes" in w.value for w in at.warning)
+    save = at.button(key="snapshot-correct-save")
+    assert save.label == "Save the correction ⚠"
+    save.click()
+    german.edited(at, "snapshot-correct-2026-09-0", edit)
+    assert not at.exception and not at.error
+    assert (data / "history.csv").read_text() == (
+        "date,asset,value\n2026-08-01,giro,900.00\n2026-09-01,giro,1100.00\n"
+    )
+    assert revisions.entries(data)[-1].source == "app: correct 2026-09"
+    assert [t.value for t in at.toast] == ["Corrected 2026-09"]
 
 
 SECURITIES = """

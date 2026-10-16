@@ -6,6 +6,7 @@ import re
 import threading
 import time
 import unicodedata
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from functools import reduce
@@ -23,7 +24,7 @@ from dagobert.model.months import months_of_age
 from dagobert.ui import gridstate
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Mapping, Sequence
+    from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
     from datetime import tzinfo
 
     import plotly.graph_objects as go
@@ -177,12 +178,15 @@ def source(action: str = "") -> str:
     return f"{page}: {action}" if action else page
 
 
-def page_said(source: str) -> str:
+def page_said(source: str, *, action: bool = True) -> str:
     """A source of the revision log in the language of the session: the title of a page of the
-    navigation translated, the action after it as written (`Annahmen: Markets`), any other source
-    (`import x.zip`, a page drawn alone) as it is. The log keeps the English."""
-    page, colon, action = source.partition(": ")
-    return f"{_(page)}{colon}{action}" if page in st.session_state.get(PAGES, {}) else source
+    navigation translated, the action after it as written (`Annahmen: Markets`; without `action`
+    the page alone), any other source (`import x.zip`, a page drawn alone) as it is. The log keeps
+    the English."""
+    page, colon, done = source.partition(": ")
+    if page not in st.session_state.get(PAGES, {}):
+        return source
+    return f"{_(page)}{colon}{done}" if action else _(page)
 
 
 def day_said(day: revisions.Day) -> str:
@@ -278,6 +282,32 @@ def told() -> None:
             icon=":material/warning:" if toast.warn else ":material/check:",
             duration="long" if toast.warn else "short",
         )
+
+
+SAVED = "ui-saved"  # session state: the last save of the session, which `undo.line` offers
+
+
+@dataclass(frozen=True)
+class Saved:
+    """The last save of a session: its revision, and of an undo the revision that it took back."""
+
+    id: str
+    undid: str | None = None
+
+
+@contextmanager
+def recording() -> Iterator[None]:
+    """Keep the last revision that the block writes as the save of the session (`SAVED`), also
+    when the block ends by `st.rerun`: `main.py` around a page, a dialog around its write (it
+    reruns alone, without `main.py`). An undo inside it keeps the `Saved` that names what it took
+    back."""
+    with revisions.recorded() as written:
+        try:
+            yield
+        finally:
+            kept: Saved | None = st.session_state.get(SAVED)
+            if written and (kept is None or kept.id != written[-1].id):
+                st.session_state[SAVED] = Saved(written[-1].id)
 
 
 def fold(text: str, label: str | None = None) -> None:

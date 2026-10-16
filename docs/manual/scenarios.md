@@ -87,7 +87,9 @@ phone they are in the menu `File`. The menu `Check a what-if` is next to them (s
 what-if](#check-a-what-if)). Each button opens a window. The window lists each change before
 you save it. If the app refuses the change, the window shows the reason. If the button of the
 window is off, a line above it says what is missing. After the change, a short message at the
-bottom of the page says what the app did.
+bottom of the page says what the app did. To take the change back, press `Undo` at the top of
+the page ([Undo a save](index.md#undo-a-save)). An undo of a rename gives the file its old name
+again.
 
 - `New`: type a name. The new scenario extends the main scenario, so it starts with its phases,
   events and overrides. `Extends` shows each scenario with its file name and its name. Select

@@ -13,7 +13,16 @@ import streamlit as st
 from dagobert import i18n, rename, revisions
 from dagobert.i18n import N_, _, ngettext
 from dagobert.references import Kind
-from dagobert.ui import SECURITIES_ASSET, guard, keyboard, language, literal, source, tell
+from dagobert.ui import (
+    SECURITIES_ASSET,
+    guard,
+    keyboard,
+    language,
+    literal,
+    recording,
+    source,
+    tell,
+)
 from dagobert.ui.save import changed_at, listed, reason
 
 if TYPE_CHECKING:
@@ -144,7 +153,8 @@ def _dialog(data_dir: Path, kind: Kind, names: list[str], table: str) -> None:
     if shown is None or not pressed:
         return
     try:
-        rename.apply(data_dir, shown, source=source(str(shown.rename)))
+        with recording():  # a dialog reruns alone, without `main.py`
+            rename.apply(data_dir, shown, source=source(str(shown.rename)))
     except revisions.ConflictError as err:
         st.error(
             _("Not saved: {changed} since this list. Look at it again.").format(

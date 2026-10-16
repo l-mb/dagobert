@@ -61,6 +61,7 @@ this table.
 | Will the money last? / below 1×, 1× to 2×, 5× or more / run out, dead (its bands) | Reicht das Geld? / unter 1×, 1× bis 2×, 5× oder mehr / Geld ausgegangen, verstorben | the chart of the share of the paths by age (rule `balance`); the title `Reicht das Geld? 1× ist das liquide Vermögen mit 49` |
 | goal seek / roll forward / lever / Stop working | Zielsuche / Start vorrücken / Hebel / Arbeitsende | |
 | record / revision / Changes since | erfassen / Version / Änderungen seit | |
+| Undo / Saved at … / Took back the save … / Last save … / Correct a recorded month | Rückgängig / Gespeichert um … / Rückgängig gemacht: das Speichern … / Zuletzt gespeichert … / Einen erfassten Monat korrigieren | the undo of a save (rule `save-guard`); in a sentence the button in quotes, „Rückgängig“ bleibt gesperrt |
 | Save / Discard my edits / stays off / against the plan | Speichern / Meine Änderungen verwerfen / bleibt gesperrt / im Vergleich zum Plan | a button that stays off „bleibt gesperrt", not „bleibt aus" |
 | overrides (tab) / tag / default | Abweichungen / Schlagwort / Standard | |
 | Track / Plan / Setup | Verfolgen / Planen / Einrichten | the sections |

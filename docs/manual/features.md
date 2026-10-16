@@ -20,10 +20,11 @@ begins with the ten features off that it does not use.
    The list below the switches shows each change, for example `gold and crypto on → off`.
 3. Press `Save` at the top of the page.
 
-The save changes only `app.yaml`. A switch never changes your other data. If you turn a feature
-on again, everything that it hid shows again. A question of `Check a what-if` on the
-[Scenarios](scenarios.md#check-a-what-if) page or on the Overview turns on the feature that it
-needs too: `Job loss`, `Self-employment`, `Property`, or `Deductions` for the costs of a course.
+The save changes only `app.yaml`. A switch never changes your other data. To take a save back, press
+`Undo` at the top of the page ([Undo a save](index.md#undo-a-save)). If you turn a feature on again,
+everything that it hid shows again. A question of `Check a what-if` on the
+[Scenarios](scenarios.md#check-a-what-if) page or on the Overview turns on the feature that it needs
+too: `Job loss`, `Self-employment`, `Property`, or `Deductions` for the costs of a course.
 
 The help of each switch tells what it hides. On a phone the help shows below the switch.
 

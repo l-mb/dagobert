@@ -49,6 +49,8 @@ If the table holds edits that you did not save, `Add` is off: save or discard th
 3. Read the list of changes below the table.
 4. Press `Save` at the top of the page.
 
+To take a save back, press `Undo` at the top of the page ([Undo a save](index.md#undo-a-save)).
+
 The month in the column `month` counts, the day does not. A share or a rate takes percent: type
 `5` for 5%. A select lists the names that exist in your files, for example the loans for `Repay a
 loan`. A sale on a condition has no month: it sells at the age in `or at age`, or earlier when the

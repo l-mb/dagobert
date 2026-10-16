@@ -55,6 +55,7 @@ _FORMAT: Final = "%Y%m%dT%H%M%S.%fZ"  # ISO basic, UTC: no colons, sorts in time
 _ID = re.compile(r"\d{8}T\d{6}\.\d{6}Z")
 _RENAME = re.compile(r"rename (.+) → (.+)$")  # the end of the source of a rename, see `renaming`
 _held = threading.local()
+_written = threading.local()  # the lists of `recorded` that this thread holds
 
 
 def _matches(path: str, patterns: Iterable[str]) -> bool:
@@ -279,7 +280,23 @@ def _write[T](
             return None, found
         stamp = _next(head(data_dir), datetime.now(UTC))
         said = source() if callable(source) else source
-        return _save(data_dir, stamp, said, changes, live=True, validate=validate), found
+        entry = _save(data_dir, stamp, said, changes, live=True, validate=validate)
+    for written in getattr(_written, "lists", ()):
+        written.append(entry)
+    return entry, found
+
+
+@contextmanager
+def recorded() -> Iterator[list[Entry]]:
+    """The revisions that `write` commits in this thread inside the block, oldest first: the save
+    of a run of a page, which its undo takes back. Blocks nest."""
+    found: list[Entry] = []
+    outer = getattr(_written, "lists", ())
+    _written.lists = (*outer, found)
+    try:
+        yield found
+    finally:
+        _written.lists = outer
 
 
 def _adopt(data_dir: Path) -> None:
@@ -605,3 +622,46 @@ def unchanged(data_dir: Path, seen: Seen, part: object) -> None:
             if (seen.revision is None or e.id > seen.revision) and seen.file in e.paths
         ],
     )
+
+
+class UndoError(ValueError):
+    """A revision that an undo cannot take back: the first one, which has nothing before it, one
+    that the log no longer holds, or one whose files before it the store lacks."""
+
+
+def check_undo(log: Sequence[Entry], at: Entry) -> None:
+    """Raise why an undo cannot take back `at` now: `UndoError` for the first revision and for one
+    that `log` lacks, `ConflictError` with the later revisions that write or remove a path of
+    it."""
+    if at not in log:
+        msg = "the revision is no longer in the log"
+        raise UndoError(msg)
+    if not (i := log.index(at)):
+        msg = "the first revision has nothing before it"
+        raise UndoError(msg)
+    for path in at.paths:
+        if since := [e for e in log[i + 1 :] if path in e.paths]:
+            raise ConflictError(path, since)
+
+
+def undo(data_dir: Path, at: Entry, *, source: str) -> Entry | None:
+    """Take back the revision `at` as a new revision of `source`: each path that it wrote or
+    removed as the revision before it left it, so the log keeps both. Inside the write
+    `check_undo` refuses it, and so does a copy that the store lacks (`UndoError`). The undo of a
+    rename ends its source with the rename back (`renaming`): the history of the file follows it.
+    None when the files are as before `at` already."""
+    said = f"{source} {renaming(at.renamed[1], at.renamed[0])}" if at.renamed else source
+
+    def edit() -> Texts:
+        log = entries(data_dir)
+        check_undo(log, at)
+        before = state(data_dir, log[log.index(at) - 1].id)
+        if lost := [path for path in at.paths if path in before and not before[path].is_file()]:
+            msg = f"the revisions lack the copy of {', '.join(lost)}"
+            raise UndoError(msg)
+        return {
+            path: before[path].read_bytes().decode() if path in before else None
+            for path in at.paths
+        }
+
+    return write(data_dir, said, edit)

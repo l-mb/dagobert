@@ -51,6 +51,30 @@ save it and shows a warning.
 sale needs. A depot with trades gets its cost from the trades on the [Assets](assets.md) page. A
 cost basis alone does not change the date of the value: the value still needs its update.
 
+If the values that you just recorded are wrong, press `Undo` at the top of the page. See
+[Undo a save](index.md#undo-a-save).
+
+## Correct a recorded month
+
+Each record adds a row to `history.csv`: the date, the asset and the value. The charts of your
+records on the [Overview](overview.md) use these rows. To change or remove a row that you
+recorded by mistake, use the section `Correct a recorded month` below the table.
+
+1. Open `Correct a recorded month`.
+2. Select the month in `Month`. The table shows the rows of that month: the date, the asset and the
+   value as recorded. The value of a property is its full value, and the value of a loan is its
+   balance below zero.
+3. To change a value, type the correct value into `value`. For a loan, type the balance with or
+   without the minus.
+4. To remove a row, tick `remove`.
+5. Read the list of changes. A removal always shows a warning, and the button shows a `⚠`.
+6. Press `Save the correction`.
+
+The correction changes only `history.csv`. The value in your inputs, `current` in the table above,
+stays. To change it too, record the value again above, or change it on the [Assets](assets.md)
+page. If another device recorded into the same month after the table showed, the app refuses the
+correction and tells you when and where the month changed.
+
 ## Prices
 
 Dagobert does not download the prices of your securities. You add them in the section `Prices`

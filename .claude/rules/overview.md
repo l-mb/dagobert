@@ -84,7 +84,9 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   on a phone 160 px, so a swipe beside them still scrolls the page in landscape, a shorter list as
   high as its rows; after the roll a summary above it; an input changed since the list drew refuses
   the roll, `Nothing changed: the inputs changed since the list above (… changed at 14:03 on …). It
-  shows them now.`, see `rollforward`); then one row (`st.columns`, stacked in portrait): a sunburst
+  shows them now.`, see `rollforward`); then `Last save at 14:03 on Cashflows.` with `Undo`
+  (`undo.last`, rule `save-guard`: the last revision of the folder, not the session's own); then
+  one row (`st.columns`, stacked in portrait): a sunburst
   of the assets (liquidity, kind, asset, and the securities of a depot with their open lots at the
   last stored prices; `assets before debt` in the hole, the loans in the line `less loans … = net
   worth …` below it and in their tile; on a phone the first two rings at 340 px, which fits

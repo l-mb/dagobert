@@ -64,4 +64,5 @@ sections names the problem, and `Save` stays off. This happens, for example, for
 event of the id has. A section that keeps `Save` off is named above the sections too.
 
 If the file changed after the tab opened, for example on another device, `Save` stays off. Press
-`Discard my edits` to see the file as it is now.
+`Discard my edits` to see the file as it is now. To take a save back, press `Undo` at the top of the
+page ([Undo a save](index.md#undo-a-save)).

@@ -28,6 +28,8 @@ ExampleName = Literal["engineer", "starter"]  # the directories of `EXAMPLES`
 EXAMPLE = EXAMPLES / "engineer"
 # the sources of their revisions
 FROM_EXAMPLE, EMPTY_PLAN, QUICK_START = "example", "empty plan", "quick start"
+# the starts of the sources of the revisions of `open`: a migration, a new manifest
+MIGRATED, MANIFESTED = "migrate", "manifest"
 SCENARIO = "plan"  # the stem of the scenario of an empty plan
 # the phases of a new plan, those of `engineer`: four fit the sheet on an upright phone
 NEW_PHASES = ("work", "unemployed", "alt", "retired")
@@ -131,8 +133,8 @@ def open(data_dir: Path) -> revisions.Entry | None:
         # under the lock after `migrate`, which read the same files
         texts = schema.Tree(data_dir)
         if fresh(texts):
-            return f"manifest {schema.current()} (Dagobert {__version__})"
-        return f"migrate {schema.version(texts)} → {schema.current()} (Dagobert {__version__})"
+            return f"{MANIFESTED} {schema.current()} (Dagobert {__version__})"
+        return f"{MIGRATED} {schema.version(texts)} → {schema.current()} (Dagobert {__version__})"
 
     if not os.access(data_dir, os.W_OK):
         if migrate(tree).keys() - {schema.MANIFEST}:
@@ -140,6 +142,11 @@ def open(data_dir: Path) -> revisions.Entry | None:
             raise InputError([Problem(str(data_dir), None, "", msg)])
         return None
     return revisions.write(data_dir, source, lambda: migrate(schema.Tree(data_dir)))
+
+
+def opened(entry: revisions.Entry) -> bool:
+    """Whether `open` wrote `entry`: a migration or a new manifest, no save of the user."""
+    return entry.source.startswith((f"{MIGRATED} ", f"{MANIFESTED} "))
 
 
 def start_example(data_dir: Path, example: Path = EXAMPLE) -> revisions.Entry | None:

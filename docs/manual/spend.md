@@ -19,7 +19,8 @@ A line under the form names the amount, the category, the month and what you spe
 for example `Added 45,50 € to cash, 2026-10: now 65,50 € spent.` The line stays until your next
 amount. If the grid below shows another month, the button `Show 2026-10` opens that month in the
 grid. If the form misses a category or an amount, the same line says so in red. The category and
-the month stay for the next amount.
+the month stay for the next amount. To take an amount back, press `Undo` at the top of the page
+([Undo a save](index.md#undo-a-save)). It also takes back a save of the grid.
 
 ## Edit a month
 

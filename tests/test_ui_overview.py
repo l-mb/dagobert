@@ -67,6 +67,26 @@ def test_overview_rolls_the_start_forward(data: Path) -> None:
     assert "overview-roll" not in [b.key for b in at.button]  # nothing left to roll
 
 
+def test_the_app_offers_the_undo_of_a_save_above_the_page(
+    data: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`main.py` keeps what a page writes as the save of the session, here the roll forward, and
+    offers its undo above the page; the last save of the Overview leaves it to that line."""
+    monkeypatch.setenv(DATA_ENV, str(data))
+    monkeypatch.setattr(runs, "PATHS", 200)
+    at = AppTest.from_file(MAIN, default_timeout=60).run()
+    before = (data / "assumptions.yaml").read_text()
+    at.button(key="overview-roll").click().run()
+    assert not at.exception
+    line = next(c.value for c in at.caption if c.value.startswith(":material/history:"))
+    assert line.endswith(" on Overview.")  # the page, not the action of the log
+    assert "overview-undo" not in [b.key for b in at.button]
+    at.button(key="undo").click().run()
+    assert not at.exception
+    assert (data / "assumptions.yaml").read_text() == before
+    assert revisions.entries(data)[-1].source == "Overview: undo"
+
+
 def test_the_roll_forward_lists_and_keeps_the_founding_of_a_business(data: Path) -> None:
     """A business that runs before the new start keeps its founding: the half Regelbeitrag."""
     (data / "cashflows.yaml").write_text(

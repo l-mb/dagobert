@@ -21,7 +21,7 @@ from dagobert.model.plan import Feature
 from dagobert.model.taxes import Land
 from dagobert.result import SOURCE
 from dagobert.scenariofiles import act, created
-from dagobert.ui import at_age, guard
+from dagobert.ui import SAVED, Saved, at_age, guard
 from dagobert.ui.fileactions import listing
 
 if TYPE_CHECKING:
@@ -353,6 +353,7 @@ def test_a_what_if_dialog_writes_one_revision(
     stem = read_yaml(quick / APP)["scenarios"][-1]
     assert last.source == f"app: what-if {stem}"
     assert {APP, f"scenarios/{stem}.yaml"} <= set(last.files)
+    assert at.session_state[SAVED] == Saved(last.id)  # its undo: a dialog runs without `main.py`
     assert load_plan(quick, quick / "scenarios" / f"{stem}.yaml").scenario.name
 
 

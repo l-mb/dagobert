@@ -57,6 +57,9 @@ the app brings their next months.
    change the price of your gold or Bitcoin, the app records their market values, and the result
    names them too (see [Snapshot](snapshot.md)).
 
+`Undo` at the top of the page takes back the market values that a fetch recorded. The fetched
+months stay, because they are no input ([Undo a save](index.md#undo-a-save)).
+
 If the Bundesbank refuses the request, you sent several requests in a short time. Wait at least
 half an hour, then try again. The command `uv run dagobert series fetch` fetches every series at
 once.

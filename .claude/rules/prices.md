@@ -74,12 +74,12 @@ The Snapshot page around the `Prices` expander: rule `tracking`.
   options and the read (`cli.Columns`): `prices import` and `series import` (rule `series`). The
   equity import of the `Data` page uses it too, with `pricing.mapper`. `mostly`, `order` (the date
   order of some cells), `day` and `number` (a cell that does not read raises with it) serve the
-  trade import too (rule `tracking`).
+  trade import too (rule `tradeimport`).
 - `src/dagobert/ui/pricing.py`: the `Prices` expander of the Snapshot page and `mapper`, the mapping
   of a CSV of dated values by `ui.csvcolumns.select`: a select box per field (`ColumnPick`: a field
   that may lack a column offers none, one without a guess waits for a choice), then the date order
   and the decimal mark, each keyed by the header, so a new file starts from its guess; the trade
-  import takes it too (rule `tracking`). `stored` names the series (`gold series`) in the count of a
-  security that its series prices, and lists a price file without trades after the held securities,
-  marked `(no trades)`: a history imported before its trades, which values no asset (`Securities.of`
-  lists any CSV named like a security; one sold in full is left out).
+  import takes it too (rule `tradeimport`). `stored` names the series (`gold series`) in the count
+  of a security that its series prices, and lists a price file without trades after the held
+  securities, marked `(no trades)`: a history imported before its trades, which values no asset
+  (`Securities.of` lists any CSV named like a security; one sold in full is left out).

@@ -97,8 +97,8 @@ That last list also names the rows here that the import drops.
 
 Nothing changes before you press `Import`. The import writes one revision. If the data directory
 changed after you uploaded the zip, the page shows a new table, and you must choose again. If the
-files that you keep and take do not load together, the page shows the problems and changes
-nothing.
+files that you keep and take do not load together, the page shows the problems and changes nothing.
+To take the import back, press `Undo` at the top of the page ([Undo a save](index.md#undo-a-save)).
 
 If the zip has an older format, the import converts it and a line above the table says so. If the
 zip comes from a newer version of Dagobert, the page refuses it. Update the app first.

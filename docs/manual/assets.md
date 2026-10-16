@@ -62,6 +62,8 @@ off moves its columns there in both modes, for example `Basisrente`. See
 3. Read the list of changes below the table.
 4. Press `Save` at the top of the page.
 
+To take a save back, press `Undo` at the top of the page ([Undo a save](index.md#undo-a-save)).
+
 The column headers are plain words, for example `as of` for the date of the value and
 `check every (months)` for its update interval. On a computer, hold the pointer over a header to
 see its help. The help also names the key in the file, for example `asof`. On a phone, the button

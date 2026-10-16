@@ -52,6 +52,7 @@ from dagobert.ui import (
     save,
     source,
     summary,
+    undo,
     whatifs,
 )
 from dagobert.ui.assets import TRADES, opened
@@ -782,9 +783,9 @@ def _rolled(roll: rollforward.Roll) -> str:
 
 
 def page(streams: RowFile) -> None:
-    """The tiles, the plan, what needs attention, the roll forward, the assets and, while the mode
-    and the features show the records (`mode.View`), the recorded net worth and the records
-    against the plan."""
+    """The tiles, the plan, what needs attention, the roll forward, the last save with its undo, the
+    assets and, while the mode and the features show the records (`mode.View`), the recorded net
+    worth and the records against the plan."""
     data_dir = streams.data_dir
     scenario, view = first_scenario(data_dir), mode.view(data_dir)
     st.title(_("Overview"))
@@ -795,6 +796,7 @@ def page(streams: RowFile) -> None:
         plan.caption(_("Simulating the plan …"))
     _attention(data_dir, view)
     _roll_forward(data_dir, view)
+    undo.last(data_dir)
     loaded = load_assets(data_dir)
     kinds = {asset.id: summary.LIQUIDITY[asset.kind] for asset in loaded}
     months = [(month, _by_group(values, kinds)) for month, values in actual_values(data_dir)]

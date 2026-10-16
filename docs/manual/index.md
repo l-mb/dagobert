@@ -92,6 +92,7 @@ Setup: the data that the app needs.
   Examples are a value set to zero, a changed sign, a value that more than doubles or falls below
   half, and a share above 100%. You can save anyway, because a large change can be correct.
 - If a save fails, the page shows `Not saved:` and the reason. Nothing changed in that case.
+- If a save was a mistake, press `Undo` at the top of the page. See [Undo a save](#undo-a-save).
 - If an input file contains an error, a page that needs the file shows the file, the line and
   the problem instead of its content. Correct the file, then load the page again. The Scenarios
   page shows the problem of a scenario above its tabs, and you can correct the scenario there.
@@ -99,6 +100,23 @@ Setup: the data that the app needs.
   The Explorer folds its long help texts on a phone only.
 - On a phone every page works. A tap on a chart shows its values. On a desktop a click on a bar
   selects it, and you can drag to zoom.
+
+## Undo a save
+
+After a save, a line at the top of each page names it, for example `Saved at 14:03 on Cashflows.`.
+The button `Undo` in this line takes the save back: the app writes the files of the save as they
+were before it. This applies to every save of the app, also to a file action on the Scenarios page,
+a rename, a roll forward, an import, a price and a correction of a recorded month. The undo is a
+new revision, so the app keeps the save too. If you press `Undo` again, the save comes back. The
+line stays until your next save.
+
+If a later save changed the same files, for example on another device or with a command, `Undo` is
+off. The line then tells when and where the files changed. The [Overview](overview.md#last-save)
+offers `Undo` for the last save of any device or command.
+
+An undo writes back your input files, `history.csv`, `actuals.csv` and the price files. A fetch of
+the Data page is an exception: the undo takes back the values that the fetch recorded, but the
+fetched months of the series stay, because they are no input.
 
 ## Simple and advanced mode, and features
 

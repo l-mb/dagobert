@@ -1,7 +1,7 @@
 ---
 paths:
   - "src/dagobert/ui/{guard,save,tables,assets,snapshot,cashflows,spend,pricing,forms,formguard}.py"
-  - "src/dagobert/ui/{tradeimport,tradeform,rename}.py"
+  - "src/dagobert/ui/{tradeimport,tradeform,rename,undo,corrections}.py"
   - "tests/test_ui_guard.py"
 ---
 
@@ -67,5 +67,39 @@ paths:
   name them), a field of a form by its keys (`formguard.changes`); `Change.key` (`named`) keeps the
   English for a caller that tells a field by it (`assumptions.hint`, `scenario_overrides._hint`
   and `changes`). `save.changed_at` names the
-  page of a change in words (`ui.page_said`), `save.reason` why a save failed: a lock, a read-only
-  directory and a conflict by their type, any other error as written.
+  page of a change in words (`ui.page_said`; `save.when` one source at its local time:
+  `at 14:03 on Snapshot`), `save.reason` why a save failed: a lock, a read-only directory and a
+  conflict by their type, any other error as written.
+
+## Undo
+
+- Owner 2026-10-16: `Undo` shows with the confirmation of each save until the next save, and takes
+  it back as a new revision (`revisions.undo`, rule `revisions`: never a rewrite of the log), with
+  the conflict check: refused where a later revision (another session, the CLI, an import, an
+  edit outside the app) wrote or removed a file of the save. A toast takes no button, so the
+  confirmation with `Undo` is a line above every page (`ui/undo.py`, `undo.line`, in the container
+  `undo.LINE`, which `main.py` draws in every run after `datadir.open`, also empty: an element that
+  came and went before the page would move the style of its Save in the header, and Streamlit
+  draws an empty container as nothing). It says `Saved at 14:03 on Cashflows.`, after an undo `Took
+  back the save at 14:03 on Cashflows.` (`save.when` of the source and time of the revision, in the
+  language of the session), with the button `Undo` (key `undo`, help `undo.HELP`), or why it is
+  off (`revisions.check_undo` at each draw: `Undo is off: <save.changed_at>`). Every save counts:
+  `main.py` runs the page inside `ui.recording` (`revisions.recorded`, the revisions that its
+  thread commits), which keeps the last one as `ui.SAVED` (`ui.Saved`: its id, of an undo also
+  the id that it took back), also when the page ends by `st.rerun` or `st.switch_page`; a dialog
+  reruns alone, without `main.py`, so `fileactions.confirm` and `rename._dialog` wrap their write
+  in it too. The welcome page and `datadir.open` are outside it: a first revision and a migration
+  have nothing to undo.
+- The Overview offers the last revision of the folder below the roll forward (`undo.last`, key
+  `overview-undo`, `Last save at 14:03 on Cashflows.`): a save of another session or device, a
+  command, an edit outside the app; not the session's own (`ui.SAVED`, the line above the page has
+  it), not the first revision nor one of `datadir.open` (`datadir.opened`).
+- A click (in the script, not `on_click`: a callback runs before `main.py` takes the language and
+  opens the data directory) writes `revisions.undo` with the source `<page of the save>: undo`
+  (`undo._source`; this page for a command or an edit outside the app), sets `ui.SAVED` to the
+  undo with what it took back (`ui.recording` keeps it), follows a scenario whose rename it took
+  back (`fileactions.follow`), tells `Took back the save at …` and reruns. A refusal under the
+  lock shows `Not undone: <save.reason>`; nothing to take back warns. The undo of an undo restores
+  the save. It writes back every tracked file of the save, the inputs, `history.csv`,
+  `actuals.csv` and `prices/`; the months of a fetched series are no input and stay
+  (`docs/manual/index.md`).

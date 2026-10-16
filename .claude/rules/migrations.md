@@ -85,7 +85,8 @@ The input model: rule `persistence`; the writes and the revision store: rule `re
   an old revision or of a zip count as schema 1 (a hand-made folder killed in the millisecond
   between the baseline and the manifest of one locked write migrates on its retry). Otherwise one
   `revisions.write` of the migrated inputs and the manifest, source `migrate 1 → 4 (Dagobert
-  <version>)` (every scenario must load, else nothing changes). The write records the edits outside
+  <version>)` (every scenario must load, else nothing changes; `MIGRATED`, `MANIFESTED` start the
+  sources, `opened` tells them: no undo on the Overview). The write records the edits outside
   the app first (`_adopt`; the first open writes the `baseline` of the files as they are, so an old
   revision migrates again). The steps run once, inside the write, and its source (a function,
   `revisions.Writer`) reads the schema there too: a schema that another write stamps between the

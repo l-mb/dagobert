@@ -37,6 +37,7 @@ if __name__ == "__main__":
         language_switch,
         mode,
         overview,
+        recording,
         scenarios,
         session_seen,
         sliders,
@@ -44,6 +45,7 @@ if __name__ == "__main__":
         spend,
         told,
         transfer,
+        undo,
         welcome,
     )
 
@@ -147,7 +149,9 @@ if __name__ == "__main__":
     # navigation leaves out is None, so no link goes there). The mode and the language switch
     # end the sidebar, below the controls of a page, also beside a problem; the start page has the
     # language switch alone. The toasts of a save of the run before show first, whichever page it
-    # went to.
+    # went to. Above every page the last save of the session offers its undo, in a container that
+    # is always there: an element that came and went before the page would move the style of its
+    # Save in the header. The page keeps what it writes as that save.
     pages = {
         title: p if title in shown else None
         for section in sections.values()
@@ -163,7 +167,10 @@ if __name__ == "__main__":
             welcome.page(DATA)
         else:
             datadir.open(DATA)
-            page.run()
+            with st.container(key=undo.LINE):
+                undo.line(DATA)
+            with recording():
+                page.run()
     except (InputError, SchemaError) as err:
         st.error(_("The inputs do not load:"), icon=":material/error:")
         st.code(str(err), language=None, wrap_lines=True)

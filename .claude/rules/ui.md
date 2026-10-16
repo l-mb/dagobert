@@ -22,10 +22,10 @@ style of the pages (`ui/page.css`): rule `page-style`.
 | `outlook.py` | `overview`, `explorer-runs`, `i18n-track` |
 | `explorer.py`, `knobs.py`, `sliders.py`, `seek.py`, `main.py` | `explorer` (the page), `explorer-sliders` (`knobs.py`, `sliders.py`: sliders, groups, switches), `explorer-runs` (its runs, caches and pool), `mode` (simple mode) |
 | `runs.py` | `explorer-runs` |
-| `snapshot.py`, `assets.py` | `tracking` (both pages), `grids`, `save-guard`, `i18n-track` |
+| `snapshot.py`, `corrections.py`, `assets.py` | `tracking` (both pages), `grids`, `save-guard`, `i18n-track` |
 | `pricing.py` | `prices`, `save-guard`, `i18n-track` |
 | `csvcolumns.py` | `prices` (the column selects of a CSV import), `i18n-track` |
-| `tradeform.py`, `tradeimport.py` | `tracking` (the trade form and import of the Assets page), `save-guard`, `i18n-track` |
+| `tradeform.py`, `tradeimport.py` | `tracking` (the trade form and import of the Assets page), `tradeimport` (its code), `save-guard`, `i18n-track` |
 | `cashflows.py`, `refusals.py` | `cashflows` (the page), `ledger`, `grids`, `save-guard` |
 | `bars.py` | `cashflows` (the bars of a phase, which the Cashflows page and the Flows page share), `ledger` |
 | `spend.py` | `spend` (the page), `save-guard` |
@@ -40,7 +40,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
 | `summary.py` | `tracking`, `i18n-track` |
 | `tables.py` | `grids`, `save-guard` |
 | `gridstate.py`, `gridcolumns.py` | `grids` |
-| `guard.py`, `save.py` | `save-guard` |
+| `guard.py`, `save.py`, `undo.py` | `save-guard` (also the undo of a save) |
 | `rename.py` | `references` (the rename of a name with its uses), `save-guard` |
 | `fields.py`, `forms.py`, `formguard.py`, `widgets.py` | `forms`, `grids`; `forms.py`, `formguard.py` also `save-guard` |
 | `events.py`, `lineage.py` | `events` (the Events tab of the Scenarios page), `grids`, `forms`, `save-guard` |
@@ -93,7 +93,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
   reason, also `BusyError` and `ReadOnlyError`. A save of rows changed since the page read them is
   refused with when and where they changed (`ConflictError`, `save.changed_at`): the grids and
   `Record` (rule `grids`), the roll forward (rule `rollforward`); the Spend Save asks per category
-  (rule `spend`).
+  (rule `spend`). `Undo` takes back the last save (`ui/undo.py`, rule `save-guard`).
 
 ## Modules
 

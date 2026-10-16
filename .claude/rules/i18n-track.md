@@ -1,6 +1,6 @@
 ---
 paths:
-  - "src/dagobert/ui/{overview,outlook,summary,snapshot,assets,tradeform,pricing,tradeimport,csvcolumns}.py"
+  - "src/dagobert/ui/{overview,outlook,summary,snapshot,corrections,assets,tradeform,pricing,tradeimport,csvcolumns}.py"
   - "src/dagobert/report/tracker.py"
   - "src/dagobert/{tradeimport,prices,rollforward}.py"
 ---
@@ -8,8 +8,8 @@ paths:
 # Translation of the Track pages
 
 The Overview, Snapshot and Assets pages speak German (rule `i18n`): `ui/overview.py`,
-`outlook`, `summary`, `snapshot`, `assets`, `tradeform`, `pricing`, `tradeimport`, `csvcolumns` and
-`report/tracker.py` are in `i18n_check.TRANSLATED`.
+`outlook`, `summary`, `snapshot`, `corrections`, `assets`, `tradeform`, `pricing`, `tradeimport`,
+`csvcolumns` and `report/tracker.py` are in `i18n_check.TRANSLATED`.
 
 - Ids and words: a table keeps English ids as its columns and keys (tests read them), and its column
   config heads them in words (`assets.HEADERS` in `formats`, `pricing.HEADERS` and

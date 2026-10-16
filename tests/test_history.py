@@ -13,6 +13,9 @@ from dagobert.history import (
     actual_totals,
     actual_values,
     appended,
+    corrected,
+    months,
+    of_month,
     read_history,
     renamed,
     values_at,
@@ -51,6 +54,31 @@ def test_a_rename_changes_the_asset_cell_only(data: Path) -> None:
         "2026-10-01,home,3"
     }
     assert renamed(data, "giro", "cash") == {}
+
+
+def test_a_correction_changes_or_removes_rows_of_its_month_only(data: Path) -> None:
+    """A row by its place among the rows of its month: a new value with cents, a removal; the
+    other rows keep every character, quotes too, and the line ends become LF."""
+    text = (
+        'date,asset,value\r\n2026-09-01,giro,1.0\r\n2026-10-01,"flat",2\r\n'
+        "2026-10-15,giro,3\r\n2026-10-20,depot,4"
+    )
+    (data / "history.csv").write_bytes(text.encode())
+    october = date(2026, 10, 1)
+    assert [o[1] for o in of_month(read_history(data), october)] == ["flat", "giro", "depot"]
+    assert months(read_history(data)) == [october, date(2026, 9, 1)]
+    assert corrected(data, october, {0: 2500.5, 2: None}) == {
+        "history.csv": 'date,asset,value\n2026-09-01,giro,1.0\n2026-10-01,"flat",2500.50\n'
+        "2026-10-15,giro,3\n"
+    }
+    assert corrected(data, october, {}) == {}
+
+
+def test_a_correction_refuses_a_file_of_other_columns(data: Path) -> None:
+    """A hand edit that added a column: the save says why instead of breaking."""
+    (data / "history.csv").write_text("date,asset,value,note\n2026-10-01,giro,1.0,x\n")
+    with pytest.raises(ValueError, match="other columns"):
+        corrected(data, date(2026, 10, 1), {0: 2.0})
 
 
 def test_an_append_writes_lf_also_over_crlf_rows(data: Path) -> None:

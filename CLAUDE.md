@@ -54,7 +54,7 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   for a check (skill `app-check`). `export` and `import` move the inputs as a zip [transfer].
 - `uv run dagobert prices import SECURITY FILE` merges a downloaded price history into
   `data/prices/<SECURITY>.csv` and records the market values [prices]; `trades import ASSET FILE`
-  adds the new buys and sales of a broker CSV to the trades of an asset [tracking].
+  adds the new buys and sales of a broker CSV to the trades of an asset [tradeimport].
 - `uv run dagobert series list|fetch [NAME...]|import msci-world FILE` lists the external
   series, fetches the months they lack (only on this command or the button of the Data page)
   and imports an equity history into `data/series/`; maintainers refresh the shipped series
@@ -147,8 +147,8 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 - `src/dagobert/cashplan.py`: the cashflow plan on raw YAML rows [cashflows, disability].
 - `src/dagobert/sensitivity.py`, `anatomy.py`, `difference.py`, `goalseek.py`: the sensitivity run,
   the failure anatomy, two runs path by path, the goal seek [analyses, goalseek, disability].
-- `src/dagobert/history.py`: `history.csv` and the observed values per month, `lots.py` replays the
-  `trades` of an asset into lots and sales, `tradeimport.py` adds a broker CSV [tracking].
+- `src/dagobert/history.py`: `history.csv`, its corrections and the observed values per month,
+  `lots.py` the lots and sales of `trades`, `tradeimport.py` broker CSVs [tracking, tradeimport].
 - `src/dagobert/prices.py`: the price files and the series of XAU and BTC, `market_value` of
   lots, `record`. `csvimport.py`: a downloaded table of dated values [prices].
 - `src/dagobert/actuals.py`: `actuals.csv` [spend].
@@ -159,12 +159,12 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   [disability], `charts.py` shared parts, the others a figure each; `*.css`, `tabs.js` package data.
 - `src/dagobert/money.py`: `format_eur` and the grid formats, one euro format everywhere [money].
 - `src/dagobert/ui/`: Streamlit pages [ui, money]: `main.py` the entry script, `__init__.py` shared
-  helpers, `page.css` the style, `fixed.py` the cached `fixed` run, `mode.py` the mode and feature
-  predicate [mode]. `tables.py`, `gridstate.py`, `gridcolumns.py` [grids], `guard.py`, `save.py`
+  helpers, `page.css` the style, `fixed.py` the cached `fixed` run, `mode.py` mode and features
+  [mode]. `tables.py`, `gridstate.py`, `gridcolumns.py` [grids], `guard.py`, `save.py`, `undo.py`
   [save-guard], `rename.py` [references], `summary.py` [tracking], `pricing.py`, `csvcolumns.py`
   [prices], `fields.py`, `widgets.py`, `forms.py`, `formguard.py` [forms]. `outlook.py`: the plan on
-  the Overview, `runs.py` its runs with the explorer, `sliders.py`, `knobs.py` its sliders,
-  `seek.py` its goal seek [overview, explorer, explorer-runs]. Pages: `overview.py`, `snapshot.py`,
+  the Overview, `runs.py` its runs, `sliders.py`, `knobs.py` its sliders, `seek.py` its goal seek
+  [overview, explorer, explorer-runs]. Pages: `overview.py`, `snapshot.py` (`corrections.py`),
   `assets.py` (`tradeform.py`, `tradeimport.py`) [grids, tracking], `cashflows.py` (`bars.py`,
   `refusals.py`), `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode], `data.py`,
   `assumptions.py`, `transfer.py`, `welcome.py`, `scenarios.py` (`fileactions.py`; tabs `phases.py`,

@@ -568,3 +568,81 @@ def test_a_save_refuses_when_the_part_it_read_changed(data: Path) -> None:
     with pytest.raises(revisions.ConflictError, match=r"^assets\.yaml changed") as caught:
         revisions.write(data, "Snapshot", save)
     assert [e.source for e in caught.value.since] == ["Assets", "Phone"]
+
+
+@pytest.mark.parametrize("writer", [w for w in WRITERS if w != "datadir.open"])
+def test_an_undo_takes_back_the_save_of_every_writer(data: Path, writer: str) -> None:
+    """The files of the save as before it, as one more revision; an undo of the undo restores
+    the save."""
+    with (data / "assets.yaml").open("a") as fh:
+        fh.write(DEPOT)
+    datadir.open(data)
+    before = live(data)
+    WRITERS[writer](data)
+    saved, after = revisions.entries(data)[-1], live(data)
+    undone = revisions.undo(data, saved, source="Page: undo")
+    assert undone is not None
+    assert (live(data), undone.source) == (before, "Page: undo")
+    assert set(undone.paths) == set(saved.paths)
+    assert revisions.undo(data, undone, source="Page: undo")
+    assert live(data) == after
+
+
+def test_an_undo_of_a_rename_keeps_the_history_of_the_file(data: Path) -> None:
+    base, plan = "scenarios/base.yaml", "scenarios/plan.yaml"
+    adopt(data)
+    scenariofiles.act(
+        data,
+        lambda d: scenariofiles.renamed(d, "base", "plan"),
+        source=f"Scenarios: {revisions.renaming(base, plan)}",
+    )
+    undone = revisions.undo(data, revisions.entries(data)[-1], source="Scenarios: undo")
+    assert undone
+    assert undone.renamed == (plan, base)
+    assert (data / base).is_file()
+    assert not (data / plan).exists()
+    log = revisions.entries(data)
+    assert [revisions.named(log, base)(e.id) for e in log] == [base, plan, base]
+
+
+def test_an_undo_is_refused_after_a_later_save_of_its_files(data: Path) -> None:
+    """A later revision of another file does not count; the first revision has nothing before
+    it."""
+    first = adopt(data)
+    assert first
+    saved = revisions.write(data, "Assets", lambda: {"assets.yaml": _assets(data, "6000")})
+    assert saved
+    revisions.write(data, "Snapshot", lambda: {"history.csv": HISTORY})
+    revisions.check_undo(revisions.entries(data), saved)
+    phone = (data / "assets.yaml").read_text().replace("value: 6000", "value: 7000")
+    revisions.write(data, "Phone", lambda: {"assets.yaml": phone})
+    with pytest.raises(revisions.ConflictError) as caught:
+        revisions.undo(data, saved, source="Assets: undo")
+    assert [e.source for e in caught.value.since] == ["Phone"]
+    assert "value: 7000" in (data / "assets.yaml").read_text()
+    with pytest.raises(revisions.UndoError, match="first revision"):
+        revisions.undo(data, first, source="Assets: undo")
+
+
+def test_an_undo_refuses_a_revision_whose_copy_before_it_is_lost(data: Path) -> None:
+    first = adopt(data)
+    assert first
+    saved = revisions.write(data, "Assets", lambda: {"assets.yaml": _assets(data, "6000")})
+    assert saved
+    (data / revisions.REVISIONS / first.id / "assets.yaml").unlink()
+    with pytest.raises(revisions.UndoError, match=r"lack the copy of assets\.yaml"):
+        revisions.undo(data, saved, source="Assets: undo")
+
+
+def test_recorded_keeps_the_writes_of_its_thread(data: Path) -> None:
+    """A block takes what its thread commits, nested blocks both, a write of another thread
+    neither; a write without a change is none."""
+    adopt(data)
+    actuals_csv = {"actuals.csv": "month,category,amount\n"}
+    with revisions.recorded() as outer:
+        first = revisions.write(data, "Assets", lambda: {"assets.yaml": _assets(data, "6000")})
+        with revisions.recorded() as inner, ThreadPoolExecutor(1) as pool:
+            pool.submit(revisions.write, data, "Phone", lambda: {"history.csv": HISTORY}).result()
+            revisions.write(data, "Assets", lambda: {"assets.yaml": _assets(data, "6000")})
+            second = revisions.write(data, "Spend", lambda: actuals_csv)
+    assert (outer, inner) == ([first, second], [second])

@@ -98,7 +98,8 @@ a value and then switch to simple mode, the field stays on the page until you sa
 
 Each tab has its own `Save`. A save writes the changes of its tab only. The other tabs keep the
 values that you typed, until you save them too. Each save is one revision, for example `Assumptions:
-Markets`.
+Markets`. To take a save back, press `Undo` at the top of the page ([Undo a
+save](index.md#undo-a-save)).
 
 An empty field takes the value that it shows in gray: the default of the app. To go back to the
 default, empty the field. If a value does not read, or the values do not fit together, for example a

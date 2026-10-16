@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections import Counter
 from datetime import date
 from enum import StrEnum
-from typing import LiteralString, NamedTuple
+from typing import TYPE_CHECKING, Any, LiteralString, NamedTuple
 
 from pydantic import Field, ValidationError, field_validator, model_validator
 from pydantic_core import InitErrorDetails, PydanticCustomError
@@ -44,6 +44,20 @@ from dagobert.model.events import (
     WriteOffEvent,
 )
 from dagobert.model.streams import Stream, StreamKind
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+# the keys of `overrides` that change the scenario and the assets; the others the assumptions
+SCENARIO_KEYS = ("events", "shift", "assets")
+
+
+def split(overrides: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """The overrides of the assumptions, and those of the scenario (`SCENARIO_KEYS`)."""
+    return (
+        {k: v for k, v in overrides.items() if k not in SCENARIO_KEYS},
+        {k: v for k, v in overrides.items() if k in SCENARIO_KEYS},
+    )
 
 
 class Scenario(Strict):

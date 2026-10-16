@@ -33,6 +33,8 @@ rule `store`.
   saved: …`; a write inside a write raises `RuntimeError`), then `_recover`, `_adopt` and `edit()`:
   the new text per path, None removes. `edit` reads what it changes, so it sees the newest content,
   and may raise `ConflictError`. Texts equal to the files drop out, and nothing to write gives None.
+  A `source` may be a function (`Writer`), called after `edit` while the files are still the ones
+  it read: `datadir.open` names the schema that it migrated from (rule `migrations`).
   `write_returning` takes an `edit` that returns its texts and what it found with them, and returns
   that: the amounts of a Spend month before and after, the `Saved` of a price, the `Roll`.
   Then the revision directory (`.entry` first, the copies, `fsync`), the live files by

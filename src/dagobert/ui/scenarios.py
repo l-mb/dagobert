@@ -194,7 +194,7 @@ def _item(kind: str) -> str:
     return _(TITLES[kind]) if kind in TITLES else kind
 
 
-def timeline(path: Path, labels: Mapping[str, str]) -> list[dict[str, str]]:
+def timeline(data_dir: Path, path: Path, labels: Mapping[str, str]) -> list[dict[str, str]]:
     """Each phase change and event of the `extends` chain of `path` as its run sees it, moved by
     the `shift` and `events` overrides (`loader.written`), by month, an inheritance without one
     `AT_DEATH` after the dated rows, a sale on a condition last, each with its file (`THIS` for
@@ -203,7 +203,7 @@ def timeline(path: Path, labels: Mapping[str, str]) -> list[dict[str, str]]:
     Raises `InputError` for a chain that does not load."""
     rows = []
     condition = _(ON_CONDITION)
-    for file, own in loader.written(path):
+    for file, own in loader.written(data_dir, path):
         where = _(THIS) if file.stem == path.stem else file.stem
         rows += [
             {"month": _month(p.at), "item": _("Phase"), "detail": _phase(labels, p.phase)}
@@ -451,7 +451,7 @@ def _timeline(chosen: Chosen) -> None:
     """Every phase change and event that a run of the scenario sees, with the file that holds it,
     and a button per parent that opens it."""
     try:
-        rows = timeline(chosen.path, references.phases(chosen.data_dir))
+        rows = timeline(chosen.data_dir, chosen.path, references.phases(chosen.data_dir))
     except InputError as err:
         st.error(str(err))
         return

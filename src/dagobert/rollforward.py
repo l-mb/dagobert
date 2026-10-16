@@ -78,7 +78,7 @@ def passed(data_dir: Path, start: date) -> tuple[list[Passed], list[Passed]]:
     phases: Found = defaultdict(list)
     onset = (read_yaml(data_dir / "assumptions.yaml").get(DISABILITY) or {}).get("at")
     for name, path in concrete_scenarios(data_dir).items():
-        layers = written(path)
+        layers = written(data_dir, path)
         for file, own in layers:
             for e in own.events:
                 if e.at is not None and e.at < start and not isinstance(e, KEPT):
@@ -582,7 +582,7 @@ def _crossing(data_dir: Path, start: date) -> Iterator[tuple[str, str, date, dat
     """Per concrete scenario the gifts whose month in its run lies on the other side of `start`
     than in their file: the scenario, the file, the two months."""
     for name, path in concrete_scenarios(data_dir).items():
-        for (file, own), (_file, seen) in zip(lineage(path), written(path), strict=True):
+        for (file, own), (_file, seen) in zip(lineage(path), written(data_dir, path), strict=True):
             yield from (
                 (name, scenario_file(file.stem), e.at, run.at)
                 for e, run in zip(own.events, seen.events, strict=True)

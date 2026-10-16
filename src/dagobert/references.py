@@ -11,6 +11,7 @@ from enum import Enum, StrEnum
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, get_args
 
+from dagobert.loader import ancestry, drops_below
 from dagobert.model.assets import Asset, Loan, PropertyAsset
 from dagobert.model.assumptions import CPI_INDEX
 from dagobert.model.streams import Stream
@@ -90,14 +91,14 @@ class References:
     drops: dict[str, set[str]] = field(default_factory=dict)  # `drop` by scenario stem
 
     def chain(self, scenario: str) -> list[str]:
-        """The stems of the `extends` chain of `scenario`, the root first. It ends at a missing
-        parent and at a cycle."""
-        stems: list[str] = []
-        stem: str | None = scenario
-        while stem is not None and stem in self.parents and stem not in stems:
-            stems.insert(0, stem)
-            stem = self.parents[stem]
-        return stems
+        """The stems of the `extends` chain of `scenario`, the root first (`loader.ancestry`), none
+        for no scenario file. It ends at a missing parent and at a cycle, where the loader raises:
+        the names of the files count as written."""
+        return ancestry(scenario, self._parent) if scenario in self.parents else []
+
+    def _parent(self, stem: str) -> str | None:
+        """The parent of the scenario `stem`, none without its file."""
+        return parent if (parent := self.parents[stem]) in self.parents else None
 
     def names(
         self, kind: Kind, scenario: str | None = None, *, sorts: Collection[str] = ()
@@ -141,9 +142,10 @@ class References:
         if kind is Kind.SCENARIO or site.scenario is None:
             return True
         stems = [] if scenario is None else self.chain(scenario)
-        return site.scenario in stems and not any(
-            site.item in self.drops[stem] for stem in stems[stems.index(site.scenario) + 1 :]
-        )
+        if site.scenario not in stems:
+            return False
+        gone = drops_below([self.drops[stem] for stem in stems])
+        return site.item not in gone[stems.index(site.scenario)]
 
 
 class _Step(Enum):

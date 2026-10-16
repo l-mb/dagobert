@@ -161,7 +161,8 @@ def test_a_child_drops_the_phases_and_events_of_an_id(data_dir: Path) -> None:
     kept, dropped = (load_plan(data_dir, scen / f"{n}.yaml").scenario for n in ("kept", "dropped"))
     assert [p for p in kept.phases if p.id != "exit"] == dropped.phases != kept.phases
     assert [e for e in kept.events if e.id != "exit"] == dropped.events != kept.events
-    assert [e for _, own in written(scen / "dropped.yaml") for e in own.events] == dropped.events
+    events = [e for _, own in written(data_dir, scen / "dropped.yaml") for e in own.events]
+    assert events == dropped.events
     assert load_scenario(scen / "base.yaml").events == kept.events
 
 
@@ -748,8 +749,13 @@ def test_overrides_move_groups_and_set_amounts(data: Path) -> None:
         ),
         (
             "{shift: {leave: x}}",
-            "overrides.shift.leave: Input should be a valid number, unable to parse string as a "
-            "number",
+            "overrides.shift.leave: Input should be a valid integer, unable to parse string as an "
+            "integer",
+        ),
+        (  # whole months: a half moved by half to even before
+            "{shift: {leave: 2.5}}",
+            "overrides.shift.leave: Input should be a valid integer, got a number with a "
+            "fractional part",
         ),
         (
             "{events: {severance: 5}}",
@@ -852,6 +858,15 @@ def test_an_event_override_skips_the_fields_that_a_sale_lacks() -> None:
     assert isinstance(flat, SellEvent)
     assert isinstance(gold, SellEvent)
     assert (flat.price, flat.share, gold.price, gold.share) == (500_000, 1, None, 0.5)
+
+
+def test_the_files_show_a_gold_sale_as_its_run_takes_it(data: Path) -> None:
+    """`written` takes the gold and crypto ids of `assets.yaml`: an override of `share` reaches
+    the gold sale there too, which a property sale lacks."""
+    path = _with_gold(data, "[{at: 2027-01-01, type: sell, asset: g, id: exit}]")
+    path.write_text(path.read_text() + "overrides: {events: {exit: {share: 0.5}}}\n")
+    events = [e for _, own in written(data, path) for e in own.events]
+    assert events == load_plan(data, path).scenario.events != load_scenario(path).events
 
 
 def test_a_shift_moves_a_purchase_with_its_fixed_rate_and_an_override_sets_its_price() -> None:

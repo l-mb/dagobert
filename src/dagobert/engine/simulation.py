@@ -83,7 +83,7 @@ class Engine(Events, Settlement):
             note=self.plan.scenario.note,
             model=self.model,
             months=months,
-            ages=np.array([self._age(i) for i in range(n)]),
+            ages=self.ages,
             phases=phases,
             phase_labels=self.a.phase_labels,
             liquid=liquid,

@@ -191,10 +191,15 @@ def _idle(phases: Mapping[str, str], streams: list[dict[str, Any]]) -> str | Non
     return next((p for p in [*named, IDLE] if p in phases), None)
 
 
-def _phase_at(path: Path, month: date) -> str | None:
-    """The phase of the scenario `path` in `month`, as its run sees it (`loader.written`)."""
+def _phase_at(data_dir: Path, stem: str, month: date) -> str | None:
+    """The phase of the scenario `stem` in `month`, as its run sees it (`loader.written`)."""
     changes = sorted(
-        ((p.at, p.phase) for _file, own in written(path) for p in own.phases), key=lambda c: c[0]
+        (
+            (p.at, p.phase)
+            for _file, own in written(data_dir, data_dir / scenario_file(stem))
+            for p in own.phases
+        ),
+        key=lambda c: c[0],
     )
     return next((phase for at, phase in reversed(changes) if at <= month), None)
 
@@ -224,10 +229,9 @@ def lost_job(data_dir: Path, loss: JobLoss) -> list[Edit]:
     if loss.back is not None and loss.back <= loss.lost:
         msg = "the new job starts before the job loss"
         raise ValueError(msg)
-    main = data_dir / scenario_file(loss.main)
     phases, streams = references.phases(data_dir), streams_file(data_dir).rows()
     idle = _idle(phases, streams) or IDLE
-    back = _phase_at(main, loss.back) if loss.back else None
+    back = _phase_at(data_dir, loss.main, loss.back) if loss.back else None
     if loss.back is not None and back in (None, idle):
         msg = (
             f"the main scenario {loss.main} is unemployed or has no phase in {loss.back:%Y-%m}, "

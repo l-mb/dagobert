@@ -212,7 +212,7 @@ def _no_em_rente(data_dir: Path, scenario: str, plan: Plan) -> list[Notice]:
     file = next(
         (
             f
-            for f, own in reversed(written(data_dir / scenario_file(scenario)))
+            for f, own in reversed(written(data_dir, data_dir / scenario_file(scenario)))
             if isinstance(block := own.overrides.get(rollforward.DISABILITY), dict)
             and "at" in block
         ),
@@ -252,7 +252,7 @@ def _plan_changes(data_dir: Path, scenario: str, plan: Plan, day: date) -> list[
     links to the Cashflows page, one of an event and a purchase to the event (`placed`)."""
     rows = cashflows.estimated([dict(r) for r in streams_file(data_dir).rows()], day, plan)
     labels = plan.assumptions.phase_labels
-    chain = written(data_dir / scenario_file(scenario))
+    chain = written(data_dir, data_dir / scenario_file(scenario))
     changes = [
         *cashplan.scheduled(rows, day, list(labels), paired=True),
         *cashplan.scenario_changes(rows, plan, day, list(labels)),

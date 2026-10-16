@@ -20,9 +20,10 @@ from streamlit.delta_generator import DeltaGenerator
 
 from dagobert import loader, overrides, revisions, scenariofiles, store
 from dagobert.i18n import N_, NP_, _, pgettext
-from dagobert.loader import SCENARIO_KEYS, flatten
+from dagobert.loader import flatten
 from dagobert.model.base import KeyPath, Unit
 from dagobert.model.months import add_months
+from dagobert.model.plan import SCENARIO_KEYS
 from dagobert.overrides import Leaf
 from dagobert.references import Kind, References
 from dagobert.ui import fields, formguard, gridstate, guard, joined, literal, tables

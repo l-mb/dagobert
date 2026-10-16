@@ -107,7 +107,8 @@ def open(data_dir: Path) -> revisions.Entry | None:
     at most the manifest would be new, and raises when it needs a migration. An empty or missing
     directory raises with the way to start a plan. A directory with no manifest and no revisions
     log at all is written by hand in the current format: it gets the manifest and no step. Any
-    history means Dagobert touched it, so its texts read as schema 1 and migrate."""
+    history means Dagobert touched it, so its texts read as schema 1 and migrate. A newer schema
+    or a broken manifest raises before any write."""
     if not (data_dir / "assumptions.yaml").is_file():
         msg = (
             f"{'no plan yet' if data_dir.is_dir() else 'no such directory'}: {START}"
@@ -116,29 +117,30 @@ def open(data_dir: Path) -> revisions.Entry | None:
         )
         raise InputError([Problem(str(data_dir), None, "", msg)])
     tree = schema.Tree(data_dir)
+    old = schema.version(tree)  # an older app records nothing in the folder of a newer one
     # written by hand: no manifest and no log at all; any history means Dagobert touched it
     by_hand = schema.MANIFEST not in tree and revisions.head(data_dir) is None
-    old = schema.version(tree)
+
+    def fresh(texts: Mapping[str, str]) -> bool:
+        # under the lock a manifest of another write counts: `by_hand` was looked at before it
+        return by_hand and schema.MANIFEST not in texts
 
     def migrate(texts: Mapping[str, str]) -> dict[str, str]:
-        # under the lock a manifest of another write counts: `by_hand` was looked at before it
-        if by_hand and schema.MANIFEST not in texts:
-            return {schema.MANIFEST: schema.manifest_text()}
-        return schema.migrate(texts)
+        return {schema.MANIFEST: schema.manifest_text()} if fresh(texts) else schema.migrate(texts)
 
-    migrated = migrate(tree)
+    def source() -> str:
+        # under the lock after `migrate`, which read the same files
+        texts = schema.Tree(data_dir)
+        if fresh(texts):
+            return f"manifest {schema.current()} (Dagobert {__version__})"
+        return f"migrate {schema.version(texts)} → {schema.current()} (Dagobert {__version__})"
+
     if not os.access(data_dir, os.W_OK):
-        if migrated.keys() - {schema.MANIFEST}:
+        if migrate(tree).keys() - {schema.MANIFEST}:
             msg = f"read-only, so the inputs of schema {old} cannot migrate: make it writable"
             raise InputError([Problem(str(data_dir), None, "", msg)])
         return None
-    return revisions.write(
-        data_dir,
-        f"manifest {schema.current()} (Dagobert {__version__})"
-        if by_hand
-        else f"migrate {old} → {schema.current()} (Dagobert {__version__})",
-        lambda: migrate(schema.Tree(data_dir)),
-    )
+    return revisions.write(data_dir, source, lambda: migrate(schema.Tree(data_dir)))
 
 
 def start_example(data_dir: Path, example: Path = EXAMPLE) -> revisions.Entry | None:

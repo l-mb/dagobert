@@ -9,7 +9,7 @@ paths:
 
 The checks of `model.plan.Plan` across the inputs: what a run takes, refused at load and not in
 the run, where a bare `ValueError` ended `dagobert run` in a traceback. Each error lies at the key
-path of its use, so `loader._plan_error` names the file and the line (rule `persistence`). The
+path of its use, so `origins.plan_error` names the file and the line (rule `problems`). The
 messages are English, as every input error. The inputs: `docs/manual/configuration.md`.
 
 - Purchases: `Plan._ids` adds the ids of a `buy_property` to the properties and loans;

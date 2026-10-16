@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 type Texts = Mapping[str, str | None]  # tracked path -> new text, None removes the file
+type Writer = str | Callable[[], str]  # the page or the command that writes, see `write`
 
 REVISIONS: Final = "revisions"
 LOG: Final = "log.csv"
@@ -239,7 +240,7 @@ def lock(data_dir: Path) -> Iterator[None]:
 
 def write(
     data_dir: Path,
-    source: str,
+    source: Writer,
     edit: Callable[[], Texts],
     *,
     validate: bool = True,
@@ -249,13 +250,14 @@ def write(
     raise `ConflictError`. A text equal to the current file does not count: None when nothing
     changes. Edits outside the app get a revision of their own first (`_adopt`). If a YAML input
     changes and `validate` is set, every scenario loads after the write: if one fails, the files
-    and the log stay as before and the error goes up."""
+    and the log stay as before and the error goes up. A `source` that is a function names the
+    revision under the lock, after `edit`, from the files before the write."""
     return _write(data_dir, source, lambda: (edit(), None), validate=validate)[0]
 
 
 def write_returning[T](
     data_dir: Path,
-    source: str,
+    source: Writer,
     edit: Callable[[], tuple[Texts, T]],
     *,
     validate: bool = True,
@@ -266,7 +268,7 @@ def write_returning[T](
 
 
 def _write[T](
-    data_dir: Path, source: str, edit: Callable[[], tuple[Texts, T]], *, validate: bool
+    data_dir: Path, source: Writer, edit: Callable[[], tuple[Texts, T]], *, validate: bool
 ) -> tuple[Entry | None, T]:
     with lock(data_dir):
         _recover(data_dir)
@@ -276,7 +278,8 @@ def _write[T](
         if not changes:
             return None, found
         stamp = _next(head(data_dir), datetime.now(UTC))
-        return _save(data_dir, stamp, source, changes, live=True, validate=validate), found
+        said = source() if callable(source) else source
+        return _save(data_dir, stamp, said, changes, live=True, validate=validate), found
 
 
 def _adopt(data_dir: Path) -> None:

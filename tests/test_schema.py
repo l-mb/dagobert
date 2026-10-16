@@ -234,6 +234,27 @@ def test_a_manifest_stamped_between_the_look_and_the_lock_is_kept(tmp_path: Path
     assert len(revisions.entries(hand)) == 2
 
 
+def test_a_migration_names_the_schema_that_it_finds_under_the_lock(
+    data: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Another write stamps schema 2 between the look and the lock: the steps and the source of
+    the revision start there."""
+    (data / "history.csv").write_text(HISTORY)
+    _opened_before(data)
+    ran: list[str] = []
+    monkeypatch.setattr(schema, "STEPS", _steps(ran))
+    real = revisions.write
+
+    def stamped(data_dir: Path, source: revisions.Writer, edit: Any, **kw: bool) -> Any:
+        real(data_dir, "other", lambda: {schema.MANIFEST: "schema: 2\napp: 0.0.1\n"}, **kw)
+        return real(data_dir, source, edit, **kw)
+
+    monkeypatch.setattr(revisions, "write", stamped)
+    datadir.open(data)
+    assert ran == ["to_3"]
+    assert revisions.entries(data)[-1].source == f"migrate 2 → 3 (Dagobert {__version__})"
+
+
 def test_open_writes_the_manifest_once(data: Path) -> None:
     datadir.open(data)
     assert _manifest(data) == {"schema": schema.current(), "app": __version__}

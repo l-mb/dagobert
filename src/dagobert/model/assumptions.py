@@ -7,10 +7,9 @@ import math
 import re
 import unicodedata
 from collections import Counter
-from collections.abc import Collection, Iterable, Sequence
+from collections.abc import Collection, Iterable
 from datetime import date
-from itertools import pairwise
-from typing import Annotated, Literal, LiteralString
+from typing import Annotated, Literal, LiteralString, overload
 
 import numpy as np
 from pydantic import AfterValidator, Field, ValidationError, field_validator, model_validator
@@ -33,6 +32,7 @@ from dagobert.model.base import (
 )
 from dagobert.model.months import aged, months_between, months_of_age
 from dagobert.model.taxes import Allowance, Relation, TaxOptions, default_tax_year
+from dagobert.result import FloatArray
 
 CPI_INDEX = "cpi"
 REQUIRED_CLASSES = frozenset({"equity", "fixed_income", "cash", "property"})  # of `returns`
@@ -339,15 +339,21 @@ def _each_age_once[P: Aged](points: list[P]) -> list[P]:
     return points
 
 
-def interpolate(points: Sequence[AgePoint], age: float) -> float:
-    """Linear between age points, flat outside."""
-    pts = sorted(points, key=lambda p: p.age)
-    if age <= pts[0].age:
-        return pts[0].factor
-    for lo, hi in pairwise(pts):
-        if age <= hi.age:
-            return lo.factor + (hi.factor - lo.factor) * (age - lo.age) / (hi.age - lo.age)
-    return pts[-1].factor
+@overload
+def interpolate(
+    points: Iterable[tuple[float, float]], ages: float, left: float | None = None
+) -> float: ...
+@overload
+def interpolate(
+    points: Iterable[tuple[float, float]], ages: FloatArray, left: float | None = None
+) -> FloatArray: ...
+def interpolate(
+    points: Iterable[tuple[float, float]], ages: float | FloatArray, left: float | None = None
+) -> float | FloatArray:
+    """The value at each of `ages` of the points `(age, value)`: linear between them, flat
+    outside, `left` before the first age when given."""
+    ordered = sorted(points)
+    return np.interp(ages, [a for a, _ in ordered], [v for _, v in ordered], left=left)
 
 
 class GlidePoint(Aged):
@@ -377,8 +383,8 @@ class Allocation(Strict):
         "crash is not locked in. 0 always rebalances",
     )
 
-    def share_at(self, age: float) -> float:
-        return interpolate([AgePoint(age=p.age, factor=p.share) for p in self.fixed_income], age)
+    def share_at[A: (float, FloatArray)](self, ages: A) -> A:
+        return interpolate(((p.age, p.share) for p in self.fixed_income), ages)
 
 
 VPW_CAP = 0.10  # the highest payment rate of VPW, as the Bogleheads table caps it
@@ -529,9 +535,10 @@ class Spending(Strict):
         return self
 
 
-def hazard_at(points: Sequence[AgePoint], age: float) -> float:
-    """Zero before the first age of a `hazard` table, flat after the last."""
-    return 0.0 if age < min(p.age for p in points) else interpolate(points, age)
+def hazard_at(points: Iterable[AgePoint], ages: FloatArray) -> FloatArray:
+    """The yearly chance at each of `ages` of a `hazard` table: zero before its first age, flat
+    after the last."""
+    return interpolate(((p.age, p.factor) for p in points), ages, left=0.0)
 
 
 class CareOptions(Strict):
@@ -554,8 +561,8 @@ class CareOptions(Strict):
         "null for nominal euros",
     )
 
-    def hazard_at(self, age: float) -> float:
-        return hazard_at(self.hazard, age)
+    def hazard_at(self, ages: FloatArray) -> FloatArray:
+        return hazard_at(self.hazard, ages)
 
 
 class DisabilityPoint(AgePoint):
@@ -601,8 +608,8 @@ class DisabilityOptions(Strict):
         "instead of the drawn one. Empty: drawn per path",
     )
 
-    def hazard_at(self, age: float) -> float:
-        return hazard_at(self.hazard, age)
+    def hazard_at(self, ages: FloatArray) -> FloatArray:
+        return hazard_at(self.hazard, ages)
 
 
 class Scale(Strict):

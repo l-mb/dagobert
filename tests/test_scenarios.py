@@ -167,7 +167,7 @@ def test_the_timeline_shows_what_a_run_sees_and_marks_what_the_child_drops(
         "  - {at: 2031-01-01, type: gift, from: mother, cash: 500, note: For the car}\n"
     )
     shown = itemgetter("month", "item", "detail", "id", SET_IN, LEFT_OUT)
-    assert list(map(shown, timeline(child, references.phases(family)))) == [
+    assert list(map(shown, timeline(family, child, references.phases(family)))) == [
         ("2026-01", "Phase", "Work", "", "base", ""),
         ("2030-01", "One-off payment", "", "", THIS, ""),  # the child's own event
         ("2031-01", "Gift", "For the car (mother: 500 €)", "", THIS, ""),
@@ -177,7 +177,7 @@ def test_the_timeline_shows_what_a_run_sees_and_marks_what_the_child_drops(
         (ON_CONDITION, "Sell an asset", "The flat at 78 (age 78)", "", "base", ""),  # last
     ]
     child.write_text(CHILD.replace("[bonus]", "[retirement]"))
-    rows = timeline(child, references.phases(family))
+    rows = timeline(family, child, references.phases(family))
     assert [(r["detail"], r["id"]) for r in rows if r[LEFT_OUT]] == [("Retired", "retirement")]
 
 
@@ -191,7 +191,7 @@ def test_the_timeline_words_a_dropped_gift_and_sale_as_the_rows_it_runs(family: 
     child = family / "scenarios" / "child.yaml"
     child.write_text(CHILD.replace("[bonus]", "[estate, trip, flat-sale]"))
     shown = itemgetter("month", "item", "detail", "id")
-    dropped = [shown(r) for r in timeline(child, {}) if r[LEFT_OUT]]
+    dropped = [shown(r) for r in timeline(family, child, {}) if r[LEFT_OUT]]
     assert dropped == [
         ("2031-01", "Gift", "Trip (mother: 500 €)", "trip"),
         (AT_DEATH, "Inheritance", "mother: 1.000 €", "estate"),

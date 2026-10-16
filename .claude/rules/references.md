@@ -31,7 +31,9 @@ The inputs that it reads and their model: rule `persistence`; their writes: rule
   `InputError` (`read`, one input: the store and the Scenarios page use it too). A name defined
   outside the scenario files, and a scenario stem, counts everywhere; one that a scenario file
   defines (an item id, an `add_stream`, an index or a return class of its overrides) counts there
-  and in the files that extend it (`chain`), until one drops its item (`Site.item`). `names` gives
+  and in the files that extend it (`chain`, on `loader.ancestry`: it stops at a missing parent or
+  a cycle, where the loader raises), until one drops its item (`Site.item`,
+  `loader.drops_below`). `names` gives
   the options sorted without regard to case, by `sorts` too, `orphans` the uses that no definition
   reaches once a file or the part below a key path goes (the Assumptions page keeps a used phase by
   it). A `drop` uses an item of the parents (`names(Kind.ITEM, <parent>)`). A `buy_property` defines

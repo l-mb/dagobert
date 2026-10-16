@@ -8,8 +8,9 @@ from typing import Any
 import pytest
 import yaml
 
-from dagobert.loader import flatten, load_plan, load_scenario, nested, split
+from dagobert.loader import flatten, load_plan, load_scenario, nested
 from dagobert.model.assumptions import Assumptions
+from dagobert.model.plan import split
 from dagobert.overrides import (
     ASSUMPTIONS,
     DEFAULT,

@@ -124,7 +124,10 @@ class Core:
         self.level = year_levels(self.cpi, self.start.month)
         self.eq_index = np.cumprod(1 + self.returns.rates["equity"], axis=1)
         self.eq_price = np.ones(self.paths)  # the equity index now: before or after the return
+        self.ages = np.array([self._age(i) for i in range(self.n_months)])
         self.age_factor = self._age_factors()
+        # the fixed-income share of the glide path per month
+        self.glide = self.a.allocation.share_at(self.ages) if self.a.allocation else None
         self.care = self._draw_care()
         self.onset = self._draw_disability()
 
@@ -351,7 +354,7 @@ class Core:
         curve = self.a.spending.age_curve if self.a.spending else []
         if not curve:
             return np.ones(self.n_months)
-        return np.array([interpolate(curve, self._age(i)) for i in range(self.n_months)])
+        return interpolate(((p.age, p.factor) for p in curve), self.ages)
 
     def _first_month(self, rng: np.random.Generator, yearly: FloatArray, none: int) -> IntArray:
         """Per path the first month index in which a uniform draw falls below the monthly chance
@@ -365,7 +368,7 @@ class Core:
         in_care = np.zeros((self.paths, self.n_months), dtype=bool)
         if care is None or self.paths == 1:
             return in_care
-        yearly = np.array([care.hazard_at(self._age(i)) for i in range(self.n_months)])
+        yearly = care.hazard_at(self.ages)
         rng = generator(self.a.seed, "care")
         start = self._first_month(rng, yearly, self.n_months)
         months = np.maximum(rng.normal(care.duration.mean, care.duration.stdev, self.paths), 1)
@@ -381,8 +384,7 @@ class Core:
         months after it drop an onset (`Income._claim_pension`)."""
         none = np.full(self.paths, -1)
         spec = self.a.disability
-        before = [self._age(i) < self.ty.regelaltersgrenze for i in range(self.n_months)]
-        months = sum(before)  # the ages fall into the run in order
+        months = int((self.ages < self.ty.regelaltersgrenze).sum())  # the ages rise in the run
         if spec is None:
             return none
         if spec.at is not None:
@@ -390,7 +392,7 @@ class Core:
             return np.full(self.paths, i) if i < months else none
         if self.paths == 1 or not months:
             return none
-        yearly = np.array([spec.hazard_at(self._age(i)) for i in range(months)])
+        yearly = spec.hazard_at(self.ages[:months])
         return self._first_month(generator(self.a.seed, "disability"), yearly, -1)
 
     @property
@@ -592,7 +594,7 @@ class Core:
             prop.afa_taken = prop.afa_taken + self._let(prop) * prop.afa_month
 
     def _fixed_share(self) -> float:
-        return self.a.allocation.share_at(self._age(self.m.i)) if self.a.allocation else 0.0
+        return 0.0 if self.glide is None else float(self.glide[self.m.i])
 
     def _update_spending_rule(self, liquid_prev: FloatArray) -> None:
         """The cut and the increase of this month by the liquid wealth at its start against the

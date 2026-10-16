@@ -44,11 +44,13 @@ paths:
   its context, which the grids say in words (`ui.refusals`, rule `cashflows`), and the English text
   of the problem as before. Every number and date field carries a `Unit` in its
   JSON schema through an alias (`Euros`, `Percent`, `Factor`, `Months`, `Years`, `Number`, `Day`,
-  `Month`, `Annotated[int, unit(...)]`; `Shift` for `overrides.shift`): `units` gives them by key
-  path (`EACH` for a key or an item, the tag of a discriminated union) and raises for one without, a
-  choice (`enum`) aside. `Unit.step`: the finest step shown (cents, 0.001%). Bounds go on the field:
-  an alias bound replaces its own (`Factor` carries `ge=0`, which none narrows). The description of
-  a field is the one text of its help: the forms show it (with how its unit reads),
+  `Month`, `Annotated[int, unit(...)]`; `Shift` for `overrides.shift`, whole months: a fraction is
+  refused at its line, no longer rounded half to even; no migration: the app writes whole months
+  only, a hand-written fraction is the one input that no longer loads): `units` gives them by
+  key path (`EACH` for a key or an item, the tag of a discriminated union) and raises for one
+  without, a choice (`enum`) aside. `Unit.step`: the finest step shown (cents, 0.001%). Bounds go
+  on the field: an alias bound replaces its own (`Factor` carries `ge=0`, which none narrows). The
+  description of a field is the one text of its help: the forms show it (with how its unit reads),
   `description(model, path)` gives it to the sliders of the explorer (rule `assumptions`). Every
   event but a sale and an inheritance is a `DatedEvent`, whose `at` is required, a gift too
   (`SellEvent._at_or_when`: `at` or `when`; an inheritance without `at` falls at a death, rule
@@ -73,45 +75,40 @@ paths:
   `loader._takes` matches an override by the alias), one name read as a list of one
   (`BeforeValidator`), a gift one giver; `cash`, `equity` (`Securities`); an inheritance without
   `at` (its `_dated` takes none). `Plan` refuses a giver that `person.relatives` lacks
-  (`_event_checks`).
-- `src/dagobert/loader.py`: YAML loading, `extends` composition, `overrides` merge. `lineage` gives
-  each file of an `extends` chain with its own content less what a file below drops (`_without`: the
-  items of a `drop` id and, `kept`, its `shift` and `events` overrides above), `written` the same
-  with the `shift` and `events` overrides of the chain applied, so an item keeps the file it is
-  written in. Drops first, root first (an id that no file above keeps raises at `drop[i]`), then the
-  merge of the overrides and `adjust`. `_plan_error` takes `_layers`, which keep the index of an
-  event in its file. Every input that does not load raises `problems.InputError` (rule
-  `problems`): a file that does not read or parse or is empty, a model error, a missing or
-  circular `extends` parent or one with a path (`NO_PATH`; at the line of `extends`), an override.
-  An override error names the source that `deep_merge` takes the
-  value from, in the order of precedence: the overrides of the explorer (`explorer sliders`, no
-  line), then the files of the `extends` chain from the last (`overrides.<path>`). At each depth the
-  first source that holds the key path wins, until one holds no mapping there (a list replaces the
-  lists below it). An error of the whole assumptions belongs to the first source that overrides
-  them. This covers the merged assumptions, the `events` and `assets` overrides and their unknown
-  ids and fields, and the shapes of `events`, `shift` and `assets` (`_shaped`). A check across the
-  inputs (`Plan`) is an error at the key path of each use (`Plan._references_known`: one `Check` of
-  a message and its `known` names per kind, over the streams of the plan and of `add_stream`,
-  the assets, the events, `care.index`, `scale` and the `spending` categories; `TWICE`: two streams
-  of `cashflows.yaml` of one name and start, an `add_stream` may add a name again). The loader
-  names its file and line (`_plan_error`): a stream `cashflows.yaml`, an asset `assets.yaml` or
-  the `assets` override that sets the field, a name of the assumptions the override that sets it,
-  else `assumptions.yaml`, so `problems` lists it once. One at an event (also `_streams_exist`: the
-  names and tags of `set_stream` and `end_streams` exist) names the `events` override that sets
-  the field, else the file that writes the event, with line and key path; in another
-  file it adds `(for <scenario>, whose chain drops <ids>)`. An unknown phase names its use: of a
-  stream `cashflows.yaml`, of a bAV policy the `assets` override that sets `phases`, else
-  `assets.yaml`, of a phase change every file of the chain that writes it, less its drops
-  (`_phase_changes`: the merged changes are sorted and shifted, so their place names no file;
-  `Error.input` holds the name); a missing phase at the start the `phases` of the scenario.
-  `overrides.phases` is refused (`_assumptions`, `OWN_PHASES`). `problems` loads `app.yaml`
-  (`load_app_settings`, `AppSettings`) and every scenario and gives what does not load, each problem
-  once: the validation of `revisions.write`; `check` raises them (an import, rule `transfer`). The
+  (`_event_checks`). `interpolate` gives the value of points by age at one age or an array of
+  them (`np.interp` on the points sorted by age, flat outside): the age curve, the glide path
+  (`Allocation.share_at`) and the hazards (`hazard_at`, zero before the first age), which the
+  engine takes for all months of a run at once (`Core.ages`).
+- `src/dagobert/loader.py`: YAML loading, `extends` composition, `overrides` merge. `chain` gives
+  the raw mappings of an `extends` chain, the root first (`ancestry`: a start and its parents by a
+  function, up to a missing parent or a cycle), and raises at the line of `extends` of the file
+  where the walk stopped: a missing or circular parent, or one with a path (`NO_PATH`).
+  `references.References.chain` stops there on the same function and raises nothing (a
+  deliberate difference: it counts the names of the files as written, the loader names the
+  problem). `_layers` gives each file as a `Layer`: its own content and the ids that the files
+  below drop (`drops_below`, which `overrides._read`, `references` and `schema._changes` take
+  too). `lineage` gives each file with its own content less what a file below drops (`_without`:
+  the items of a `drop` id and, `kept`, its `shift` and `events` overrides above), `written` the
+  same with the `shift` and `events` overrides of the chain applied, so an item keeps the file it
+  is written in, a sale with the fields that its run takes (`_holdings`: the gold and crypto ids
+  of `assets.yaml`, as `load_plan` passes them to `adjust`). Drops first, root first (an id that
+  no file above keeps raises at `drop[i]`), then the merge of the overrides
+  (`model.plan.split`: those of the assumptions and those of `SCENARIO_KEYS`) and `adjust`. Every
+  input that does not load raises `problems.InputError`: a file that does not read or parse or is
+  empty, a model error, an `extends` that `chain` refuses, an override, a check across the inputs
+  (`Plan`). Where an override and a check name their file and line: rule `problems`
+  (`origins`, which `load_plan` hands its layers). A check across the inputs (`Plan`) is an error
+  at the key path of each use (`Plan._references_known`: one `Check` of a message and its `known`
+  names per kind, over the streams of the plan and of `add_stream`, the assets, the events,
+  `care.index`, `scale` and the `spending` categories; `TWICE`: two streams of `cashflows.yaml`
+  of one name and start, an `add_stream` may add a name again). `overrides.phases` is refused
+  (`_assumptions`, `OWN_PHASES`). `problems` loads `app.yaml` (`load_app_settings`,
+  `AppSettings`) and every scenario and gives what does not load, each problem once: the
+  validation of `revisions.write`; `check` raises them (an import, rule `transfer`). The
   explorer's overrides lose the `scale.savings` of a plan that the scenario lacks (`_plans_of`); in
   a file such a name is a model error. They lose `spending.vpw` where the `spending` of
   `assumptions.yaml` with the scenario's own overrides has no VPW, and the band (`BAND`: `cut`,
   `trigger`, `increase`, `ceiling`) where it has (rule `spending`), an emptied `spending` whole.
-  `chain` gives the raw mappings of an `extends` chain.
   `merged_overrides` merges the overrides of a chain with each other before they merge over the
   assumptions, so a child's mapping over its parent's null merges with `assumptions.yaml` again.
   `flatten` and `nested` turn a mapping into its leaves by key path and back: a list, a null and an

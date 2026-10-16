@@ -21,8 +21,9 @@ from pydantic import BaseModel, ValidationError
 
 from dagobert import overrides, revisions, store
 from dagobert.i18n import N_, _
-from dagobert.loader import SCENARIO_KEYS, nested, read_yaml
+from dagobert.loader import nested, read_yaml
 from dagobert.model.base import KeyPath, named
+from dagobert.model.plan import SCENARIO_KEYS
 from dagobert.overrides import DEFAULT, Leaf, own
 from dagobert.problems import Keys, Problem, Source, dotted, errors, located
 from dagobert.store import NULL, RowEdits

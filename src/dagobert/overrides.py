@@ -11,7 +11,16 @@ from typing import TYPE_CHECKING, Any, get_args, get_origin
 
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
-from dagobert.loader import chain, deep_merge, flatten, kept, merged_overrides, nested, read_yaml
+from dagobert.loader import (
+    chain,
+    deep_merge,
+    drops_below,
+    flatten,
+    kept,
+    merged_overrides,
+    nested,
+    read_yaml,
+)
 from dagobert.model.assumptions import Assumptions
 from dagobert.model.base import KeyPath
 from dagobert.store import NULL
@@ -126,11 +135,11 @@ def _read(
     data_dir: Path, scenario: Path, overrides: Mapping[str, Any] | None
 ) -> tuple[dict[str, Any], list[tuple[str, dict[str, Any]]]]:
     """`assumptions.yaml`, and the overrides of each file of the chain by stem, the root first,
-    less those of the ids that a file below drops (`loader.kept`)."""
+    less those of the ids that a file below drops (`loader.kept`, `loader.drops_below`)."""
     files = chain(scenario)
+    gone = drops_below([_drop(raw) for _, raw in files])
     layers = [
-        (file.stem, kept(_own(raw), {i for _, below in files[n + 1 :] for i in _drop(below)}))
-        for n, (file, raw) in enumerate(files)
+        (file.stem, kept(_own(raw), out)) for (file, raw), out in zip(files, gone, strict=True)
     ]
     if overrides is not None:
         layers[-1] = (scenario.stem, dict(overrides))

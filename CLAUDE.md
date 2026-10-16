@@ -119,15 +119,15 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 - `src/dagobert/loader.py`: YAML loading, `extends` composition, `overrides` merge [persistence].
 - `src/dagobert/overrides.py`: each override path of a scenario with its value and source,
   edits of a file's own overrides, the rows of `shift`, `events`, `assets` [persistence].
-- `src/dagobert/problems.py`: `InputError`, one `Problem` per error, the reads [problems].
-  `references.py`: who refers to what in the inputs, `rename.py` renames by it [references].
+- `src/dagobert/problems.py`: `InputError`, one `Problem` per error, the reads; `origins.py`: the
+  place of an error of `load_plan` [problems]. `references.py`: who refers to what in the inputs,
+  `rename.py` renames by it [references].
 - `src/dagobert/schema.py`, `datadir.py`: the schema version and its migrations, `open`, which
   brings a data directory to it [migrations], a start [first-run]. `transfer.py`: zips [transfer].
 - `src/dagobert/store.py`: writes the YAML inputs with `ruamel.yaml`, `yamlcomments.py` its
   comments, `textedit.py` as text, `scenariofiles.py` scenario file actions [store, revisions].
 - `src/dagobert/revisions.py`: the revision store, the one writer of the inputs: `write` under the
-  lock of the data directory, one revision per write, the inputs at a time, for the plan
-  comparisons, Changes since and the Flows comparison [revisions].
+  lock, one revision per write, the inputs at a time (Overview, Changes since, Flows) [revisions].
 - `src/dagobert/files.py`: `atomic_write` (synced temp file, `os.replace`) under `revisions.write`;
   `yaml()`, `dump()`: the YAML of the store; `read_csv`: the CSV inputs [revisions].
 - `src/dagobert/rollforward.py`: moves `start` to a later month [rollforward].

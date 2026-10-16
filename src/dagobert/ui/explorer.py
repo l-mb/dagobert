@@ -19,7 +19,6 @@ from dagobert.difference import Difference
 from dagobert.history import actual_totals
 from dagobert.i18n import N_, _, ngettext
 from dagobert.loader import (
-    SCENARIO_KEYS,
     load_assumptions,
     load_plan,
     load_scenario,
@@ -27,7 +26,7 @@ from dagobert.loader import (
     nested,
 )
 from dagobert.model.base import KeyPath
-from dagobert.model.plan import Feature, Plan
+from dagobert.model.plan import SCENARIO_KEYS, Feature, Plan
 from dagobert.money import format_eur
 from dagobert.problems import InputError
 from dagobert.report.anatomy import reading

@@ -17,7 +17,7 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from ruamel.yaml.error import YAMLError
 
 from dagobert import __version__, files
-from dagobert.loader import validate
+from dagobert.loader import drops_below, validate
 from dagobert.model.base import Month, Strict
 from dagobert.model.events import Shift
 from dagobert.model.months import add_months
@@ -257,18 +257,17 @@ def _chain(docs: Docs, stem: str) -> list[str]:
 
 def _changes(chain: list[CommentedMap]) -> list[date]:
     """The months of the phase changes of a raw `extends` chain, the root first, as its run sees
-    them: without those that a file below drops, moved by the merged `shift` (`loader.adjust`)."""
-    layers = [
-        (node, {i for below in chain[n + 1 :] for i in _names(below.get("drop"))})
-        for n, node in enumerate(chain)
-    ]
+    them: without those that a file below drops (`loader.drops_below`), moved by the merged
+    `shift` (`loader.adjust`)."""
+    drops = drops_below([_names(node.get("drop")) for node in chain])
+    layers = list(zip(chain, drops, strict=True))
     merged: dict[str, object] = {}
     for node, gone in layers:
         shift = _child(_child(node, "overrides"), "shift")
         merged |= {i: v for i, v in shift.items() if i not in gone}
     moves = _valid(_SHIFT, merged) or {}
     return [
-        add_months(month, round(moves[i])) if i in moves else month
+        add_months(month, moves[i]) if i in moves else month
         for node, gone in layers
         for row in _items(node, "phases")
         if (month := _valid(_MONTH, row.get("from"))) is not None
@@ -480,8 +479,15 @@ def manifest(texts: Mapping[str, str]) -> Manifest | None:
 
 
 def version(texts: Mapping[str, str]) -> int:
-    """The schema of the files: 1 without a manifest, the format of the first release."""
+    """The schema of the files: 1 without a manifest, the format of the first release. One newer
+    than this app reads raises `SchemaError`."""
     found = manifest(texts)
+    if found and found.version > current():
+        msg = (
+            f"{MANIFEST}: schema {found.version}, written by Dagobert {found.app}. This is "
+            f"Dagobert {__version__}, which reads schema {current()} at most. Update the app."
+        )
+        raise SchemaError(msg)
     return found.version if found else 1
 
 
@@ -490,15 +496,8 @@ def migrate(texts: Mapping[str, str]) -> dict[str, str]:
     Nothing when they are current. Files without a manifest count as schema 1, the format of the
     first release, so every step runs on them (and changes nothing on files of a later schema) and
     the manifest comes last. The other files keep every character."""
-    found = manifest(texts)
-    start = found.version if found else 1
-    if found and start > current():
-        msg = (
-            f"{MANIFEST}: schema {start}, written by Dagobert {found.app}. This is Dagobert "
-            f"{__version__}, which reads schema {current()} at most. Update the app."
-        )
-        raise SchemaError(msg)
-    if found and start == current():
+    start, found = version(texts), manifest(texts)
+    if start == current():
         return {}
     inputs = Inputs(texts)
     changed = set[str]().union(*(step(inputs) for step in STEPS[start - 1 :]))

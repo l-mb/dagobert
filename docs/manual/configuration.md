@@ -900,13 +900,16 @@ source can still change. Only the [Data](data.md) page (a fetch or an import) an
   - `events: {<id>: {<field>: value}}` sets a field on every event of the group that has it. A
     nested mapping such as `loan` or `property` of a `buy_property` is replaced whole, so it needs
     all its fields.
-  - `shift: {<id>: months}` moves `at` and `from` of every item of the group.
+  - `shift: {<id>: months}` moves `at` and `from` of every item of the group by whole months,
+    below zero earlier.
   - `assets: {<asset id>: {<field>: value}}` sets a field of an asset.
 
   The `Overrides` tab of the Scenarios page edits every key, the last three as tables of rows. In
   a file an unknown id or field is an error. The Explorer skips them, because its sliders reach
   every chosen scenario. A value of the wrong shape is an error with its file and line:
-  `shift: {retirement: x}` (months must be a number), `events: {car: 5}` (needs fields). The ids
+  `shift: {retirement: x}` or `shift: {retirement: 2.5}` (months must be a whole number; earlier
+  versions rounded a fraction),
+  `events: {car: 5}` (needs fields). The ids
   of the full example include `flat-sale` (a sale and the repayment from it), `job-loss` (the
   change to `unemployed`, the severance and the end of the old salary), `retirement` (the change
   to `retired` and the rent of a smaller flat) and `car` (two new cars).

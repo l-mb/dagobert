@@ -13,7 +13,6 @@ from dagobert.model.base import (
     Euros,
     Factor,
     Month,
-    Months,
     Percent,
     Strict,
     Unit,
@@ -27,7 +26,8 @@ from dagobert.model.taxes import Land, transfer_tax_rate
 from dagobert.money import format_eur
 
 ID_HELP = "Address for `overrides.events` and `overrides.shift`. Items that share it move together"
-Shift = dict[str, Months]  # `overrides.shift`: the months by which each id moves
+# `overrides.shift`: the whole months by which each id moves, a fraction refused
+Shift = dict[str, Annotated[int, unit(Unit.MONTHS)]]
 
 
 class PhaseChange(Strict):

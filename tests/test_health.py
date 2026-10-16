@@ -410,6 +410,17 @@ def test_a_harvest_keeps_the_voluntary_kv_of_the_next_year(
         assert harvested(pair, DECEMBER) == pytest.approx(full * months / 12)
 
 
+@pytest.mark.parametrize(("losses", "along"), [(1500.0, True), (5000.0, False)])
+def test_a_loss_pot_below_the_room_of_the_kv_goes_along(losses: float, *, along: bool) -> None:
+    """A capital loss pot (§20 Abs. 6 EStG) comes off the gain before the base of the KV counts
+    it (BVSzGs §3 Abs. 1b S. 4): a pot below the room that the minimum leaves goes along on top of
+    it, a larger one closes the harvest. The KV of the next year stays either way."""
+    pair = _harvests(RENT, scenario=_retired(), tax=GKV | {"capital_losses": losses})
+    assert _kv(pair[0]) == pytest.approx(_kv(pair[1]))
+    full = 12 * (TY.kv_min_base - 1000) + TY.kv_capital_werbungskosten
+    assert harvested(pair, DECEMBER) == pytest.approx(losses + full if along else 0.0)
+
+
 def test_a_salary_ended_by_factor_zero_or_end_streams_is_voluntary_in_january() -> None:
     """Both ends leave no salary in January: the same voluntary KV in January, below that of
     a salary that goes on, and the same room for a harvest."""

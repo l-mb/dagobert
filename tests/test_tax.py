@@ -288,41 +288,56 @@ def test_a_loss_goes_back_one_year_then_two_up_to_its_limit(
 
 
 @pytest.mark.parametrize(
-    ("income", "losses", "room"),
+    ("income", "losses", "options", "room"),
     [
-        (YearIncome(), 0.0, 13_384.0),
-        (YearIncome(), 2000.0, 0.0),
-        (YearIncome(alg1=12_348.0), 0.0, 2266.0),
-        (YearIncome(capital_income=2000.0), 0.0, 11_384.0),
-        (YearIncome(health_deductible=3000.0), 0.0, 16_384.0),
-        (YearIncome(other_taxable=5000.0, loss_carried=500.0), 0.0, 8884.0),
-        (YearIncome(other_taxable=-3000.0), 0.0, 1000.0),
-        (YearIncome(loss_carried=500.0), 0.0, 1000.0),
-        (YearIncome(severance=10_000.0), 0.0, 1000.0),
+        (YearIncome(), 0.0, {}, 13_384.0),
+        (YearIncome(), 2000.0, {}, 15_384.0),
+        (YearIncome(), 20_000.0, {}, 0.0),
+        (YearIncome(alg1=12_348.0), 0.0, {}, 2266.0),
+        (YearIncome(capital_income=2000.0), 0.0, {}, 11_384.0),
+        (YearIncome(health_deductible=3000.0), 0.0, {}, 16_384.0),
+        (YearIncome(other_taxable=5000.0, loss_carried=500.0), 0.0, {}, 8884.0),
+        (YearIncome(other_taxable=-3000.0), 0.0, {}, 1000.0),
+        (YearIncome(other_taxable=-3000.0), 0.0, {"carryback": False}, 16_384.0),
+        (YearIncome(loss_carried=500.0), 0.0, {}, 13_884.0),
+        (YearIncome(loss_carried=20_000.0), 0.0, {}, 1000.0),
+        (YearIncome(severance=10_000.0), 0.0, {}, 1000.0),
+        (YearIncome(), 2000.0, {"cap": 3000.0}, 5000.0),
+        (YearIncome(), 2000.0, {"cap": 1500.0}, 0.0),
+        (YearIncome(loss_carried=500.0), 0.0, {"cap": 1500.0}, 1000.0),
     ],
     ids=[
         "zve 0",
         "loss pot",
+        "loss pot beyond the room",
         "alg1",
         "capital income",
         "negative zve",
         "pot used up",
         "negative gde",
+        "negative gde forward only",
         "pot left",
+        "pot beyond the tariff room",
         "severance",
+        "cap",
+        "cap below twice the loss pot",
+        "cap below twice the pot left",
     ],
 )
 def test_the_harvest_room_ends_at_the_grundfreibetrag(
-    income: YearIncome, losses: float, room: float
+    income: YearIncome, losses: float, options: dict[str, Any], room: float
 ) -> None:
     """The Sparer-Pauschbetrag left of 1,000 € (§20 Abs. 9 EStG) and, at a zvE of 0 less the
     Sonderausgaben-Pauschbetrag of 36 € (§10c), the Grundfreibetrag of 12,348 € (§32a Abs. 1), less
     what ALG1 (§32b, less the Arbeitnehmer-Pauschbetrag that no Arbeitslohn takes, Abs. 2 S. 1
-    Nr. 1) and the capital income of the year take. A negative zvE from the Sonderausgaben carries
-    nothing and widens it; a
-    Verlustvortrag left (§10d), also from a negative Gesamtbetrag, and a Fünftelregelung (§34)
-    close the tariff part, a loss pot (§20 Abs. 6) all of it."""
-    assert harvest_room(income, 1000.0, losses, TY) == pytest.approx(room)
+    Nr. 1) and the capital income of the year take, at most `cap`. A negative zvE from the
+    Sonderausgaben carries nothing and widens it. A gain uses up a Verlustvortrag left (§10d Abs.
+    2), also of a negative Gesamtbetrag that does not go back, before the tariff room, the loss
+    pot (§20 Abs. 6) before both: each goes along where the room beyond it is at least as large,
+    else that room closes. A loss of the year that may go back (§10d Abs. 1) and a
+    Fünftelregelung (§34) close the tariff part."""
+    kw = {"carryback": True} | options
+    assert harvest_room(income, 1000.0, losses, TY, **kw) == pytest.approx(room)
 
 
 GAINS = [

@@ -186,8 +186,9 @@ class TaxOptions(Strict):
         description="Each December, sell the equity whose gains fit into the tax-free room of the "
         "year and buy it back at the next price: the Sparer-Pauschbetrag left and what your other "
         "income leaves of the Grundfreibetrag, where the Günstigerprüfung refunds the flat tax. A "
-        "later sale then pays less tax. It never uses up carried losses, neither of the income tax "
-        "nor of capital income. A voluntary member of the statutory health insurance in the next "
+        "later sale then pays less tax. Carried losses come off a gain first, of the income tax "
+        "and of capital income, so it uses them only where the tax-free room beyond them is at "
+        "least as large. A voluntary member of the statutory health insurance in the next "
         "January realizes only what keeps the contribution of that year at its minimum",
     )
     pkv: bool = Field(

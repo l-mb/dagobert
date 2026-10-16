@@ -30,23 +30,43 @@ rule `gkv`; the run: rule `engine`. The inputs: `docs/manual/configuration.md`, 
   the Werbungskosten and the Sonderausgaben of rule `deductions` and the Verlustvortrag left,
   without and with the capital income of the year; a negative zvE from the Sonderausgaben (PKV
   premiums, the Pauschbetrag of §10c: 13,384 € of room in a year without income) carries nothing
-  and widens the room.
-- A harvest never uses up carried losses. The tariff part is 0 in a year with a severance (the
-  Fünftelregelung, §34; also a bAV lump sum with `fuenftel`) and while a Verlustvortrag (§10d) is
-  left with the capital income of the year (`Zve.left_capital`, also of a negative Gesamtbetrag of
-  the year): it would use up losses that offset the tariff of a later year. No room at all while
-  the §20 loss pot holds losses (`Core.losses`, also those of `tax.capital_losses` at the start):
-  `capital_gains_tax` takes the pot first (§20 Abs. 6 S. 2), which would shelter the next sale at
-  once, while a stepped-up pooled basis reaches each later sale by its share: tax earlier. The
-  design (C8, C11) took the pot as the cheapest step-up; `engineer`, 2,000 paths: median end net
-  worth −3,001 € with it, +170 € without (5th percentile 0).
+  and widens the room. A `cap` bounds the Pauschbetrag and the tariff part together.
+- The loss pots (issue #6, 2026-10-16). A gain uses up a pot first: the §20 pot (`Core.losses`, also
+  of `tax.capital_losses`) before the Pauschbetrag (§20 Abs. 6 S. 2, `capital_gains_tax`), the
+  Verlustvortrag left with the capital income of the year (`Zve.left_capital`, §10d Abs. 2; the
+  Günstigerprüfung adds the gain to the Gesamtbetrag der Einkünfte, §32d Abs. 6 S. 1) before the
+  tariff room, which beyond it is `grundfreibetrag − Zve.capital − Zve.loss_capital − Zve.alg1` (a
+  loss of the year joins the pot). `tax._along`: a pot goes along with the room beyond it only where
+  that room is at least the pot, so the basis steps up at least twice each pot used (with both at
+  once the §20 gate counts the Verlustvortrag as room: 4/3 of both at worst, the Pauschbetrag used,
+  the tariff room the §10d pot, the §20 pot twice it; an approximation); else that room closes, for
+  the §20 pot all of it, for the §10d pot the tariff part. Why: a §20 pot offsets the next capital
+  income at once (often the next Vorabpauschale), a Verlustvortrag the tariff of the next year with
+  income, at most the top rate with Soli and church tax (47.5%, 51.5% at 9%), below twice the flat
+  rate (52.75%, 55.98%); a stepped-up pooled basis reaches each later sale by its share and the end.
+  Approximations: no discounting, no look at the later years (a pot that offsets income below the
+  Grundfreibetrag saves nothing).
+- The tariff part is 0 in a year with a severance (the Fünftelregelung, §34; also a bAV lump sum
+  with `fuenftel`) and, with `tax.loss_carryback`, in a year whose own Gesamtbetrag with the
+  capital income is negative (`Zve.loss_capital`): a gain would shrink the loss that goes back,
+  which may refund more than the top rate (into a year of the Fünftelregelung); not in the first
+  year of a run (`assessed` empty), whose loss goes forward only, but in a year whose earlier
+  years have no room (an approximation). A loss that goes forward only joins the pot.
+- Measured on a copy of `engineer` (2,000 paths, seed 42; the median real end net worth against
+  the rule before, no room while a pot held losses): every §20 pot along −555 to −3,865 € over the
+  ten scenarios (`plan` −2,817 €, seed 7 alike, as the −3,001 € of the first design C8, C11); the
+  rule here +7 to +531 € (`plan` +263 €, paired +172 €; the 5th percentile +14 to +572 €). The §20
+  gate alone at half the pot gave +33 to +762 €, at twice the pot +0 to +531 €: the pot itself
+  keeps one rule for both pots.
 - The step (`Settlement._harvest`, December only): after the Vorabpauschale and the interest took
   their part of the Pauschbetrag, before `year_settlement`, whose `YearIncome` it rebuilds with the
-  new capital income. `gain = min(room × deflator, taxable_gain⁺)`, `taxable_basis += gain`, its
-  `_flat_tax` joins the bill, and the Günstigerprüfung of the same settlement refunds it: the cash
-  never falls. `liquid` rises by gain × `flat_rate` (`_latent_tax`) with no cash moved, so the
-  spending rule, `broke`, the difference of two runs and the end wealth see the tax saved. A sale
-  for the December bill after it (`_settle_late_sales`) pays the tax on what exceeds the room.
+  new capital income. The `cap` beyond the §20 pot is the taxable gain held (so a gate sees what
+  the equity holds) and the KV room below. `gain = min(room × deflator, taxable_gain⁺)`,
+  `taxable_basis += gain`, its `_flat_tax` joins the bill, and the Günstigerprüfung of the same
+  settlement refunds it: the cash never falls. `liquid` rises by gain × `flat_rate`
+  (`_latent_tax`) with no cash moved, so the spending rule, `broke`, the difference of two runs
+  and the end wealth see the tax saved. A sale for the December bill after it
+  (`_settle_late_sales`) pays the tax on what exceeds the room.
   Equity only: gold and crypto keep their lots (a rebuy restarts the §23 period, BMF 2025-03-06 Rn.
   55), deposits and the bucket hold no gain to step up. No tax-loss harvesting.
 - GKV cap (always, owner W3; the formulas of rule `gkv`): when the next January is voluntary by the
@@ -54,8 +74,9 @@ rule `gkv`; the run: rule `engine`. The inputs: `docs/manual/configuration.md`, 
   `tax.gkv_from` by then, whose PKV December keeps `kv_rest`, a switch later in the year no cap; no
   salary stream active then by its dates and phases and `core.pays`, no ALG1 stream that pays or
   rests (`_alg1_holds`, rule `alg1`), no pension with `person.kvdr` that can be claimed by then;
-  masks and later events left out), the gain is at most `Health._kv_room`, so the base of the next
-  year (`_kv_last`) stays at the minimum and the harvest costs no KV. KV and PV of about 20.5% on
+  masks and later events left out), the gain beyond the §20 pot (which `kv_capital` leaves out) is
+  at most `Health._kv_room`, the `cap` before the gates of the pots, so the base of the next year
+  (`_kv_last`) stays at the minimum and the harvest costs no KV. KV and PV of about 20.5% on
   the base after the Teilfreistellung are 14.4% of the gain against 18.5% of tax later: the cap pays
   only through discounting and a later sale free of KV. A compulsory January (a job, ALG1, the KVdR)
   takes the tax room: after a December of ALG1 whose days end next year, the voluntary months after
@@ -73,9 +94,18 @@ rule `gkv`; the run: rule `engine`. The inputs: `docs/manual/configuration.md`, 
   notice, the engine counts the harvest in the next year in full (rule `gkv`); a severance year
   harvests the Pauschbetrag only. The Vorabpauschale of a depot above about 64 k€ (the Basiszins of
   2026) takes the Pauschbetrag in each year of growth, so the room comes from a calendar year
-  without pay and without carried losses, or a year whose falling market leaves the Pauschbetrag.
-- Tests: `tests/test_harvest.py` (relations), `test_tax.py` (the room in amounts), `test_health.py`
-  (the cap), `rich_plan` of `test_golden.py` (one harvest, 2031, a career break); `gkv_plan`
+  without pay and without a pot larger than its room, or a year whose falling market leaves the
+  Pauschbetrag. No harvest outside December (a sale that a deficit forces, the month of a lump
+  sum): the settlement alone knows the income of the year. The waiver of a carryback (rule
+  `rental`) decides without the harvest, which may then take the kept loss along. A harvest raises
+  the room of its year (`Zve.room_capital`), so a loss of the next two years goes back into it by
+  up to the gain, where the tax was 0 already: the waiver keeps it only where the next year saves
+  more.
+- Tests: `tests/test_harvest.py` (relations: a §20 pot below the room along, less tax in all, one
+  beyond it waits; a Verlustvortrag along, less tax in all, beyond the room the Pauschbetrag),
+  `test_tax.py` (the room in amounts, the pots, the gates, the `cap`), `test_health.py` (the cap,
+  a §20 pot beside it), `rich_plan` of `test_golden.py` (one harvest, 2031, a career break; its
+  §20 pot goes before the December of 2026, the course loss of 2030 goes back); `gkv_plan`
   harvests once, 2043: the gift of that year pays its spending (VPW at its floor, rule `spending`)
   without a sale, and the KVdR of 2044 lifts the cap. Else its Vorabpauschale takes the
   Pauschbetrag, its sales stay within the Grundfreibetrag and the minimum base, its bAV lump sum

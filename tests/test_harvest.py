@@ -23,11 +23,19 @@ RATE = flat_rate(0.0, TY)
 # at a zvE of 0: the Grundfreibetrag, the Sonderausgaben- (§10c) and the Sparer-Pauschbetrag
 ROOM = TY.grundfreibetrag + TY.sonderausgaben_pauschbetrag + 1000
 SALARY = Stream(name="pay", kind=StreamKind.SALARY, gross=3000, index=None)
+SHOP = Stream(name="shop", kind=StreamKind.SELF_EMPLOYED, amount=-500, index=None)
+CAR = LumpSumEvent(at=date(2027, 3, 1), type="lump_sum", amount=-60_000)
 
 
 def depot(value: float = 100_000, basis: float = 50_000) -> EquityAsset:
     """An equity fund at a Teilfreistellung of 30%."""
     return EquityAsset(id="d", kind="equity", value=value, cost_basis=basis)
+
+
+def taxes(r: RunResult) -> float:
+    """The income tax, the SV and the capital tax of the run and the latent tax at its end, below
+    zero."""
+    return float(r.taxes.sum() + r.capital_taxes.sum() + r.nominal_balance["latent_tax"][-1])
 
 
 def runs(
@@ -103,16 +111,15 @@ def test_a_year_whose_sales_used_the_room_harvests_nothing() -> None:
             [],
             {},
         ),
-        ([Stream(name="shop", kind=StreamKind.SELF_EMPLOYED, amount=-500, index=None)], [], [], {}),
         ([], [], [], {"loss_carryforward": 20_000}),
     ],
-    ids=["salary", "severance", "bav lump sum", "business loss", "verlustvortrag"],
+    ids=["salary", "severance", "bav lump sum", "verlustvortrag"],
 )
 def test_without_tariff_room_the_harvest_takes_the_pauschbetrag(
     streams: list[Stream], assets: list[object], events: list[object], tax: dict[str, object]
 ) -> None:
     """A zvE above the Grundfreibetrag, a Fünftelregelung (a bAV lump sum takes it by
-    `fuenftel`), a Verlustvortrag left, also of a loss of the year: the Pauschbetrag only."""
+    `fuenftel`), a Verlustvortrag beyond the tariff room: the Pauschbetrag only."""
     pair = runs(
         *streams,
         assets=[cash(10_000), depot(), *assets],
@@ -120,6 +127,17 @@ def test_without_tariff_room_the_harvest_takes_the_pauschbetrag(
         tax=tax,
     )
     assert harvested(pair) == pytest.approx(1000)
+
+
+def test_a_loss_of_the_year_closes_the_tariff_room_only_with_a_year_to_go_back_to() -> None:
+    """§10d Abs. 1 EStG: a business loss of 2027 may go back into the salary of 2026, and a harvest
+    would shrink what it refunds: 2027 takes the Pauschbetrag only, as 2026 with its salary. In
+    the first year of a run the loss goes forward only: the harvest takes it along as a
+    Verlustvortrag."""
+    pay = SALARY.model_copy(update={"end": date(2027, 1, 1)})
+    shop = SHOP.model_copy(update={"start": date(2027, 1, 1)})
+    assert harvested(runs(pay, shop, returns=zero_returns(24)), 23) == pytest.approx(2000)
+    assert harvested(runs(SHOP)) > 1000
 
 
 def test_a_harvest_keeps_the_verlustvortrag() -> None:
@@ -143,24 +161,69 @@ def test_alg1_takes_room_from_the_harvest() -> None:
 
 
 @pytest.mark.parametrize(
-    ("rate", "tax"), [(-0.02, {}), (0.0, {"capital_losses": 4_000})], ids=["run", "start"]
+    ("rate", "tax", "pot"),
+    [(-0.02, {}, 20_000 * (1 - 0.98**12)), (0.0, {"capital_losses": 4_000}, 4_000)],
+    ids=["run", "start"],
 )
-def test_a_carried_capital_loss_waits_for_a_sale(rate: float, tax: dict[str, object]) -> None:
+def test_a_harvest_takes_a_capital_loss_pot_below_the_room_along(
+    rate: float, tax: dict[str, object], pot: float
+) -> None:
     """Fixed income loses 2% a month in 2026, or `tax.capital_losses` carries a loss to the
-    start: the loss pot (§20 Abs. 6 EStG) would come off a harvest first, so none. A car in 2027
-    sells equity whose gain uses the pot up: that December harvests again."""
+    start: the gain uses up the loss pot (§20 Abs. 6 EStG) first, and the room beyond it is
+    larger, so the harvest steps up both. With a salary from 2027 and a car that sells equity the
+    run pays less tax in all, paid and latent, than without the harvest."""
     returns = zero_returns(24)
     returns.rates["fixed_income"][:, :12] = rate
     bucket = FixedIncomeAsset(id="f", kind="fixed_income", value=20_000)
-    car = LumpSumEvent(at=date(2027, 3, 1), type="lump_sum", amount=-60_000)
-    pair = runs(
+    pay = SALARY.model_copy(update={"start": date(2027, 1, 1)})
+    pair = on, off = runs(
+        pay,
         assets=[cash(10_000), depot(), bucket],
-        scenario=Scenario(name="t", events=[car]),
+        scenario=Scenario(name="t", events=[CAR]),
         returns=returns,
         tax=tax,
     )
+    assert harvested(pair, 11) == pytest.approx(pot + ROOM)
+    assert taxes(on) > taxes(off)  # below zero: less tax
+
+
+def test_a_capital_loss_pot_beyond_the_room_waits_for_a_sale() -> None:
+    """A loss pot of 20,000 €: a harvest would use up more of it than it steps up beyond it, so
+    none. A car in 2027 sells equity whose gain uses most of the pot: that December takes the rest
+    along with the room."""
+    pair = runs(
+        returns=zero_returns(24),
+        scenario=Scenario(name="t", events=[CAR]),
+        tax={"capital_losses": 20_000},
+    )
     assert harvested(pair, 11) == 0
-    assert harvested(pair, 23) > 0
+    assert harvested(pair, 23) > ROOM
+
+
+@pytest.mark.parametrize(
+    ("streams", "tax", "pot"),
+    [
+        ([], {"loss_carryforward": 5_000}, 5_000),
+        ([SHOP], {"loss_carryback": False}, 6_000),
+    ],
+    ids=["carried", "loss forward only"],
+)
+def test_a_verlustvortrag_below_the_tariff_room_goes_along(
+    streams: list[Stream], tax: dict[str, object], pot: float
+) -> None:
+    """A Verlustvortrag (§10d Abs. 2 EStG), from before the start or a business loss of the year
+    that goes forward only, comes off the gain before the tariff room, which is larger: the harvest
+    takes it along."""
+    assert harvested(runs(*streams, tax=tax)) == pytest.approx(pot + ROOM)
+
+
+def test_a_harvest_that_takes_the_verlustvortrag_along_pays_less_tax_in_all() -> None:
+    """5,000 € carried from before the start go with the harvest of 2026: the salary of 2027 pays
+    more income tax, the stepped-up basis saves more flat tax, paid and latent."""
+    pay = SALARY.model_copy(update={"start": date(2027, 1, 1)})
+    on, off = runs(pay, returns=zero_returns(24), tax={"loss_carryforward": 5_000})
+    assert on.taxes.sum() < off.taxes.sum()  # below zero: more tax
+    assert taxes(on) > taxes(off)
 
 
 def test_a_negative_zve_from_the_premiums_widens_the_room() -> None:

@@ -144,13 +144,20 @@ class Settlement(Income, Portfolio):
     def _harvest(self, year: tax.YearIncome) -> FloatArray:
         """Sell the equity whose taxable gain fits the tax-free room of the year
         (`tax.harvest_room`) and buy it back at once: the units stay, the taxable basis rises by
-        that gain. A GKV member who is voluntary in the next January takes no more than keeps the
-        base of the next year at its minimum (`_kv_room`). Returns the flat tax, which the
-        Günstigerprüfung of the settlement refunds. A marker gives the gain before the
-        Teilfreistellung in the first December in which half of the paths harvest."""
-        room = tax.harvest_room(year, self.acc.pauschbetrag_left, self.losses, self.ty)
-        if self._voluntary_next():
-            room = np.minimum(room, np.maximum(self._kv_room(), 0.0))
+        that gain. Beyond the loss pot the gain is at most what the equity holds and, of a GKV
+        member who is voluntary in the next January, what keeps the base of the next year at its
+        minimum (`_kv_room`), so a pot goes along only where the room still pays for it. Returns
+        the flat tax, which the Günstigerprüfung of the settlement refunds. A marker gives the gain
+        before the Teilfreistellung in the first December in which half of the paths harvest."""
+        held = np.maximum(self.taxable_gain / self.deflator - self.losses, 0.0)
+        room = tax.harvest_room(
+            year,
+            self.acc.pauschbetrag_left,
+            self.losses,
+            self.ty,
+            carryback=self.a.tax.loss_carryback and bool(self.assessed),  # a year to go back to
+            cap=np.clip(self._kv_room(), 0.0, held) if self._voluntary_next() else held,
+        )
         gain = np.minimum(room * self.deflator, np.maximum(self.taxable_gain, 0.0))
         if not self.harvested and (gain > 0).mean() >= 0.5:
             self.harvested = True

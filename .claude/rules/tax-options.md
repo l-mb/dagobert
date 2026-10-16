@@ -69,8 +69,9 @@ yearly work expenses (`werbungskosten`): rule `deductions`. The inputs:
   `loss_carryforward` (rule `rental`): the sum of the Verlustverrechnungstopf that the bank still
   carries (§43a Abs. 3 S. 3) and the Feststellungsbescheid (§20 Abs. 6 S. 3 with §10d Abs. 4), into
   which a Verlustbescheinigung (§43a Abs. 3 S. 4) moves the first. It offsets later capital income
-  before the Pauschbetrag as every loss of the pot (`tax.capital_gains_tax`), closes the harvest
-  room while it lasts (rule `harvest`), and the KV of a voluntary member takes the capital income
+  before the Pauschbetrag as every loss of the pot (`tax.capital_gains_tax`), goes along with a
+  harvest only where its room is at least the pot, else closes it (rule `harvest`), and the KV of a
+  voluntary member takes the capital income
   after it (`kv_capital`, rule `gkv`; a gap there for a pot from earlier years). A loss of single
   shares (the Aktienverlusttopf of S. 4) belongs here only if the BVerfG strikes S. 4 (2 BvL 3/21 on
   BFH VIII R 11/18, undecided): a scenario sets it in its overrides to compare both outcomes. A pot

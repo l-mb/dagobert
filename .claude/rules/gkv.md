@@ -75,11 +75,11 @@ In plain English: `docs/manual/models.md`.
   counts none, and a one-off counts a year late (the law: 1/12 for twelve months from the inflow, §5
   Abs. 3).
 - The harvest (rule `harvest`) of a member who is voluntary in the next January
-  (`Health._voluntary_next`) stops at `Health._kv_room`: k × max(`kv_min_base` − `Core.kv_rest` −
-  (kv_vorab − 51 + private sales⁺ + kv_oneoff) / 12, 0) − kv_capital, k = min(i + 1, 12) the months
-  of the year in the run (as `_kv_last` divides), `kv_rest` the base of December beside `kv_last`
-  (`_pay_gkv`: the pension, the Versorgungsbezüge and the rest). So `_kv_last` of the next year
-  stays at the minimum.
+  (`Health._voluntary_next`) stops beyond the §20 pot at `Health._kv_room`: k × max(`kv_min_base`
+  − `Core.kv_rest` − (kv_vorab − 51 + private sales⁺ + kv_oneoff) / 12, 0) − kv_capital, k = min(i
+  + 1, 12) the months of the year in the run (as `_kv_last` divides), `kv_rest` the base of
+  December beside `kv_last` (`_pay_gkv`: the pension, the Versorgungsbezüge and the rest). So
+  `_kv_last` of the next year stays at the minimum.
 - Versorgungsbezüge (`Health._versorgung`): the annuity of a company pension, and of a lump sum a
   `versorgung_months`-th (120) for that many months from the month after the payout (§229 Abs. 1 S.
   3 SGB V; BVSzGs §5 Abs. 4), `PolicyState.tail` from `tail_from`, nominal, deflated each month. A

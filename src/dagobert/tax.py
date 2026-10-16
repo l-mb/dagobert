@@ -715,21 +715,38 @@ def zve(income: YearIncome, ty: TaxYear) -> Zve:
 
 
 def harvest_room(
-    income: YearIncome, pauschbetrag_left: Num, losses: Num, ty: TaxYear
+    income: YearIncome,
+    pauschbetrag_left: Num,
+    losses: Num,
+    ty: TaxYear,
+    *,
+    carryback: bool,
+    cap: Num = np.inf,
 ) -> FloatArray:
-    """The capital income after the Teilfreistellung that the year can realize free of tax and of
-    a cost later: the Sparer-Pauschbetrag left (§20 Abs. 9 EStG) and the room up to the
-    Grundfreibetrag, where the Günstigerprüfung refunds the flat tax in full (§32d Abs. 6; ALG1
-    raises the rate there, §32b). None while the loss pot `losses` holds losses: they come off
-    first (§20 Abs. 6) and would shelter the next sale in full, while a basis stepped up reaches
-    each later sale by its share. The tariff part is closed in a year of the Fünftelregelung (§34)
-    and while a Verlustvortrag is left with the capital income of the year (§10d): the harvest
-    would use up losses that offset the tariff of a later year."""
+    """The capital income after the Teilfreistellung that the year can realize free of tax now:
+    the Sparer-Pauschbetrag left (§20 Abs. 9 EStG) and the room up to the Grundfreibetrag, where
+    the Günstigerprüfung refunds the flat tax in full (§32d Abs. 6; ALG1 raises the rate there,
+    §32b), at most `cap` together. A gain uses up a loss pot first: the Verlustvortrag left with
+    the capital income of the year (§10d Abs. 2) before the tariff room, the loss pot `losses`
+    (§20 Abs. 6) before both (`_along`). The tariff part is closed in a year of the
+    Fünftelregelung (§34) and, with the `carryback`, in a year whose own loss could go back
+    (§10d Abs. 1): the harvest would shrink it."""
     z = zve(income, ty)
-    tariff = np.maximum(ty.grundfreibetrag - z.capital - z.alg1, 0.0)
-    free = (floats(income.severance) <= 0) & (z.left_capital <= 0)
-    room = pauschbetrag_left + np.where(free, tariff, 0.0)
-    return floats(np.where(floats(losses) > 0, 0.0, room))
+    # the zvE that a gain beyond the losses meets: a loss of the year joins the Verlustvortrag
+    tariff = np.maximum(ty.grundfreibetrag - z.capital - z.loss_capital - z.alg1, 0.0)
+    pauschbetrag = np.minimum(pauschbetrag_left, cap)
+    pot = z.left_capital
+    closed = (floats(income.severance) > 0) | (carryback & (z.loss_capital > 0))
+    beyond = _along(pot, np.minimum(tariff, cap - pauschbetrag - pot))
+    return _along(floats(losses), pauschbetrag + np.where(closed, 0.0, beyond))
+
+
+def _along(pot: FloatArray, room: Num) -> FloatArray:
+    """A harvest takes a loss pot that its gain uses up first along with the tax-free `room`
+    beyond it only where that room is at least the pot: the pot offsets the next income at once,
+    a basis stepped up each later sale by its share, and a Verlustvortrag saves up to the top
+    rate of the tariff, below twice the flat rate."""
+    return floats(np.where(room >= pot, pot + room, 0.0))
 
 
 def year_settlement(income: YearIncome, ty: TaxYear, *, church: float) -> YearSettlement:

@@ -105,8 +105,9 @@ the run: rule `engine`. The inputs: `docs/manual/configuration.md`, in plain Eng
 - The waiver (`Settlement._waive_back`, owner 2026-10-16): decided when a taxpayer would, with the
   return of the loss year L, in December L+1, its income known. The refund is booked there anyway,
   so no cash moves earlier and the paths do not part before. In the first settlement of L+1,
-  after `_year_income`, before `_refund_back`, the harvest (rule `harvest`: no tariff room while a
-  Verlustvortrag is left, so it sees the chosen pot) and the rounds, which keep it (`replace`).
+  after `_year_income`, before `_refund_back`, the harvest (rule `harvest`: it sees the chosen pot
+  and takes it along where the tariff room beyond it is at least the pot) and the rounds, which keep
+  it (`replace`).
   Where `loss_back` holds, L+1 settles twice on all paths: as is and with `loss_back` in the pot
   and `church_back` in its church tax paid. A path waives where what that saves (the `total` and
   the Günstigerprüfung refund, as `refund_back` and `flat_back` count them, nominal at L+1)

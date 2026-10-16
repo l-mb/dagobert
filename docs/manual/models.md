@@ -423,17 +423,42 @@ The tax-free room of a year has two parts:
 The room counts the gains after the Teilfreistellung. In a year without other income, a fund with
 a Teilfreistellung of 30% can realize 19,120 € of gains free of tax in 2026.
 
-The harvest never uses up carried losses. So it realizes nothing while you carry losses of capital
-income from earlier years: they come off the next sale first. It uses no part of the Grundfreibetrag
-while you carry a loss of the income tax (Verlustvortrag), for example of a let flat. That loss
-lowers the tax of a later year at your full rate. A year with a severance payment taxed by the
-Fünftelregelung realizes the Sparer-Pauschbetrag only.
+Carried losses come off a realized gain first. There are two kinds:
+
+- Losses of capital income from earlier years, from `tax.capital_losses` or from the plan. They
+  come off before the Sparer-Pauschbetrag.
+- A loss of the income tax (Verlustvortrag), for example of a let flat. The Günstigerprüfung adds
+  the gain to your income, and this loss comes off before the Grundfreibetrag.
+
+A gain that a loss takes saves no tax now. It uses up the loss, and the cost of your shares rises
+by the same amount. Without the harvest, the loss lowers the tax of the next sale or of the next
+Vorabpauschale. A Verlustvortrag lowers the tax of the next year with income, at your full rate. A
+higher cost lowers the tax of each later sale only by its share. So the simulation uses a loss
+only if the tax-free room beyond the loss is at least as large as the loss. Then the cost of your
+shares rises by at least twice the loss. If both kinds of losses come in one year, the cost
+rises by at least four thirds of both. If the room is smaller, the loss stays. A loss of
+capital income then stops the harvest for that year. A Verlustvortrag then stops the part of the
+Grundfreibetrag, and the harvest realizes the Sparer-Pauschbetrag only.
+
+This rule does not discount the tax saved later, and it does not look at your later years. On
+the example `engineer`, it raised the median net worth at the end in each scenario, by up to about
+500 €. A harvest that always used up the losses lowered it by up to about 3,900 €.
+
+Some years realize the Sparer-Pauschbetrag only, or nothing while a loss of capital income is
+larger than the Sparer-Pauschbetrag:
+
+- A year with a severance payment taxed by the Fünftelregelung.
+- A year with a loss of the income tax, if the loss can go back into an earlier year of the
+  simulation, also when that year has no income left to take it
+  (`tax.loss_carryback`, see [A loss of a year](#a-loss-of-a-year)). A gain makes the loss
+  smaller, and with it the refund.
 
 In the statutory health insurance, the health fund counts the capital income of a year in the
 contribution of the next year. If you are a voluntary member in the next January, the simulation
-realizes only so much that this contribution stays at its minimum. With a salary, ALG1 or the KVdR
-in January, the full room applies. A year in which you live from sales of your depot usually
-leaves no room.
+realizes only so much that this contribution stays at its minimum. The health fund does not
+count the part of a gain that a loss of capital income takes, so the harvest can use such a loss
+on top. With a salary, ALG1 or the KVdR in January, the full room applies. A year in which you
+live from sales of your depot usually leaves no room.
 
 The simulation decides your status in January in a simple way:
 
@@ -445,7 +470,8 @@ The simulation decides your status in January in a simple way:
 No cash moves. The tax on your unrealized gains falls, so your liquid wealth rises by the tax that
 you save: about 18.5% of the realized gain at a Teilfreistellung of 30%. A marker in the charts
 shows the first December in which half of the paths realize gains, with their median gain. Gold,
-crypto, deposits and fixed income realize nothing. Trading costs are left out.
+crypto, deposits and fixed income realize nothing. Trading costs are left out. The simulation
+realizes gains in December only, not in the month of a sale or of a lump sum.
 
 ## An inheritance or a gift
 

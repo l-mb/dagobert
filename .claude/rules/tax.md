@@ -75,7 +75,8 @@ sources, the tests).
   December's share, the taxable basis grows by that part (§19 Abs. 1 S. 3, 4). A loss (a year of
   interest below zero, a sale of equity below its pooled basis) goes into the general loss pot,
   which offsets later capital income before the Pauschbetrag and carries over the years (§20 Abs. 6
-  EStG, `Core.losses`). Term deposit interest is taxed in the maturity month, without
+  EStG, `Core.losses`; a harvest takes it along where its room is at least the pot, rule `harvest`).
+  Term deposit interest is taxed in the maturity month, without
   Teilfreistellung, after what is left of the Pauschbetrag. Until then the deposit counts with its
   accrued interest, and the tax on that interest is part of the latent tax. The return on cash and
   the fixed-income bucket is summed over the year, losing months offset it, and the December

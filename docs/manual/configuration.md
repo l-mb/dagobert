@@ -254,7 +254,8 @@ Overview moves it) and `scale` (the overrides of a scenario).
   - `harvest` (default false): each December, sell the equity whose gains fit into the tax-free
     room of the year, and buy it back at the next price. The room is the Sparer-Pauschbetrag that
     is left, and the part of the Grundfreibetrag that your other income leaves. A later sale then
-    pays less tax. The harvest never uses up carried losses. If you are a voluntary member of the
+    pays less tax. Carried losses come off a gain first, so the harvest uses them only if the
+    tax-free room beyond them is at least as large. If you are a voluntary member of the
     statutory health insurance in the next January, the harvest keeps the contribution of the next
     year at its minimum. In other cases this limit does not apply. See
     [How the simulation works](models.md#realizing-gains).
@@ -304,9 +305,10 @@ Overview moves it) and `scale` (the overrides of a scenario).
     that your bank still holds in its loss pot (its yearly tax statement lists them), and the
     losses of capital income in your last Feststellungsbescheid. A loss certificate of the bank
     (Verlustbescheinigung) moves the first amount into the second. They offset the capital
-    income of later years, gains and interest, before the Sparer-Pauschbetrag. While they last,
-    `harvest` realizes no gains. By law, a loss from the sale of single shares (Aktienverlusttopf)
-    offsets only gains from single shares (§20 Abs. 6 S. 4 EStG). The BVerfG checks this rule
+    income of later years, gains and interest, before the Sparer-Pauschbetrag. While they are
+    larger than the tax-free room of a year, `harvest` realizes no gains. By law, a loss from the
+    sale of single shares (Aktienverlusttopf) offsets only gains from single shares (§20 Abs. 6
+    S. 4 EStG). The BVerfG checks this rule
     (2 BvL 3/21) and did not decide yet. If it strikes the rule, such a loss offsets all capital
     income. So add a loss of single shares only in the `overrides` of a scenario, and compare that
     scenario with one without it. The simulation holds no single shares, so it has no pot for

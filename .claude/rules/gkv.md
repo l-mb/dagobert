@@ -132,9 +132,12 @@ In plain English: `docs/manual/models.md`.
   the days of the Ruhen) is free. A lump sum paid before the start leaves no tail. The 4% cut of the
   deductible KV with Krankengeld (§10 Abs. 1 Nr. 3 S. 4 EStG) is left out. The refund on application
   of the own share of the pension's KV and PV above the BBG with the salary and the
-  Versorgungsbezüge (§231 Abs. 2) is left out: a working pensioner pays too much. The KV-BBG and
-  the Bezugsgröße (`kv_min_base`, the Freigrenze) follow the CPI in the run (rule `tax`), the law
-  the wages (§6 Abs. 6 SGB V, §18 SGB IV): over decades they fall behind, more for a voluntary one.
+  Versorgungsbezüge (§231 Abs. 2) is left out: a working pensioner pays too much. The KV-BBG and the
+  Bezugsgröße (`kv_min_base`, the Freigrenze) follow the CPI in the run (rule `tax`), the law the
+  wages (§6 Abs. 6 SGB V, §18 SGB IV): over decades they fall behind, more for a voluntary one. The
+  loss pot of capital income from earlier years, also `tax.capital_losses`, lowers `kv_capital`, but
+  the Beitragsrecht knows no Verlustvortrag (SG München, BeckRS 2021, 15075, on §10d; for §20 Abs. 6
+  unverified): errs towards less contribution.
 - Tests: `tests/test_health.py` (the law in amounts, the engine as relations; the church tax
   changes no KV), `gkv_plan` of `test_golden.py` (salary, business, gap years from a depot and a
   rent, a lump sum, the KVdR, a company annuity and a Basisrente; VPW spends from the gap years;

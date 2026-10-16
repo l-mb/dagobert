@@ -150,7 +150,9 @@ forward moves the start to a later month, so that the plan starts today again. T
    [configuration](configuration.md), `tax.self_employed`). Losses that the plan carries to the new
    month for the income tax, for example of a let flat, go into `loss_carryforward`, so the years
    after the new start still get them. Scenarios that share one `loss_carryforward` get the smallest
-   of their losses, so no scenario starts with losses that it did not have. A gift before the new
+   of their losses, so no scenario starts with losses that it did not have. The losses of capital
+   income go into `capital_losses` the same way. The roll does not change them by the consumer
+   prices, because the law keeps them in nominal euros. A gift before the new
    month moves from its scenario into the gifts before the start of its relative, with the tax that
    the roll computes for it. So the tax of a later gift or inheritance still adds it (see
    [Assumptions](assumptions.md#relatives)). The roll takes the month of the gift as its scenario

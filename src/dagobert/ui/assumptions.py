@@ -152,6 +152,7 @@ LABELS: dict[KeyPath, str] = {
     ("tax", "land"): N_("Bundesland"),
     ("tax", "crypto_capital_from"): N_("Crypto taxed like shares from"),
     ("tax", "loss_carryforward"): N_("Losses carried forward €"),
+    ("tax", "capital_losses"): N_("Capital losses carried forward €"),
     ("tax", "alleinerziehend"): N_("Single parent (Entlastungsbetrag)"),
     ("tax", "self_employed"): N_("Self-employment"),
     ("tax", "self_employed", "rv"): N_("Pension insurance of a business"),
@@ -173,6 +174,7 @@ TERMS: dict[KeyPath, str] = {
     ("tax", "kv_zusatz"): "Zusatzbeitrag",
     ("tax", "church"): "Kirchensteuer",
     ("tax", "loss_carryforward"): "Verlustvortrag",
+    ("tax", "capital_losses"): "Verlustvortrag aus Kapitalvermögen",
     ("tax", "self_employed", "rv"): "Rentenversicherung (RV)",
     ("tax", "self_employed", "krankengeld"): "Krankengeld",
 }

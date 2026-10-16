@@ -2472,6 +2472,41 @@ msgstr "Verlustvortrag"
 
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid ""
+"Losses of capital income carried forward at the start (§20 Abs. 6 EStG), "
+"in euros of the start month: the losses that your bank still holds in its "
+"loss pot (its yearly tax statement) plus those of your last "
+"Feststellungsbescheid (a loss certificate of the bank moves them there). "
+"They offset later capital income, gains and interest, before the "
+"Sparer-Pauschbetrag. A loss from the sale "
+"of single shares (Aktienverlusttopf) counts here only if the BVerfG "
+"strikes §20 Abs. 6 S. 4 EStG, which lets it offset only gains of shares "
+"(2 BvL 3/21): set it in a scenario to compare both outcomes. The roll "
+"forward writes the losses that the plan carries to the new start"
+msgstr ""
+"Verluste aus Kapitalvermögen, die zum Start vorgetragen werden (§20 Abs. "
+"6 EStG), in Euro in Kaufkraft des Startmonats: die Verluste, die deine "
+"Bank noch in ihrem Verlustverrechnungstopf führt (ihre "
+"Jahressteuerbescheinigung), plus die deines letzten "
+"Feststellungsbescheids (eine Verlustbescheinigung der Bank verschiebt sie "
+"dorthin). Sie mindern spätere Kapitalerträge, Gewinne und Zinsen, vor dem Sparer-"
+"Pauschbetrag. Ein Verlust aus dem Verkauf einzelner Aktien "
+"(Aktienverlusttopf) zählt hier nur, wenn das BVerfG §20 Abs. 6 S. 4 EStG "
+"für verfassungswidrig erklärt, nach dem er nur Gewinne aus Aktien mindert"
+" (2 BvL 3/21): Trage ihn in einem Szenario ein, um beide Ausgänge zu "
+"vergleichen. Das Vorrücken des Starts trägt die Verluste ein, die der "
+"Plan bis zum neuen Start vorträgt"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid "Capital losses"
+msgstr "Kapitalverluste"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgctxt "key"
+msgid "capital_losses"
+msgstr "Kapitalverluste"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid ""
 "You raise your children alone, without another adult in the household: "
 "the Entlastungsbetrag (§24b EStG) of the tax year, higher for each "
 "further child, comes off the taxable income in each month in which a "
@@ -5635,6 +5670,10 @@ msgstr "Krypto als Kapitalertrag ab"
 #: ui/assumptions.py
 msgid "Losses carried forward €"
 msgstr "Verlustvortrag €"
+
+#: ui/assumptions.py
+msgid "Capital losses carried forward €"
+msgstr "Kapitalverlustvortrag €"
 
 #: ui/assumptions.py
 msgid "Single parent (Entlastungsbetrag)"
@@ -9978,13 +10017,14 @@ msgid ""
 "`tax.self_employed` that its scenarios take. Losses that the plan carries"
 " to the new start for the income tax (a Verlustvortrag, such as of a let "
 "flat) would be lost too: the roll writes them as `loss_carryforward` into"
-" the options `tax` that its scenarios take. A gift before the new start "
-"moves from its scenario file into the gifts before the start of its "
-"relative on the Assumptions page, with the Schenkungsteuer that the roll "
-"computes, so the ten years of §14 ErbStG keep it. The roll refuses while "
-"an event other than a stream event or a gift lies before the new start. "
-"The roll is one revision. The `Changes since` table of the Cashflows page"
-" shows what it changed in the streams."
+" the options `tax` that its scenarios take, the losses of capital income "
+"as `capital_losses`. A gift before the "
+"new start moves from its scenario file into the gifts before the start of"
+" its relative on the Assumptions page, with the Schenkungsteuer that the "
+"roll computes, so the ten years of §14 ErbStG keep it. The roll refuses "
+"while an event other than a stream event or a gift lies before the new "
+"start. The roll is one revision. The `Changes since` table of the "
+"Cashflows page shows what it changed in the streams."
 msgstr ""
 "Das Vorrücken setzt `start` in `assumptions.yaml` auf den gewählten "
 "Monat. Die Beträge in Euro in Kaufkraft des alten Starts, die den "
@@ -10009,14 +10049,15 @@ msgstr ""
 "Einkommensteuer, die der Plan zum neuen Start vorträgt (ein "
 "Verlustvortrag, etwa aus einer vermieteten Wohnung), gingen ebenso "
 "verloren: Das Vorrücken schreibt sie als `loss_carryforward` in die "
-"Optionen `tax`, die seine Szenarien verwenden. Eine Schenkung vor dem "
-"neuen Start wandert aus ihrer Szenariodatei in die Schenkungen vor dem "
-"Start ihres Angehörigen auf der Seite Annahmen, mit der Schenkungsteuer, "
-"die das Vorrücken berechnet, so dass die zehn Jahre des §14 ErbStG sie "
-"behalten. Das Vorrücken wird abgelehnt, solange ein Ereignis, das weder "
-"ein Ereignis einer Zahlung noch eine Schenkung ist, vor dem neuen Start "
-"liegt. Das Vorrücken ist eine Version. Die Tabelle `Änderungen seit` der "
-"Seite Cashflows zeigt, was es an den Zahlungen geändert hat."
+"Optionen `tax`, die seine Szenarien verwenden, die Verluste aus "
+"Kapitalvermögen als `capital_losses`. Eine Schenkung vor dem neuen Start wandert aus ihrer "
+"Szenariodatei in die Schenkungen vor dem Start ihres Angehörigen auf der "
+"Seite Annahmen, mit der Schenkungsteuer, die das Vorrücken berechnet, so "
+"dass die zehn Jahre des §14 ErbStG sie behalten. Das Vorrücken wird "
+"abgelehnt, solange ein Ereignis, das weder ein Ereignis einer Zahlung "
+"noch eine Schenkung ist, vor dem neuen Start liegt. Das Vorrücken ist "
+"eine Version. Die Tabelle `Änderungen seit` der Seite Cashflows zeigt, "
+"was es an den Zahlungen geändert hat."
 
 #: ui/overview.py
 msgid "Asset values stay as they are: the Snapshot page records them."
@@ -10169,6 +10210,16 @@ msgstr ""
 #: ui/overview.py
 #, python-brace-format
 msgid ""
+"The plan carries losses of capital income to {month}: it writes them as "
+"`capital_losses`, so they offset the capital "
+"income after it:"
+msgstr ""
+"Der Plan trägt Verluste aus Kapitalvermögen bis {month} vor: Das "
+"Vorrücken schreibt sie als `capital_losses`, damit sie die Kapitalerträge danach mindern:"
+
+#: ui/overview.py
+#, python-brace-format
+msgid ""
 "These gifts lie before {month}: it moves each into the gifts before the "
 "start of its relative, with the tax that it computes on them:"
 msgstr ""
@@ -10225,6 +10276,15 @@ msgstr "{file} behält die Gründung eines Betriebs, {month}, als `founded`."
 #, python-brace-format
 msgid "{file} keeps the losses carried, {amount}, as `loss_carryforward`."
 msgstr "{file} behält den Verlustvortrag, {amount}, als `loss_carryforward`."
+
+#: ui/overview.py
+#, python-brace-format
+msgid ""
+"{file} keeps the losses of capital income carried, {amount}, as "
+"`capital_losses`."
+msgstr ""
+"{file} behält den Verlustvortrag aus Kapitalvermögen, {amount}, als "
+"`capital_losses`."
 
 #: ui/overview.py
 #, python-brace-format

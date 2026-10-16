@@ -131,6 +131,7 @@ EXPERT = _items(
     "tax.kv_zusatz",
     "tax.crypto_capital_from",
     "tax.loss_carryforward",
+    "tax.capital_losses",
     "tax.alleinerziehend",
     "tax.self_employed",
 ) | _items(

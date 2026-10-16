@@ -254,7 +254,8 @@ class Core:
         self.flows = MonthFlows.new(self.paths)
         self._init_spending_rule()
         self.last_salary = np.zeros(self.paths)  # nominal contributory salary: the ALG1 base
-        self.losses = np.zeros(self.paths)  # general loss pot in start-year euros (§20 Abs. 6)
+        # the general loss pot of capital income (§20 Abs. 6 EStG), start-year euros
+        self.losses = np.full(self.paths, self.a.tax.capital_losses)
         self.private_losses = np.zeros(self.paths)  # §23 losses carried, start-year euros
         # the Verlustvortrag of the income tax (§10d Abs. 2 EStG), nominal as the law carries it
         self.income_losses = np.full(self.paths, self.a.tax.loss_carryforward)

@@ -131,7 +131,8 @@ simplifications): change it with the behaviour.
   deficit cover and the settlement again with what the cover sold, until no path owes a cent more
   (`Settlement._settle_december`), then the surplus is invested. The December bill therefore comes
   out of cash before anything is invested. The loss pots carry from one settlement to the next: §20
-  (`Core.losses`) and §23 (`private_losses`) in start-year euros, §10d (`income_losses`) nominal.
+  (`Core.losses`, from `tax.capital_losses`) and §23 (`private_losses`) in start-year euros, §10d
+  (`income_losses`, from `tax.loss_carryforward`) nominal.
 - Withdrawal order for deficits: cash, fixed income, equity (grossed up for capital gains tax), then
   gold and crypto in file order: first the free units of every pool, then the rest of each, the
   young units at face value (their tax comes with the settlement), the §20 part grossed up. Term

@@ -61,6 +61,17 @@ simulation applies the 2026 rules in every year. It raises their amounts, such a
 the tax-free allowance, with the consumer prices of each path, as if the law adjusted them every
 January.
 
+A loss of capital income, for example a sale of fund shares below their cost, goes into a loss pot.
+The pot offsets the capital income of later years before the tax-free allowance. The pot starts
+with `tax.capital_losses`: the losses from before the start. That is the loss pot that your bank
+still holds plus the losses of capital income in your last tax notice. The pot stays in euros of
+the start.
+
+By law, a loss from the sale of single shares offsets only gains from single shares (§20 Abs. 6
+S. 4 EStG). The Federal Constitutional Court (BVerfG) checks this rule in the case 2 BvL 3/21 and
+did not decide yet. If the court strikes the rule, such a loss offsets all capital income. So
+enter such a loss only in a scenario, and compare that scenario with one without it.
+
 If you are a member of a church (`tax.church`), the church tax adds 8% or 9% of the income tax.
 The rate depends on the Land where you live (`tax.land`). On capital income, the flat tax then
 falls a little and the church tax comes on top. The church tax that you pay in a year lowers your
@@ -733,9 +744,10 @@ Dagobert is approximate by design. These are the main simplifications:
   takes it in December of the year itself. The Basiszins of the tax year applies in every year.
   A higher Basiszins moves tax earlier, because a sale credits the Vorabpauschale.
 - A loss on shares offsets only gains on shares by law. The simulation lets it offset all capital
-  income. A bond fund is `fixed_income`, so its return pays tax every year. The law taxes a
-  Vorabpauschale each year and the rest at the sale. Funds of funds and a fund that changes its
-  class are not modeled.
+  income. So it has no pot for the losses of single shares from before the start either (see
+  `tax.capital_losses`). A bond fund is `fixed_income`, so its return pays tax every year. The law
+  taxes a Vorabpauschale each year and the rest at the sale. Funds of funds and a fund that changes
+  its class are not modeled.
 - A savings plan has no fees, and the simulation does not delete it after it skipped rates.
 - A salary conversion uses the limits of each month, a twelfth of the year. A conversion of a
   bonus, which the law lets use the rest of the yearly limit at once, is not modeled. The

@@ -12,6 +12,7 @@ from builders import fixed_run
 from ruamel.yaml import YAML
 
 from dagobert import revisions, rollforward, series
+from dagobert.engine.simulation import before
 from dagobert.loader import load_assumptions, load_plan, load_streams
 from dagobert.result import TAX
 from dagobert.series import MonthlySeries
@@ -530,6 +531,67 @@ def test_scenarios_that_share_the_options_take_the_smallest_pot(data: Path) -> N
     _scenario(data, "covered", "name: covered\nphases: [{from: 2026-01-01, phase: work}]\n")
     carried = rollforward.check(data, LATER).carried
     assert [(c.amount, c.scenarios) for c in carried] == [(12000.0, ("base", "covered"))]
+
+
+def _losing_bond(data: Path) -> None:
+    """A bond fund that loses 5% a year: a loss of capital income (§20 Abs. 6 EStG)."""
+    path = data / "assumptions.yaml"
+    path.write_text(
+        path.read_text().replace("fixed_income: {mean: 0.03}", "fixed_income: {mean: -0.05}")
+    )
+    with (data / "assets.yaml").open("a") as fh:
+        fh.write("  - id: bond\n    kind: fixed_income\n    value: 20000\n")
+
+
+def _capital_losses(data: Path, scenario: str = "base") -> float:
+    """The losses of capital income that a run of `scenario` carries to `LATER`."""
+    engine = before(load_plan(data, data / "scenarios" / f"{scenario}.yaml"), LATER)
+    assert engine is not None
+    return round(float(engine.losses[0]), 2)
+
+
+@pytest.mark.parametrize(
+    ("assumptions", "written"),
+    [
+        ("", "start: 2027-03-01\ntax: {loss_carryforward: 12000, capital_losses: POT}\n"),
+        ("tax: {}\n", "tax: {capital_losses: POT, loss_carryforward: 12000}\n"),
+        ("tax:\n  pkv: true\n", "  pkv: true\n  capital_losses: POT\n  loss_carryforward: 12000\n"),
+    ],
+    ids=["new", "empty", "block"],
+)
+def test_apply_keeps_both_loss_pots_in_one_tax(data: Path, assumptions: str, written: str) -> None:
+    """A loss of a business (§10d EStG) and of a bond fund (§20 Abs. 6 EStG) before the new start:
+    the roll writes both pots into the one `tax` that the scenario takes, both nominal."""
+    (data / "cashflows.yaml").write_text(LOSS)
+    _losing_bond(data)
+    with (data / "assumptions.yaml").open("a") as fh:
+        fh.write(assumptions)
+    pot = _capital_losses(data)
+    assert pot > 0
+    rollforward.apply(data, LATER, source="test")
+    assert written.replace("POT", str(pot)) in (data / "assumptions.yaml").read_text()
+    taken = load_assumptions(data).tax
+    assert (taken.loss_carryforward, taken.capital_losses) == (12000, pot)
+
+
+def test_a_scenario_keeps_its_own_capital_losses(data: Path) -> None:
+    """`tax.capital_losses` of a scenario that compares a decision of the BVerfG (2 BvL 3/21): the
+    roll writes what its run carries to the new start into its overrides, less the capital income
+    that the pot offset, nominal; `base` carries none."""
+    seed = 30_000
+    _scenario(
+        data,
+        "bverfg",
+        f"name: bverfg\nextends: base\noverrides:\n  tax:\n    capital_losses: {seed}\n",
+    )
+    pot = _capital_losses(data, "bverfg")
+    assert 0 < pot < seed
+    roll = rollforward.apply(data, LATER, source="test")
+    assert [(c.file, c.key, c.amount, c.scenarios) for c in roll.carried] == [
+        ("scenarios/bverfg.yaml", rollforward.CAPITAL_LOSSES, pot, ("bverfg",))
+    ]
+    bverfg = load_plan(data, data / "scenarios" / "bverfg.yaml").assumptions.tax
+    assert (bverfg.capital_losses, load_assumptions(data).tax.capital_losses) == (pot, 0)
 
 
 @pytest.mark.parametrize(

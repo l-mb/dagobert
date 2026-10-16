@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import operator
 import re
+from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date
@@ -77,12 +78,18 @@ def _replaced(path: Path, values: Mapping[Keys, Scalar | After | Key]) -> str:
     text = path.read_bytes().decode("utf-8").replace("\r\n", "\n")  # every write is LF (owner)
     doc = YAML().load(text)
     lines = _LINES.findall(text)
-    edits = [
-        _edit(path, lines, reduce(operator.getitem, k[:-1], doc), k[-1], v)
-        for k, v in values.items()
-    ]
-    for line, col, end, new in sorted(edits, reverse=True):  # from the end: positions hold
-        lines[line] = lines[line][:col] + new + lines[line][end:]
+    spots: defaultdict[tuple[int, int, int], list[str]] = defaultdict(list)
+    for k, v in values.items():
+        line, col, end, new = _edit(path, lines, reduce(operator.getitem, k[:-1], doc), k[-1], v)
+        spots[line, col, end].append(new)
+    for (line, col, end), texts in sorted(spots.items(), reverse=True):  # from the end
+        row = lines[line]
+        # keys added at one place: into `{}` a comma between them, elsewhere each ends itself;
+        # behind a last line without its newline each starts one, which they share
+        joint = ", " if row[col - 1 : end + 1] == "{}" else ""
+        lead = "\n" if not joint and all(t.startswith("\n") for t in texts) else ""
+        added = joint.join(t.removeprefix(lead) for t in sorted(texts))
+        lines[line] = row[:col] + lead + added + row[end:]
     return "".join(lines)
 
 

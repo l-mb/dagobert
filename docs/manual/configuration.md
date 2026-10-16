@@ -282,9 +282,22 @@ Overview moves it) and `scale` (the overrides of a scenario).
     before the Sonderausgaben. The `Roll forward` of the Overview writes the losses that the plan
     carries to the new start, into the `tax` that the scenario takes: that of its `overrides` or
     of a scenario that it extends, else that of `assumptions.yaml`, where it adds `tax` when the
-    file has none. Scenarios that share one `tax` take the smallest amount. The losses of the
-    stock sales are another pot and stay out
-    ([issue #12](https://github.com/l-mb/dagobert/issues/12)).
+    file has none. Scenarios that share one `tax` take the smallest amount. The losses of
+    capital income are another pot: see `capital_losses`.
+  - `capital_losses` (default 0, at least 0): the losses of capital income that you carry forward
+    at the start (§20 Abs. 6 EStG), in euros of `start`. Enter the sum of two amounts: the losses
+    that your bank still holds in its loss pot (its yearly tax statement lists them), and the
+    losses of capital income in your last Feststellungsbescheid. A loss certificate of the bank
+    (Verlustbescheinigung) moves the first amount into the second. They offset the capital
+    income of later years, gains and interest, before the Sparer-Pauschbetrag. While they last,
+    `harvest` realizes no gains. By law, a loss from the sale of single shares (Aktienverlusttopf)
+    offsets only gains from single shares (§20 Abs. 6 S. 4 EStG). The BVerfG checks this rule
+    (2 BvL 3/21) and did not decide yet. If it strikes the rule, such a loss offsets all capital
+    income. So add a loss of single shares only in the `overrides` of a scenario, and compare that
+    scenario with one without it. The simulation holds no single shares, so it has no pot for
+    shares alone. The `Roll forward` writes the losses that the plan carries to the new start
+    into the same `tax` as `loss_carryforward`. It changes them by the consumer prices, because
+    the simulation keeps them in euros of the start.
   - `alleinerziehend` (default false): you raise your children alone, with no other adult in the
     household. The Entlastungsbetrag (§24b EStG) of 4,260 € a year in 2026, and 240 € more for each
     further child, comes off the income in each month in which a child of `children_born` counts.

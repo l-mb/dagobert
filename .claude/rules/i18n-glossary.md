@@ -36,6 +36,7 @@ this table.
 | sale / purchase / property | Verkauf / Kauf / Immobilie | |
 | let (a property) / rental income / bought in / building share / financed property | vermietet / Mieteinnahmen / Kaufmonat / Gebäudeanteil / Finanzierte Immobilie | a field reads as its noun, not „gekauft im", „finanziert" |
 | AfA, AfA rate / Werbungskosten / Verlustvortrag / Feststellungsbescheid | AfA, AfA-Satz / Werbungskosten / Verlustvortrag / Feststellungsbescheid | as the law writes them; English help: `depreciation (AfA)`, `losses carried forward` |
+| losses of capital income / Capital losses carried forward € (`tax.capital_losses`) / Aktienverlusttopf | Verluste aus Kapitalvermögen / Kapitalverlustvortrag € / Aktienverlusttopf | the label fits one line beside its neighbours, the term of its help „Verlustvortrag aus Kapitalvermögen"; the key „Kapitalverluste"; loss certificate „Verlustbescheinigung" |
 | Sonderausgaben / donation / childcare / household services / craftsman's labour / deductible as / own premium (`premium`) / Kinderzulage | Sonderausgaben / Spende / Kinderbetreuung / haushaltsnahe Dienstleistung / Handwerkerleistung / absetzbar als / Eigenbeitrag (eigener Beitrag pro Monat) / Kinderzulage | rule `deductions`; `deductible` stays „Absetzbar", one term, one word; never „Steuerabzug": that is the withholding |
 | loan / interest / principal / fixed for / repayment (a `repay` event) | Darlehen / Zinsen / Tilgung / Zinsbindung / Sondertilgung | |
 | term deposit / overnight | Festgeld / Tagesgeld | |

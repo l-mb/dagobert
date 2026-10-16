@@ -99,6 +99,22 @@ def test_the_roll_forward_lists_and_keeps_the_losses_carried(data: Path) -> None
     assert load_assumptions(data).tax.loss_carryforward == 1000 * months
 
 
+def test_the_roll_forward_lists_and_keeps_the_capital_losses_carried(data: Path) -> None:
+    """Losses of capital income carried to the start (§20 Abs. 6 EStG) carry on to the new one."""
+    with (data / "assumptions.yaml").open("a") as fh:
+        fh.write("tax: {capital_losses: 5000}\n")
+    at = AppTest.from_string(OVERVIEW.format(data=str(data)), default_timeout=60).run()
+    assert not at.exception
+    carried = next(d.value for d in at.dataframe if "capital_losses" in d.value.columns)
+    [[pot, *where]] = carried.values.tolist()
+    assert where == ["all", "assumptions.yaml"]
+    at.button(key="overview-roll").click().run()
+    assert not at.exception
+    kept = f"assumptions.yaml keeps the losses of capital income carried, {pot}"
+    assert kept in at.success[0].value
+    assert format_eur(load_assumptions(data).tax.capital_losses, cents=True) == pot
+
+
 def test_overview_shows_the_plan(data: Path) -> None:
     """The outlook of the main scenario, the first of `app.yaml`, by its name and note; the target
     names the age that the run takes the chance to run out at."""

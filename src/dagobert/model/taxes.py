@@ -235,6 +235,19 @@ class TaxOptions(Strict):
         "before the Sonderausgaben, in euros of `start`. The roll forward writes the losses that "
         "the plan carries to the new start",
     )
+    capital_losses: Euros = Field(
+        default=0.0,
+        ge=0,
+        description="Losses of capital income carried forward at the start (§20 Abs. 6 EStG), in "
+        "euros of the start month: the losses that your bank still holds in its loss pot (its "
+        "yearly tax statement) plus those of your last Feststellungsbescheid (a loss certificate "
+        "of the bank moves them there). They offset later capital income, gains and interest, "
+        "before the "
+        "Sparer-Pauschbetrag. A loss from the sale of single shares (Aktienverlusttopf) counts "
+        "here only if the BVerfG strikes §20 Abs. 6 S. 4 EStG, which lets it offset only gains of "
+        "shares (2 BvL 3/21): set it in a scenario to compare both outcomes. The roll forward "
+        "writes the losses that the plan carries to the new start",
+    )
     alleinerziehend: bool = Field(
         default=False,
         description="You raise your children alone, without another adult in the household: the "

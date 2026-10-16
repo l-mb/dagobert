@@ -35,10 +35,11 @@ rule `gkv`; the run: rule `engine`. The inputs: `docs/manual/configuration.md`, 
   Fünftelregelung, §34; also a bAV lump sum with `fuenftel`) and while a Verlustvortrag (§10d) is
   left with the capital income of the year (`Zve.left_capital`, also of a negative Gesamtbetrag of
   the year): it would use up losses that offset the tariff of a later year. No room at all while
-  the §20 loss pot holds losses (`Core.losses`): `capital_gains_tax` takes the pot first (§20 Abs. 6
-  S. 2), which would shelter the next sale at once, while a stepped-up pooled basis reaches each
-  later sale by its share: tax earlier. The design (C8, C11) took the pot as the cheapest step-up;
-  `engineer`, 2,000 paths: median end net worth −3,001 € with it, +170 € without (5th percentile 0).
+  the §20 loss pot holds losses (`Core.losses`, also those of `tax.capital_losses` at the start):
+  `capital_gains_tax` takes the pot first (§20 Abs. 6 S. 2), which would shelter the next sale at
+  once, while a stepped-up pooled basis reaches each later sale by its share: tax earlier. The
+  design (C8, C11) took the pot as the cheapest step-up; `engineer`, 2,000 paths: median end net
+  worth −3,001 € with it, +170 € without (5th percentile 0).
 - The step (`Settlement._harvest`, December only): after the Vorabpauschale and the interest took
   their part of the Pauschbetrag, before `year_settlement`, whose `YearIncome` it rebuilds with the
   new capital income. `gain = min(room × deflator, taxable_gain⁺)`, `taxable_basis += gain`, its

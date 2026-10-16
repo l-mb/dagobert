@@ -55,6 +55,13 @@ def test_scalars_add_a_key_after_another(data: Path) -> None:
     assert out["cashflows.yaml"] == block.replace("# yearly\n", "# yearly\n    start: 2026-01-01\n")
 
 
+def test_scalars_add_two_keys_behind_a_last_line_without_its_newline(data: Path) -> None:
+    (data / "assumptions.yaml").write_text("tax:\n  pkv: true", newline="\n")
+    spots: dict[Keys, After] = {("tax", "b"): After("pkv", 2), ("tax", "a"): After("pkv", 1)}
+    out = scalars(data, {"assumptions.yaml": spots})["assumptions.yaml"]
+    assert out == "tax:\n  pkv: true\n  a: 1\n  b: 2\n"
+
+
 @pytest.mark.parametrize(
     ("null", "written"),
     [

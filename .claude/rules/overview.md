@@ -74,7 +74,8 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   consumer price factor with its source, the amounts it changes (item, old, new, file; on a phone
   the item at 140 px, so old and new fit), the periodic streams that take the old start, the
   businesses that keep their founding (founded, scenarios, file), the losses carried to the new
-  start (`loss_carryforward`, scenarios, file), the gifts that move into `given` (item, month,
+  start, a grid per pot (`loss_carryforward` or `capital_losses`, scenarios, file; `CARRIED`,
+  `KEPT`), the gifts that move into `given` (item, month,
   value, tax, file; rule `estates`), and the button; these grids (`_roll_grid`) at most 250 px high,
   on a phone 160 px, so a swipe beside them still scrolls the page in landscape, a shorter list as
   high as its rows; after the roll a summary above it; an input changed since the list drew refuses

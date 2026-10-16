@@ -806,6 +806,7 @@ VPW = {"base": "no_pay", "categories": ["fun"], "vpw": {}}
         (Assumptions, {"spending": VPW | {"increase": 0.1}}, "VPW replaces the cut"),
         (Assumptions, {"spending": VPW | {"categories": []}}, "VPW needs the flexible"),
         (Assumptions, {"spending": VPW | {"vpw": {"growth": 0.11}}}, "less than or equal to 0.1"),
+        (Assumptions, {"tax": {"capital_losses": -1}}, "greater than or equal to 0"),
         (
             Assumptions,
             {"care": CARE | {"hazard": [{"age": 80, "factor": 0.1}, {"age": 80, "factor": 0.2}]}},

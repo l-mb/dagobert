@@ -48,6 +48,7 @@ KEPT = (*STATE_EVENTS, GiftEvent)  # events before the new start that refuse no 
 DISABILITY = "disability"  # the kind of a forced onset of a disability (`disability.at`)
 OPTIONS: Keys = ("tax", "self_employed")  # the social insurance of a business
 LOSSES = "loss_carryforward"  # of the options `tax`: the Verlustvortrag (§10d EStG)
+CAPITAL_LOSSES = "capital_losses"  # of the options `tax`: the losses of §20 Abs. 6 EStG
 START = "start"
 
 
@@ -411,15 +412,17 @@ class Founded:
 
 @dataclass(frozen=True)
 class Carried:
-    """The Verlustvortrag (§10d EStG) that a run builds up to the new start, nominal: a run from
-    the new start would lose it. The roll writes it as `loss_carryforward` into the options `tax`
-    at `keys` in `file` that `scenarios` take, behind the key `after` (`FIRST`: as their first
-    entry, None: in place); without such options, as a new `tax` behind `start` in
-    `assumptions.yaml` (`keys` empty)."""
+    """A loss pot that a run builds up to the new start: a run from the new start would lose it.
+    `key` names it: `LOSSES`, the Verlustvortrag (§10d EStG), or `CAPITAL_LOSSES`, the losses of
+    capital income (§20 Abs. 6 EStG), both nominal as the law carries them. The roll writes it as
+    `key` into the options `tax` at `keys` in `file` that `scenarios` take, behind the key `after`
+    (`FIRST`: as their first entry, None: in place); without such options, into a new `tax` behind
+    `start` in `assumptions.yaml` (`keys` empty)."""
 
     file: str
     keys: Keys
     after: str | First | None
+    key: str
     amount: float
     scenarios: tuple[str, ...]
 
@@ -434,11 +437,13 @@ def built(data_dir: Path, new: date) -> tuple[list[Founded], list[Carried]]:
     the nearest `overrides` of its `extends` chain that hold them, else `assumptions.yaml`.
     `Founded`: a business that runs, in a scenario without `founded` and with the options
     `tax.self_employed` (without them `rv` is `none`, which takes no founding); scenarios that
-    share them take the earliest month. `Carried`: the smallest Verlustvortrag of the scenarios
-    that share the options (errs towards more tax), where it differs from the one they take
-    now."""
+    share them take the earliest month. `Carried`: per pot the smallest of the scenarios that
+    share the options (errs towards more tax), where it differs from the one they take now: the
+    Verlustvortrag (`Core.income_losses`) and the losses of capital income (`Core.losses`), as
+    written: the law keeps both nominal, so a pot that the run leaves alone stays as it is."""
     founded: dict[Anchor, tuple[date, list[str]]] = {}
-    carried: dict[Anchor, tuple[float, list[float], list[str]]] = {}  # now, pots, scenarios
+    # by pot and options: the pot that they take now, the pots of the runs, the scenarios
+    carried: dict[tuple[str, Anchor], tuple[float, list[float], list[str]]] = {}
     assumptions = read_yaml(data_dir / "assumptions.yaml")
     for name, path in concrete_scenarios(data_dir).items():
         plan = load_plan(data_dir, path)
@@ -450,17 +455,20 @@ def built(data_dir: Path, new: date) -> tuple[list[Founded], list[Carried]]:
         if month is not None and spot is not None:
             earliest, names = founded.get(spot, (month, []))
             founded[spot] = (min(month, earliest), [*names, name])
-        spot = _options(path, assumptions, ("tax",), LOSSES) or ("assumptions.yaml", (), START)
-        _now, pots, names = carried.setdefault(
-            spot, (plan.assumptions.tax.loss_carryforward, [], [])
-        )
-        pots.append(round(float(engine.income_losses[0]), 2))
-        names.append(name)
+        taken = plan.assumptions.tax
+        for key, now, pot in (
+            (LOSSES, taken.loss_carryforward, engine.income_losses[0]),
+            (CAPITAL_LOSSES, taken.capital_losses, engine.losses[0]),
+        ):
+            spot = _options(path, assumptions, ("tax",), key) or ("assumptions.yaml", (), START)
+            _now, pots, names = carried.setdefault((key, spot), (now, [], []))
+            pots.append(round(float(pot), 2))
+            names.append(name)
     return (
         [Founded(*spot, month, tuple(names)) for spot, (month, names) in founded.items()],
         [
-            Carried(*spot, min(pots), tuple(names))
-            for spot, (now, pots, names) in carried.items()
+            Carried(*spot, key, min(pots), tuple(names))
+            for (key, spot), (now, pots, names) in carried.items()
             if min(pots) != now
         ],
     )
@@ -699,7 +707,7 @@ def apply(
     data_dir: Path, new: date, *, source: str, read: Sequence[revisions.Seen] | None = None
 ) -> Roll:
     """Re-base the amounts, write the old start into the periodic streams without one, the
-    founding of a business that runs before the new start, the Verlustvortrag that the run carries
+    founding of a business that runs before the new start, the loss pots that the run carries
     there and `start`, move the gifts before it into `given` of their relatives (`Edit.onto` the
     scalars: those files are dumped once), all files in one checked write, one revision of
     `source`. `check` runs inside the write, on the newest inputs; with `read` (`seen`, when the
@@ -722,12 +730,16 @@ def apply(
             values[f.file][(*f.keys, "founded")] = (
                 f.month if f.after is None else After(f.after, f.month)
             )
+        fresh: dict[str, Scalar] = {}  # the pots without options `tax` to hold them
         for loss in roll.carried:
-            pot = loss.amount if loss.after is None else After(loss.after, loss.amount)
             if loss.keys:
-                values[loss.file][(*loss.keys, LOSSES)] = pot
-            else:  # no options `tax` to hold it
-                values[loss.file]["tax",] = After(START, {LOSSES: loss.amount})
+                values[loss.file][(*loss.keys, loss.key)] = (
+                    loss.amount if loss.after is None else After(loss.after, loss.amount)
+                )
+            else:
+                fresh[loss.key] = loss.amount
+        if fresh:
+            values["assumptions.yaml"]["tax",] = After(START, fresh)
         values["assumptions.yaml"]["start",] = roll.cpi.new
         texts = scalars(data_dir, values)
         for edit in _moving(roll.gifts) if roll.gifts else []:

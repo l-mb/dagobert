@@ -55,7 +55,8 @@ paths:
   lacks behind an entry whose value takes one line: on a line of its own in a block mapping, after a
   comma in a flow mapping; its value a scalar or a flow mapping of scalars (the new `tax` of a roll
   forward, rule `rollforward`); `FIRST` puts it in front of the first entry, in its column, or into
-  `{}` (which `ruamel.yaml` gives no flow style): a mapping of mappings only.
+  `{}` (which `ruamel.yaml` gives no flow style): a mapping of mappings only. Keys added at one
+  place (the two loss pots of a roll) go in in the order of their text, into `{}` with a comma.
 - `assets.yaml` and `cashflows.yaml` keep one block mapping per row. `ruamel.yaml` drops
   comments inside flow mappings (`- { ... }`), so do not reintroduce that layout. The store
   writes no anchors: one `asof` date on several rows would otherwise become `&id001`.

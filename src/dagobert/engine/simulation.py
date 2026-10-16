@@ -170,8 +170,9 @@ def simulate(plan: Plan, returns: Returns, model: str) -> RunResult:
 def before(plan: Plan, until: date) -> Engine | None:
     """A `fixed` run of `plan` from its start through the month before `until`, for what it
     built by then (the roll forward): the first month of a business (`Core.first_profit`), the
-    founding that the engine takes without `tax.self_employed.founded`, and the Verlustvortrag
-    (`Core.income_losses`). None when `until` is not after the start."""
+    founding that the engine takes without `tax.self_employed.founded`, the Verlustvortrag
+    (`Core.income_losses`) and the losses of capital income (`Core.losses`). None when `until` is
+    not after the start."""
     months = months_between(plan.assumptions.start, until)
     if months <= 0:
         return None

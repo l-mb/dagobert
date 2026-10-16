@@ -7,7 +7,7 @@ paths:
   - "tests/test_{tax,sv,income,golden,health}.py"
 ---
 
-# Church tax, the own Zusatzbeitrag, the switch to the GKV
+# Church tax, the own Zusatzbeitrag, the switch to the GKV, the capital losses at the start
 
 Options of the person in `tax` (`model.taxes.TaxOptions`, beside `pkv`), the law checked at
 gesetze-im-internet.de on 2026-10-13. The rest of the tax and SV law: rule `tax`; a business: rule
@@ -62,3 +62,19 @@ gesetze-im-internet.de on 2026-10-13. The rest of the tax and SV law: rule `tax`
   names it: the PKV subsidy of the employer (§257 Abs. 2 SGB V, `TaxYear.kv_half`) and of the DRV
   (§106 Abs. 3 SGB VI), the caps of the Agentur, the Vorsorgepauschale of ALG1 (§153 Abs. 1 S. 4
   SGB III).
+- Capital losses at the start (`tax.capital_losses`, `Euros`, at least 0, default 0; owner
+  2026-10-16; §20 Abs. 6 EStG read on gesetze-im-internet.de that day): the start of the general
+  loss pot of capital income, `Core.losses` in start-year euros (rule `tax`), beside the §10d pot
+  `loss_carryforward` (rule `rental`): the sum of the Verlustverrechnungstopf that the bank still
+  carries (§43a Abs. 3 S. 3) and the Feststellungsbescheid (§20 Abs. 6 S. 3 with §10d Abs. 4), into
+  which a Verlustbescheinigung (§43a Abs. 3 S. 4) moves the first. It offsets later capital income
+  before the Pauschbetrag as every loss of the pot (`tax.capital_gains_tax`), closes the harvest
+  room while it lasts (rule `harvest`), and the KV of a voluntary member takes the capital income
+  after it (`kv_capital`, rule `gkv`; a gap there for a pot from earlier years). A loss of single
+  shares (the Aktienverlusttopf of S. 4) belongs here only if the BVerfG strikes S. 4 (2 BvL 3/21 on
+  BFH VIII R 11/18, undecided): a scenario sets it in its overrides to compare both outcomes. A pot
+  of the shares alone is a gap (rule `tax`). The roll forward writes the pot of the run at the new
+  start, times the consumer prices (rule `rollforward`). The Tax tab: `Capital losses carried
+  forward €` (term `Verlustvortrag aus Kapitalvermögen`), after `loss_carryforward`; `mode.EXPERT`.
+  Tests: `test_portfolio.py` (with and without it, at 0), `test_harvest.py`, `test_model.py`,
+  `rich_plan` (2,500 €, used up in 2026).

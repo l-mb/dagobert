@@ -42,8 +42,10 @@ The page has four tabs:
   works](models.md#a-change-from-the-pkv-to-the-gkv)), the Zusatzbeitrag of your Krankenkasse in the
   statutory health insurance (empty: the average of the year), the church tax (`Church tax`) with the Land where you
   live (`Bundesland`), and the first month in which a purchase of crypto counts as capital income
-  (`Crypto taxed like shares from`), and the losses of earlier years that your last tax notice
-  carries forward (`Losses carried forward €`, the Verlustvortrag). Switch on `Single parent
+  (`Crypto taxed like shares from`), the losses of earlier years that your last tax notice
+  carries forward (`Losses carried forward €`, the Verlustvortrag), and the losses of capital
+  income from before the start (`Capital losses carried forward €`, see [How the simulation
+  works](models.md#each-month)). Switch on `Single parent
   (Entlastungsbetrag)` when you raise your children with no other adult in the household. The select
   `Bundesland` shows the name of the Land, and the file keeps its code, such as `BY`. If no tax year
   is selected, the plan takes the newest tax year up to the year of the simulation start. The page

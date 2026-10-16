@@ -9,7 +9,7 @@ import pytest
 from builders import booked, cash, gold, phases, plan, purchase, zero_returns, zero_run
 
 from dagobert import budget
-from dagobert.engine.simulation import simulate
+from dagobert.engine.simulation import Engine, simulate
 from dagobert.model.assets import (
     CryptoAsset,
     EquityAsset,
@@ -96,6 +96,44 @@ def test_a_loss_on_fixed_income_carries_into_the_next_year() -> None:
     assert -r.capital_taxes[0, 12:].sum() == pytest.approx(
         (interest - loss) * flat_rate(0.0, TY), rel=1e-6
     )
+
+
+SEED = 5_000.0
+
+
+def _interest(rate: float, **tax: float) -> tuple[RunResult, float]:
+    """A year of 100,000 € of fixed income at `rate` a month without a Sparer-Pauschbetrag, and
+    the loss pot (§20 Abs. 6 EStG) at its end. Other income keeps the tariff above the flat rate,
+    so the Günstigerprüfung refunds nothing."""
+    p = plan(
+        [
+            Stream(name="rent", kind=StreamKind.OTHER_INCOME, amount=10_000, index=None),
+            Stream(name="living", amount=-100, index=None),
+        ],
+        [cash(), FixedIncomeAsset(id="f", kind="fixed_income", value=100_000)],
+        tax={"sparer_pauschbetrag": 0} | tax,
+    )
+    returns = zero_returns(12)
+    returns.rates["fixed_income"][:] = rate
+    engine = Engine(p, returns, "fixed")
+    return engine.run(), float(engine.losses[0])
+
+
+@pytest.mark.parametrize("rate", [0.01, 0.002, 0.0], ids=["above the pot", "below it", "none"])
+def test_a_capital_loss_carried_to_the_start_offsets_later_capital_income(rate: float) -> None:
+    """`tax.capital_losses` seeds the loss pot: the interest pays less flat tax, and the pot
+    shrinks by the interest that it offsets, at most to 0; without interest it stays."""
+    (plain, _), (seeded, pot) = _interest(rate), _interest(rate, capital_losses=SEED)
+    offset = (seeded.capital_taxes.sum() - plain.capital_taxes.sum()) / flat_rate(0.0, TY)
+    interest = 100_000 * ((1 + rate) ** 12 - 1)
+    assert offset == pytest.approx(min(interest, SEED))
+    assert pot == pytest.approx(SEED - offset)
+
+
+def test_a_capital_loss_of_zero_changes_nothing() -> None:
+    (plain, _), (zero, _) = _interest(0.01), _interest(0.01, capital_losses=0)
+    for name in ("income", "expenses", "taxes", "capital_taxes", "liquid", "total"):
+        np.testing.assert_array_equal(getattr(zero, name), getattr(plain, name))
 
 
 def test_fixed_income_interest_is_taxed_in_december() -> None:

@@ -412,13 +412,31 @@ ROLL_HELP = N_(
     "Regelbeitrag: the roll writes its first month as `founded` into the options "
     "`tax.self_employed` that its scenarios take. Losses that the plan carries to the new start "
     "for the income tax (a Verlustvortrag, such as of a let flat) would be lost too: the roll "
-    "writes them as `loss_carryforward` into the options `tax` that its scenarios take. A gift "
+    "writes them as `loss_carryforward` into the options `tax` that its scenarios take, the "
+    "losses of capital income as `capital_losses`. A gift "
     "before the new start moves from its scenario file into the gifts before the start of its "
     "relative on the Assumptions page, with the Schenkungsteuer that the roll computes, so the "
     "ten years of §14 ErbStG keep it. The roll refuses while an event other than a stream event "
     "or a gift lies before the new start. The roll is one revision. "
     "The `Changes since` table of the Cashflows page shows what it changed in the streams."
 )
+# a loss pot that the roll carries, by its key: the line above its grid, the line of the summary
+CARRIED = {
+    rollforward.LOSSES: N_(
+        "The plan carries losses of the income tax to {month}: it writes them as "
+        "`loss_carryforward`, so they offset the income after it:"
+    ),
+    rollforward.CAPITAL_LOSSES: N_(
+        "The plan carries losses of capital income to {month}: it writes them as "
+        "`capital_losses`, so they offset the capital income after it:"
+    ),
+}
+KEPT = {
+    rollforward.LOSSES: N_("{file} keeps the losses carried, {amount}, as `loss_carryforward`."),
+    rollforward.CAPITAL_LOSSES: N_(
+        "{file} keeps the losses of capital income carried, {amount}, as `capital_losses`."
+    ),
+}
 # the asset values after a roll, which no roll changes, by whether the Snapshot page shows
 VALUES = {
     True: N_("Asset values stay as they are: the Snapshot page records them."),
@@ -574,24 +592,20 @@ def _roll_check(roll: rollforward.Roll, scenarios: int, *, snapshot: bool) -> No
             ],
             ["founded", "scenarios", "file"],
         )
-    if roll.carried:
-        st.markdown(
-            _(
-                "The plan carries losses of the income tax to {month}: it writes them as "
-                "`loss_carryforward`, so they offset the income after it:"
-            ).format(month=new)
-        )
-        _roll_grid(
-            [
-                {
-                    "loss_carryforward": format_eur(c.amount, cents=True),
-                    "scenarios": _reach(c.scenarios, scenarios),
-                    "file": c.file,
-                }
-                for c in roll.carried
-            ],
-            ["loss_carryforward", "scenarios", "file"],
-        )
+    for key, words in CARRIED.items():
+        if pots := [c for c in roll.carried if c.key == key]:
+            st.markdown(_(words).format(month=new))
+            _roll_grid(
+                [
+                    {
+                        key: format_eur(c.amount, cents=True),
+                        "scenarios": _reach(c.scenarios, scenarios),
+                        "file": c.file,
+                    }
+                    for c in pots
+                ],
+                [key, "scenarios", "file"],
+            )
     if roll.gifts:
         st.markdown(
             _(
@@ -712,9 +726,7 @@ def _rolled(roll: rollforward.Roll) -> str:
         for f in roll.founded
     )
     carried = (
-        _("{file} keeps the losses carried, {amount}, as `loss_carryforward`.").format(
-            file=c.file, amount=format_eur(c.amount, cents=True)
-        )
+        _(KEPT[c.key]).format(file=c.file, amount=format_eur(c.amount, cents=True))
         for c in roll.carried
     )
     gifts = ngettext(

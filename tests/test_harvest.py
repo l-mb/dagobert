@@ -142,18 +142,22 @@ def test_alg1_takes_room_from_the_harvest() -> None:
     assert 1000 < harvest("unemployed") < harvest("alt") < ROOM
 
 
-def test_a_carried_capital_loss_waits_for_a_sale() -> None:
-    """Fixed income loses 2% a month in 2026: the loss pot (§20 Abs. 6 EStG) would come off a
-    harvest first, so none. A car in 2027 sells equity whose gain uses the pot up: that December
-    harvests again."""
+@pytest.mark.parametrize(
+    ("rate", "tax"), [(-0.02, {}), (0.0, {"capital_losses": 4_000})], ids=["run", "start"]
+)
+def test_a_carried_capital_loss_waits_for_a_sale(rate: float, tax: dict[str, object]) -> None:
+    """Fixed income loses 2% a month in 2026, or `tax.capital_losses` carries a loss to the
+    start: the loss pot (§20 Abs. 6 EStG) would come off a harvest first, so none. A car in 2027
+    sells equity whose gain uses the pot up: that December harvests again."""
     returns = zero_returns(24)
-    returns.rates["fixed_income"][:, :12] = -0.02
+    returns.rates["fixed_income"][:, :12] = rate
     bucket = FixedIncomeAsset(id="f", kind="fixed_income", value=20_000)
     car = LumpSumEvent(at=date(2027, 3, 1), type="lump_sum", amount=-60_000)
     pair = runs(
         assets=[cash(10_000), depot(), bucket],
         scenario=Scenario(name="t", events=[car]),
         returns=returns,
+        tax=tax,
     )
     assert harvested(pair, 11) == 0
     assert harvested(pair, 23) > 0

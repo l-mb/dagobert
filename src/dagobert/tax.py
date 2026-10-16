@@ -120,6 +120,11 @@ class TaxYear(Strict):
     alg1_training_floor_days: int
     alg1_course_months: int
     alg1_claim_months: int
+    gz_min_days: int
+    gz_gap_months: int
+    gz_months: int
+    gz_extension_months: int
+    gz_amount: float  # nominal, never indexed
     alg1_year_days: int
     alg1_month_days: int
     lohnsteuer_year_days: int

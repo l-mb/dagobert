@@ -88,7 +88,8 @@ forum's).
 `tests/test_spending.py` (relations; VPW: a twelfth of the rate of the wealth, monthly whatever
 `every`; the fixed draws; twice the wealth; an older start; the PMT invariant, cash at the 3% of
 `growth` spends each January as the one before to 0.1%, faster rises, slower falls; the floor; a
-month with pay, a late bonus, a January with pay; a lump sum, an Altersvorsorgedepot, a purchase,
-a Basisrente premium; the counts; the bill of a year in the next), the model in `test_model.py`,
-`gkv_plan` of `test_golden.py`: VPW (3%, a floor of 1,000 €) on `Leben` from 2029, at its floor
-until the pension of 2044, above its plan after; the lump sum of 2035 leaves its month at the floor.
+month with pay, a late bonus, a January with pay; a lump sum, an Altersvorsorgedepot, a purchase, a
+Basisrente premium; the counts; the bill of a year in the next), the model in `test_model.py`,
+`gkv_plan` of `test_golden.py`: VPW (3%, a floor of 1,000 €) on `Leben` in the three months of ALG1
+of 2026 (no pay) and from 2029, at its floor until the pension of 2044, above its plan after; the
+lump sum of 2035 leaves its month at the floor.

@@ -68,9 +68,10 @@ STREAMS: list[dict[str, Any]] = [
     | {"start": date(2029, 7, 1), "end": date(2030, 1, 1)},
     {"name": "RV voluntary", "kind": "rv_voluntary", "amount": -110, "phases": ["alt"]},
     # a trade business with a Hebesatz and a yearly project fee beside it, the founding set
-    # earlier: half the Regelbeitrag up to 2033, the full one in 2034
+    # earlier: half the Regelbeitrag up to 2033, the full one in 2034. Its Gründungszuschuss
+    # pays nothing: the ALG1 ended in 2030, 21 months before (§93 Abs. 2 Nr. 1 SGB III)
     {"name": "Beratung", "kind": "self_employed", "amount": 7000, "index": "salary"}
-    | {"phases": ["freelance"], "hebesatz": 4.1},
+    | {"phases": ["freelance"], "hebesatz": 4.1, "gruendungszuschuss": True},
     {"name": "Projekt", "kind": "self_employed", "amount": 32_000, "every": 12}
     | {"start": date(2032, 6, 1), "phases": ["freelance"]},
     {"name": "Rente", "kind": "pension", "points": 30, "point_value": 40, "phases": ["retired"]},
@@ -395,8 +396,10 @@ def test_ledger_adds_up_to_the_engine_totals(rich: RunResult, level: FloatArray)
 
 
 def gkv_plan(disabled: date | None = None) -> Plan:
-    """The GKV beside the PKV of `rich_plan`, at a Zusatzbeitrag of its own: a salary, a trade
-    business with Krankengeld, the GRV on the profit and a yearly fee, then years without either
+    """The GKV beside the PKV of `rich_plan`, at a Zusatzbeitrag of its own: a salary, three
+    months of ALG1, a trade business with Krankengeld and the Gründungszuschuss with its extension
+    (its profit above the BBG of the KV), the GRV on the profit and a yearly fee, then years
+    without either
     from a depot and a rent (a voluntary member: the minimum, the capital income of the year
     before, the rent net of its costs), a company pension paid at once (a Versorgungsbezug for 120
     months), a pension deferred to 67 with the KVdR, a company annuity and a Basisrente beside it,
@@ -433,8 +436,9 @@ def gkv_plan(disabled: date | None = None) -> Plan:
     )
     streams: list[dict[str, Any]] = [
         {"name": "Gehalt", "kind": "salary", "gross": 6000, "phases": ["work"]},
+        {"name": "ALG1", "kind": "alg1", "phases": ["unemployed"]},
         {"name": "Laden", "kind": "self_employed", "amount": 6500, "hebesatz": 4.5}
-        | {"phases": ["alt"]},
+        | {"phases": ["alt"], "gruendungszuschuss": True, "gz_extension": True},
         {"name": "Projekt", "kind": "self_employed", "amount": 20_000, "every": 12}
         | {"start": date(2027, 6, 1), "phases": ["alt"]},
         {"name": "Miete ein", "kind": "other_income", "amount": 600, "property": "wohnung"},
@@ -454,6 +458,7 @@ def gkv_plan(disabled: date | None = None) -> Plan:
             "name": "gkv",
             "phases": phases(
                 (date(2026, 1, 1), "work"),
+                (date(2026, 4, 1), "unemployed"),
                 (date(2026, 7, 1), "alt"),
                 (date(2029, 1, 1), "gap"),
                 (date(2042, 1, 1), "retired"),

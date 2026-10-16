@@ -94,7 +94,9 @@ TAKES: dict[StreamKind, frozenset[str]] = {
     StreamKind.OTHER_INCOME: frozenset({"cat", "amount", "taxable", "repays", "property"}),
     StreamKind.RV_VOLUNTARY: frozenset({"cat", "amount"}),
     StreamKind.SAVINGS: frozenset({"amount", "into"}),
-    StreamKind.SELF_EMPLOYED: frozenset({"cat", "amount", "hebesatz"}),
+    StreamKind.SELF_EMPLOYED: frozenset(
+        {"cat", "amount", "hebesatz", "gruendungszuschuss", "gz_extension"}
+    ),
     StreamKind.BU: frozenset({"cat", "amount", "premium", "until_age"}),
 }
 KIND_FIELDS = frozenset().union(*TAKES.values())
@@ -202,7 +204,7 @@ class Stream(Strict):
     taxable: bool = Field(
         default=True,
         description="Other income: false for a tax-free benefit outside the Progressionsvorbehalt,"
-        " for example the Gründungszuschuss (§3 Nr. 2 EStG)",
+        " for example a scholarship (§3 Nr. 44 EStG)",
     )
     # the field shadows the builtin in the class body, so the methods take `builtins.property`
     property: str | None = Field(
@@ -226,6 +228,20 @@ class Stream(Strict):
         "with it",
     )
 
+    gruendungszuschuss: bool = Field(
+        default=False,
+        description="Self-employed: you start this business out of unemployment with the "
+        "Gründungszuschuss (GZ, §§93, 94 SGB III). It needs at least 150 days of the claim to ALG1 "
+        "left in the first month of the business, ALG1 paid up to a month before, and no salary "
+        "beside the business. For six months it pays your monthly ALG1 and 300 €, free of tax, "
+        "and each month uses 30 days of the claim. You pay your health insurance as the business "
+        "does, and it earns no pension points",
+    )
+    gz_extension: bool = Field(
+        default=False,
+        description="Self-employed, with the Gründungszuschuss: the employment agency pays 300 € "
+        "a month for nine more months. It decides this case by case (§94 Abs. 2 SGB III)",
+    )
     sperrzeit: bool = Field(
         default=False,
         description="ALG1: a Sperrzeit after you quit or signed an Aufhebungsvertrag (§159 SGB "
@@ -323,6 +339,11 @@ class Stream(Strict):
                 "course",
                 "{name}: a course takes no Sperrzeit: mark the Sperrzeit on the ALG1 row before "
                 "the course",
+            ),
+            (
+                self.gz_extension and not self.gruendungszuschuss,
+                "extension",
+                "{name}: gz_extension extends the Gründungszuschuss: set gruendungszuschuss too",
             ),
             (
                 self.kind == StreamKind.BU and phased,

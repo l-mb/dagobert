@@ -256,7 +256,7 @@ STREAM_FIELDS = (
 STREAM_MORE = (
     *("part", "of", "share", "points", "point_value", "health", "deduct", "deductible"),
     *("repays", "after_sale_of", "property", "taxable", "into", "hebesatz"),
-    *("sperrzeit", "training"),
+    *("gruendungszuschuss", "gz_extension", "sperrzeit", "training"),
 )
 ID_HELP = N_(
     "An id names the items that the Overrides tab moves (Dates) and changes (Event fields), here "

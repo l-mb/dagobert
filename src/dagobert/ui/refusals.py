@@ -30,6 +30,7 @@ SAID = {
     "bonus": N_("a bonus needs both {of} and {share}: fill the other one, or empty both"),
     "bonus_gross": N_("a bonus takes its amount from {of} and {share}: empty {gross}"),
     "course": N_("a course takes no {sperrzeit}: tick it on the ALG1 row before the course"),
+    "extension": N_("{gz_extension} extends {gruendungszuschuss}: tick both, or neither"),
     "contract": N_("a BU policy runs by its contract: set every phase to 1 and {every} to 1"),
     "pension": N_("enter either {gross} or {points} with {point_value}"),
     "needs": N_("enter {field}"),

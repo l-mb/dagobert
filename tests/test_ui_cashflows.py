@@ -108,6 +108,7 @@ REFUSED: list[gridcolumns.Row] = [
     {"kind": "bu", "amount": -1},
     {"kind": "salary", "of": "Salary", "share": 2},
     {"kind": "expense", "amount": -100, "start": "soon"},
+    {"kind": "self_employed", "amount": 3000, "gz_extension": True},
 ]
 
 

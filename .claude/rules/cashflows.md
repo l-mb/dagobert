@@ -115,35 +115,36 @@ The rows of the run on the Cashflows sheet come from the ledger: rule `ledger`.
   `amount: -900 € → -950 €`, `share: 10% → 12%`, `end: – → 2027-01-01`), in the attention table of
   the Overview too, in the words of the session (`Change.what` is made per call, never cached:
   `starts`, `sale of …`, a key by `pgettext("key", …)`, German `Betrag: -900 € → -950 €`). `role`
-  gives `INCOME` (`INCOME_KINDS`: also `self_employed`, the profit of a business, its `hebesatz`
-  behind `All columns` of the income grid), `EXPENSE` or `SAVINGS` (kind `savings`): `sheet`,
-  `by_stream` and so `actuals.planned` and the bars take income and expense rows only. `diff` also
-  lists an unchanged derived stream (`of`) whose amount follows a changed base row. It takes the
-  `start` of the revision (`plan_at`, from its `assumptions.yaml`): a row without `start` there and
-  the row of the same name that starts then are one stream, the roll forward wrote that start,
-  unless the plan still has a row of that name without `start`. A stream paid every n months is
-  active from `accrues_from`, n months before the month after its first payment: a yearly bonus that
-  starts next January counts today. An ALG1 stream has no amount: the page fills in `sv.alg1_month`
-  on `cashplan.alg1_reference` through `cashplan.with_alg1` (`estimated` takes the plan; a course
-  row, `training`, gets none and starts no claim: the claim pays once, rule `alg1`). As the
-  engine it takes the last monthly salary before the claim (`_alg1`): in the month before the first
-  change to a phase in which an ALG1 stream pays, of the newest phase before it that pays one, so a
-  change of jobs counts; without one, on the `As of` date in the phase of the scenario then, else
-  the newest before it that pays; less the part free of SV of the conversions of the bAV policies
-  that pay in that phase and month, before `matures` (`_converted`, `sv.conversions` on that
-  salary), each from its salary as the engine takes it (`_salary_of`: the one that `salary` names,
-  else the first without `of`; none that pays then, no conversion). A stream of a non-cumulative
-  index counts at the level that a `fixed` run pays, the clipped mean (`Index.at_mean`):
-  `with_levels` adds it to the row as `level`, and `monthly` multiplies by it (a row that a grid
-  holds half typed counts what it holds: a bonus without `share` 0), so a bonus with a
-  payout ratio of 0.9 counts 90 %. A cumulative index starts at 1 in the euros of the start, so its
-  streams count in full. `ui.cashflows.estimated` applies both to the rows of the Cashflows page and
-  of the Overview, with the assumptions of the chosen scenario on the Cashflows page;
-  `scenario_changes` takes the plan and levels the streams of `add_stream` events the same way. The
-  Spend page levels its rows with the assumptions of `assumptions.yaml`. Both end the PKV premiums
-  (`health`) in the month of `tax.gkv_from` as the engine does (`cashplan.with_gkv`, rule `gkv`):
-  the sheet of a later date leaves them out, the scheduled changes show their end, and an
-  `add_stream` of one that starts after the switch shows no start.
+  gives `INCOME` (`INCOME_KINDS`: also `self_employed`, the profit of a business, its `hebesatz`,
+  `gruendungszuschuss` and `gz_extension` behind `All columns` of the income grid; the
+  Gründungszuschuss is a row of the run, the sheet note says so, rule `alg1`), `EXPENSE` or
+  `SAVINGS` (kind `savings`): `sheet`, `by_stream` and so `actuals.planned` and the bars take income
+  and expense rows only. `diff` also lists an unchanged derived stream (`of`) whose amount follows a
+  changed base row. It takes the `start` of the revision (`plan_at`, from its `assumptions.yaml`): a
+  row without `start` there and the row of the same name that starts then are one stream, the roll
+  forward wrote that start, unless the plan still has a row of that name without `start`. A stream
+  paid every n months is active from `accrues_from`, n months before the month after its first
+  payment: a yearly bonus that starts next January counts today. An ALG1 stream has no amount: the
+  page fills in `sv.alg1_month` on `cashplan.alg1_reference` through `cashplan.with_alg1`
+  (`estimated` takes the plan; a course row, `training`, gets none and starts no claim: the claim
+  pays once, rule `alg1`). As the engine it takes the last monthly salary before the claim
+  (`_alg1`): in the month before the first change to a phase in which an ALG1 stream pays, of the
+  newest phase before it that pays one, so a change of jobs counts; without one, on the `As of` date
+  in the phase of the scenario then, else the newest before it that pays; less the part free of SV
+  of the conversions of the bAV policies that pay in that phase and month, before `matures`
+  (`_converted`, `sv.conversions` on that salary), each from its salary as the engine takes it
+  (`_salary_of`: the one that `salary` names, else the first without `of`; none that pays then, no
+  conversion). A stream of a non-cumulative index counts at the level that a `fixed` run pays, the
+  clipped mean (`Index.at_mean`): `with_levels` adds it to the row as `level`, and `monthly`
+  multiplies by it (a row that a grid holds half typed counts what it holds: a bonus without `share`
+  0), so a bonus with a payout ratio of 0.9 counts 90 %. A cumulative index starts at 1 in the euros
+  of the start, so its streams count in full. `ui.cashflows.estimated` applies both to the rows of
+  the Cashflows page and of the Overview, with the assumptions of the chosen scenario on the
+  Cashflows page; `scenario_changes` takes the plan and levels the streams of `add_stream` events
+  the same way. The Spend page levels its rows with the assumptions of `assumptions.yaml`. Both end
+  the PKV premiums (`health`) in the month of `tax.gkv_from` as the engine does
+  (`cashplan.with_gkv`, rule `gkv`): the sheet of a later date leaves them out, the scheduled
+  changes show their end, and an `add_stream` of one that starts after the switch shows no start.
 - `src/dagobert/ui/bars.py`: the bars of one phase, which the Cashflows page and the Flows page
   share; their labels take a fixed room, so the bars of stacked charts start at one x (rule
   `charts`, `bars_figure`). The outflow and income bars color a category like its block in the

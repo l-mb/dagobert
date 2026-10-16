@@ -150,7 +150,8 @@ sources, the tests).
   65 with 45 years. Ages count in whole months. A birthday after the first of the month
   reaches an age in the following month, so the pension starts there. When a claim is possible, the pension starts with the phases
   of its stream. Otherwise the engine defers to 67 and adds a marker. An EM-Rente: rule `disability`.
-- ALG1: its amount (`sv.alg1_month`), the claim of days, a Sperrzeit, a course: rule `alg1`.
+- ALG1: its amount (`sv.alg1_month`), the claim of days, a Sperrzeit, a course, the
+  Gründungszuschuss (its 300 € nominal, never indexed): rule `alg1`.
 - PKV subsidies follow what the month pays and its insurance (`Core.pkv`, rule `gkv`), never the
   phase (`Income._health_support`). The employer (`sv.employer_pkv_subsidy`): 8.75% (`kv_half`) and
   1.8% (`pv_rate`, its half, §58 Abs. 1 SGB XI) of the KV base of the salary (`sv.sv_bases`: up to

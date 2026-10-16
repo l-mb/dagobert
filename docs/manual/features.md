@@ -54,7 +54,7 @@ now.
 | Records | the Snapshot and Spend pages, the trades and prices of securities, the column `update_every` | nothing |
 | Gold and crypto | the asset kinds gold and crypto, the event `buy`, their sliders, `crypto_capital_from` | nothing |
 | Property, rental and loans | the asset kinds property and loan, the events `buy_property` and `repay`, the stream columns `property`, `after_sale_of` and `repays`, `refinance_rate` | nothing |
-| Self-employment | the stream kind of a self-employed profit, the column `hebesatz`, the tax options of self-employment | nothing |
+| Self-employment | the stream kind of a self-employed profit, the columns `hebesatz`, `gruendungszuschuss` and `gz_extension`, the tax options of self-employment | nothing |
 | Children | your children, `alleinerziehend`, childcare as a deduction | the care insurance surcharge for the childless |
 | Inheritance and gifts | your relatives and their gifts before the start, the events `inheritance` and `gift` | nothing |
 | Job loss | the stream kind ALG1 with its columns `sperrzeit` and `training`, the event `severance` | nothing |

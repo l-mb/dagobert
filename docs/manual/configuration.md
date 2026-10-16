@@ -579,7 +579,8 @@ A list under `streams`. Fields:
   with an `alg1` stream pays the rest if it starts within four years after that month. `part` (default 1, 0 to 1) scales a salary gross
   for part time. A field that the kind does not take is rejected, also `amount` beside the `gross`
   of a salary: each field here names its kinds, `cat` every kind but `savings`, `alg1` only
-  `sperrzeit` and `training`.
+  `sperrzeit` and `training`, `self_employed` also `hebesatz`, `gruendungszuschuss` and
+  `gz_extension`.
 - `sperrzeit` (only `alg1`, default false): you quit or signed an Aufhebungsvertrag, so a
   Sperrzeit applies (§159 SGB III). It starts in the first month in which the row pays, once for
   the row. For 12 weeks the row pays no ALG1, and the employment agency pays no private health
@@ -651,9 +652,10 @@ A list under `streams`. Fields:
   month, so the costs still count. A sale of the property ends the streams that name it. A rent
   cannot take `taxable: false`.
 - `taxable` (default true): `false` marks `other_income` that is tax-free and outside the
-  Progressionsvorbehalt, for example the Gründungszuschuss (§3 Nr. 2 EStG, not in §32b). The
-  Kindergeld needs no stream: `person.children_born`. Enter the Elterngeld of your notice as such
-  a stream for now: the simulation leaves its Progressionsvorbehalt out.
+  Progressionsvorbehalt, for example a scholarship (§3 Nr. 44 EStG, not in §32b). The
+  Gründungszuschuss is a field of a business, see below. The Kindergeld needs no stream:
+  `person.children_born`. Enter the Elterngeld of your notice as such a stream for now: the
+  simulation leaves its Progressionsvorbehalt out.
 - A business (`kind: self_employed`) pays `amount`, the profit of a month before the income tax
   and before your own social insurance, net of the Umsatzsteuer. It is other income in the income
   tax, without a flat amount for work expenses. A loss offsets the other income of its year, and
@@ -675,6 +677,20 @@ A list under `streams`. Fields:
   business paid every n months pays the social insurance on a part of 1/n in every month in which it
   runs. Use `rv_voluntary` only in phases without a compulsory pension insurance (§7 Abs. 1 SGB VI).
   An app before this kind does not load a plan with it.
+- `gruendungszuschuss` (only `self_employed`, default false): you start the business out of
+  unemployment with the start-up grant of the employment agency (§§93, 94 SGB III). The first
+  month in which a business with it runs decides the grant, once in a plan. It needs at least 150
+  days of the claim to ALG1 left in that month, ALG1 paid up to one month before, and no salary in
+  that month. Else nothing pays, and a marker names the reason. For six months it pays the monthly
+  ALG1 of the claim and 300 €, free of tax and outside the Progressionsvorbehalt. Each of these
+  months uses 30 days of the claim (§148 Abs. 1 Nr. 8), and a later `alg1` stream pays the rest.
+  The 300 € are nominal. A month without the business or with a salary pays nothing. The ledger
+  books it as `Gründungszuschuss`. A member of the statutory health insurance pays the voluntary
+  contribution on it without the 300 € (§240 Abs. 2 S. 3 SGB V). An app before this field does
+  not load a plan with it.
+- `gz_extension` (only `self_employed` with `gruendungszuschuss`, default false): 300 € a month for
+  the nine months after the six (§94 Abs. 2 SGB III). The employment agency decides this case by
+  case. These months take no days of the claim.
 - A payment that makes up for the deduction of an early pension (§187a SGB VI, from the age of 50)
   is an `rv_voluntary` stream of one month: `start` its month, `end` the month after, `amount` the
   payment from the pension insurance below 0, also in a month with a salary. It counts that month

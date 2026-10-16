@@ -2365,9 +2365,9 @@ msgstr ""
 "Steuer. Vorgetragene Verluste gehen zuerst vom Gewinn ab, die der "
 "Einkommensteuer wie die aus Kapitalerträgen, daher werden sie nur "
 "verbraucht, wo der steuerfreie Rahmen darüber hinaus mindestens so groß "
-"ist. Wer im nächsten Januar "
-"freiwillig gesetzlich versichert ist, realisiert nur so viel, dass der "
-"Beitrag des nächsten Jahres beim Mindestbeitrag bleibt"
+"ist. Wer im nächsten Januar freiwillig gesetzlich versichert ist, "
+"realisiert nur so viel, dass der Beitrag des nächsten Jahres beim "
+"Mindestbeitrag bleibt"
 
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid "Harvest"
@@ -3365,10 +3365,10 @@ msgstr "Hebesatz"
 #: model/events.py model/plan.py model/streams.py
 msgid ""
 "Other income: false for a tax-free benefit outside the "
-"Progressionsvorbehalt, for example the Gründungszuschuss (§3 Nr. 2 EStG)"
+"Progressionsvorbehalt, for example a scholarship (§3 Nr. 44 EStG)"
 msgstr ""
 "Sonstige Einnahmen: false für eine steuerfreie Leistung außerhalb des "
-"Progressionsvorbehalts, etwa den Gründungszuschuss (§3 Nr. 2 EStG)"
+"Progressionsvorbehalts, etwa ein Stipendium (§3 Nr. 44 EStG)"
 
 #: model/events.py model/plan.py model/streams.py
 msgid ""
@@ -3397,6 +3397,44 @@ msgid ""
 "BU policy: the age at which the contract ends, the premium and the "
 "benefit with it"
 msgstr "BU: das Alter, mit dem der Vertrag endet, und mit ihm Beitrag und Rente"
+
+#: model/events.py model/plan.py model/streams.py
+msgid ""
+"Self-employed: you start this business out of unemployment with the "
+"Gründungszuschuss (GZ, §§93, 94 SGB III). It needs at least 150 days of "
+"the claim to ALG1 left in the first month of the business, ALG1 paid up "
+"to a month before, and no salary beside the business. For six months it "
+"pays your monthly ALG1 and 300 €, free of tax, and each month uses 30 "
+"days of the claim. You pay your health insurance as the business does, "
+"and it earns no pension points"
+msgstr ""
+"Selbstständig: Du gründest diesen Betrieb aus der Arbeitslosigkeit mit "
+"dem Gründungszuschuss (GZ, §§93, 94 SGB III). Er braucht im ersten Monat "
+"des Betriebs noch mindestens 150 Tage des Anspruchs auf ALG1, ALG1 bis "
+"einen Monat davor und kein Gehalt neben dem Betrieb. Sechs Monate zahlt "
+"er dein monatliches ALG1 und 300 €, steuerfrei, und jeder Monat "
+"verbraucht 30 Tage des Anspruchs. Deine Krankenversicherung zahlst du wie"
+" der Betrieb, und er bringt keine Rentenpunkte"
+
+#: model/events.py model/plan.py model/streams.py
+msgctxt "key"
+msgid "gruendungszuschuss"
+msgstr "Gründungszuschuss"
+
+#: model/events.py model/plan.py model/streams.py
+msgid ""
+"Self-employed, with the Gründungszuschuss: the employment agency pays 300"
+" € a month for nine more months. It decides this case by case (§94 Abs. 2"
+" SGB III)"
+msgstr ""
+"Selbstständig, mit dem Gründungszuschuss: Die Agentur für Arbeit zahlt "
+"neun Monate länger 300 € im Monat. Sie entscheidet das im Einzelfall (§94"
+" Abs. 2 SGB III)"
+
+#: model/events.py model/plan.py model/streams.py
+msgctxt "key"
+msgid "gz_extension"
+msgstr "GZ-Verlängerung"
 
 #: model/events.py model/plan.py model/streams.py
 msgid ""
@@ -3511,6 +3549,14 @@ msgstr "Nach Verkauf von"
 #: model/events.py model/streams.py
 msgid "Hebesatz"
 msgstr "Hebesatz"
+
+#: model/events.py model/streams.py
+msgid "Gruendungszuschuss"
+msgstr "Gründungszuschuss"
+
+#: model/events.py model/streams.py
+msgid "Gz extension"
+msgstr "Verlängerung des Gründungszuschusses"
 
 #: model/events.py model/streams.py
 msgid "Sperrzeit"
@@ -4081,6 +4127,21 @@ msgstr "der Anspruch entstand vor mehr als vier Jahren ({law})"
 
 #: report/charts.py
 #, python-brace-format
+msgid "not paid, no ALG1 up to a month before the business ({law})"
+msgstr "nicht gezahlt, kein ALG1 bis einen Monat vor dem Betrieb ({law})"
+
+#: report/charts.py
+#, python-brace-format
+msgid "not paid, fewer than 150 days of ALG1 left ({law})"
+msgstr "nicht gezahlt, weniger als 150 Tage ALG1 übrig ({law})"
+
+#: report/charts.py
+#, python-brace-format
+msgid "not paid, a salary beside the business ({law})"
+msgstr "nicht gezahlt, ein Gehalt neben dem Betrieb ({law})"
+
+#: report/charts.py
+#, python-brace-format
 msgid ""
 "the plan assumes the exemption from the GKV, applied for within three "
 "months and irrevocable ({law})"
@@ -4141,6 +4202,10 @@ msgstr "{value} Pp."
 #, python-brace-format
 msgid "{month}, age {age}"
 msgstr "{month}, Alter {age}"
+
+#: report/charts.py ui/cashflows.py
+msgid "Gründungszuschuss"
+msgstr "Gründungszuschuss"
 
 #: report/charts.py ui/events.py
 msgid "Sale"
@@ -6511,6 +6576,10 @@ msgid "trade tax rate (Hebesatz)"
 msgstr "Gewerbesteuer-Hebesatz"
 
 #: ui/cashflows.py
+msgid "GZ extension"
+msgstr "GZ-Verlängerung"
+
+#: ui/cashflows.py
 msgid ""
 "The Gewerbesteuer-Hebesatz of the municipality of a trade business, at "
 "least 200%, in percent: 430 for 430%. Empty: a freelancer, no trade tax."
@@ -6648,17 +6717,19 @@ msgid ""
 "benefit (ALG1) is an estimate: what the simulation pays on the monthly "
 "salary of that date in the phase of the scenario then, or in the last "
 "phase before it with a salary, net and only for the 12 to 24 months of "
-"the claim. A stream paid every n months counts in the n months that end "
-"with its first payment. Streams that wait for a property sale are left "
-"out. The rows down to `{run}` are what no stream pays, such as the taxes "
-"and the loans: a single run of `{scenario}` with the mean returns, the "
-"mean over the first 12 months of each phase from the `As of` date on "
-"({covered}), a bonus spread over the months that earn it. A phase that "
-"the run does not reach from then on shows `–`. `surplus` adds up all rows"
-" above it: what is left to save. It takes the streams of the plan, not "
-"those of the run, so it differs from the surplus of the Flows page by "
-"what the run changes in the streams (the growth of the indices, the "
-"events) and by the months that a phase of the Flows page covers. "
+"the claim. A business with the Gründungszuschuss shows its profit only: "
+"the Gründungszuschuss is a row of the run, its months spread over the "
+"first 12 of the phase. A stream paid every n months counts in the n "
+"months that end with its first payment. Streams that wait for a property "
+"sale are left out. The rows down to `{run}` are what no stream pays, such"
+" as the taxes and the loans: a single run of `{scenario}` with the mean "
+"returns, the mean over the first 12 months of each phase from the `As of`"
+" date on ({covered}), a bonus spread over the months that earn it. A "
+"phase that the run does not reach from then on shows `–`. `surplus` adds "
+"up all rows above it: what is left to save. It takes the streams of the "
+"plan, not those of the run, so it differs from the surplus of the Flows "
+"page by what the run changes in the streams (the growth of the indices, "
+"the events) and by the months that a phase of the Flows page covers. "
 "`{saved}` below it, with a savings plan, is what the plans paid into "
 "their assets in the run, so a month that paused one shows: a part of the "
 "surplus, not taken off it. `non-cash income` below it comes from the run "
@@ -6671,24 +6742,26 @@ msgstr ""
 "Simulation ihn zahlt. Das Arbeitslosengeld (ALG1) ist eine Schätzung: was"
 " die Simulation auf das Monatsgehalt dieses Datums in der damaligen Phase"
 " des Szenarios zahlt oder in der letzten Phase davor mit einem Gehalt, "
-"netto und nur für die 12 bis 24 Monate des Anspruchs. Eine Zahlung alle n"
-" Monate zählt in den n Monaten, die mit ihrer ersten Zahlung enden. "
-"Zahlungen, die auf einen Immobilienverkauf warten, fehlen. Die Zeilen bis"
-" `{run}` sind, was keine Zahlung abdeckt, etwa die Steuern und die "
-"Darlehen: eine einzelne Simulation von `{scenario}` mit den mittleren "
-"Renditen, der Mittelwert über die ersten 12 Monate jeder Phase ab dem "
-"`Stichtag` ({covered}), ein Bonus verteilt auf die Monate, die ihn "
-"verdienen. Eine Phase, die die Simulation ab dann nicht erreicht, zeigt "
-"`–`. `Überschuss` addiert alle Zeilen darüber: was zum Sparen bleibt. Er "
-"nimmt die Zahlungen des Plans, nicht die der Simulation, und weicht daher"
-" vom Überschuss der Seite Flows ab um das, was die Simulation an den "
-"Zahlungen ändert (das Wachstum der Indizes, die Ereignisse), und um die "
-"Monate, die eine Phase der Seite Flows abdeckt. `{saved}` darunter, bei "
-"einem Sparplan, ist, was die Sparpläne in der Simulation in ihre "
-"Vermögenswerte gezahlt haben, ein Monat, in dem ein Sparplan aussetzte, "
-"ist also zu sehen: ein Teil des Überschusses, nicht davon abgezogen. "
-"`unbare Einnahmen` darunter stammen aus der Simulation über dieselben "
-"Monate und sind nicht Teil des Überschusses."
+"netto und nur für die 12 bis 24 Monate des Anspruchs. Ein Betrieb mit dem"
+" Gründungszuschuss zeigt nur seinen Gewinn: Der Gründungszuschuss ist "
+"eine Zeile der Simulation, seine Monate verteilt auf die ersten 12 der "
+"Phase. Eine Zahlung alle n Monate zählt in den n Monaten, die mit ihrer "
+"ersten Zahlung enden. Zahlungen, die auf einen Immobilienverkauf warten, "
+"fehlen. Die Zeilen bis `{run}` sind, was keine Zahlung abdeckt, etwa die "
+"Steuern und die Darlehen: eine einzelne Simulation von `{scenario}` mit "
+"den mittleren Renditen, der Mittelwert über die ersten 12 Monate jeder "
+"Phase ab dem `Stichtag` ({covered}), ein Bonus verteilt auf die Monate, "
+"die ihn verdienen. Eine Phase, die die Simulation ab dann nicht erreicht,"
+" zeigt `–`. `Überschuss` addiert alle Zeilen darüber: was zum Sparen "
+"bleibt. Er nimmt die Zahlungen des Plans, nicht die der Simulation, und "
+"weicht daher vom Überschuss der Seite Flows ab um das, was die Simulation"
+" an den Zahlungen ändert (das Wachstum der Indizes, die Ereignisse), und "
+"um die Monate, die eine Phase der Seite Flows abdeckt. `{saved}` "
+"darunter, bei einem Sparplan, ist, was die Sparpläne in der Simulation in"
+" ihre Vermögenswerte gezahlt haben, ein Monat, in dem ein Sparplan "
+"aussetzte, ist also zu sehen: ein Teil des Überschusses, nicht davon "
+"abgezogen. `unbare Einnahmen` darunter stammen aus der Simulation über "
+"dieselben Monate und sind nicht Teil des Überschusses."
 
 #: ui/cashflows.py
 msgid "How to read the sheet"
@@ -7681,6 +7754,10 @@ msgstr ""
 "der Aktienreihe seit 1970 nach, ein Verlauf je Startmonat."
 
 #: ui/explorer.py
+msgid "What moves the result: starts when the sliders rest"
+msgstr "Was das Ergebnis bewegt: startet, sobald die Regler ruhen"
+
+#: ui/explorer.py
 msgid ""
 "Off: euros of the simulation start, each path divided by its own consumer"
 " prices, so medians compare buying power. On: nominal euros, as paid at "
@@ -7697,10 +7774,6 @@ msgid "Historical needs the equity series `{series}`: fetch or import it first."
 msgstr ""
 "Historisch braucht die Aktienreihe `{series}`: Hole oder importiere sie "
 "zuerst."
-
-#: ui/explorer.py
-msgid "What moves the result: starts when the sliders rest"
-msgstr "Was das Ergebnis bewegt: startet, sobald die Regler ruhen"
 
 #: ui/explorer.py
 msgid "For the sliders before your last move"
@@ -9518,11 +9591,13 @@ msgstr "Selbstständigkeit"
 
 #: ui/mode.py
 msgid ""
-"Off hides the stream kind of a self-employed profit, the column "
-"`hebesatz` and the tax options of self-employment."
+"Off hides the stream kind of a self-employed profit, the columns "
+"`hebesatz`, `gruendungszuschuss` and `gz_extension` and the tax options "
+"of self-employment."
 msgstr ""
-"Aus blendet die Zahlungsart Gewinn aus Selbstständigkeit aus, die Spalte "
-"`hebesatz` und die Steueroptionen der Selbstständigkeit."
+"Aus blendet die Zahlungsart Gewinn aus Selbstständigkeit aus, die Spalten"
+" `hebesatz`, `gruendungszuschuss` und `gz_extension` und die "
+"Steueroptionen der Selbstständigkeit."
 
 #: ui/mode.py
 msgctxt "inline"
@@ -10026,6 +10101,10 @@ msgstr ""
 "mit Rendite und Beiträgen fort, die erfassten Werte bleiben, wie du sie "
 "eingegeben hast: **Schätzungen übernehmen** auf der Seite Snapshot "
 "aktualisiert sie."
+
+#: ui/outlook.py ui/overview.py
+msgid "Simulating the plan …"
+msgstr "Der Plan wird simuliert …"
 
 #: ui/outlook.py ui/scenarios.py
 #, python-brace-format
@@ -10664,10 +10743,6 @@ msgstr[0] "{n} Schenkung in die Schenkungen vor dem Start verschoben."
 msgstr[1] "{n} Schenkungen in die Schenkungen vor dem Start verschoben."
 
 #: ui/overview.py
-msgid "Simulating the plan …"
-msgstr "Der Plan wird simuliert …"
-
-#: ui/overview.py
 msgid "Cashflows: where the money goes"
 msgstr "Cashflows: wohin das Geld geht"
 
@@ -11120,6 +11195,11 @@ msgid "a course takes no {sperrzeit}: tick it on the ALG1 row before the course"
 msgstr ""
 "Eine Weiterbildung hat keine {sperrzeit}: Hake sie in der ALG1-Zeile vor "
 "der Weiterbildung an"
+
+#: ui/refusals.py
+#, python-brace-format
+msgid "{gz_extension} extends {gruendungszuschuss}: tick both, or neither"
+msgstr "{gz_extension} verlängert {gruendungszuschuss}: Hake beide an oder keines"
 
 #: ui/refusals.py
 #, python-brace-format
@@ -13394,6 +13474,25 @@ msgid "a career break"
 msgstr "eine Auszeit"
 
 #: ui/whatifs.py
+#, python-brace-format
+msgid ""
+"Your plan pays no ALG1 up to a month before {month}: the "
+"Gründungszuschuss needs a claim that pays until the business starts."
+msgstr ""
+"Dein Plan zahlt bis einen Monat vor {month} kein ALG1: Der "
+"Gründungszuschuss braucht einen Anspruch, der bis zum Start des Betriebs "
+"zahlt."
+
+#: ui/whatifs.py
+#, python-brace-format
+msgid ""
+"Your plan leaves {days} days of the claim to ALG1 in {month}: the "
+"Gründungszuschuss needs 150."
+msgstr ""
+"Dein Plan lässt im Monat {month} noch {days} Tage des Anspruchs auf ALG1:"
+" Der Gründungszuschuss braucht 150."
+
+#: ui/whatifs.py
 msgid "Fill in the fields above first."
 msgstr "Fülle zuerst die Felder oben aus."
 
@@ -13557,6 +13656,21 @@ msgstr "Selbstständig mit {age}"
 #: ui/whatifs.py
 msgid "Business"
 msgstr "Selbstständig"
+
+#: ui/whatifs.py
+msgid "With the Gründungszuschuss"
+msgstr "Mit dem Gründungszuschuss"
+
+#: ui/whatifs.py
+msgid ""
+"Out of unemployment the employment agency pays six months of your ALG1 "
+"and 300 € a month, free of tax, if at least 150 days of the claim are "
+"left (§§93, 94 SGB III). They use 180 days of the claim."
+msgstr ""
+"Aus der Arbeitslosigkeit zahlt die Agentur für Arbeit sechs Monate dein "
+"ALG1 und 300 € im Monat, steuerfrei, wenn noch mindestens 150 Tage des "
+"Anspruchs übrig sind (§§93, 94 SGB III). Sie verbrauchen 180 Tage des "
+"Anspruchs."
 
 #: ui/whatifs.py
 #, python-brace-format

@@ -47,8 +47,10 @@ insurance) and PKV (private health insurance). The sheet shows the plan on the s
   interest and repayment, the upkeep of property and the tax on capital gains. After the loss of
   the ability to work (a scenario that forces it), they also hold the sick pay (`Krankengeld`), the
   disability pension (`EM-Rente`) where the pension stream does not pay, and the benefit of a
-  disability insurance. Each is the mean over the first twelve months of the phase from the
-  selected date on. A `–` means that the run does not reach that phase after this date.
+  disability insurance. The start-up grant of a business (`Gründungszuschuss`) shows here too: the
+  row of the business shows its profit only. Each is the mean over the first twelve months of the
+  phase from the selected date on. A `–` means that the run does not reach that phase after this
+  date.
 - `surplus`: the sum of all rows above. It is what is left to save.
 - `into savings plans`: what your savings plans paid in the same months of the run. It is a part of
   the surplus, so it is not taken off it. A month in which a plan skipped its rate shows here. The

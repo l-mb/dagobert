@@ -213,6 +213,7 @@ _BADGE_GAP, _BADGE_TOP, _BADGE_ROW = (1 / 40, 1 / 12), 0.95, 0.075
 _WRAP, _WIDE_WRAP = 34, 110
 # pixels right of a compact plot for half a tick label: plotly hides one that runs past the figure
 TICK_ROOM = 32
+GZ = N_("Gründungszuschuss")
 # the kind of a marker (`MarkerKind`: what the engine marks, or the type of an event) in words
 MARKER_KINDS: dict[MarkerKind, str] = {
     "phase": N_("Phase"),
@@ -235,6 +236,9 @@ MARKER_KINDS: dict[MarkerKind, str] = {
     "alg1": N_("ALG1"),
     "alg1 used": N_("ALG1"),
     "alg1 expired": N_("ALG1"),
+    "gz gap": GZ,
+    "gz days": GZ,
+    "gz salary": GZ,
     "savings plan": N_("Savings plan"),
     "harvest": N_("Gains realized"),
     "disability": N_("Unable to work"),
@@ -246,6 +250,9 @@ SAYS: dict[MarkerKind, str] = {
     "alg1": N_("on the last salary, not on the self-employment"),
     "alg1 used": N_("the claim is used up"),
     "alg1 expired": N_("the claim arose more than four years ago ({law})"),
+    "gz gap": N_("not paid, no ALG1 up to a month before the business ({law})"),
+    "gz days": N_("not paid, fewer than 150 days of ALG1 left ({law})"),
+    "gz salary": N_("not paid, a salary beside the business ({law})"),
     "exemption": N_(
         "the plan assumes the exemption from the GKV, applied for within three months and "
         "irrevocable ({law})"
@@ -255,6 +262,9 @@ SAYS: dict[MarkerKind, str] = {
 # the law that a marker names, on one line of its legend
 LAWS: dict[MarkerKind, str] = {
     "alg1 expired": "§161 Abs. 2 SGB III",
+    "gz gap": "§93 Abs. 2 Nr. 1 SGB III",
+    "gz days": "§93 Abs. 2 Nr. 1 SGB III",
+    "gz salary": "§93 Abs. 1 SGB III",
     "exemption": "§8 Abs. 1 S. 1 Nr. 1a SGB V",
     "gkv": "§6 Abs. 3a SGB V",
 }

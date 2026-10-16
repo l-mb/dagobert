@@ -89,12 +89,12 @@ plain English `docs/manual/models.md`. No phase kind: the engine reads what the 
   (1/300 of the yearly Bezugsgröße a day for a degree, 158.20 € in 2026); the engine pays on the
   last salary, however long ago (right for a Restanspruch, which lasts four years, §161 Abs. 2), and
   marks `alg1: on the last salary, not on the self-employment`; a later stretch pays the days left
-  (rule `alg1`); the days of a Gründungszuschuss shorten the claim (§148 Abs. 1 Nr. 8: issue of
-  its own); a profit beside ALG1 does not reduce it (§155: 30% flat expenses, a Freibetrag of 165
-  €); the 4% cut of the deductible KV with Krankengeld: rule `gkv`. `Core.first_profit` is the first month of any business of the run: a
-  second business after a stretch without one gets no new half years (whether a new Aufnahme starts
-  them again, §165 Abs. 1 S. 2 SGB VI, is open; `founded` sets the start). Left out: Umsatzsteuer
-  (the profit is net of it), the sale or the end of the business (§§16, 34 EStG), the
+  (rule `alg1`); a business out of unemployment may take the Gründungszuschuss
+  (`gruendungszuschuss`, rule `alg1`: its months are those of the main work); a profit beside ALG1
+  does not reduce it (§155: 30% flat expenses, a Freibetrag of 165 €); the 4% cut of the deductible
+  KV with Krankengeld: rule `gkv`. `Core.first_profit` is the first month of any business of the
+  run: a second business after a stretch without one gets no new half years (whether a new Aufnahme
+  starts them again, §165 Abs. 1 S. 2 SGB VI, is open; `founded` sets the start). Left out:
+  Umsatzsteuer (the profit is net of it), the sale or the end of the business (§§16, 34 EStG), the
   Künstlersozialkasse, Versorgungswerke (an `rv_voluntary` stream approximates the contribution, a
-  `pension` stream with `gross` the pension), the Gründungszuschuss beyond `taxable: false` other
-  income.
+  `pension` stream with `gross` the pension).

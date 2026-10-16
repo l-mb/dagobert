@@ -14,6 +14,8 @@ from typing import TYPE_CHECKING, Any, Protocol
 from pydantic import TypeAdapter
 
 from dagobert import datadir, goalseek, references, scenariofiles
+from dagobert.engine.alg1 import Refusal, refusal
+from dagobert.engine.simulation import before
 from dagobert.i18n import N_, _, pgettext
 from dagobert.loader import load_plan, load_scenario
 from dagobert.model.events import SetStreamEvent, Shift
@@ -295,18 +297,40 @@ class Course:
 
 
 @dataclass(frozen=True)
+class Founding:
+    """The claim to ALG1 of a scenario before a business starts in `month`: the days left and why
+    it gives no Gründungszuschuss (`engine.alg1.refusal`), None when it can."""
+
+    month: date
+    days: float
+    why: Refusal | None
+
+
+def founding(data_dir: Path, main: str, month: date) -> Founding | None:
+    """The claim of the scenario `main` before `month`, as its run has it then
+    (`simulation.before`); None without one: no job loss before."""
+    plan = load_plan(data_dir, data_dir / scenario_file(main))
+    engine = before(plan, month)
+    if engine is None or engine.alg1.start is None:
+        return None
+    i = months_between(plan.assumptions.start, month)
+    return Founding(month, engine.alg1.days, refusal(engine.alg1, i, engine.ty))
+
+
+@dataclass(frozen=True)
 class Business:
     """A business from `start` with a `profit` a month before tax and own social insurance: the
     change to the phase `BUSINESS`, which stops the salary, and a `self_employed` stream that pays
     in it (rule `self-employment`; `tax.self_employed` at its defaults: no statutory pension,
-    no sick pay). The change out of work after it stays: the business ends when the plan stops
-    working."""
+    no sick pay), with `gruendungszuschuss` where `founded` (rule `alg1`). The change out of work
+    after it stays: the business ends when the plan stops working."""
 
     main: str
     start: date
     profit: float
     name: str
     stem: str
+    founded: bool = False
 
     def misfits(self, data_dir: Path) -> dict[str, str]:
         """A start before the start of the plan or at or after its stop."""
@@ -326,7 +350,7 @@ class Business:
             "kind": "self_employed",
             "amount": self.profit,
             "phases": [BUSINESS],
-        }
+        } | ({"gruendungszuschuss": True} if self.founded else {})
         leave = Leave(
             self.main,
             BUSINESS,

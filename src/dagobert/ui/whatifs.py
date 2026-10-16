@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 import streamlit as st
 
 from dagobert import datadir, goalseek, i18n, references, whatifs
+from dagobert.engine.alg1 import Refusal
 from dagobert.i18n import N_, _, pgettext
 from dagobert.model.base import Unit
 from dagobert.model.months import months_of_age
@@ -45,6 +46,17 @@ COURSE_MONTHS = 6  # the default length of a course: six months in a row extend 
 EARLIER = 5  # the default of `Stop earlier`: so many years before the plan stops now
 # what a course follows, by its id: its words
 AFTER = {"loss": N_("a job loss"), "break": N_("a career break")}
+# why a business gets no Gründungszuschuss, by the refusal of the claim (`whatifs.founding`)
+FOUNDING: dict[Refusal, str] = {
+    "gz gap": N_(
+        "Your plan pays no ALG1 up to a month before {month}: the Gründungszuschuss needs a claim "
+        "that pays until the business starts."
+    ),
+    "gz days": N_(
+        "Your plan leaves {days} days of the claim to ALG1 in {month}: the Gründungszuschuss "
+        "needs 150."
+    ),
+}
 MISSING = N_("Fill in the fields above first.")
 MISFIT = N_("Change the fields marked above.")
 DONE = N_("Added {name}: the Overview compares it with your plan.")
@@ -293,6 +305,7 @@ def _business(data_dir: Path, plan: Plan) -> None:
     )
     form = _Form()
     start = form.typed("start", _("Start the business in (month)"), MONTH, value=_next_year())
+    founded = _founded(data_dir, main, start)
     profit = form.typed(
         "profit",
         _("Profit per month €"),
@@ -307,11 +320,35 @@ def _business(data_dir: Path, plan: Plan) -> None:
     named = _("Business at {age}").format(age=age) if age is not None else _("Business")
     name, stem = _named(data_dir, plan, named)
     step = (
-        whatifs.Business(main, start, profit, name, stem)
+        whatifs.Business(main, start, profit, name, stem, founded)
         if start is not None and profit is not None and form.read
         else None
     )
     _finish(data_dir, "business", step, form)
+
+
+def _founded(data_dir: Path, main: str, start: date | None) -> bool:
+    """After a job loss in the main scenario before `start` a checkbox for the
+    Gründungszuschuss: on where the claim gives it, else off with the reason
+    (`whatifs.founding`). Keyed by that, so a start that changes it shows the new default."""
+    claim = whatifs.founding(data_dir, main, start) if start is not None else None
+    if claim is None:
+        return False
+    ticked = st.checkbox(
+        _("With the Gründungszuschuss"),
+        value=claim.why is None,
+        key=f"{KEY}business-gz-{claim.why is None}",
+        help=_(
+            "Out of unemployment the employment agency pays six months of your ALG1 and 300 € a "
+            "month, free of tax, if at least 150 days of the claim are left (§§93, 94 SGB III). "
+            "They use 180 days of the claim."
+        ),
+    )
+    if claim.why is not None:
+        st.caption(
+            _(FOUNDING[claim.why]).format(days=round(claim.days), month=f"{claim.month:%Y-%m}")
+        )
+    return ticked
 
 
 def _land(data_dir: Path) -> Land | None:

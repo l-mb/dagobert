@@ -253,8 +253,23 @@ A course with a Bildungsgutschein (`training: true`) pays the same ALG1. Two day
 one day of the claim, but a course never takes the claim below three months. After a course of six
 months or longer, a rest below three months grows to three months, once.
 
+A business can end the unemployment with the start-up grant of the employment agency
+(Gründungszuschuss). You mark its `self_employed` stream with `gruendungszuschuss: true`. The first
+month in which that business runs decides the grant. It needs at least 150 days of the claim in
+that month, ALG1 paid up to one month before, and no salary beside the business. If one of them
+fails, the business gets nothing, and a marker names the reason.
+
+For six months the grant pays your monthly ALG1 and 300 €. Each of these months uses 30 days of the
+claim. With `gz_extension: true` it pays 300 € a month for nine more months. The employment agency
+decides this part case by case, so it is off by default. The grant is free of tax and does not raise
+the tax rate of your other income. It earns no pension points. You pay your health insurance as the
+business does. In the statutory health insurance, the grant counts in your contribution, but its
+300 € do not. A private member pays the full premium: the employment agency pays no part of it. The
+300 € do not change with prices: the law has kept them since 2006. If the business stops and an
+`alg1` stream pays again, it pays the days that are left.
+
 The Cashflows sheet shows the monthly ALG1 of a phase. It does not show the Sperrzeit or the end of
-the days: the rows from the run show what the simulation pays.
+the days: the rows from the run show what the simulation pays. The grant is a row from the run too.
 
 ## The statutory health insurance
 
@@ -353,6 +368,8 @@ the business expenses, before the income tax and your own social insurance.
   count from the first month of the first business, or from the month that you set as `founded`.
   The other choice is a contribution on the profit, which is never half. Both earn pension points.
 - From 2027 a business makes you eligible for the state grant of the Altersvorsorgedepot.
+- A business that ends a time of unemployment can take the start-up grant of the employment
+  agency (see [Unemployment benefit](#unemployment-benefit)).
 
 ## Buying a property
 
@@ -806,8 +823,12 @@ Dagobert is approximate by design. These are the main simplifications:
   income tax stay in euros of their year.
 - The unemployment benefit assumes a full record of insured work, so your age alone sets its
   length. A new claim after a new job of a year is not modeled: a later time pays the rest of the
-  first claim. The short Sperrzeiten of 3 and 6 weeks, the other Sperrzeiten and the
-  Gründungszuschuss are left out. The claim is the same on every path.
+  first claim. The short Sperrzeiten of 3 and 6 weeks and the other Sperrzeiten are left out. The
+  claim is the same on every path.
+- The Gründungszuschuss assumes that the employment agency accepts your business plan. It pays
+  once in a plan. If the business runs in the first month of the plan, the simulation cannot see
+  the ALG1 before it and pays nothing. Enter the rest of a grant that pays now as other income
+  with `taxable: false`.
 - The rules for children cover one parent. Nothing splits between two parents. The monthly
   withholding of a salary leaves out the child allowances of the Soli and the church tax, and the
   Entlastungsbetrag. The December settlement refunds the difference.

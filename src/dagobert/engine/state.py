@@ -228,9 +228,15 @@ class Alg1State:
     extended: bool = False  # by §148 Abs. 3, once
     ended: bool = False  # its marker fell: used up or expired
     monthly: FloatArray | None = None  # nominal, fixed at entry like the Bewilligungsbescheid
+    paid: int | None = None  # the last month in which it paid
+    founded: int | None = None  # the first month of a business with the Gründungszuschuss
+    funded: bool = False  # that business gets it (§93 SGB III)
     row: StreamState | None = None  # the ALG1 row that books the month, none without one
     share: float = 0.0  # of the month that ALG1 pays
     status: bool = False  # it pays or rests in a Sperrzeit: the KVdA (§5 Abs. 1 Nr. 2 SGB V)
+    # the part of the Gründungszuschuss in the amount of ALG1 paid this month, nominal: the base
+    # of a voluntary member of the GKV takes it, not the 300 € (§240 Abs. 2 S. 3 SGB V)
+    grant: FloatArray | float = 0.0
 
 
 @dataclass

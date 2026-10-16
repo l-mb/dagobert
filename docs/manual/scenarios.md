@@ -141,7 +141,13 @@ revision.
   changes to the phase `self-employed`: the salary and the savings plan stop, and the profit pays
   until you stop working. You pay the income tax and your health insurance yourself and no statutory pension
   insurance. The tab `Rules` of the [Assumptions](assumptions.md) page changes this
-  (`tax.self_employed`). The month must lie before you stop working.
+  (`tax.self_employed`). The month must lie before you stop working. If the main scenario
+  has a job loss before that month, the box `With the Gründungszuschuss` shows. The start-up
+  grant of the employment agency then pays six months of your ALG1 and 300 € a month. The box
+  is on when at least 150 days of the claim to ALG1 are left in that month and ALG1 paid up to a
+  month before. Else it is off, and a line says why ([How the simulation
+  works](models.md#unemployment-benefit)). A job loss without a new job ends your work in the
+  main scenario, so a business after it is refused: give the job loss a new job.
 - `Buy a property`: type the month, the price, your own funds and the Land (Bundesland) where the
   property lies. The Land sets the Grunderwerbsteuer, and 5% of the price go to the notary and a
   broker. A loan pays what your own funds leave, at the refinance rate of the plan with a repayment

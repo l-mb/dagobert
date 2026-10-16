@@ -51,8 +51,8 @@ simplifications): change it with the behaviour.
   the one place that charges Abgeltungsteuer (Pauschbetrag, memory for the Günstigerprüfung), and
   `_report_capital_tax` the one that reports it.
 - A marker is data (`result.Marker`, `Core._mark`): its kind (`result.MarkerKind`: the event type,
-  `phase`, `pension`, `bav`, `av`, `alg1`, `alg1 used` and `alg1 expired` (rule `alg1`), `savings
-  plan`, `harvest`, `disability`, `exemption` and `gkv` (rule `gkv`); a new kind there, the type
+  `phase`, `pension`, `bav`, `av`, `alg1 …` and `gz …` (rule `alg1`), `savings plan`, `harvest`,
+  `disability`, `exemption` and `gkv` (rule `gkv`); a new kind there, the type
   checker refuses an event type that it lacks), the name as the inputs write it, the median euros
   or the claim factor, the years, the deferred month, the form (`monthly`, `once`, `half`); the
   run, which the app caches for every session, holds no words. `report.charts.said` writes them (rule `charts`), `tests/builders.marked` in the words of

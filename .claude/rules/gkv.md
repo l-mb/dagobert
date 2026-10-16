@@ -61,7 +61,8 @@ In plain English: `docs/manual/models.md`.
   another, not the other kinds), the rent of a
   let property after its Werbungskosten (`Core._rent_net`, BVSzGs §3 Abs. 1b S. 1, rule `rental`),
   the annuity of a Basisrente (a private pension counts for a voluntary member, Katalog), the
-  Auszahlplan of an Altersvorsorgedepot, and `kv_last`.
+  Auszahlplan of an Altersvorsorgedepot, the Gründungszuschuss but its 300 € (`Alg1State.grant`,
+  §240 Abs. 2 S. 3, read 2026-10-17; Katalog; rule `alg1`), and `kv_last`.
 - `kv_last` (`Health._kv_last`, each January): the capital income of the year that ended
   (`YearAcc.kv_capital`, booked by `Portfolio._flat_tax`: after the Teilfreistellung and the loss
   pot, §20 InvStG and §20 Abs. 6 EStG by Katalog and BVSzGs §3 Abs. 1b S. 4, before the
@@ -138,10 +139,10 @@ In plain English: `docs/manual/models.md`.
   loss pot of capital income from earlier years, also `tax.capital_losses`, lowers `kv_capital`, but
   the Beitragsrecht knows no Verlustvortrag (SG München, BeckRS 2021, 15075, on §10d; for §20 Abs. 6
   unverified): errs towards less contribution.
-- Tests: `tests/test_health.py` (the law in amounts, the engine as relations; the church tax
-  changes no KV), `gkv_plan` of `test_golden.py` (salary, business, gap years from a depot and a
-  rent, a lump sum, the KVdR, a company annuity and a Basisrente; VPW spends from the gap years;
-  disabled in 2028, rule `disability`), the Krankengeld and a BU in `test_disability.py`. The
-  switch: `test_health.py` (with and without it, the settlement, the harvest cap, the markers),
-  `rich_plan` (`gkv_from` 2035-01 at 58, `kvdr: false`: compulsory in the part time with a bAV
-  tail, voluntary at the KV-BBG as a pensioner; the marker of ALG1 at 52).
+- Tests: `tests/test_health.py` (the law in amounts, the engine as relations; the church tax changes
+  no KV), `gkv_plan` of `test_golden.py` (salary, ALG1, business with the Gründungszuschuss, gap
+  years from a depot and a rent, a lump sum, the KVdR, a company annuity and a Basisrente; VPW
+  spends from the gap years; disabled in 2028, rule `disability`), the Krankengeld and a BU in
+  `test_disability.py`. The switch: `test_health.py` (with and without it, the settlement, the
+  harvest cap, the markers), `rich_plan` (`gkv_from` 2035-01 at 58, `kvdr: false`: compulsory in the
+  part time with a bAV tail, voluntary at the KV-BBG as a pensioner; the marker of ALG1 at 52).

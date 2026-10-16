@@ -200,6 +200,8 @@ INCOME = Table(
         "property",
         "taxable",
         "hebesatz",
+        "gruendungszuschuss",
+        "gz_extension",
         "sperrzeit",
         "training",
     ),
@@ -212,7 +214,11 @@ INCOME = Table(
     locked=("name",),
     rename=Kind.STREAM,
     identity=("name", "start"),
-    titles={"hebesatz": N_("trade tax rate (Hebesatz)")},
+    titles={
+        "hebesatz": N_("trade tax rate (Hebesatz)"),
+        "gruendungszuschuss": N_("Gründungszuschuss"),
+        "gz_extension": N_("GZ extension"),
+    },
     grid="streams",
     helps={
         "hebesatz": N_(
@@ -667,6 +673,8 @@ def page(file: RowFile) -> None:
         "run pays it. The unemployment benefit (ALG1) is an estimate: what the simulation pays "
         "on the monthly salary of that date in the phase of the scenario then, or in the last "
         "phase before it with a salary, net and only for the 12 to 24 months of the claim. A "
+        "business with the Gründungszuschuss shows its profit only: the Gründungszuschuss is a "
+        "row of the run, its months spread over the first 12 of the phase. A "
         "stream paid every n months counts in the n months that end with its first payment. "
         "Streams that wait for a property sale are left out. The rows down to `{run}` are what "
         "no stream pays, such as the taxes and the loans: a single run of `{scenario}` with the "

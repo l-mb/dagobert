@@ -178,6 +178,8 @@ EXPERT = _items(
             "of",
             "share",
             "hebesatz",
+            "gruendungszuschuss",
+            "gz_extension",
             "sperrzeit",
             "training",
         )
@@ -236,11 +238,13 @@ FEATURES = {
         N_("Self-employment"),
         NP_("inline", "self-employment"),
         N_(
-            "Off hides the stream kind of a self-employed profit, the column `hebesatz` and the "
-            "tax options of self-employment."
+            "Off hides the stream kind of a self-employed profit, the columns `hebesatz`, "
+            "`gruendungszuschuss` and `gz_extension` and the tax options of self-employment."
         ),
         _items(Sort.STREAM, "self_employed")
-        | _items(Sort.COLUMN, "streams.hebesatz")
+        | _items(
+            Sort.COLUMN, "streams.hebesatz", "streams.gruendungszuschuss", "streams.gz_extension"
+        )
         | _items(Sort.PATH, "tax.self_employed"),
     ),
     Feature.CHILDREN: Spec(

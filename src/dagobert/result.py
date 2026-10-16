@@ -111,6 +111,7 @@ CONVERSION = N_("salary conversion")
 SALARY, PROFIT = "salary", "profit"
 PKV_SUBSIDY = N_("PKV subsidy")  # an item of `SOURCE`
 KINDERGELD = "Kindergeld"  # an item of `SOURCE`, German already
+GRUENDUNGSZUSCHUSS = "Gründungszuschuss"  # an item of `SOURCE`, German already (rule `alg1`)
 # Items of `SOURCE` after the onset of a disability, German already: the Krankengeld (its shares
 # book as `RV`, `AV`, `PV`) and the EM-Rente outside the phases of its pension stream, in them under
 # the name of the stream. The benefit of a BU policy is `<name>: benefit`.
@@ -142,7 +143,7 @@ WORDS = frozenset(
     {
         *(ONEOFF_TAX, PURCHASE_COSTS, LOAN_INTEREST, LOAN_PRINCIPAL, CARE, UPKEEP, CONVERSION),
         *(PKV_SUBSIDY, KINDERGELD, CAPITAL_TAX, INCOME_TAX, TRADE_TAX, RV, AV, KV, PV),
-        *(KRANKENGELD, EM_RENTE, BENEFIT),
+        *(KRANKENGELD, EM_RENTE, BENEFIT, GRUENDUNGSZUSCHUSS),
         *(LUMP_SUM, SEVERANCE, SETTLEMENT, PREMIUM, PAYOUT, SALE, PURCHASE, LOAN, REPAYMENT),
         *(WRITE_OFF, EQUITY, FIXED_INCOME, CASH, EMPLOYER, SUBSIDY, ZULAGE, GUARANTEE),
         *(TRANSFER_TAX, OWN_PREMIUM, INHERITANCE, GIFT, INHERITANCE_TAX, GIFT_TAX),
@@ -200,6 +201,9 @@ MarkerKind = Literal[
     "alg1",
     "alg1 used",
     "alg1 expired",
+    "gz gap",
+    "gz days",
+    "gz salary",
     "savings plan",
     "harvest",
     "disability",

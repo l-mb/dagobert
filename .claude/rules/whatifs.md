@@ -45,7 +45,11 @@ the Scenarios page: rule `scenarios`; `away`, `lost_job` and `compared`: rule `s
   (`profit`) in that phase, so the change out of work ends it (the caption: the salary and the
   savings plan stop in it, as those of a quick start pay in `work` only); `tax.self_employed` at its defaults
   (`rv: none`, no Krankengeld; rule `self-employment`); `Feature.SELF_EMPLOYMENT` on. Refused: a
-  start before the start or at or after the stop.
+  start before the start or at or after the stop. `founded` writes `gruendungszuschuss: true` on
+  the stream (rule `alg1`). `founding(dir, main, month)`: the claim of the main scenario before the
+  month (`simulation.before`, `engine.alg1.refusal`), a `Founding` (`days`, `why`), None without a
+  claim (no job loss before). A job loss without a new job is the stop of work (`goalseek.work`),
+  so a business after it is refused: the GZ needs one with a new job (the manual says so).
 - `Purchase` (`Buy a property`): a `buy_property` (rule `engine`) with the Grunderwerbsteuer of
   `land` (a quick start writes no `tax.land`), `COSTS` 5% of the price (notary, land register,
   broker: those of `buy-home`), `UPKEEP` 1% a year (a rule of thumb), a loan of the cost less the
@@ -87,6 +91,10 @@ the Scenarios page: rule `scenarios`; `away`, `lost_job` and `compared`: rule `s
   the step. `lines` (`confirm`, `fileactions.listing`): a line of the guard that a step words
   itself, the `shift` of `Stop earlier` as `Stop working 2053-06 (age 67) → 2046-06 (age 60)`
   (`ui.at_age`, as the work slider of the Explorer), never `shift retired -84`.
+- `Start a business` (`_founded`): after the start field, where `founding` finds a claim, the
+  checkbox `With the Gründungszuschuss` (help: what it pays), on where `why` is None, else off with
+  the reason below it (`FOUNDING`: the days left or no ALG1 up to a month before); keyed by that,
+  so a start that changes it shows the new default.
 - Defaults: a month the next January, `EARLIER` (5) years before the stop, `COURSE_MONTHS` (6: so
   many months of a course in a row extend a short claim), costs 0, the profit the gross of the
   first salary, the Land the `tax.land` of `assumptions.yaml`, the rent 0. The purchase names its
@@ -100,5 +108,8 @@ entry, each step as runs (fewer months of work, ALG1 in the course months and th
 them, less tax with costs, the profit in the new phase, the property from its month, the loan,
 the rent equal to a `set_stream` by hand), the costs to the cent, the spending of a rent, the
 misfits, the guard line of `Stop earlier`, each dialog one revision as a desktop and a phone, the
-Land and the own funds marked at once. `test_ui_overview`: the invitation
+Land and the own funds marked at once, the Gründungszuschuss after a job loss with a new job
+(`founding` at 270 and 120 days, its six months in the run and on the sheet, the box on and off
+with its reason).
+`test_ui_overview`: the invitation
 and the row of a what-if. `test_scenarios`: `lost_job`.

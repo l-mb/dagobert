@@ -1,20 +1,38 @@
 """The claim to ALG1 as a balance of days, the same on every path (§§147, 148, 159, 161 SGB III):
 the months of ALG1 use it, a Sperrzeit rests and shortens it, a course uses half, a later
-stretch within four years pays the rest. The month of the claim comes before the streams, so
-every step after them reads it (`Alg1State`)."""
+stretch within four years pays the rest; a business out of unemployment may take the
+Gründungszuschuss from it (§§93, 94). The month of the claim comes before the streams, so every
+step after them reads it (`Alg1State`)."""
 
 from __future__ import annotations
 
 import math
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
 from dagobert import sv
+from dagobert.engine.core import pays
 from dagobert.engine.profit import Profit
-from dagobert.engine.state import StreamState
+from dagobert.engine.state import Alg1State, StreamState
 from dagobert.model.streams import StreamKind
-from dagobert.result import SOURCE
+from dagobert.result import GRUENDUNGSZUSCHUSS, SOURCE
+
+if TYPE_CHECKING:
+    from dagobert.tax import TaxYear
+
+type Refusal = Literal["gz gap", "gz days"]  # why a claim gives no Gründungszuschuss
+
+
+def refusal(c: Alg1State, i: int, ty: TaxYear) -> Refusal | None:
+    """Why a business that starts in the month `i` gets no Gründungszuschuss by the claim `c` as
+    it stands before that month, None when it can: no ALG1 paid up to `gz_gap_months` before it
+    (§93 Abs. 1, Abs. 2 Nr. 1 SGB III: the business ends the unemployment of a claim that pays,
+    FW 93.36 and 93.44; a Sperrzeit that rests a claim never paid gives none, FW 93.39), fewer
+    than `gz_min_days` left (Nr. 1)."""
+    if c.paid is None or i - c.paid > ty.gz_gap_months + 1:
+        return "gz gap"
+    return "gz days" if c.days < ty.gz_min_days else None
 
 
 class Alg1(Profit):
@@ -31,7 +49,7 @@ class Alg1(Profit):
         if not training:
             self._extend_alg1()
         continued = c.row is not None
-        c.row = min(rows, key=lambda s: s.spec.training, default=None)
+        c.row = None if self._found() else min(rows, key=lambda s: s.spec.training, default=None)
         c.share, c.status = 0.0, False
         if c.row is None:
             return
@@ -88,8 +106,61 @@ class Alg1(Profit):
             c.days -= paid
         c.share = paid / ty.alg1_month_days
         c.status = rest > 0 or paid > 0
+        if paid > 0:
+            c.paid = self.m.i
         if not c.status:
             self._end_alg1("alg1 used")
+
+    def _found(self) -> bool:
+        """The Gründungszuschuss of the month, before the claim to ALG1: whether it pays, so the
+        ALG1 rows pay nothing and take no days (the business ended the unemployment). The first
+        month in which a business with `gruendungszuschuss` runs (`_running`) decides it once:
+        `refusal`, and no salary (§93 Abs. 1 SGB III: the business is the main work), else a
+        marker. Then `gz_months` of the monthly ALG1 plus `gz_amount`, nominal, each taking
+        `alg1_month_days` of the claim, not below 0 (§94 Abs. 1, §148 Abs. 1 Nr. 8), with
+        `gz_extension` `gz_extension_months` of `gz_amount` (§94 Abs. 2), in each month of them
+        in which such a business runs without a salary, on its paths (`mask`), none after the
+        onset of a disability (`working`): tax-free (§3 Nr. 2 a EStG) outside the
+        Progressionsvorbehalt (§32b), no points, no KVdA."""
+        c, ty, i = self.alg1, self.ty, self.m.i
+        c.grant = 0.0
+        flagged = (
+            [s for s in self._running() if s.spec.gruendungszuschuss]
+            if any(s.spec.gruendungszuschuss for s in self.streams)
+            else []
+        )
+        if not flagged:
+            return False
+        salaried = self._salaried()
+        if c.founded is None:
+            c.founded = i
+            why = refusal(c, i, ty) or ("gz salary" if salaried else None)
+            c.funded = why is None
+            if why is not None:
+                self._mark(why)
+        extended = any(s.spec.gz_extension for s in flagged)
+        month = i - c.founded
+        if not c.funded or salaried or month >= ty.gz_months + extended * ty.gz_extension_months:
+            return False
+        on = (sum((s.mask for s in flagged), np.zeros(self.paths)) > 0) * self.working
+        if month < ty.gz_months and c.monthly is not None:
+            c.days = max(c.days - ty.alg1_month_days, 0.0)
+            c.grant = c.monthly * on
+        paid = c.grant + ty.gz_amount * on
+        self._note(SOURCE, "", GRUENDUNGSZUSCHUSS, paid)
+        self._receive(paid)
+        return True
+
+    def _salaried(self) -> bool:
+        """A salary pays this month by its dates, phases, `every` (`_pays`) and factor
+        (`core.pays`), a bonus (`of`) too: one without `phases` pays with its last base after
+        that ends (`Income._salary_gross`)."""
+        return any(
+            s.spec.kind == StreamKind.SALARY
+            and self._pays(s)
+            and pays(s.spec, self.a, self.m.phase, s.factor_override)
+            for s in self.streams
+        )
 
     def _extend_alg1(self) -> None:
         """In a month without a course, after one of `alg1_course_months` in a row: a rest below

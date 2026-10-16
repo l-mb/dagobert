@@ -149,6 +149,17 @@ alg1_training_floor_days: 90
 alg1_course_months: 6
 # A claim cannot be claimed again four years after it arose (§161 Abs. 2)
 alg1_claim_months: 48
+# The Gründungszuschuss (§§93, 94 SGB III, read 2026-10-17): it needs a claim of at least 150
+# days at the start of the business (§93 Abs. 2 Nr. 1), paid up to it: at most a month between
+# the last ALG1 and the business (Fachliche Weisungen GZ of the Bundesagentur, 2023-09-13, FW
+# 93.44). Six months of the last ALG1 plus 300 € (§94 Abs. 1), each day a day of the claim (§148
+# Abs. 1 Nr. 8), then nine months of 300 € at the Agentur's discretion (§94 Abs. 2). The 300 € is
+# nominal: the law has kept it since 2006, so the engine does not index it
+gz_min_days: 150
+gz_gap_months: 1
+gz_months: 6
+gz_extension_months: 9
+gz_amount: 300.0
 
 # Statutory pension (SGB VI)
 durchschnittsentgelt: 51944.0  # provisional value of 2026, Sozialversicherungs-Rechengrößenverordnung

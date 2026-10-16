@@ -153,6 +153,15 @@ def test_a_basisrente_pays_no_lump_sum() -> None:
             "kind other_income takes no hebesatz",
         ),
         ({"kind": "self_employed"}, "needs amount"),
+        ({"kind": "self_employed", "amount": 9000, "gruendungszuschuss": True}, None),
+        (
+            {"kind": "self_employed", "amount": 9000, "gz_extension": True},
+            "gz_extension extends the Gründungszuschuss",
+        ),
+        (
+            {"kind": "other_income", "amount": 9000, "gruendungszuschuss": True},
+            "kind other_income takes no gruendungszuschuss",
+        ),
     ],
 )
 def test_a_self_employed_profit_may_be_negative_and_takes_a_hebesatz_of_200_percent(

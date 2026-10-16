@@ -34,6 +34,8 @@ WIDTHS = {
     "name": 200,
     "category": 160,  # of the Spend page
     "deduct": 240,  # of an expense: `haushaltsnahe Dienstleistung (§35a)`
+    "gruendungszuschuss": 160,  # its header, the title of the income grid
+    "gz_extension": 140,  # `GZ-Verlängerung`
     "entry": 72,  # an entry of a mapping, such as a phase: the bold total below it fits too
     "string": 105,
     "number": 88,

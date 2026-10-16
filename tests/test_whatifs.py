@@ -13,13 +13,13 @@ from builders import QUICK, booked, fixed_run
 from streamlit.testing.v1 import AppTest
 
 from dagobert import datadir, references, revisions, scenariofiles, whatifs
-from dagobert.budget import regular_salary
+from dagobert.budget import beyond_streams, regular_salary
 from dagobert.loader import APP, load_plan, read_yaml
-from dagobert.model.events import BuyPropertyEvent, SetStreamEvent
+from dagobert.model.events import AddStreamEvent, BuyPropertyEvent, SetStreamEvent
 from dagobert.model.months import add_months, aged, months_between
 from dagobert.model.plan import Feature
 from dagobert.model.taxes import Land
-from dagobert.result import SOURCE
+from dagobert.result import GRUENDUNGSZUSCHUSS, SOURCE
 from dagobert.scenariofiles import act, created
 from dagobert.ui import SAVED, Saved, at_age, guard
 from dagobert.ui.fileactions import listing
@@ -190,6 +190,56 @@ def test_a_business_replaces_the_salary_until_the_plan_stops_working(quick: Path
     assert whatifs.Business("plan", STOP, 1, "x", "x").misfits(quick) == {
         "start": f"type a month before you stop working in {STOP:%Y-%m}"
     }
+
+
+FOUNDED = add_months(LATER, 3)  # three months after a job loss: 270 days of the claim left
+
+
+def lost(quick: Path) -> None:
+    """The main scenario `lost`: unemployed from `LATER` for a year, the plan before it. Without
+    a new job its work would stop with the loss, and a business after it would be refused."""
+    back = add_months(LATER, 12)
+    written(quick, whatifs.Loss("plan", LATER, back, "Lost", "lost", "Unemployed"))
+    (quick / APP).write_text("scenarios: [lost, plan]\n")
+
+
+def test_a_business_after_a_job_loss_takes_the_gruendungszuschuss(quick: Path) -> None:
+    """The claim of the main scenario before the business decides it (`engine.alg1.refusal`): six
+    months pay with the flag after three months of ALG1, none after eight; a plan without a job
+    loss has no claim to ask about."""
+    lost(quick)
+    assert whatifs.founding(quick, "plan", FOUNDED) is None
+    assert whatifs.founding(quick, "lost", FOUNDED) == whatifs.Founding(FOUNDED, 270, None)
+    late = add_months(LATER, 8)
+    assert whatifs.founding(quick, "lost", late) == whatifs.Founding(late, 120, "gz days")
+    written(quick, whatifs.Business("lost", FOUNDED, 6000, "Business", "business", founded=True))
+    run = fixed_run(quick, "business")
+    paid = booked(run, GRUENDUNGSZUSCHUSS, SOURCE)
+    i = months_between(START, FOUNDED)
+    assert np.flatnonzero(paid).tolist() == list(range(i, i + 6))
+    # the Cashflows sheet: a row of the run, beside the profit of the business row
+    plan = load_plan(quick, quick / "scenarios" / "business.yaml")
+    sheet = beyond_streams(run, plan, FOUNDED)[whatifs.BUSINESS].sources
+    months = [j for j in range(i, i + 12) if run.phases[j] == whatifs.BUSINESS]  # the new job
+    assert sheet[GRUENDUNGSZUSCHUSS] == pytest.approx(paid[months].mean())
+
+
+@pytest.mark.parametrize(("start", "ticked"), [(FOUNDED, True), (add_months(LATER, 8), False)])
+def test_the_business_dialog_offers_the_gruendungszuschuss_after_a_job_loss(
+    quick: Path, start: date, ticked: bool
+) -> None:
+    """On where the claim gives it, else off with the reason; the stream that it writes takes
+    the box."""
+    lost(quick)
+    at = typed_in(quick, "business", {"start": f"{start:%Y-%m}"})
+    assert at.checkbox(key=f"whatif-business-gz-{ticked}").value is ticked
+    assert ticked or any("leaves 120 days" in c.value for c in at.caption)
+    next(b for b in at.button if b.key == "whatif-scenarios-business").click()
+    next(b for b in at.button if b.key == "scenarios-confirm").click().run()
+    stem = read_yaml(quick / APP)["scenarios"][-1]
+    added = load_plan(quick, quick / "scenarios" / f"{stem}.yaml").scenario.events[-1]
+    assert isinstance(added, AddStreamEvent)
+    assert added.stream.gruendungszuschuss is ticked
 
 
 @pytest.mark.parametrize("own", [100000, None])  # None: all of the cost

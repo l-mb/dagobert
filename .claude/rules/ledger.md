@@ -14,8 +14,9 @@ After a change, run the check of the rule `engine`.
   start-year euros, written by `Core._note`. A salary is a `source` row with the group `salary`, a
   self-employed profit one with `profit` (`budget.regular_salary` reads both: a usual month of
   earned income, which `scale.salary` scales), every other source has no group (the Kindergeld,
-  `result.KINDERGELD`, rule `children`; `KRANKENGELD` with its `RV`, `AV` and `PV`, `EM_RENTE`
-  outside the phases of its stream, a BU policy `<name>: benefit`, `BENEFIT`, and its premium a
+  `result.KINDERGELD`, rule `children`; `GRUENDUNGSZUSCHUSS`, rule `alg1`; `KRANKENGELD` with
+  its `RV`, `AV` and `PV`, `EM_RENTE` outside the phases of its stream, a BU policy `<name>:
+  benefit`, `BENEFIT`, and its premium a
   `spending` row of its `cat`: rule `disability`). A business books `RV` and its reserve as `income
   tax` monthly, the Gewerbesteuer `trade tax` with the settlement; the KV and PV of a GKV member
   beyond the salary and the pension book monthly as `KV` and `PV` (`Health._pay_gkv`, rule `gkv`).
@@ -107,8 +108,8 @@ After a change, run the check of the rule `engine`.
 - The sides stay in the code; the groups and items of the ledger and the lines of a `Budget` are
   English data in every language. The words of the engine are constants of `result.py`, marked
   `N_` (`result.WORDS`: `INCOME_TAX`, `LOAN_PRINCIPAL`, `SALE`, the suffixes `EMPLOYER`,
-  `GUARANTEE`, `BENEFIT`, …; the SV parts, `ZULAGE`, `KINDERGELD`, `KRANKENGELD` and `EM_RENTE` are
-  German already), those of a
+  `GUARANTEE`, `BENEFIT`, …; the SV parts, `ZULAGE`, `KINDERGELD`, `GRUENDUNGSZUSCHUSS`,
+  `KRANKENGELD` and `EM_RENTE` are German already), those of a
   budget beside them
   (`budget.WORDS`: `TAXES`, `SAVED`, the lines of `totals`, `REFUND`). A new word of the engine is a
   constant there, never a literal. The pages say a name through `budget.said` (rule `i18n`): a

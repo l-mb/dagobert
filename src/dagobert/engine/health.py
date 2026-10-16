@@ -49,12 +49,14 @@ class Health(Alg1):
         voluntary (`sv.kv_voluntary`): the pension, the Versorgungsbezüge and the rest, which is
         the profit at its run rate, the taxable other income, the rent net of its costs, a
         Basisrente, the Auszahlplan `av_paid`, the benefit of a BU policy (`bu_paid`; Katalog: a
-        private Risikoversicherung) and `kv_last`; the Krankengeld of a business stays free (§224
-        Abs. 1 S. 2). Nothing in a month of the PKV (`Core.pkv`); its December before a switch to
+        private Risikoversicherung), the Gründungszuschuss but its 300 € (`Alg1State.grant`,
+        §240 Abs. 2 S. 3) and `kv_last`; the Krankengeld of a business stays free (§224 Abs. 1
+        S. 2). Nothing in a month of the PKV (`Core.pkv`); its December before a switch to
         a voluntary January keeps the base beside `kv_last` for the cap of a harvest (`kv_rest`)."""
         if self.pkv and not (self.m.month.month == 12 and self._voluntary_next()):
             return np.zeros(self.paths)
         d, ty, opts, person, month = self.deflator, self.ty, self.a.tax, self.a.person, self.m.month
+        grant = self.alg1.grant
         company, basis = (x / d for x in self._versorgung())
         pension = rente / d
         on, profit = self._business()
@@ -62,7 +64,7 @@ class Health(Alg1):
         # §3 Abs. 1b): a loss offsets another stream of its kind, no other kind
         other = np.maximum(self._run_rate(StreamKind.OTHER_INCOME, taxable=True), 0.0)
         other += np.maximum(self._rent_net(), 0.0)
-        rest = np.maximum(profit, 0.0) + (other + basis + av_paid + self.bu_paid) / d
+        rest = np.maximum(profit, 0.0) + (other + basis + av_paid + self.bu_paid + grant) / d
         self.kv_rest = pension + company + rest
         if self.pkv:
             return np.zeros(self.paths)

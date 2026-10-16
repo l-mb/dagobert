@@ -13,7 +13,7 @@ from dagobert.model.months import add_months
 from dagobert.model.plan import Scenario
 from dagobert.model.streams import Stream, StreamKind
 from dagobert.model.taxes import TaxOptions
-from dagobert.result import SOURCE, FloatArray, RunResult
+from dagobert.result import GRUENDUNGSZUSCHUSS, SOURCE, FloatArray, RunResult
 from dagobert.tax import for_year
 
 TY = for_year(2026)
@@ -179,3 +179,169 @@ def test_the_age_counts_in_the_first_month_of_a_sperrzeit() -> None:
     r = _run(_alg1(sperrzeit=True), person=Person(born=add_months(LOST, -12 * 50 + 1)))
     assert np.flatnonzero(_paid(r))[0] == 4
     assert _paid(r).sum() == pytest.approx(9.0)
+
+
+# The Gründungszuschuss (§§93, 94 SGB III): a business in `alt` after three months of ALG1, 270
+# days left
+FOUNDED = date(2026, 6, 1)  # index 5
+GZ_MONTHS = slice(5, 11)  # its six months of ALG1 and 300 €
+EXTENSION = slice(11, 20)  # its nine more months of 300 €
+
+
+def _business(**kw: object) -> Stream:
+    return Stream.model_validate(
+        {"name": "biz", "kind": "self_employed", "amount": 3000, "index": None}
+        | {"phases": ["alt"]}
+        | kw
+    )
+
+
+def _founding(
+    *, gz: bool = True, changes: tuple[tuple[date, str], ...] = (), **kw: object
+) -> RunResult:
+    """Unemployed from `LOST`, a business in `alt` from `FOUNDED`, with the Gründungszuschuss
+    (`gz`) and the fields `kw` of the business, then the phase `changes`."""
+    flags = {"gruendungszuschuss": True} if gz else {}
+    return _run(
+        _alg1(),
+        changes=(*UNEMPLOYED, (FOUNDED, "alt"), *changes),
+        others=(Stream(name="kv", amount=-700, health="kv", index=None), _business(**flags, **kw)),
+        months=36,
+    )
+
+
+def _gz(r: RunResult) -> FloatArray:
+    return booked(r, GRUENDUNGSZUSCHUSS, SOURCE)
+
+
+def _founded(r: RunResult) -> list[tuple[date, str]]:
+    return [(m.month, m.kind) for m in r.markers if m.kind.startswith("gz")]
+
+
+def test_the_gruendungszuschuss_pays_six_months_of_alg1_and_300_euros() -> None:
+    """§94 Abs. 1: six months of the last ALG1 and 300 €, tax-free (§3 Nr. 2 a EStG, not in
+    §32b): the rest of the run the same, also the taxes, and no subsidy of the Agentur to the PKV
+    premium (§174 SGB III needs ALG1). Its source row is the difference of the income."""
+    plain, founded = _founding(gz=False), _founding()
+    more = founded.income[0] - plain.income[0]
+    assert more[GZ_MONTHS].tolist() == pytest.approx([MONTHLY + TY.gz_amount] * 6)
+    assert np.delete(more, np.r_[GZ_MONTHS]) == pytest.approx(0)
+    assert _gz(founded) == pytest.approx(more)
+    assert founded.taxes[0] == pytest.approx(plain.taxes[0])
+    assert not _founded(founded)
+
+
+def test_its_months_take_the_days_of_the_claim() -> None:
+    """§148 Abs. 1 Nr. 8: a day of the Gründungszuschuss in the amount of ALG1 is a day of the
+    claim. A business that fails after a year: ALG1 again within four years pays the rest, 270
+    days less six months."""
+    again = ((date(2027, 6, 1), "unemployed"),)
+    plain, founded = (_founding(gz=gz, changes=again) for gz in (False, True))
+    assert _paid(plain)[17:].sum() == pytest.approx(9.0)
+    assert _paid(founded)[17:].sum() == pytest.approx(3.0)
+
+
+@pytest.mark.parametrize(
+    ("changes", "kind"),
+    [
+        (((date(2026, 10, 1), "alt"),), None),  # 150 days left
+        (((date(2026, 11, 1), "alt"),), "gz days"),  # 120
+        (((date(2026, 6, 1), "work"), (date(2026, 7, 1), "alt")), None),  # a month between
+        (((date(2026, 6, 1), "work"), (date(2026, 8, 1), "alt")), "gz gap"),  # two months
+    ],
+    ids=["150 days", "120 days", "a month between", "two months between"],
+)
+def test_it_needs_150_days_of_a_claim_that_pays_up_to_the_business(
+    changes: tuple[tuple[date, str], ...], kind: str | None
+) -> None:
+    """§93 Abs. 2 Nr. 1: at least 150 days of the claim left when the business starts, and ALG1
+    paid up to a month before (FW 93.44). Else nothing, and a marker in the first month of the
+    business."""
+    r = _run(
+        _alg1(),
+        changes=(*UNEMPLOYED, *changes),
+        others=(_business(gruendungszuschuss=True),),
+        months=36,
+    )
+    assert bool(_gz(r).any()) is (kind is None)
+    assert _founded(r) == ([] if kind is None else [(changes[-1][0], kind)])
+
+
+BONUS = {"name": "bonus", "kind": "salary", "of": "pay", "share": 0.1, "every": 12}
+
+
+@pytest.mark.parametrize(
+    ("beside", "kind", "twelfth"),
+    [
+        (
+            Stream(name="job", kind=StreamKind.SALARY, gross=2000, index=None, phases=["alt"]),
+            "gz salary",
+            0.0,
+        ),
+        (Stream.model_validate(BONUS), None, 0.0),
+        (Stream.model_validate(BONUS | {"phases": ["work"]}), None, TY.gz_amount),
+    ],
+    ids=["a salary", "a bonus that outlives its salary", "a bonus in the phases of its salary"],
+)
+def test_it_needs_the_business_as_the_main_work(
+    beside: Stream, kind: str | None, twelfth: float
+) -> None:
+    """§93 Abs. 1: a business beside a salary is no main work: nothing, and a marker. A bonus
+    without phases pays with its last salary after that ends (`every` 12: the months 0 and 12),
+    so it takes the grant of the month 12 only; one in the phases of its salary none."""
+    r = _run(
+        _alg1(),
+        changes=(*UNEMPLOYED, (FOUNDED, "alt")),
+        others=(_business(gruendungszuschuss=True, gz_extension=True), beside),
+        months=24,
+    )
+    assert bool(_gz(r).any()) is (kind is None)
+    assert _gz(r)[12] == pytest.approx(twelfth)
+    assert _founded(r) == ([] if kind is None else [(FOUNDED, kind)])
+
+
+def test_the_extension_pays_300_euros_for_nine_more_months() -> None:
+    """§94 Abs. 2: nine more months of 300 €, which take no days of the claim."""
+    founded, extended = _founding(), _founding(gz_extension=True)
+    more = _gz(extended) - _gz(founded)
+    assert more[EXTENSION].tolist() == pytest.approx([TY.gz_amount] * 9)
+    assert np.delete(more, np.r_[EXTENSION]) == pytest.approx(0)
+
+
+def test_it_earns_no_pension_points() -> None:
+    """No contribution of the Agentur, unlike ALG1 (§3 S. 1 Nr. 3 SGB VI): the pension at 67
+    the same with and without it."""
+    pension = Stream(name="rente", kind=StreamKind.PENSION, points=30, point_value=40)
+    plain, founded = (
+        _run(
+            _alg1(),
+            changes=(*UNEMPLOYED, (FOUNDED, "alt"), (date(2027, 7, 1), "retired")),
+            others=(_business(gruendungszuschuss=gz), pension),
+            months=24,
+            person=Person(born=date(1960, 7, 1)),
+        )
+        for gz in (False, True)
+    )
+    assert _gz(founded).any()
+    assert booked(founded, "rente", SOURCE) == pytest.approx(booked(plain, "rente", SOURCE))
+
+
+def test_a_member_of_the_gkv_pays_on_it_but_not_on_the_300_euros() -> None:
+    """§240 Abs. 2 S. 3 SGB V: the voluntary KV and PV of the business take the
+    Gründungszuschuss but its 300 € (Katalog of the GKV-Spitzenverband, 2026-05-26): as a profit
+    higher by the ALG1, the nine months of 300 € as none."""
+
+    def run(amount: float, **kw: object) -> FloatArray:
+        r = _run(
+            _alg1(),
+            changes=(*UNEMPLOYED, (FOUNDED, "alt")),
+            others=(_business(amount=amount, **kw),),
+            months=24,
+            tax=TaxOptions(pkv=False),
+        )
+        return booked(r, "KV") + booked(r, "PV")
+
+    plain, founded = run(3000), run(3000, gruendungszuschuss=True, gz_extension=True)
+    assert founded[GZ_MONTHS] == pytest.approx(run(3000 + MONTHLY)[GZ_MONTHS])
+    assert founded[EXTENSION] == pytest.approx(plain[EXTENSION])
+    assert (founded[GZ_MONTHS] > plain[GZ_MONTHS]).all()

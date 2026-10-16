@@ -22,6 +22,7 @@ from dagobert.result import (
     SETTLEMENT,
     TAX,
     TRADE_TAX,
+    BoolArray,
     FloatArray,
 )
 
@@ -32,7 +33,9 @@ LATE_ROUNDS, CENT = 30, 0.01
 
 
 class Settlement(Income, Portfolio):
-    def _settle_year(self) -> tuple[tax.YearIncome, tax.YearSettlement]:
+    def _year_income(self) -> tuple[tax.YearIncome, FloatArray]:
+        """The income of the year to settle, after the Vorabpauschale and the interest, and their
+        flat tax, nominal."""
         acc = self.acc
         d = self.deflator
         growth = self.eq_index[:, self.m.i] / acc.index_jan - 1
@@ -48,7 +51,7 @@ class Settlement(Income, Portfolio):
         trades = [
             (t.profit, *tax.trade_tax(t.profit, t.hebesatz, self.ty)) for t in acc.trade.values()
         ]
-        year_income = tax.YearIncome(
+        return tax.YearIncome(
             salary_gross=acc.salary_gross,
             severance=acc.severance,
             alg1=acc.lohnersatz,
@@ -77,9 +80,17 @@ class Settlement(Income, Portfolio):
             entlastung=self._entlastung(),
             household=acc.deduct.get(Deduction.HOUSEHOLD, zero),
             craftsman=acc.deduct.get(Deduction.CRAFTSMAN, zero),
-        )
+        ), flat_tax
+
+    def _settle_year(
+        self, year_income: tax.YearIncome, flat_tax: FloatArray
+    ) -> tuple[tax.YearIncome, tax.YearSettlement]:
+        """Settle the year (`_year_income`) after a harvest, pay the bill and book its tax.
+        Returns the year as settled."""
+        acc = self.acc
+        d = self.deflator
         if self.a.tax.harvest and self.m.month.month == 12:
-            flat_tax += self._harvest(year_income)
+            flat_tax = flat_tax + self._harvest(year_income)
             year_income = replace(
                 year_income,
                 capital_income=acc.capital_income,
@@ -165,19 +176,22 @@ class Settlement(Income, Portfolio):
         return np.asarray(jan_units + rest)
 
     def _settle_december(self) -> None:
-        """The refund of a loss carried back the year before (`_refund_back`), then the settlement
-        of the year and a deficit cover for its bill. What that cover sells joins the settlement:
-        pay the change and cover again, until no path owes a cent more (each round sells less, at
-        most `LATE_ROUNDS`). Then the §23 losses left carry into the next year, the church tax that
-        the withholding left, which the next year pays, the loss of the year, back into the years
+        """The income of the year, with the decision on the carryback of the loss of the year
+        before (`_waive_back`) and its refund (`_refund_back`), then the settlement of the year
+        and a deficit cover for its bill. What that cover sells joins the settlement: pay the
+        change and cover again, until no path owes a cent more (each round sells less, at most
+        `LATE_ROUNDS`). Then the §23 losses left carry into the next year, the church tax that the
+        withholding left, which the next year pays, the loss of the year, back into the years
         before (`_carry_back`) unless `tax.loss_carryback` is off, the rest with the Verlustvortrag
         (§10d EStG, nominal), and the Rentenfreibetrag after the first full pension year.
         `settled` keeps the regular bill of all rounds for VPW, which spreads it over the next
         year; the Fünftelregelung part (a refund of the withholding) is a one-off, and so is the
         refund of a carryback."""
+        year_income, flat_tax = self._year_income()
+        year_income = self._waive_back(year_income)
         self._refund_back()
         before = self.cash.copy()
-        year = self._settle_year()
+        year = self._settle_year(year_income, flat_tax)
         self.settled = before - self.cash - self.oneoff_tax
         for _ in range(LATE_ROUNDS):
             self._cover_deficit()
@@ -197,28 +211,76 @@ class Settlement(Income, Portfolio):
         self.income_losses = left * self.deflator
         self._freeze_rentenfreibetrag()
 
+    def _waive_back(self, income: tax.YearIncome) -> tax.YearIncome:
+        """§10d Abs. 1 S. 6 EStG: the return of the year before, settled now when the income of
+        this year is known, waives the carryback of its loss as a whole or not at all. Per path
+        this year settles with the Verlustvortrag as it is and with the loss taken back on top
+        (`loss_back`; the church tax that its refund takes off this year, `church_back`, stays
+        paid): the waiver where what the loss then saves here (income tax, Soli, church and trade
+        tax, the refund of the Günstigerprüfung) exceeds the refund, `refund_back` and
+        `flat_back`, both nominal now, by more than a cent. What the pot keeps after this year
+        counts nothing. A waiver pays no refund, and the years amended settle again without the
+        loss (`Assessed.pending`), so a later loss sees their room. Returns this year's income as
+        decided."""
+        if not self.loss_back.any():
+            return income
+        d = self.deflator
+        back, church = self.loss_back / d, self.church_back / d
+        self.loss_back, self.church_back = np.zeros(self.paths), np.zeros(self.paths)
+
+        def waived(paths: BoolArray) -> tax.YearIncome:
+            return replace(
+                income,
+                loss_carried=income.loss_carried + np.where(paths, back, 0.0),
+                church_paid=income.church_paid + np.where(paths, church, 0.0),
+            )
+
+        kept, waiver = (
+            tax.year_settlement(year, self.ty, church=self.church)
+            for year in (income, waived(np.full(self.paths, True)))
+        )
+        saved = (kept.total - waiver.total + waiver.refund - kept.refund) * d
+        waive = saved > self.refund_back + self.flat_back + CENT
+        self.refund_back = np.where(waive, 0.0, self.refund_back)
+        self.flat_back = np.where(waive, 0.0, self.flat_back)
+        for year in self.assessed:
+            if waive.any() and np.any(year.pending):
+                year.income = replace(
+                    year.income,
+                    loss_back=year.income.loss_back - np.where(waive, year.pending, 0.0),
+                )
+                year.settlement = tax.year_settlement(year.income, self.ty, church=self.church)
+            year.pending = 0.0
+        return waived(waive)
+
     def _carry_back(self, loss: FloatArray) -> FloatArray:
         """§10d Abs. 1 EStG: the negative Gesamtbetrag der Einkünfte `loss` of this year (real)
         goes back into the years that the run settled before it (`assessed`, `tax.carryback`), up
         to their rooms at their price levels: each settles again with it. What that saves of the
         income tax, Soli and church tax, and what its Günstigerprüfung refunds more of the flat
         tax, come back with the next settlement, nominal (the assessment of this year comes next
-        year, `_refund_back`). The church tax refunded lowers the church tax paid in the year of
-        the refund, a Sonderausgabe (`church_due`). Returns the loss taken back, real."""
+        year, `_refund_back`), unless that settlement waives the carryback (`_waive_back`, which
+        `loss_back` and `church_back` serve). The church tax refunded lowers the church tax paid
+        in the year of the refund, a Sonderausgabe (`church_due`). Returns the loss taken back,
+        real."""
         taken = np.zeros(self.paths)
         if not loss.any():
             return taken
         d = self.deflator
         rooms = [year.settlement.room * year.level / d for year in self.assessed]
         for year, back in zip(self.assessed, tax.carryback(loss, rooms, self.ty), strict=True):
-            income = replace(year.income, loss_back=year.income.loss_back + back * d / year.level)
+            year.pending = back * d / year.level
+            income = replace(year.income, loss_back=year.income.loss_back + year.pending)
             again = tax.year_settlement(income, self.ty, church=self.church)
             settled = year.settlement
+            church = (settled.church - again.church) * year.level
             self.refund_back += (settled.total - again.total) * year.level
             self.flat_back += (again.refund - settled.refund) * year.level
-            self.church_due -= (settled.church - again.church) * year.level
+            self.church_due -= church
+            self.church_back += church
             year.income, year.settlement = income, again
             taken += back
+        self.loss_back = taken * d
         return taken
 
     def _refund_back(self) -> None:

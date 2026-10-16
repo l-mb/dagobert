@@ -86,8 +86,8 @@ the run: rule `engine`. The inputs: `docs/manual/configuration.md`, in plain Eng
   Günstigerprüfung. The rest joins the pot. S. 6 since 2022 (Viertes Corona-Steuerhilfegesetz,
   BGBl. 2022 I S. 911; read again 2026-10-16: "insgesamt abzusehen"): the waiver on application is
   whole, no part of it (a partial waiver down to the Grundfreibetrag is the law before 2022, not
-  modelled): the default carries back in full; `false` is the waiver, forward only, the engine
-  before the option.
+  modelled). `true` carries back in full where that pays, per path (owner 2026-10-16, below);
+  `false` is always the waiver, forward only.
 - The engine (`Settlement._carry_back`, in `_settle_december` after the rounds, the church tax due
   set): `Core.assessed`, a `deque` of two `state.Assessed`, the last year first (its final
   `YearIncome` with `loss_back`, its settlement, its price level), a loss of no path skips. The
@@ -99,7 +99,25 @@ the run: rule `engine`. The inputs: `docs/manual/configuration.md`, in plain Eng
   assessment of the loss year comes the next year; the last settlement of a run too): `income tax`
   and `capital gains tax` below zero in that month (rule `ledger`), before `settled` (rule
   `spending`). The church tax refunded lowers `church_due`, the church tax paid in the year of the
-  refund (§10 Abs. 4b S. 3).
+  refund (§10 Abs. 4b S. 3). `_carry_back` keeps what a waiver undoes: `Core.loss_back` (the loss
+  taken back, nominal), `church_back` (that church tax), `Assessed.pending` (of a year's
+  `loss_back` the part of this loss).
+- The waiver (`Settlement._waive_back`, owner 2026-10-16): decided when a taxpayer would, with the
+  return of the loss year L, in December L+1, its income known. The refund is booked there anyway,
+  so no cash moves earlier and the paths do not part before. In the first settlement of L+1,
+  after `_year_income`, before `_refund_back`, the harvest (rule `harvest`: no tariff room while a
+  Verlustvortrag is left, so it sees the chosen pot) and the rounds, which keep it (`replace`).
+  Where `loss_back` holds, L+1 settles twice on all paths: as is and with `loss_back` in the pot
+  and `church_back` in its church tax paid. A path waives where what that saves (the `total` and
+  the Günstigerprüfung refund, as `refund_back` and `flat_back` count them, nominal at L+1)
+  exceeds `refund_back + flat_back` by more than `CENT`: a tie keeps the carryback. What the pot
+  keeps after L+1 counts at zero (a modelling choice, also in models.md and the help), and the
+  refund of L-1 or L-2 against the saving of L+1 compares nominal, undiscounted. The harvest room
+  that the kept pot would close or open in L+1 does not enter it, and a run that ends in L+1
+  decides on its months up to the end (`Engine.run` settles in its last month too). A waiver: no
+  refund, the loss in the pot of L+1, its church tax paid as before, and the years amended
+  (`assessed`) settle again without `pending`, so a later loss sees their room. No decision without
+  an L+1 in the run: the loss of the last year carries back, its refund lost (gaps).
 - The pot is nominal, as the law carries it: `Core.income_losses`, seeded from
   `tax.loss_carryforward` (the Feststellungsbescheid, Abs. 4, nominal at `start`), `/ d` into
   `_settle_year`, kept by `_settle_late_sales` and the `plain` recompute of the ledger split through
@@ -120,7 +138,9 @@ the run: rule `engine`. The inputs: `docs/manual/configuration.md`, in plain Eng
   rent; the Gewerbesteuer carryforward (§10a GewStG). Of the Verlustrücktrag: none into the years
   before `start` (after a roll forward the loss of its first year carries forward only); a refund
   due after the end of the run is lost, so is one across a roll forward (`rollforward.built`
-  writes the pot of `simulation.before` only, not `refund_back`, `flat_back` or `assessed`). A
+  writes the pot of `simulation.before` only, not `refund_back`, `flat_back`, `assessed` or the
+  pending decision, `loss_back`: a roll to the January after the loss drops its waiver too, one
+  later in that year decides on its months before the roll, the last settlement of `before`). A
   roll of one year settles one December with `assessed` empty: the whole loss is in the pot. A
   roll of two or more loses the carryback of a loss of its last year, refund and loss; models.md
   names the waiver for the roll as the remedy (an issue for the owner, review 2026-10-16); the
@@ -133,10 +153,13 @@ the run: rule `engine`. The inputs: `docs/manual/configuration.md`, in plain Eng
   the AfA rate, share and end; the end of the rent and a sale; the §23 basis, once for a GKV
   member too, and the penalty; the costs that the age curve and `scale` leave; the pot over years,
   nominal with inflation, the seed, a business loss, a purchase, the GKV; the carryback a December
-  later, switched off, into the second year, into the capital income of a Günstigerprüfung, the
-  Grundfreibetrag it takes), the law in amounts in `test_tax.py` (`carryback`, `loss_back` as the
-  pot, the room, with the capital income), `rich_plan` (a let flat at a loss,
+  later before a year without income, switched off, a tie, into the second year, into the capital
+  income of a Günstigerprüfung; the waiver before a year of higher income, less in all than the
+  forced carryback; the loss of the last year; the paths of one run each by its own income), the
+  law in amounts in `test_tax.py` (`carryback`, `loss_back` as the pot, the room, with the
+  capital income), `rich_plan` (a let flat at a loss,
   its taxable sale; a course of 2030, whose loss beyond the capital income goes back into the
-  severance year 2029, refunded in December 2031) and `gkv_plan`
+  severance year 2029, refunded in December 2031, which keeps it: its tax is 0 and its
+  Günstigerprüfung refunds in full either way) and `gkv_plan`
   (a let flat with a loan repaid in 2033, its loss against the capital gains of the gap years, a
   seed of 20,000 €) of `test_golden.py`.

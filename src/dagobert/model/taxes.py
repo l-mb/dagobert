@@ -238,13 +238,14 @@ class TaxOptions(Strict):
     )
     loss_carryback: bool = Field(
         default=True,
-        description="A loss of a year, when the income of the year is below zero, goes back first "
-        "(§10d Abs. 1 EStG): into the year before, the rest into the year "
-        "before that, up to their income and 1.000.000 €; what is left carries forward. The refund "
-        "comes in the December after the year of the loss. The carryback comes off before the "
-        "Sonderausgaben and can use up the tax-free Grundfreibetrag of a year of low income. Since "
-        "2022 the law lets you waive it only as a whole: switch it off for that, and the loss "
-        "carries forward only",
+        description="A loss of a year, when the income of the year is below zero, can go back "
+        "(§10d Abs. 1 EStG): into the year before, the rest into the year before that, up to their "
+        "income and 1.000.000 €; what is left carries forward. The refund comes in the December "
+        "after the year of the loss. The carryback comes off before the Sonderausgaben and can use "
+        "up the tax-free Grundfreibetrag of a year of low income. Since 2022 the law lets you "
+        "waive it only as a whole. On: in that December the simulation waives it on each path "
+        "where the loss saves more tax in the year after it than the refund brings; later years "
+        "do not count. Off: the loss always carries forward only",
     )
     capital_losses: Euros = Field(
         default=0.0,

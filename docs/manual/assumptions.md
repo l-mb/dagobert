@@ -43,9 +43,10 @@ The page has four tabs:
   statutory health insurance (empty: the average of the year), the church tax (`Church tax`) with the Land where you
   live (`Bundesland`), and the first month in which a purchase of crypto counts as capital income
   (`Crypto taxed like shares from`), the losses of earlier years that your last tax notice
-  carries forward (`Losses carried forward €`, the Verlustvortrag), whether a loss goes back into
-  the two years before (`Carry a loss back into the two years before`, the Verlustrücktrag, see
-  [How the simulation works](models.md#a-loss-of-a-year)), and the losses of capital
+  carries forward (`Losses carried forward €`, the Verlustvortrag), whether a loss can go back into
+  the two years before (`Carry a loss back into the two years before`, the Verlustrücktrag: when
+  on, the simulation waives it where the year after the loss saves more, see [How the simulation
+  works](models.md#a-loss-of-a-year)), and the losses of capital
   income from before the start (`Capital losses carried forward €`, see [How the simulation
   works](models.md#each-month)). Switch on `Single parent
   (Entlastungsbetrag)` when you raise your children with no other adult in the household. The select

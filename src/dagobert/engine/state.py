@@ -309,11 +309,13 @@ class YearAcc:
 @dataclass
 class Assessed:
     """A settled year that a loss of one of the two years after it amends (§10d Abs. 1 EStG): its
-    income as settled, with the losses carried back into it, its settlement and its price level."""
+    income as settled, with the losses carried back into it, its settlement and its price level;
+    of its `loss_back` the part of the last loss, which a waiver takes out again."""
 
     income: YearIncome
     settlement: YearSettlement
     level: FloatArray
+    pending: FloatArray | float = 0.0
 
 
 @dataclass

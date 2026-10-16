@@ -262,10 +262,13 @@ class Core:
         self.income_losses = np.full(self.paths, self.a.tax.loss_carryforward)
         # the last two years settled, the last first, which a loss carries back into (Abs. 1),
         # and what that refunds with the next settlement, nominal: the income tax and the flat
-        # tax of a Günstigerprüfung
+        # tax of a Günstigerprüfung; the loss taken back and the church tax that its refund
+        # takes off the next year, which a waiver in that settlement returns (S. 6)
         self.assessed: deque[Assessed] = deque(maxlen=2)
         self.refund_back = np.zeros(self.paths)
         self.flat_back = np.zeros(self.paths)
+        self.loss_back = np.zeros(self.paths)
+        self.church_back = np.zeros(self.paths)
         # the monthly base of a freiwilliges GKV member from the last year (`Health._kv_last`)
         self.kv_last = np.zeros(self.paths)
         # the rest of that base in the month, what caps a harvest (`Health._kv_room`)

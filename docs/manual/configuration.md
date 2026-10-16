@@ -285,14 +285,18 @@ Overview moves it) and `scale` (the overrides of a scenario).
     of a scenario that it extends, else that of `assumptions.yaml`, where it adds `tax` when the
     file has none. Scenarios that share one `tax` take the smallest amount. The losses of
     capital income are another pot: see `capital_losses`.
-  - `loss_carryback` (default true): a loss of a year goes back first (Verlustrücktrag, §10d Abs. 1
+  - `loss_carryback` (default true): a loss of a year can go back (Verlustrücktrag, §10d Abs. 1
     EStG). It goes into the year before, and the rest into the year before that. Each year takes it
     up to its income, at most 1,000,000 € in all, and the losses that a year carried forward come
     first. The refund comes in the December after the year of the loss. What is left carries
     forward. The carryback comes off before the Sonderausgaben, so in a year of low income it can
     use up the tax-free amount (Grundfreibetrag). Since 2022 the law lets you waive only the whole
-    carryback. For that, set false: the whole loss then carries forward. The years before `start`
-    take no carryback. See [How the simulation works](models.md#a-loss-of-a-year).
+    carryback. With true, the simulation chooses in that December, separately for each path. It
+    waives the carryback when the loss saves more tax in the year after the loss than the refund.
+    It does not count what the loss saves in later years. A loss of the last year of the plan
+    always goes back. With false, the simulation always waives: the whole loss carries forward. The
+    years before `start` take no carryback. See [How the simulation
+    works](models.md#a-loss-of-a-year).
   - `capital_losses` (default 0, at least 0): the losses of capital income that you carry forward
     at the start (§20 Abs. 6 EStG), in euros of `start`. Enter the sum of two amounts: the losses
     that your bank still holds in its loss pot (its yearly tax statement lists them), and the

@@ -152,14 +152,26 @@ has a loss (a negative Gesamtbetrag der Einkünfte, §10d EStG). The loss goes t
 
 The carryback also comes off before the Sonderausgaben. In a year of low income it can use up the
 tax-free amount (Grundfreibetrag), so a part of the loss saves no tax. Since 2022 the law lets you
-waive the carryback only as a whole. If you want that, set `tax.loss_carryback` to false. The whole
-loss then carries forward. The losses stay in euros of their year.
+waive the carryback, but only as a whole. You decide this with the tax return of the year of the
+loss. At that time you know the income of the next year.
+
+The simulation makes this choice for you, separately for each path, in the December after the year
+of the loss. It computes the tax of that next year twice: with the carryback, and with the whole
+loss carried forward. If the loss saves more tax in that next year than the refund of the
+carryback, the simulation waives the carryback. Then no refund comes, and the whole loss carries
+forward. If both amounts are equal, the carryback stays. The simulation compares the amounts in
+euros of their own years. It does not count what the loss saves after that next year. If the loss
+falls in the last year of the plan, no next year decides, so the carryback stays.
+
+If you always want to waive the carryback, set `tax.loss_carryback` to false. The whole loss then
+carries forward. The losses stay in euros of their year.
 
 An example: you get a severance of 150,000 € in 2029 and no salary after it. In 2030 you pay a
 course of 30,000 € yourself. You enter it as an expense with `deduct: work`. Your income of 2030
 falls below zero, and the loss first offsets your capital income of 2030. The rest goes back into
 2029. There it comes off your other income first, then off the severance, so the tax of the
-severance falls. The refund comes in December 2031.
+severance falls. In 2031 you earn too little to pay income tax, so a waiver saves nothing there.
+The carryback stays, and the refund comes in December 2031.
 
 ## Children
 
@@ -737,7 +749,10 @@ Dagobert is approximate by design. These are the main simplifications:
   year for the new start. A roll forward by two years or more loses the refund of a loss of its
   last year, and the part of that loss that went back no longer carries forward. For such a roll,
   set `tax.loss_carryback` to false, and set it back to true after the roll: the whole loss then
-  carries to the new start. In a year of the Günstigerprüfung a loss first offsets the capital
+  carries to the new start. The choice to waive the carryback looks only at the year after the
+  loss. It does not count what the loss saves in later years, nor how it changes the gains that
+  the simulation realizes tax-free that year, and it compares the refund with the tax saved without
+  interest. If the plan ends during that year, the choice looks at the months up to the end. In a year of the Günstigerprüfung a loss first offsets the capital
   income of that year, also when a carryback would save more. The losses of private sales carry
   forward only. The
   limit on a carried loss above 1 Mio. € a year (Mindestgewinnbesteuerung) is left out. The losses

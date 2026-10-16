@@ -112,9 +112,10 @@ def default_said(value: object, unit: Unit | None) -> str | None:
 def said(about: str, named: str | None = None, more: Iterable[str] = (), **fields: str) -> str:
     """A help in the language of the session from its English parts: `about` (a description of
     the model or a help of a page), the default that it names, `named` (`(default: 30%)`), and the
-    sentences `more`, each a message of the catalogue, formatted with `fields`."""
+    sentences `more`, each a message of the catalogue, formatted with `fields`. An empty default
+    (the text of a `note`) names none."""
     text = _(about).format(**fields) if about else ""
-    if named is not None:
+    if named:
         text = _(DEFAULT_HELP).format(text=text.rstrip("."), value=named).strip()
     for sentence in more:
         text = also(text, _(sentence).format(**fields))

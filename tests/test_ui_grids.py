@@ -57,6 +57,7 @@ def test_column_types() -> None:
     assert "salary" in cols["kind"].options
     assert (cols["factor"].type, cols["factor"].unit) == ("object", Unit.FACTOR)
     assert cols["every"].help.endswith(" (default: 1)")
+    assert "default" not in _columns(SellEvent)["note"].help  # an empty text names no default
 
 
 def test_a_mapping_takes_a_column_per_name_of_the_table() -> None:

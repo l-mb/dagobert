@@ -296,8 +296,8 @@ Overview moves it) and `scale` (the overrides of a scenario).
     income. So add a loss of single shares only in the `overrides` of a scenario, and compare that
     scenario with one without it. The simulation holds no single shares, so it has no pot for
     shares alone. The `Roll forward` writes the losses that the plan carries to the new start
-    into the same `tax` as `loss_carryforward`. It changes them by the consumer prices, because
-    the simulation keeps them in euros of the start.
+    into the same `tax` as `loss_carryforward`. It does not change them by the consumer prices,
+    because the law keeps them in nominal euros.
   - `alleinerziehend` (default false): you raise your children alone, with no other adult in the
     household. The Entlastungsbetrag (§24b EStG) of 4,260 € a year in 2026, and 240 € more for each
     further child, comes off the income in each month in which a child of `children_born` counts.

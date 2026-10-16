@@ -74,7 +74,7 @@ gesetze-im-internet.de on 2026-10-13. The rest of the tax and SV law: rule `tax`
   shares (the Aktienverlusttopf of S. 4) belongs here only if the BVerfG strikes S. 4 (2 BvL 3/21 on
   BFH VIII R 11/18, undecided): a scenario sets it in its overrides to compare both outcomes. A pot
   of the shares alone is a gap (rule `tax`). The roll forward writes the pot of the run at the new
-  start, times the consumer prices (rule `rollforward`). The Tax tab: `Capital losses carried
+  start, nominal (rule `rollforward`). The Tax tab: `Capital losses carried
   forward €` (term `Verlustvortrag aus Kapitalvermögen`), after `loss_carryforward`; `mode.EXPERT`.
   Tests: `test_portfolio.py` (with and without it, at 0), `test_harvest.py`, `test_model.py`,
   `rich_plan` (2,500 €, used up in 2026).

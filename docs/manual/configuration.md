@@ -57,7 +57,8 @@ Overview moves it) and `scale` (the overrides of a scenario).
   goal seek say 90 and 67, and the help names the scenarios at another age), `children` (default 0,
   at least 0: every child, also a grown one), `children_born` (default none: a row for each child,
   at most `children` of them, see below), `rv_since` (optional: the first month of uninterrupted
-  Rentenversicherung contributions), `kvdr` (default true, with `pkv: false` only).
+  Rentenversicherung contributions), `kvdr` (default true, with `pkv: false` or from
+  `tax.gkv_from` only).
   With `kvdr`, the pension makes you a compulsory member of the health insurance of pensioners
   (KVdR, §5 Abs. 1 Nr. 11 SGB V), which pays on the pension, a company pension and a profit beside
   them. False: you stay a voluntary member and pay on all income ([How the simulation
@@ -80,12 +81,12 @@ Overview moves it) and `scale` (the overrides of a scenario).
   While a child counts, the tax takes its allowances instead of the Kindergeld where that saves
   more (§31 EStG), and ALG1 pays 67% instead of 60%. A child without a row counts for nothing, also
   for ALG1: enter each child that still counts. Without a child the Pflegeversicherung adds the
-  surcharge for the childless, up to the month of the first birth. With `pkv: false` it takes 0.25
-  points less for each child of `children_born` under 25 from the second, up to the fifth, through
-  the month in which the child turns 25 (§55 Abs. 3 SGB XI): the month of the birthday, for a
-  birthday on the first the month before (§187 Abs. 2 S. 2, §188 Abs. 2 BGB). A child that
-  `children_born` leaves out gives no discount. [How the simulation
-  works](models.md#children) explains the rules.
+  surcharge for the childless, up to the month of the first birth. In the statutory health
+  insurance (`pkv: false`, or from `tax.gkv_from`) it takes 0.25 points less for each child of
+  `children_born` under 25 from the second, up to the fifth, through the month in which the child
+  turns 25 (§55 Abs. 3 SGB XI): the month of the birthday, for a birthday on the first the month
+  before (§187 Abs. 2 S. 2, §188 Abs. 2 BGB). A child that `children_born` leaves out gives no
+  discount. [How the simulation works](models.md#children) explains the rules.
 
   Schema 6 pays the Kindergeld itself. The migration to schema 6 writes `kindergeld: false` into
   every row of `children_born`, in `assumptions.yaml` and in the overrides of a scenario, with a
@@ -255,7 +256,19 @@ Overview moves it) and `scale` (the overrides of a scenario).
     year at its minimum. In other cases this limit does not apply. See
     [How the simulation works](models.md#realizing-gains).
   - `pkv` (default true): privately insured. Then there is no statutory KV and PV, and the
-    `health` streams take the subsidies and the deduction.
+    `health` streams take the subsidies and the deduction. With `gkv_from`, this is true only
+    before that month.
+  - `gkv_from` (a month, default empty, only with `pkv: true`): the first month in the statutory
+    health insurance (GKV). Before this month the rules of the PKV apply. From this month the
+    rules of the GKV apply, and the `health` streams end by themselves. A salary, ALG1 or a
+    pension with `person.kvdr` makes you a compulsory member, else you are a voluntary member
+    ([How the simulation works](models.md#the-statutory-health-insurance)). The law decides
+    whether you can change. Before 55, a salary below the Jahresarbeitsentgeltgrenze or ALG1
+    makes you a compulsory member (§5 SGB V). From 55, §6 Abs. 3a SGB V usually blocks the
+    change. The simulation does not refuse a change at 55 or later, but it marks it. Set it in
+    the `overrides` of a scenario to compare it with a scenario that stays in the PKV. After a
+    late change you usually stay a voluntary member as a pensioner too: set `person.kvdr` to
+    false then. Empty: the PKV for the whole run.
   - `kv_zusatz` (default empty: the average Zusatzbeitrag of the tax year, 0.029 in 2026): the
     whole rate of your own Krankenkasse, at least 0, for the statutory health insurance only. You
     pay half of it on a salary and on the pension, and all of it on the other income that pays,
@@ -483,13 +496,14 @@ comments too. Trades and price files name a security, not the asset, so they do 
   (floored at zero, no present value, no mortality). A policy with `value: 0`, `contribution: 0`
   and `phases: []` is an empty vehicle that scenario events can fund (`severance.bav`,
   `fund_policy`). It pays nothing and leaves no marker elsewhere.
-  `basisrente: true` (default false) marks a Basisrente (Rürup). With `pkv: false` the payout of a
-  company pension is a Versorgungsbezug (§229 SGB V). A compulsory member pays the health and
-  care rates on it above 197.75 € a month, a voluntary member on all of it, and a lump sum counts
-  as 1/120 for 120 months. A Basisrente pays them only for a voluntary member. A Basisrente needs
-  `payout: annuity`: the law allows no lump sum. Set `basisrente: true` on every Basisrente.
-  Without it, the simulation takes the policy for a company pension: the payout pays the health
-  and care rates also in the KVdR, the income tax takes all of it, and you cannot pay into it.
+  `basisrente: true` (default false) marks a Basisrente (Rürup). In the statutory health insurance
+  (`pkv: false`, or from `tax.gkv_from`) the payout of a company pension is a Versorgungsbezug (§229
+  SGB V). A compulsory member pays the health and care rates on it above 197.75 € a month, a
+  voluntary member on all of it, and a lump sum counts as 1/120 for 120 months. A Basisrente pays
+  them only for a voluntary member. A Basisrente needs `payout: annuity`: the law allows no lump
+  sum. Set `basisrente: true` on every Basisrente. Without it, the simulation takes the policy for a
+  company pension: the payout pays the health and care rates also in the KVdR, the income tax takes
+  all of it, and you cannot pay into it.
   - `premium` (default 0, at least 0, only with `basisrente: true`): your own premium per month,
     nominal, from the cash in the `phases` of the policy until `matures`. When the cash is short,
     the simulation sells assets to pay it, as for any bill. The premium lowers the income tax
@@ -546,7 +560,7 @@ A list under `streams`. Fields:
   Pflegepflicht part as `pv`. The engine holds no premium parts. `deductible` (0 to 1) with
   `health` is the share of a part that is Basisabsicherung and a Sonderausgabe, from the
   certificate of the insurer. The default is all of `pv`, and `pkv_basis_share` of the tax year
-  for `kv`.
+  for `kv`. A `health` stream ends in the month of `tax.gkv_from`.
 - `deduct` (an `expense` without `health` and without `property`, default none): what the expense
   is for the income tax. The cash flow stays an expense of its category.
   - `donation`: up to 20% of the income (the Gesamtbetrag der Einkünfte) lowers the taxable
@@ -595,16 +609,16 @@ A list under `streams`. Fields:
   (§35 EStG). Up to 400%, that pays it back. Leave `hebesatz` empty for a Freiberufler, who owes
   no trade tax. In a month with a business and without a salary or ALG1, the business pays the
   social insurance of `tax.self_employed` (see `assumptions.yaml`). Then a member of the statutory
-  health insurance (`pkv: false`) pays the whole health and care rates as a voluntary member, on
-  the profit and the other income ([How the simulation
+  health insurance (`pkv: false`, or from `tax.gkv_from`) pays the whole health and care rates as a
+  voluntary member, on the profit and the other income ([How the simulation
   works](models.md#the-statutory-health-insurance)). The base is at least a third of the monthly
   Bezugsgröße (1,318.33 € in 2026), even in a month of no profit or a loss. So a phase with a
-  business needs no `expense` stream for this insurance. A private member pays the `health`
-  streams in full: no one pays a subsidy. A business is off in a phase with a `factor` of 0 or a
+  business needs no `expense` stream for this insurance. A private member pays the `health` streams
+  in full: no one pays a subsidy. A business is off in a phase with a `factor` of 0 or a
   `scale.salary` of 0. Beside a salary or ALG1, a business pays no social insurance of its own. A
-  business paid every n months pays the social insurance on a part of 1/n in every month in which
-  it runs. Use `rv_voluntary` only in phases without a compulsory pension insurance (§7 Abs. 1
-  SGB VI). An app before this kind does not load a plan with it.
+  business paid every n months pays the social insurance on a part of 1/n in every month in which it
+  runs. Use `rv_voluntary` only in phases without a compulsory pension insurance (§7 Abs. 1 SGB VI).
+  An app before this kind does not load a plan with it.
 - A savings plan (`kind: savings`) pays `-amount` from the cash into an asset in the months that
   `every`, `start`, `end` and `phases` give, times `factor`, its index and `scale.savings`. `into`
   (only on this kind) names an `equity`, `fixed_income`, `gold` or `crypto` asset. Without it, the

@@ -127,6 +127,7 @@ EXPERT = _items(
     "tax.sparer_pauschbetrag",
     "tax.teilfreistellung",
     "tax.harvest",
+    "tax.gkv_from",
     "tax.kv_zusatz",
     "tax.crypto_capital_from",
     "tax.loss_carryforward",

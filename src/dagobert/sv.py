@@ -63,10 +63,11 @@ def sv_employee(
 def sv_on(
     bases: tuple[Num, Num], opts: TaxOptions, person: Person, month: date, ty: TaxYear
 ) -> SVResult:
-    """SV on the contributory bases of RV and ALV, and of KV and PV (none with a PKV)."""
+    """SV on the contributory bases of RV and ALV, and of KV and PV (none in a month of the
+    PKV)."""
     rv_alv, kv_pv = floats(bases[0]), floats(bases[1])
     rv, alv = floats(rv_alv * ty.rv_rate), floats(rv_alv * ty.alv_rate)
-    if opts.pkv:
+    if opts.pkv_in(month):
         return SVResult(rv, alv, np.zeros_like(rv), np.zeros_like(rv))
     return SVResult(
         rv,
@@ -91,13 +92,13 @@ def sv_bases(
     return base(ty.sv_bbg_month, used[0]), base(ty.kv_pv_bbg_month, used[1])
 
 
-def employer_sv(gross_month: Num, opts: TaxOptions, ty: TaxYear) -> FloatArray:
+def employer_sv(gross_month: Num, opts: TaxOptions, month: date, ty: TaxYear) -> FloatArray:
     """The employer's share of the SV of a month's gross: RV and ALV on the RV base, and of a GKV
-    member half of the KV with the Zusatzbeitrag of the Kasse and half of the PV rate on the KV
-    base (§249 Abs. 1 SGB V, §58 Abs. 1 SGB XI). A PKV subsidy is no SV contribution."""
+    member in `month` half of the KV with the Zusatzbeitrag of the Kasse and half of the PV rate on
+    the KV base (§249 Abs. 1 SGB V, §58 Abs. 1 SGB XI). A PKV subsidy is no SV contribution."""
     gross = floats(gross_month)
     shares = ty.rv_base(gross) * (ty.rv_rate + ty.alv_rate)
-    if opts.pkv:
+    if opts.pkv_in(month):
         return floats(shares)
     kv_pv = np.minimum(gross, ty.kv_pv_bbg_month) * (kv_member_half(opts, ty) + ty.pv_rate)
     return floats(shares + kv_pv)
@@ -155,11 +156,12 @@ def conversion(
     opts: TaxOptions,
     ty: TaxYear,
     *,
+    month: date,
     subsidy: float | None,
 ) -> Conversion:
     """`converted` of the monthly salary `regular_month` into a Pensionsfonds, a Pensionskasse or
     a Direktversicherung (§1 Abs. 2 Nr. 3 BetrAVG). The employer adds the `subsidy` share of it,
-    without one 15% as far as it saves SV: at most its shares on the drop of the bases
+    without one 15% as far as it saves SV: at most its shares on the drop of the bases in `month`
     (`employer_sv`, §1a Abs. 1a BetrAVG). Conversion and subsidy are free of income tax within a
     twelfth of 8% of the yearly BBG of the RV (§3 Nr. 63 S. 1 EStG; a twelfth a month, BMF Rn. 30)
     and of SV within a twelfth of 4% (§1 Abs. 1 S. 1 Nr. 9 SvEV), after what the `employer` pays
@@ -171,7 +173,9 @@ def conversion(
     sv_room = np.maximum(ty.bav_sv_free_share * ty.sv_bbg_month - paid, 0.0)
     if subsidy is None:
         gross = floats(regular_month)
-        saved = employer_sv(gross, opts, ty) - employer_sv(gross - np.minimum(c, sv_room), opts, ty)
+        saved = employer_sv(gross, opts, month, ty) - employer_sv(
+            gross - np.minimum(c, sv_room), opts, month, ty
+        )
         added = np.minimum(ty.bav_subsidy * c, saved)
     else:
         added = subsidy * c
@@ -188,6 +192,8 @@ def conversions(
     employer: Num,
     opts: TaxOptions,
     ty: TaxYear,
+    *,
+    month: date,
 ) -> list[Conversion]:
     """The conversions of a month in turn, each with the share of its subsidy (`conversion`): one
     takes the rooms that the `employer`'s contributions and the conversions before it with their
@@ -195,7 +201,7 @@ def conversions(
     out: list[Conversion] = []
     gross, paid = floats(regular_month), floats(employer)
     for amount, subsidy in converted:
-        conv = conversion(amount, gross, paid, opts, ty, subsidy=subsidy)
+        conv = conversion(amount, gross, paid, opts, ty, month=month, subsidy=subsidy)
         gross, paid = gross - conv.sv_free, paid + amount + conv.subsidy
         out.append(conv)
     return out
@@ -376,12 +382,12 @@ def pension_net_month(
     premium_month: Num,
 ) -> PensionMonth:
     """KVdR and PV of a GKV member on a pension (half of the general rate and of the Zusatzbeitrag
-    of the Kasse, §247, §249a SGB V), or the PKV subsidy of the DRV: half of the general KV rate
-    plus the average Zusatzbeitrag (§106 Abs. 3 SGB VI, 8.75% in 2026), at most half of the
-    premium."""
+    of the Kasse, §247, §249a SGB V), or in a month of the PKV the subsidy of the DRV: half of the
+    general KV rate plus the average Zusatzbeitrag (§106 Abs. 3 SGB VI, 8.75% in 2026), at most
+    half of the premium."""
     gross = floats(gross_month)
     zero = np.zeros_like(gross)
-    if opts.pkv:
+    if opts.pkv_in(month):
         subsidy = np.minimum(ty.kv_half * gross, ty.pension_pkv_subsidy_cap_rate * premium_month)
         return PensionMonth(gross, zero, zero, floats(subsidy))
     return PensionMonth(

@@ -132,8 +132,10 @@ the source in a comment. Source: §11 GrEStG and the Grunderwerbsteuer law of th
 - Statutory health insurance beyond a salary: the months over which a lump sum of a company
   pension counts (`versorgung_months`, 120) and the yearly work expenses that a voluntary member
   takes off the capital income (`kv_capital_werbungskosten`, 51 €). The exemption limit of a
-  company pension is a twentieth of `bezugsgroesse_month`, which the code computes. Source: §§226
-  and 229 SGB V, and the Beitragsverfahrensgrundsätze Selbstzahler of the GKV-Spitzenverband.
+  company pension is a twentieth of `bezugsgroesse_month`, which the code computes. The age from
+  which a change from the private to the statutory health insurance is usually not possible
+  (`gkv_return_age`, 55). Source: §§6, 226 and 229 SGB V, and the Beitragsverfahrensgrundsätze
+  Selbstzahler of the GKV-Spitzenverband.
 - Trade tax: the exemption amount (`gewst_freibetrag`), the rate of the base amount
   (`gewst_messzahl`) and the multiple of the base amount that comes off the income tax
   (`gewst_credit_factor`). Source: §11 GewStG and §35 EStG.

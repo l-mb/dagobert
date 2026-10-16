@@ -1496,20 +1496,22 @@ msgstr "RV seit"
 
 #: model/assumptions.py model/plan.py
 msgid ""
-"Statutory health insurance only (`tax.pkv` off): the pension makes you a "
-"compulsory member (KVdR), which pays on the pension and a company pension"
-" only. That needs nine tenths of the second half of the working life in "
-"the statutory insurance. Off: you stay a voluntary member and pay on all "
-"income, at least on a minimum, as in the months before the pension "
+"Statutory health insurance only (`tax.pkv` off, or from `tax.gkv_from`): "
+"the pension makes you a compulsory member (KVdR), which pays on the "
+"pension and a company pension only. That needs nine tenths of the second "
+"half of the working life in the statutory insurance, which a late switch "
+"from the PKV seldom reaches. Off: you stay a voluntary member and pay on "
+"all income, at least on a minimum, as in the months before the pension "
 "without a salary or ALG1"
 msgstr ""
-"Nur gesetzlich versichert (`tax.pkv` aus): Mit der Rente wirst du "
-"Pflichtmitglied (KVdR) und zahlst Beiträge nur auf die Rente und eine "
-"Betriebsrente. Dafür brauchst du neun Zehntel der zweiten Hälfte des "
-"Erwerbslebens in der gesetzlichen Versicherung. Aus: Du bleibst "
-"freiwilliges Mitglied und zahlst Beiträge auf alle Einnahmen, mindestens "
-"auf die Mindestbemessungsgrundlage, wie in den Monaten vor der Rente ohne"
-" Gehalt oder ALG1"
+"Nur gesetzlich versichert (`tax.pkv` aus oder ab `tax.gkv_from`): Mit der"
+" Rente wirst du Pflichtmitglied (KVdR) und zahlst Beiträge nur auf die "
+"Rente und eine Betriebsrente. Dafür brauchst du neun Zehntel der zweiten "
+"Hälfte des Erwerbslebens in der gesetzlichen Versicherung, was ein später"
+" Wechsel aus der PKV selten erreicht. Aus: Du bleibst freiwilliges "
+"Mitglied und zahlst Beiträge auf alle Einnahmen, mindestens auf die "
+"Mindestbemessungsgrundlage, wie in den Monaten vor der Rente ohne Gehalt "
+"oder ALG1"
 
 #: model/assumptions.py model/plan.py
 msgid "KVdR"
@@ -2333,10 +2335,11 @@ msgstr "Gewinnrealisierung"
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid ""
 "Privately insured: no statutory KV and PV, the `health` streams take the "
-"subsidies and the deduction"
+"subsidies and the deduction. Up to `gkv_from`, when it is set"
 msgstr ""
 "Privat versichert: keine gesetzliche KV und PV, die Zahlungen mit "
-"`health` erhalten die Zuschüsse und den Abzug"
+"`health` erhalten die Zuschüsse und den Abzug. Bis `gkv_from`, wenn "
+"gesetzt"
 
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid "PKV"
@@ -2346,6 +2349,30 @@ msgstr "PKV"
 msgctxt "key"
 msgid "pkv"
 msgstr "PKV"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid ""
+"With `pkv`: the first month in the statutory health insurance (GKV). From"
+" it the rules of the GKV apply and the `health` streams end. Before 55 a "
+"salary below the Jahresarbeitsentgeltgrenze or ALG1 makes you a "
+"compulsory member (§5 SGB V); from 55 §6 Abs. 3a usually blocks the "
+"return. A scenario sets it to compare. Empty: the PKV for the whole run"
+msgstr ""
+"Mit `pkv`: der erste Monat in der gesetzlichen Krankenversicherung (GKV)."
+" Ab ihm gelten die Regeln der GKV, und die Zahlungen mit `health` enden. "
+"Vor 55 machen dich ein Gehalt unter der Jahresarbeitsentgeltgrenze oder "
+"ALG1 zum Pflichtmitglied (§5 SGB V); ab 55 versperrt §6 Abs. 3a die "
+"Rückkehr meist. Ein Szenario setzt ihn zum Vergleich. Leer: die PKV für "
+"die ganze Simulation"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid "GKV from"
+msgstr "GKV ab"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgctxt "key"
+msgid "gkv_from"
+msgstr "GKV ab"
 
 #: model/assumptions.py model/plan.py model/taxes.py
 #, python-format
@@ -3107,10 +3134,11 @@ msgstr "Kauft"
 #: model/events.py model/plan.py model/streams.py
 msgid ""
 "Part of the PKV premium: Kranken- or Pflegepflichtversicherung. Subsidies"
-" cap the two apart."
+" cap the two apart. It ends in the month of `tax.gkv_from`."
 msgstr ""
 "Teil des PKV-Beitrags: Kranken- oder Pflegepflichtversicherung. Die "
-"Zuschüsse sind für beide getrennt gedeckelt."
+"Zuschüsse sind für beide getrennt gedeckelt. Er endet im Monat von "
+"`tax.gkv_from`."
 
 #: model/events.py model/plan.py model/streams.py
 msgctxt "key"
@@ -3856,6 +3884,28 @@ msgstr "Gewinne realisiert"
 #: report/charts.py
 msgid "Unable to work"
 msgstr "Erwerbsunfähig"
+
+#: report/charts.py
+msgid "ALG1 in the PKV"
+msgstr "ALG1 in der PKV"
+
+#: report/charts.py
+msgid "Statutory health insurance"
+msgstr "Gesetzliche Krankenversicherung"
+
+#: report/charts.py
+#, python-brace-format
+msgid "at 55 or older {law} usually blocks the switch"
+msgstr "ab 55 versperrt {law} den Wechsel meist"
+
+#: report/charts.py
+#, python-brace-format
+msgid ""
+"the plan assumes the exemption from the GKV, applied for within three "
+"months and irrevocable ({law})"
+msgstr ""
+"der Plan nimmt die Befreiung von der GKV an, binnen drei Monaten "
+"beantragt und unwiderruflich ({law})"
 
 #: report/charts.py
 #, python-brace-format
@@ -5726,6 +5776,32 @@ msgstr "Nach Gewinn"
 #: ui/assumptions.py
 msgid "statutory insurance only"
 msgstr "nur gesetzlich versichert"
+
+#: ui/assumptions.py
+msgid "Statutory health insurance from"
+msgstr "Gesetzlich versichert ab"
+
+#: ui/assumptions.py
+msgid "private insurance only"
+msgstr "nur privat versichert"
+
+#: ui/assumptions.py
+msgid ""
+"With private health insurance: the first month in the statutory health "
+"insurance (GKV). From it the rules of the GKV apply, and the premiums of "
+"the private insurance end. Before 55 a salary below the "
+"Jahresarbeitsentgeltgrenze or ALG1 makes you a compulsory member (§5 SGB "
+"V); from 55 §6 Abs. 3a usually blocks the return. A scenario sets it to "
+"compare both. Empty: the private insurance for the whole run (default: "
+"none)"
+msgstr ""
+"Mit privater Krankenversicherung: der erste Monat in der gesetzlichen "
+"Krankenversicherung (GKV). Ab ihm gelten die Regeln der GKV, und die "
+"Beiträge der privaten Versicherung enden. Vor 55 machen dich ein Gehalt "
+"unter der Jahresarbeitsentgeltgrenze oder ALG1 zum Pflichtmitglied (§5 "
+"SGB V); ab 55 versperrt §6 Abs. 3a die Rückkehr meist. Ein Szenario setzt"
+" ihn, um beides zu vergleichen. Leer: die private Versicherung für die "
+"ganze Simulation (Standard: keiner)"
 
 #: ui/assumptions.py
 msgid "fixed contribution only"

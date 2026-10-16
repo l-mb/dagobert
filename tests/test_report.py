@@ -609,6 +609,18 @@ def test_a_compact_marker_legend_wraps_and_the_figure_grows_by_it() -> None:
         (Marker(MONTH, "pension", amount=1.0, years=45), "Pension: 100% with 45 years"),
         (Marker(MONTH, "savings plan", "ETF"), "Savings plan: ETF paused"),
         (Marker(MONTH, "alg1"), "ALG1: on the last salary, not on the self-employment"),
+        # the law stays on one line of the legend
+        (
+            Marker(MONTH, "gkv"),
+            "Statutory health insurance: at 55 or older §6\u00a0Abs.\u00a03a\u00a0SGB\u00a0V "
+            "usually blocks the switch",
+        ),
+        (
+            Marker(MONTH, "exemption"),
+            "ALG1 in the PKV: the plan assumes the exemption from the GKV, applied for within "
+            "three months and irrevocable (§8\u00a0Abs.\u00a01\u00a0S.\u00a01\u00a0Nr.\u00a01a"
+            "\u00a0SGB\u00a0V)",
+        ),
     ],
 )
 def test_a_marker_reads_in_words(marker: Marker, shown: str) -> None:

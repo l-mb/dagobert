@@ -18,6 +18,7 @@ from dagobert.sv import alg1_month, conversion
 from dagobert.tax import for_year
 
 TY = for_year(2026)
+MONTH = date(2026, 1, 1)
 GKV, PKV = TaxOptions(pkv=False), TaxOptions(pkv=True)
 
 
@@ -30,6 +31,9 @@ GKV, PKV = TaxOptions(pkv=False), TaxOptions(pkv=True)
         # above the KV-BBG of 5,812.50 it saves only the RV and the ALV, 10.6%, as for a PKV member
         (7000, 200, 0, GKV, None, (21.2, 200, 200)),
         (4000, 200, 0, PKV, None, (21.2, 200, 200)),
+        # a PKV member saves as a GKV member from the month of `gkv_from`, not before it
+        (4000, 200, 0, TaxOptions(gkv_from=MONTH), None, (30, 200, 200)),
+        (4000, 200, 0, TaxOptions(gkv_from=date(2026, 2, 1)), None, (21.2, 200, 200)),
         # above the RV-BBG of 8,450 it saves nothing
         (9000, 200, 0, GKV, None, (0, 200, 200)),
         # 4% of the BBG, 338 a month: the subsidy beyond it stays in the SV gross
@@ -51,7 +55,7 @@ def test_the_conversion_within_the_limits_of_2026(
     expected: tuple[float, float, float],
 ) -> None:
     """§3 Nr. 63 EStG, §1 Abs. 1 S. 1 Nr. 9 SvEV, §1a Abs. 1a BetrAVG, BMF Rn. 30 f."""
-    got = conversion(converted, gross, employer, opts, TY, subsidy=subsidy)
+    got = conversion(converted, gross, employer, opts, TY, month=MONTH, subsidy=subsidy)
     assert (got.subsidy, got.tax_free, got.sv_free) == pytest.approx(expected, abs=1e-3)
 
 

@@ -323,7 +323,12 @@ def _converted(plan: Plan, rows: list[cashplan.Row], phase: str, day: date, gros
         if p.conversion and (pay := _salary_of(p, salaries)) is not None
     ]
     convs = sv.conversions(
-        taken, gross, sum(p.contribution for p in paying), plan.assumptions.tax, _year(plan)
+        taken,
+        gross,
+        sum(p.contribution for p in paying),
+        plan.assumptions.tax,
+        _year(plan),
+        month=day,
     )
     return sum(float(c.sv_free) for c in convs)
 
@@ -343,12 +348,16 @@ def _salary_of(policy: PensionPolicy, salaries: list[tuple[cashplan.Row, float]]
 
 
 def _paid(rows: list[cashplan.Row], plan: Plan, alg1: float) -> list[cashplan.Row]:
-    return cashplan.with_alg1(cashplan.with_levels(rows, plan.assumptions.indices), alg1)
+    a = plan.assumptions
+    return cashplan.with_gkv(
+        cashplan.with_alg1(cashplan.with_levels(rows, a.indices), alg1), a.tax.gkv_from
+    )
 
 
 def estimated(rows: list[cashplan.Row], day: date, plan: Plan) -> list[cashplan.Row]:
     """`rows` as a `fixed` run of `plan` pays them: a stream of a non-cumulative index at its level
-    (a bonus at the mean payout ratio), ALG1 on the last salary before the claim (`_alg1`)."""
+    (a bonus at the mean payout ratio), ALG1 on the last salary before the claim (`_alg1`), the
+    PKV premiums up to `tax.gkv_from`."""
     return _paid(rows, plan, _alg1(rows, day, plan))
 
 

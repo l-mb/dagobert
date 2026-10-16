@@ -327,9 +327,13 @@ class Core:
         return state
 
     def _stream_state(self, spec: Stream) -> StreamState:
-        off = spec.after_sale_of is not None
+        """A stream as it runs: a premium of the PKV (`health`) ends in the month of
+        `tax.gkv_from`."""
+        off, end = spec.after_sale_of is not None, spec.end
+        if spec.health and (switch := self.a.tax.gkv_from) is not None:
+            end = min(end or switch, switch)
         return StreamState(
-            spec, spec.end, np.full(self.paths, 0.0 if off else 1.0), np.zeros(self.paths, bool)
+            spec, end, np.full(self.paths, 0.0 if off else 1.0), np.zeros(self.paths, bool)
         )
 
     def _age_factors(self) -> FloatArray:
@@ -377,6 +381,11 @@ class Core:
             return none
         yearly = np.array([spec.hazard_at(self._age(i)) for i in range(months)])
         return self._first_month(generator(self.a.seed, "disability"), yearly, -1)
+
+    @property
+    def pkv(self) -> bool:
+        """Privately insured this month (`TaxOptions.pkv_in`): the PKV rules, else the GKV."""
+        return self.a.tax.pkv_in(self.m.month)
 
     @property
     def working(self) -> FloatArray:

@@ -151,6 +151,7 @@ ACRONYMS = {
     "afa": "AfA",
     "bav": "bAV",
     "etf": "ETF",
+    "gkv": "GKV",
     "kv": "KV",
     "kvdr": "KVdR",
     "pkv": "PKV",

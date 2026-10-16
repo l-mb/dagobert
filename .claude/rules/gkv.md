@@ -8,10 +8,11 @@ paths:
 
 # Statutory health insurance (GKV)
 
-The KV and PV of a member of the GKV (`tax.pkv: false`) beside the SV of a salary (rule `tax`), with
-its sources (checked at gesetze-im-internet.de, the Beitragsverfahrensgrundsätze Selbstzahler of the
-GKV-Spitzenverband (BVSzGs, as of 2025-01-01) and its Katalog of 2026-05-26 on 2026-10-13). The GRV
-and the tax of a business: rule `self-employment`. In plain English: `docs/manual/models.md`.
+The KV and PV of a member of the GKV (`tax.pkv: false`, or from `tax.gkv_from`) beside the SV of a
+salary (rule `tax`), with its sources (checked at gesetze-im-internet.de, the
+Beitragsverfahrensgrundsätze Selbstzahler of the GKV-Spitzenverband (BVSzGs, as of 2025-01-01) and
+its Katalog of 2026-05-26 on 2026-10-13). The GRV and the tax of a business: rule `self-employment`.
+In plain English: `docs/manual/models.md`.
 
 - The month (`engine.health.Health._pay_gkv`, per path). A salary (§5 Abs. 1 Nr. 1 SGB V), ALG1
   within the entitlement (`Income._on_alg1`, KVdA, Nr. 2) or a pension with `person.kvdr` (KVdR,
@@ -100,6 +101,26 @@ and the tax of a business: rule `self-employment`. In plain English: `docs/manua
   off the employee share, and the employer pays half of the base rate (TK Beratungsblatt `Beiträge
   in der Pflegeversicherung`, 2026). The Lohnsteuer takes the same PV in its Vorsorgepauschale
   (§39b Abs. 2 S. 5 Nr. 3 c EStG).
+- The switch (`tax.gkv_from`, `TaxOptions.pkv_in`; owner 2026-10-16): a PKV member (the model
+  refuses it with `pkv: false`) is in the GKV from that month. `Core.pkv` is the status of the
+  month, which every reader takes: `sv.sv_on` (the SV of a salary, its Vorsorgepauschale),
+  `employer_sv` and `conversion` (`month`, rule `bav`), `pension_net_month` (the KVdR or the DRV
+  subsidy), `Income._health_support` (§257 SGB V, §174 SGB III, §106 SGB VI), `_fix_sick_pay`,
+  `Health._pay_gkv` and `_voluntary_next` (the GKV next January: the harvest cap of the December
+  before a switch, whose `_pay_gkv` keeps `kv_rest`). `Core._stream_state` ends a `health` stream
+  in that month (also one of `add_stream`), `cashplan.with_gkv` the rows of the estimates of the
+  Cashflows, Overview and Spend pages. `health_deductible` sums by month, so the settlement of the
+  switch year deducts the PKV Basis share before and the GKV contributions after; `kv_last` of the
+  first GKV year takes the capital income of the last PKV year. `person.kvdr` stays an input: a
+  late switch seldom reaches the nine tenths. No Explorer switch: a scenario per choice.
+- Markers (checked at gesetze-im-internet.de on 2026-10-16), never refusals: `exemption` when an
+  ALG1 stream starts paying (`Income._start_alg1`) in a PKV month before `TaxYear.gkv_return_age`
+  (55): ALG1 makes a compulsory member (§5 Abs. 1 Nr. 2) unless exempt on application within three
+  months, irrevocable (§8 Abs. 1 S. 1 Nr. 1a, Abs. 2), which the run assumes; `gkv` in the month of
+  a switch at 55 or later (`Health._mark_switch`): §6 Abs. 3a keeps one who was outside the GKV for
+  five years free of it. The words: `charts.SAYS` (rule `charts`). The user sets the month: the run
+  does not find the first ALG1 month or a salary below the Jahresarbeitsentgeltgrenze (§6 Abs. 1
+  Nr. 1, Abs. 6, 7).
 - The ledger: `Health._pay_gkv` books `KV` and `PV` of the month (rule `ledger`), all of it is
   deductible in the settlement (`YearAcc.health_deductible`), and the reserve of a business takes
   it off (`Profit._pay_profit`). PKV: nothing here.
@@ -111,8 +132,13 @@ and the tax of a business: rule `self-employment`. In plain English: `docs/manua
   the days of the Ruhen) is free. A lump sum paid before the start leaves no tail. The 4% cut of the
   deductible KV with Krankengeld (§10 Abs. 1 Nr. 3 S. 4 EStG) is left out. The refund on application
   of the own share of the pension's KV and PV above the BBG with the salary and the
-  Versorgungsbezüge (§231 Abs. 2) is left out: a working pensioner pays too much.
+  Versorgungsbezüge (§231 Abs. 2) is left out: a working pensioner pays too much. The KV-BBG and
+  the Bezugsgröße (`kv_min_base`, the Freigrenze) follow the CPI in the run (rule `tax`), the law
+  the wages (§6 Abs. 6 SGB V, §18 SGB IV): over decades they fall behind, more for a voluntary one.
 - Tests: `tests/test_health.py` (the law in amounts, the engine as relations; the church tax
   changes no KV), `gkv_plan` of `test_golden.py` (salary, business, gap years from a depot and a
   rent, a lump sum, the KVdR, a company annuity and a Basisrente; VPW spends from the gap years;
-  disabled in 2028, rule `disability`), the Krankengeld and a BU in `test_disability.py`.
+  disabled in 2028, rule `disability`), the Krankengeld and a BU in `test_disability.py`. The
+  switch: `test_health.py` (with and without it, the settlement, the harvest cap, the markers),
+  `rich_plan` (`gkv_from` 2035-01 at 58, `kvdr: false`: compulsory in the part time with a bAV
+  tail, voluntary at the KV-BBG as a pensioner; the marker of ALG1 at 52).

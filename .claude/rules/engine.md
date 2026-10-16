@@ -51,12 +51,12 @@ simplifications): change it with the behaviour.
   the one place that charges Abgeltungsteuer (Pauschbetrag, memory for the Günstigerprüfung), and
   `_report_capital_tax` the one that reports it.
 - A marker is data (`result.Marker`, `Core._mark`): its kind (`result.MarkerKind`: the event type,
-  `phase`, `pension`, `bav`, `av`, `alg1`, `savings plan`, `harvest`, `disability`; a new kind
-  there, the type checker refuses an event type that it lacks), the name as the inputs write it, the
-  median euros or the claim factor, the years, the deferred month, the form (`monthly`, `once`,
-  `half`); the run, which the app caches for every session, holds no words. `report.charts.said`
-  writes them (rule `charts`), `tests/builders.marked` in the words of the engine (`sell: flat`),
-  which the snapshots of `test_golden` keep.
+  `phase`, `pension`, `bav`, `av`, `alg1`, `savings plan`, `harvest`, `disability`, `exemption` and
+  `gkv` (rule `gkv`); a new kind there, the type checker refuses an event type that it lacks), the
+  name as the inputs write it, the median euros or the claim factor, the years, the deferred month,
+  the form (`monthly`, `once`, `half`); the run, which the app caches for every session, holds no
+  words. `report.charts.said` writes them (rule `charts`), `tests/builders.marked` in the words of
+  the engine (`sell: flat`), which the snapshots of `test_golden` keep.
 - Engine state is one numpy array of shape `(paths,)` per quantity. Loans are scalar because events
   are deterministic. `RunResult` arrays are `(paths, months)`, the counts of months `reduced` and
   `raised` of the spending rule `(paths,)`. The Monte Carlo run must stay in the seconds range: 5000
@@ -187,10 +187,10 @@ simplifications): change it with the behaviour.
 
 - For engine changes, run `uv run pytest -n0 tests/test_golden.py --snapshot-update` and read the
   diff of `tests/__snapshots__/`: the yearly totals, ledger groups and markers of a rich synthetic
-  plan (PKV) and of `gkv_plan`, a GKV member (rule `gkv`). Check them by hand before you trust
-  charts. For the effect on a real scenario, run it with `--model fixed` and print the yearly
-  figures of the `RunResult` (income, expenses, taxes, capital_taxes, liquid, total, phase). Income
-  is gross including PKV subsidies, `expenses` the loan principal and a salary conversion too,
-  `taxes` holds income tax, Soli and SV, `capital_taxes` the Abgeltungsteuer net of the
-  Günstigerprüfung. Sanity anchors: taxes and SV take about 37% of a full salary year, refund in the
-  first partial year, pension starts with the phases of its stream, repaid loans stop paying.
+  plan (PKV, the GKV from 2035) and of `gkv_plan`, a GKV member (rule `gkv`). Check them by hand
+  before you trust charts. For the effect on a real scenario, run it with `--model fixed` and print
+  the yearly figures of the `RunResult` (income, expenses, taxes, capital_taxes, liquid, total,
+  phase). Income is gross including PKV subsidies, `expenses` the loan principal and a salary
+  conversion too, `taxes` holds income tax, Soli and SV, `capital_taxes` the Abgeltungsteuer net of
+  the Günstigerprüfung. Sanity anchors: taxes and SV take about 37% of a full salary year, refund in
+  the first partial year, pension starts with the phases of its stream, repaid loans stop paying.

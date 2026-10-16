@@ -201,6 +201,8 @@ MarkerKind = Literal[
     "savings plan",
     "harvest",
     "disability",
+    "exemption",
+    "gkv",
     "sell",
     "buy",
     "buy_property",

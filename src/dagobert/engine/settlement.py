@@ -136,7 +136,7 @@ class Settlement(Income, Portfolio):
         Günstigerprüfung of the settlement refunds. A marker gives the gain before the
         Teilfreistellung in the first December in which half of the paths harvest."""
         room = tax.harvest_room(year, self.acc.pauschbetrag_left, self.losses, self.ty)
-        if not self.a.tax.pkv and self._voluntary_next():
+        if self._voluntary_next():
             room = np.minimum(room, np.maximum(self._kv_room(), 0.0))
         gain = np.minimum(room * self.deflator, np.maximum(self.taxable_gain, 0.0))
         if not self.harvested and (gain > 0).mean() >= 0.5:

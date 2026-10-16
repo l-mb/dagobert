@@ -203,6 +203,22 @@ MARKER_KINDS: dict[MarkerKind, str] = {
     "savings plan": N_("Savings plan"),
     "harvest": N_("Gains realized"),
     "disability": N_("Unable to work"),
+    "exemption": N_("ALG1 in the PKV"),
+    "gkv": N_("Statutory health insurance"),
+}
+# what a marker of a kind always says
+SAYS: dict[MarkerKind, str] = {
+    "alg1": N_("on the last salary, not on the self-employment"),
+    "exemption": N_(
+        "the plan assumes the exemption from the GKV, applied for within three months and "
+        "irrevocable ({law})"
+    ),
+    "gkv": N_("at 55 or older {law} usually blocks the switch"),
+}
+# the law that a marker names, on one line of its legend
+LAWS: dict[MarkerKind, str] = {
+    "exemption": "§8 Abs. 1 S. 1 Nr. 1a SGB V",
+    "gkv": "§6 Abs. 3a SGB V",
 }
 # how a policy pays, by `Marker.form`
 PAID = {
@@ -214,7 +230,9 @@ PAID = {
 def said(m: Marker) -> str:
     """What a marker says after its kind, in the language of the page: `Car`, `Policy pays 5 €
     per month`, `85.9% with 40 years`, a full claim `100% with 45 years`, the gain of a harvest
-    `19.120 €`."""
+    `19.120 €`, the law of the health insurance behind ALG1 in the PKV and a late switch."""
+    if (always := SAYS.get(m.kind)) is not None:
+        return _(always).format(law=LAWS.get(m.kind, "").replace(" ", "\u00a0"))
     match m.kind:
         case "bav" | "av":
             paid = PAID.get(m.form) or N_("{policy} pays {amount}")
@@ -227,8 +245,6 @@ def said(m: Marker) -> str:
                 else _("{claim} with {years} years, deferred from {month}")
             )
             return text.format(claim=claim, years=years, month=m.since and f"{m.since:%Y-%m}")
-        case "alg1":
-            return _("on the last salary, not on the self-employment")
         case "savings plan":
             return _("{plan} paused").format(plan=m.detail)
         case "harvest":

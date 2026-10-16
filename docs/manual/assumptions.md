@@ -36,8 +36,11 @@ The page has four tabs:
   year (the Werbungskosten, `Work expenses per year €`, as your tax notice lists them: they count
   when they are higher than the 1,230 € that the tax takes anyway), the switch `Realize gains each
   December within the tax-free room` (see [How the simulation works](models.md#realizing-gains)),
-  private health insurance (PKV), the Zusatzbeitrag of your Krankenkasse in the statutory health
-  insurance (empty: the average of the year), the church tax (`Church tax`) with the Land where you
+  private health insurance (PKV), the first month in the statutory health insurance after the
+  private one (`Statutory health insurance from`, empty for the PKV in the whole run, `private
+  insurance only` while the PKV is off, see [How the simulation
+  works](models.md#a-change-from-the-pkv-to-the-gkv)), the Zusatzbeitrag of your Krankenkasse in the
+  statutory health insurance (empty: the average of the year), the church tax (`Church tax`) with the Land where you
   live (`Bundesland`), and the first month in which a purchase of crypto counts as capital income
   (`Crypto taxed like shares from`), and the losses of earlier years that your last tax notice
   carries forward (`Losses carried forward €`, the Verlustvortrag). Switch on `Single parent
@@ -50,7 +53,8 @@ The page has four tabs:
     (Regelbeitrag)` (the same amount each month, half of it in the first years after the founding)
     or `By profit` (a share of the profit).
   - `Sick pay in the GKV`: sick pay of the statutory health insurance, for a higher rate. It is off
-    while `Private health insurance (PKV)` is on: then the field shows `statutory insurance only`.
+    while `Private health insurance (PKV)` is on and `Statutory health insurance from` is empty:
+    then the field shows `statutory insurance only`.
   - `Business founded`: the month of the founding. It counts only with a fixed contribution: else
     the field shows `fixed contribution only`.
 

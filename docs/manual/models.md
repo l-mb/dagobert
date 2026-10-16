@@ -152,8 +152,8 @@ the month of the first birth. A scenario with one more child sets `person.childr
 
 ## The statutory health insurance
 
-In the statutory health insurance (GKV, `tax.pkv` off), the payments of the month decide how you
-pay the health insurance (KV) and the care insurance (PV):
+In the statutory health insurance (GKV: `tax.pkv` off, or from `tax.gkv_from`), the payments of the
+month decide how you pay the health insurance (KV) and the care insurance (PV):
 
 - In a month with a salary or with unemployment benefit (ALG1), you are a compulsory member. The
   salary pays its share, and the employment agency pays for the ALG1. Your other income pays
@@ -192,6 +192,33 @@ run starts does not change what the Vorabpauschale adds in the next year.
 Each Krankenkasse sets an extra rate on top of the general rate: the Zusatzbeitrag. You pay half
 of it on a salary and on a pension. On all other income that pays, such as a company pension or a
 profit, you pay all of it. Without `tax.kv_zusatz`, the simulation takes the average of the year.
+
+### A change from the PKV to the GKV
+
+`tax.gkv_from` is the month in which you leave the private health insurance (PKV) for the GKV.
+Before this month the simulation uses the rules of the PKV: the `health` streams, the subsidy of
+the employer, the employment agency or the pension insurance, and the deduction of the premium.
+From this month it uses the rules of the GKV above. The `health` streams end in this month without
+an edit. The tax withheld from a salary follows the insurance of each month. The tax settlement of
+the year of the change deducts the PKV premiums before the change and the GKV contributions after
+it.
+
+The capital income of the last year in the PKV counts in the first year as a voluntary member. In
+the December before a change to a voluntary member, the harvest of gains keeps the contribution of
+the next year at its minimum (see Realizing gains). This limit applies only to a change in January.
+Before a change in another month, the harvest does not look at the contribution.
+
+The law decides whether you can change. Before 55, ALG1 or a salary below the
+Jahresarbeitsentgeltgrenze makes a PKV member a compulsory member of the GKV (§5 SGB V). With ALG1
+you stay in the PKV only if you apply for an exemption within three months, and you cannot revoke
+it (§8 Abs. 1 S. 1 Nr. 1a SGB V). A plan in the PKV with ALG1 before 55 assumes this exemption, and
+a marker says so. From 55, §6 Abs. 3a SGB V usually blocks the change for a person who was outside
+the GKV in the last five years. The simulation does not refuse such a change, but a marker says
+so. The KVdR needs nine tenths of the second half of your working life in the statutory insurance.
+A late change seldom reaches it, so set `person.kvdr` off then.
+
+To compare the two insurances, set `tax.gkv_from` in the `overrides` of one scenario, and keep a
+scenario without it. The Explorer has no switch for it.
 
 ## A business of your own
 
@@ -693,6 +720,12 @@ Dagobert is approximate by design. These are the main simplifications:
   takes the capital income of the same year.
 - A business beside a pension stays in the health insurance of pensioners (KVdR). The law ends
   the KVdR for a business that is your main work.
+- The contribution ceiling and the Bezugsgröße of the health insurance follow the consumer prices
+  in the run. The law raises them with the wages, so over decades the simulation falls behind.
+  This matters more for a voluntary member.
+- A change from the PKV to the GKV comes from `tax.gkv_from` only. The simulation does not find
+  the month itself, for example the first month of ALG1 or of a salary below the
+  Jahresarbeitsentgeltgrenze.
 - The unemployment insurance of a business (on application, §28a SGB III) is not modeled. Add an
   expense stream for its premium. Unemployment benefit after a business is paid on the last
   salary. By law it needs that insurance, and then it is paid on a fixed wage by your

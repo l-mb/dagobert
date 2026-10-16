@@ -7,9 +7,9 @@ paths:
   - "tests/test_{tax,sv,income,golden,health}.py"
 ---
 
-# Church tax and the own Zusatzbeitrag
+# Church tax, the own Zusatzbeitrag, the switch to the GKV
 
-Two options of the person in `tax` (`model.taxes.TaxOptions`, beside `pkv`), the law checked at
+Options of the person in `tax` (`model.taxes.TaxOptions`, beside `pkv`), the law checked at
 gesetze-im-internet.de on 2026-10-13. The rest of the tax and SV law: rule `tax`; a business: rule
 `self-employment`. The inputs: `docs/manual/configuration.md`, in plain English
 `docs/manual/models.md`.
@@ -46,6 +46,12 @@ gesetze-im-internet.de on 2026-10-13. The rest of the tax and SV law: rule `tax`
   a mixed marriage, the church tax on capital income that the Günstigerprüfung taxes at the tariff
   as a Sonderausgabe. Leaving the church is the override `tax.church: false` of a scenario, from
   the start of its run.
+- The switch (`tax.gkv_from`, a `Month`, default none; owner 2026-10-16): with `pkv` the first
+  month in the GKV, `TaxOptions.pkv_in(month)` the one test of the insurance of a month (`Core.pkv`
+  in the engine, the `month` of `sv`); the model refuses it with `pkv: false` (`_gkv_after_pkv`).
+  Before it the PKV, from it the GKV with its `health` streams ended: rule `gkv`. A scenario sets it
+  in its overrides, no Explorer switch. The Tax tab: `Statutory health insurance from`, off while
+  `pkv` is (rule `assumptions`); a month before `start` means the GKV for the whole run.
 - Zusatzbeitrag (`tax.kv_zusatz`, the whole rate of the own Kasse, GKV only; `sv.kv_zusatz` gives
   it, else the average of the year, twice `kv_zusatz_half`, §242a SGB V): half of it on a salary
   (§249 Abs. 1) and on the pension (§247, §249a; a voluntary member pays all and the DRV half of it

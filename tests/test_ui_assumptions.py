@@ -170,13 +170,18 @@ def test_a_start_leaf_without_a_value_falls_back_to_the_start_of_the_file(
 
 
 @pytest.mark.parametrize(
-    ("tax", "off"),
-    [("", True), ("tax: {pkv: false, self_employed: {rv: regular}}\n", False)],
+    ("tax", "off", "private"),
+    [
+        ("", True, True),
+        ("tax: {pkv: false, self_employed: {rv: regular}}\n", False, False),
+        ("tax: {gkv_from: 2030-01-01, self_employed: {rv: regular}}\n", False, True),
+    ],
 )
 def test_self_employment_reads_in_words_and_offs_what_has_no_effect(
-    data: Path, tax: str, off: bool
+    data: Path, tax: str, *, off: bool, private: bool
 ) -> None:
-    """Sick pay counts with statutory insurance only, the founding with a fixed contribution."""
+    """Sick pay counts with statutory insurance only, also after a switch to it, which a member
+    of the PKV takes, the founding with a fixed contribution."""
     with (data / "assumptions.yaml").open("a") as fh:
         fh.write(tax)
     at = AppTest.from_string(ASSUMPTIONS.format(data=str(data)), default_timeout=60).run()
@@ -196,16 +201,26 @@ def test_self_employment_reads_in_words_and_offs_what_has_no_effect(
         off,
     )
     assert (founded.placeholder == "fixed contribution only") is off  # a label would wrap
+    switch = next(t for t in at.text_input if t.label == "Statutory health insurance from")
+    assert (switch.proto.disabled, switch.placeholder == "private insurance only") == (
+        not private,
+        not private,
+    )
 
 
 @pytest.mark.parametrize(
     ("overrides", "off"),
-    [("", True), ("overrides: {tax: {pkv: false}}\n", False)],
+    [
+        ("", True),
+        ("overrides: {tax: {pkv: false}}\n", False),
+        ("overrides: {tax: {gkv_from: 2030-01-01}}\n", False),
+    ],
 )
 def test_a_scenario_offs_sick_pay_by_the_insurance_it_inherits(
     data: Path, overrides: str, off: bool
 ) -> None:
-    """The Overrides tab takes the insurance of its chain, the default PKV without one."""
+    """The Overrides tab takes the insurance of its chain, the default PKV without one, and its
+    switch to the GKV."""
     path = data / "scenarios" / "base.yaml"
     path.write_text(path.read_text() + overrides)
     script = "from pathlib import Path\nfrom dagobert.ui import scenario_overrides\n"

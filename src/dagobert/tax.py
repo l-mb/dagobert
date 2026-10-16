@@ -168,6 +168,7 @@ class TaxYear(Strict):
     gewst_credit_factor: float
     versorgung_months: int
     kv_capital_werbungskosten: float
+    gkv_return_age: float
     erbst_freibetrag: dict[Relation, float]
     erbst_klasse: dict[Relation, int]
     erbst_brackets: list[float]

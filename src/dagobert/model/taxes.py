@@ -192,7 +192,15 @@ class TaxOptions(Strict):
     pkv: bool = Field(
         default=True,
         description="Privately insured: no statutory KV and PV, the `health` streams take the "
-        "subsidies and the deduction",
+        "subsidies and the deduction. Up to `gkv_from`, when it is set",
+    )
+    gkv_from: Month | None = Field(
+        default=None,
+        description="With `pkv`: the first month in the statutory health insurance (GKV). From "
+        "it the rules of the GKV apply and the `health` streams end. Before 55 a salary below "
+        "the Jahresarbeitsentgeltgrenze or ALG1 makes you a compulsory member (§5 SGB V); from "
+        "55 §6 Abs. 3a usually blocks the return. A scenario sets it to compare. Empty: the "
+        "PKV for the whole run",
     )
     kv_zusatz: Percent | None = Field(
         default=None,
@@ -238,10 +246,21 @@ class TaxOptions(Strict):
         description="The pension and the health insurance in a month with a business of your own",
     )
 
+    def pkv_in(self, month: date) -> bool:
+        """Privately insured in `month`: `pkv`, before `gkv_from`."""
+        return self.pkv and (self.gkv_from is None or month < self.gkv_from)
+
     @model_validator(mode="after")
     def _church_in_a_land(self) -> TaxOptions:
         if self.church and self.land is None:
             msg = "church needs land: the Land sets the rate of the church tax"
+            raise ValueError(msg)
+        return self
+
+    @model_validator(mode="after")
+    def _gkv_after_pkv(self) -> TaxOptions:
+        if self.gkv_from is not None and not self.pkv:
+            msg = "gkv_from needs pkv: it is the month in which the private insurance ends"
             raise ValueError(msg)
         return self
 

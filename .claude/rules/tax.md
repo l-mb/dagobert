@@ -161,19 +161,19 @@ sources, the tests).
   euros in the first ALG1 month and does not follow the CPI. The duration follows the age at entry
   and payments stop by themselves. The phase of the ALG1 stream can be longer than the ALG1
   duration. The Agentur pays the PKV premium up to a cap. A child that counts: rule `children`.
-- PKV subsidies follow what the month pays, never the phase (`Income._health_support`). The
-  employer (`sv.employer_pkv_subsidy`): 8.75% (`kv_half`) and 1.8% (`pv_rate`, its half, §58
-  Abs. 1 SGB XI) of the KV base of the salary (`sv.sv_bases`: up to the KV-BBG, a one-off within
-  what the BBG of the year leaves), at most half of the KV and of the PV premium (§257 Abs. 2 S. 2
-  SGB V, §61 Abs. 2 S. 2 SGB XI): 508.59 and 104.63 at the BBG in 2026, none without a salary.
-  Instead the Agentur, while an ALG1 stream pays within the entitlement (`Income._on_alg1`): the
-  whole premium (caps 813.75 KV, 167.40 PV: the rates on 80% of the KV-BBG). The DRV: 8.75% of
-  the sum of the pensions, at most half of the KV premium: half of 14.6% plus the average
-  Zusatzbeitrag of the year, 2.9% in 2026 (§106 Abs. 3 SGB VI; DRV brochure `Rentner und ihre
-  Krankenversicherung`, 2/2026; a DRV notice of 2026-03-23 still named the 8.55% of 2025). A
-  salary beside a pension gets both, up to the whole premium: §257 Abs. 2 and §106 Abs. 3 hold no
-  joint cap, §106 Abs. 1 S. 2 excludes only GKV-Pflichtversicherte. The PV part is the sum of the
-  `health: pv` streams. Caps are in start-year euros, the engine deflates the premium first.
+- PKV subsidies follow what the month pays and its insurance (`Core.pkv`, rule `gkv`), never the
+  phase (`Income._health_support`). The employer (`sv.employer_pkv_subsidy`): 8.75% (`kv_half`) and
+  1.8% (`pv_rate`, its half, §58 Abs. 1 SGB XI) of the KV base of the salary (`sv.sv_bases`: up to
+  the KV-BBG, a one-off within what the BBG of the year leaves), at most half of the KV and PV
+  premium (§257 Abs. 2 S. 2 SGB V, §61 Abs. 2 S. 2 SGB XI): 508.59 and 104.63 at the BBG in 2026,
+  none without a salary. Instead the Agentur, while an ALG1 stream pays within the entitlement
+  (`Income._on_alg1`): the whole premium (caps 813.75 KV, 167.40 PV: the rates on 80% of the
+  KV-BBG). The DRV: 8.75% of the sum of the pensions, at most half of the KV premium: half of 14.6%
+  plus the average Zusatzbeitrag of the year, 2.9% in 2026 (§106 Abs. 3 SGB VI; DRV brochure
+  `Rentner und ihre Krankenversicherung`, 2/2026; a DRV notice of 2026-03-23 still named the 8.55%
+  of 2025). A salary beside a pension gets both, up to the whole premium: §257 Abs. 2 and §106 Abs.
+  3 hold no joint cap, §106 Abs. 1 S. 2 excludes only GKV-Pflichtversicherte. The PV part is the sum
+  of the `health: pv` streams. Caps are in start-year euros, the engine deflates the premium first.
 - Known gaps: Sperrzeit and Ruhen (§§ 158, 159 SGB III) are not modelled, a scenario avoids them
   through the phase dates (for example a year without salary before the phase of ALG1). The ALG1
   reference salary is the sum of the monthly (`every: 1`) salary streams in the last month that paid

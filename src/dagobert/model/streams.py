@@ -151,7 +151,7 @@ class Stream(Strict):
     health: Literal["kv", "pv"] | None = Field(
         default=None,
         description="Part of the PKV premium: Kranken- or Pflegepflichtversicherung. "
-        "Subsidies cap the two apart.",
+        "Subsidies cap the two apart. It ends in the month of `tax.gkv_from`.",
     )
     deduct: Deduction | None = Field(
         default=None,

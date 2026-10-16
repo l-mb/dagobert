@@ -622,7 +622,10 @@ def page(streams: RowFile) -> None:
     name = first_scenario(data_dir)
     scenario = load_scenario(data_dir / scenario_file(name))
     assumptions = load_assumptions(data_dir)
-    rows = cashplan.with_levels([dict(r) for r in streams.rows()], assumptions.indices)
+    rows = cashplan.with_gkv(
+        cashplan.with_levels([dict(r) for r in streams.rows()], assumptions.indices),
+        assumptions.tax.gkv_from,
+    )
     recorded = actuals.read(data_dir)
     today = date.today()
     options = months(recorded, today)

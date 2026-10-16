@@ -53,19 +53,20 @@ The user guide: `docs/manual/assumptions.md`.
   phases, `rv`, `founded`, `loss_carryforward`, `spending.base` and `reference`), `CHOICES` the
   options in words (`rv`: `None`, `Fixed contribution (Regelbeitrag)`, `By profit`; `spending.base`:
   `The start, always`, `The first month without pay`), `WHEN` turns a field off while it has no
-  effect (`forms.When`): `Sick pay in the GKV (statutory insurance only)` while `pkv` is on,
-  `Business founded` (placeholder `fixed contribution only`) without `rv: regular`, the `increase`
-  and `ceiling` of the spending rule (`without pay only`) without `base: no_pay`, so does the
-  section `vpw` (`Use (without pay only)`, rule `forms`: off it cannot turn on, on it can turn off).
-  The spending rule names the reference wealth in its labels (`Cut below this share of the reference
-  wealth %`), `base` and `reference` first, `categories` `Flexible categories`, the section `vpw`
-  last (rule `spending`): `Variable percentage withdrawal (VPW)`, `Growth trend, real % per year`,
-  `Spend down to age`, `Floor of the flexible spending € per month`. The intro is one line, the rest
-  folds (`READING`, `ui.fold`). `NULLS` (`Every category except the health premium` for
-  `age_categories: null`; off, an empty list is `[]`). `options` gives the names of the selects from
-  `references`: the expense categories of `spending.categories` and `age_categories`, the indices
-  with `cpi` of `care.index` (`null`: nominal). The keys of `returns` and `indices` are free text: a
-  new class or index is a new name.
+  effect (`forms.When`): `Sick pay in the GKV (statutory insurance only)` while `pkv` is on and
+  `gkv_from` empty (`When.unless`), `Statutory health insurance from` (placeholder `private
+  insurance only`, rule `tax-options`) while `pkv` is off, `Business founded` (placeholder `fixed
+  contribution only`) without `rv: regular`, the `increase` and `ceiling` of the spending rule
+  (`without pay only`) without `base: no_pay`, so does the section `vpw` (`Use (without pay only)`,
+  rule `forms`: off it cannot turn on, on it can turn off). The spending rule names the reference
+  wealth in its labels (`Cut below this share of the reference wealth %`), `base` and `reference`
+  first, `categories` `Flexible categories`, the section `vpw` last (rule `spending`): `Variable
+  percentage withdrawal (VPW)`, `Growth trend, real % per year`, `Spend down to age`, `Floor of the
+  flexible spending € per month`. The intro is one line, the rest folds (`READING`, `ui.fold`).
+  `NULLS` (`Every category except the health premium` for `age_categories: null`; off, an empty list
+  is `[]`). `options` gives the names of the selects from `references`: the expense categories of
+  `spending.categories` and `age_categories`, the indices with `cpi` of `care.index` (`null`:
+  nominal). The keys of `returns` and `indices` are free text: a new class or index is a new name.
 - `start` is read only (decision): a disabled field `Start month (read only)` with the description
   of the model and `START` as its help, a caption that the roll forward moves it, and, while
   it lags the current month (`months_between`), a link to the Overview (`ui.page_link`, the page

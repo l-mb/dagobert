@@ -132,6 +132,7 @@ class Income(Health):
         self.bu_paid = np.zeros(self.paths)
         points = p.points.copy()
         self._disable()
+        self._mark_switch()
         self._start_alg1()
         pay = self._pay_streams()
         self._mark_onset()
@@ -226,7 +227,7 @@ class Income(Health):
         (`sv.krankengeld_month`) on the regular salary of the month (`last_salary`), else on the
         profit of a business with `tax.self_employed.krankengeld`, nominal in this month."""
         last = (self.onset >= 0) & (self.onset + self.ty.efzg_months - 1 == self.m.i)
-        if self.a.tax.pkv or not last.any():
+        if self.pkv or not last.any():
             return
         d, opts, sick = self.deflator, self.a.tax, self.sick
         on, profit = self._business()
@@ -363,10 +364,10 @@ class Income(Health):
         pension_subsidy: FloatArray,
         kv_base_real: FloatArray,
     ) -> tuple[FloatArray, FloatArray]:
-        """Nominal PKV subsidy and deductible premium. The Agentur pays while ALG1 pays, else
-        the employer on the contributory salary `kv_base_real`: in start-year euros, as the
-        constants of `sv`."""
-        if not self.a.tax.pkv:
+        """Nominal PKV subsidy and deductible premium in a month of the PKV. The Agentur pays
+        while ALG1 pays, else the employer on the contributory salary `kv_base_real`: in
+        start-year euros, as the constants of `sv`."""
+        if not self.pkv:
             return np.zeros(self.paths), np.zeros(self.paths)
         d = self.deflator
         subsidy = d * (
@@ -760,6 +761,7 @@ class Income(Health):
             sum(p.spec.contribution for p in paying) / d,
             self.a.tax,
             self.ty,
+            month=self.m.month,
         )
         zero = np.zeros(self.paths)
         for (pol, amount), conv in zip(taken, convs, strict=True):
@@ -886,13 +888,19 @@ class Income(Health):
         return self.alg1.start is not None and self.m.i - self.alg1.start < self.alg1.months
 
     def _start_alg1(self) -> None:
-        """The entitlement from the first month in which an ALG1 stream pays."""
+        """The entitlement from the first month in which an ALG1 stream pays. A member of the
+        PKV before `gkv_return_age` stays in it only by the exemption of §8 Abs. 1 S. 1 Nr. 1a
+        SGB V, which the run assumes and marks: else ALG1 makes a compulsory member (§5 Abs. 1
+        Nr. 2), which `tax.gkv_from` models."""
         if self.alg1.start is not None or not self._alg1_pays():
             return
         self.alg1.start = self.m.i
-        self.alg1.months = sv.alg1_months(int(self._age(self.m.i)), self.ty)
+        age = self._age(self.m.i)
+        self.alg1.months = sv.alg1_months(int(age), self.ty)
         if self.first_profit is not None:  # no Anwartschaft of its own without §28a SGB III
             self._mark("alg1")
+        if self.pkv and age < self.ty.gkv_return_age:
+            self._mark("exemption")
 
     def _alg1(self, s: StreamState) -> FloatArray:
         """Nominal ALG1 of the stream `s` within the entitlement."""

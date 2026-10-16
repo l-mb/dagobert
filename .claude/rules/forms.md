@@ -106,17 +106,17 @@ The editors build their forms here; each page that uses them has its own rule. T
   model and of a grid column by the path of its field and its name, `Form.shown`), `terms` (the
   technical term before the help: `Sparer-Pauschbetrag`), `helps` (a help in words that replaces the
   description), `choices` (the words of the options), `when` (`When`: a field that takes effect only
-  while a field drawn before it holds one of some values, else it shows disabled with why after the
-  label of a bool, else as its placeholder: a label of 220 px wraps; `Spot.off`), `rows` (see
-  above), `nulls` (what null stands for: the toggle of a list, the option of a choice), `negative`
-  (numbers typed without a sign, no minus on the keypad, kept below zero: the loan of a purchase),
-  `derived` (what an empty field takes from the candidate: its placeholder `own-flat from the name`,
-  and `Form.filled` writes it into the edits before the checks) and `plain` (a message of the model
-  in plain words, by the end of its text). `show` draws it and returns `Shown` (the edits, the
-  candidate, the guard list, the `Edit` and the check of the write). A form that shows a value in
-  another unit than the file keeps it overrides `mapping` (file to shown) and `stored` (shown to
-  file, in `Shown.edit`): the salary of `scenario_overrides.ScaleForm` in euros, the file keeps the
-  factor.
+  while a field drawn before it holds one of some values or its `unless` holds a value, else it
+  shows disabled with why after the label of a bool, else as its placeholder: a label of 220 px
+  wraps; `Spot.off`), `rows` (see above), `nulls` (what null stands for: the toggle of a list, the
+  option of a choice), `negative` (numbers typed without a sign, no minus on the keypad, kept below
+  zero: the loan of a purchase), `derived` (what an empty field takes from the candidate: its
+  placeholder `own-flat from the name`, and `Form.filled` writes it into the edits before the
+  checks) and `plain` (a message of the model in plain words, by the end of its text). `show` draws
+  it and returns `Shown` (the edits, the candidate, the guard list, the `Edit` and the check of the
+  write). A form that shows a value in another unit than the file keeps it overrides `mapping` (file
+  to shown) and `stored` (shown to file, in `Shown.edit`): the salary of
+  `scenario_overrides.ScaleForm` in euros, the file keeps the factor.
 - `show` draws with the fallback of the candidate of the run before (`<key>-leaves`); when the edits
   change it (`Shown.refresh`), `save` reruns the page once per interaction, so a placeholder follows
   its siblings, but not when Save was pressed with the edit: a rerun drops the press.

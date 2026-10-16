@@ -69,7 +69,8 @@ The file `actuals.csv`: `docs/manual/configuration.md`.
   category of a month, the `cashplan.sheet` of that date in the phase of the main scenario
   (`Scenario.phase_of`: a month before its first change takes the first; the help names it by its
   label). It uses the current `cashflows.yaml` as written: euros of the simulation start, no
-  inflation, no events of the scenario. `Comparison` pairs plan and actual per month and category,
+  inflation, no events of the scenario, the PKV premiums up to `tax.gkv_from` of
+  `assumptions.yaml` (`cashplan.with_gkv`). `Comparison` pairs plan and actual per month and category,
   only where the category has an actual. `Coverage` counts the planned categories of a month that
   have an actual, 0 included (other categories, such as cash, do not count). `missing` gives the
   reminder of the Overview: the first complete month since the first record whose `Coverage` falls

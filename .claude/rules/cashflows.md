@@ -125,7 +125,10 @@ The rows of the run on the Cashflows sheet come from the ledger: rule `ledger`.
   streams count in full. `ui.cashflows.estimated` applies both to the rows of the Cashflows page and
   of the Overview, with the assumptions of the chosen scenario on the Cashflows page;
   `scenario_changes` takes the plan and levels the streams of `add_stream` events the same way. The
-  Spend page levels its rows with the assumptions of `assumptions.yaml`.
+  Spend page levels its rows with the assumptions of `assumptions.yaml`. Both end the PKV premiums
+  (`health`) in the month of `tax.gkv_from` as the engine does (`cashplan.with_gkv`, rule `gkv`):
+  the sheet of a later date leaves them out, the scheduled changes show their end, and an
+  `add_stream` of one that starts after the switch shows no start.
 - `src/dagobert/ui/bars.py`: the bars of one phase, which the Cashflows page and the Flows page
   share; their labels take a fixed room, so the bars of stacked charts start at one x (rule
   `charts`, `bars_figure`). The outflow and income bars color a category like its block in the

@@ -41,7 +41,8 @@ of its payout: rule `gkv`; its ledger rows: rule `ledger`. The inputs:
   their subsidies. The subsidy is part of the conversion (Rn. 31): `subsidy`, the share of a
   contract, paid in full, else `bav_subsidy` (15%) of the conversion as far as the employer saves SV
   (§1a Abs. 1a BetrAVG): `sv.employer_sv` on the regular salary less the part within the SV room: RV
-  and ALV (10.6%), for a GKV member KV and PV below the KV-BBG too (21.15%); above the RV-BBG
+  and ALV (10.6%), in a month of the GKV (`month`, rule `gkv`) KV and PV below the KV-BBG too
+  (21.15%; `rich_plan` from its switch to the GKV); above the RV-BBG
   nothing, for a PKV member never the §257 subsidy (no SV contribution). Conversion and subsidy
   beyond a room stay in that gross (`tax_free`, `sv_free` below the conversion, below zero when the
   subsidy alone exceeds the room).

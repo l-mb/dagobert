@@ -128,6 +128,7 @@ def _converted(plan: Plan, spec: PensionPolicy, month: date, phase: str) -> floa
         sum(p.contribution for p in paying),
         plan.assumptions.tax,
         tax.for_year(plan.assumptions.tax_year),
+        month=month,
     )
     paid = ((p, amount + float(c.subsidy)) for (p, amount), c in zip(taken, convs, strict=True))
     return next((added for p, added in paid if p is spec), 0.0)

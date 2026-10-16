@@ -223,11 +223,12 @@ class Person(Strict):
     )
     kvdr: bool = Field(
         default=True,
-        description="Statutory health insurance only (`tax.pkv` off): the pension makes you a "
-        "compulsory member (KVdR), which pays on the pension and a company pension only. That "
-        "needs nine tenths of the second half of the working life in the statutory insurance. "
-        "Off: you stay a voluntary member and pay on all income, at least on a minimum, as in the "
-        "months before the pension without a salary or ALG1",
+        description="Statutory health insurance only (`tax.pkv` off, or from `tax.gkv_from`): "
+        "the pension makes you a compulsory member (KVdR), which pays on the pension and a "
+        "company pension only. That needs nine tenths of the second half of the working life in "
+        "the statutory insurance, which a late switch from the PKV seldom reaches. Off: you stay a "
+        "voluntary member and pay on all income, at least on a minimum, as in the months before "
+        "the pension without a salary or ALG1",
     )
     children_born: list[Child] = Field(
         default=[],

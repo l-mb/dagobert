@@ -222,6 +222,12 @@ geringfuegigkeit_month: 603.0
 # on 2026-10-13), of the last calendar year (§5 Abs. 2 S. 4); no §226 Abs. 2 (§3 Abs. 4).
 versorgung_months: 120
 kv_capital_werbungskosten: 51.0
+# A person who becomes a compulsory member of the GKV after the 55th birthday stays free of it after
+# five years outside the GKV, half of them free or exempt of it, such as in the PKV (§6 Abs. 3a
+# SGB V, checked at gesetze-im-internet.de on 2026-10-16); before it ALG1 makes a PKV member a
+# compulsory one unless exempt on application (§5 Abs. 1 Nr. 2, §8 Abs. 1 S. 1 Nr. 1a). The run
+# marks both and refuses neither (`tax.gkv_from`).
+gkv_return_age: 55.0
 rv_founding_years: 3
 rv_founding_share: 0.5
 # Gewerbesteuer of a natural person: the Freibetrag on the Gewerbeertrag (§11 Abs. 1 S. 3 Nr. 1

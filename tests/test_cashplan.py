@@ -15,6 +15,7 @@ from dagobert.model.assets import GoldAsset, PropertyAsset
 from dagobert.model.assumptions import Index
 from dagobert.model.plan import Scenario
 from dagobert.model.streams import Stream
+from dagobert.model.taxes import TaxOptions
 
 ROWS: list[cashplan.Row] = [
     {"name": "Gehalt", "cat": "gehalt", "kind": "salary", "gross": 10_000, "part": 0.9},
@@ -117,6 +118,34 @@ def test_alg1_takes_the_last_monthly_salary(
     """The engine bases ALG1 on the last salary paid: of the phase of the day, else of the newest
     phase before it that pays one, whatever its name."""
     assert cashplan.alg1_reference(rows, TODAY, phases) == salary
+
+
+def test_the_pkv_premiums_end_with_a_switch_to_the_gkv() -> None:
+    """`tax.gkv_from` ends the `health` rows as the engine does: an end before it stays, the
+    other rows run on; a plan without it keeps them all."""
+    switch = date(2027, 1, 1)
+    rows: list[cashplan.Row] = [
+        {"name": "PKV", "cat": "pkv", "amount": -600, "health": "kv"},
+        {"name": "Tarif", "cat": "pkv", "amount": -40, "health": "kv", "end": "2026-10-01"},
+        {"name": "Pflege", "cat": "pkv", "amount": -80, "health": "pv"},
+        *ROWS[3:4],
+    ]
+    switched = cashplan.with_gkv(rows, switch)
+    assert [r.get("end") for r in switched] == [switch, date(2026, 10, 1), switch, None]
+    assert [c.name for c in cashplan.scheduled(switched, TODAY, ["work"])] == [
+        "Tarif",
+        "PKV",
+        "Pflege",
+    ]
+    assert cashplan.with_gkv(rows, None) == rows
+    premium = {"type": "add_stream", "stream": {"name": "Zusatz", "amount": -30, "health": "kv"}}
+    scenario = Scenario.model_validate(
+        {"name": "s", "events": [premium | {"at": "2026-11-01"}, premium | {"at": "2027-02-01"}]}
+    )
+    p = plan([], [], scenario, tax=TaxOptions(gkv_from=switch))
+    assert [c.when for c in cashplan.scenario_changes([], p, TODAY, ["work"])] == [
+        date(2026, 11, 1)
+    ]
 
 
 def test_alg1_estimate_fills_the_stream_without_amount() -> None:

@@ -122,6 +122,17 @@ def with_alg1(rows: list[Row], amount: float) -> list[Row]:
     return [row | {"amount": amount} if row.get("kind") == "alg1" else row for row in rows]
 
 
+def with_gkv(rows: list[Row], switch: date | None) -> list[Row]:
+    """`rows` with the premiums of the PKV (`health`) ended in `switch`, the first month in the
+    GKV (`tax.gkv_from`), as the engine ends them (`Core._stream_state`)."""
+    return [
+        row | {"end": min(_day(row["end"]), switch) if "end" in row else switch}
+        if switch is not None and row.get("health")
+        else row
+        for row in rows
+    ]
+
+
 def role(row: Row) -> str:
     """`INCOME`, `EXPENSE` or `SAVINGS`: a savings plan moves money out of the surplus into an
     asset, so it is neither, and the sheet leaves it out."""
@@ -301,10 +312,12 @@ def scenario_changes(rows: list[Row], plan: Plan, after: date, phases: list[str]
     that a sale (also of a property that an event buys) or `end_streams` ends, that start after a
     sale or by `add_stream`, and `set_stream`, by date. A sale on a condition has no date. A
     stream that an event ended, also before `after`, changes no more; one added again under its
-    name does. An added stream counts at the level of its index, as `with_levels` gives it."""
+    name does. An added stream counts at the level of its index, as `with_levels` gives it, and a
+    PKV premium ends in `tax.gkv_from`, as `with_gkv` ends it."""
     tags = {a.id: set(a.tags) for a in plan.assets if isinstance(a, PropertyAsset)}
     tags |= {e.property.id: set(e.property.tags) for e in plan.bought}
-    events = _Events(rows, phases, tags, plan.assumptions.indices)
+    a = plan.assumptions
+    events = _Events(rows, phases, tags, a.indices, a.tax.gkv_from)
     changes: list[Change] = []
     for ev in sorted(plan.scenario.events, key=lambda e: e.at or date.max):  # a month in file order
         found = [replace(c, event=ev) for c in events.of(ev, ev.at or after)]
@@ -320,6 +333,7 @@ class _Events:
     phases: list[str]
     tags: dict[str, set[str]]  # of the assets
     indices: Mapping[str, Index]
+    gkv_from: date | None
     added: list[Row] = field(default_factory=list)  # a derived stream can follow an added one
     ended: set[int] = field(default_factory=set)  # the rows that an event ended, by `id`
 
@@ -337,10 +351,17 @@ class _Events:
                 ending = self._end(running, lambda r: r["name"] in names or tags & _tags(r))
                 return [self._change(ev.at, r, f"{_(ENDS)}{note}", -1) for r in ending]
             case AddStreamEvent():
-                self.added += with_levels(
-                    [ev.stream.model_dump(mode="json", exclude_none=True)], self.indices
+                self.added += with_gkv(
+                    with_levels(
+                        [ev.stream.model_dump(mode="json", exclude_none=True)], self.indices
+                    ),
+                    self.gkv_from,
                 )
-                return [self._change(ev.at, self.added[-1], f"{_(STARTS)}{note}", 1)]
+                row = self.added[-1]
+                begins = max(ev.at, _bound(row, "start") or ev.at)
+                if "end" in row and _day(row["end"]) <= begins:  # a PKV premium after the switch
+                    return []
+                return [self._change(ev.at, row, f"{_(STARTS)}{note}", 1)]
             case SetStreamEvent():
                 named = [
                     r

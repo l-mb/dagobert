@@ -7,6 +7,7 @@ from datetime import date
 import numpy as np
 import pytest
 from builders import booked, cash, harvested, phases, plan, zero_returns, zero_run
+from pydantic import ValidationError
 
 from dagobert.engine.simulation import simulate
 from dagobert.model.assets import EquityAsset, PensionPolicy, TermDeposit
@@ -15,7 +16,7 @@ from dagobert.model.events import EndStreamsEvent, Event, SetStreamEvent
 from dagobert.model.plan import Scenario
 from dagobert.model.streams import Stream, StreamKind
 from dagobert.model.taxes import TaxOptions
-from dagobert.result import FloatArray, RunResult
+from dagobert.result import INCOME_TAX, FloatArray, RunResult
 from dagobert.sv import kv_compulsory, kv_voluntary
 from dagobert.tax import for_year
 
@@ -362,7 +363,9 @@ def test_the_church_tax_leaves_the_kv_base_alone(run: Callable[..., RunResult]) 
 RENT = Stream(name="rent", kind=StreamKind.OTHER_INCOME, amount=1000, index=None)
 
 
-def _harvests(*streams: Stream, scenario: Scenario, **kw: object) -> tuple[RunResult, RunResult]:
+def _harvests(
+    *streams: Stream, scenario: Scenario, tax: Mapping[str, object] = GKV, **kw: object
+) -> tuple[RunResult, RunResult]:
     """Two years with and without the harvest (`tax.harvest`) of a depot at a gain of half, the
     cash kept as cash: it pays the December bill, which would sell equity beyond the room."""
     held: list[object] = [
@@ -375,7 +378,7 @@ def _harvests(*streams: Stream, scenario: Scenario, **kw: object) -> tuple[RunRe
             months=24,
             assets=held,
             scenario=scenario,
-            tax=GKV | {"harvest": h},
+            tax={**tax, "harvest": h},
             invest_rest=False,
             **kw,
         )
@@ -469,3 +472,97 @@ def test_alg1_into_the_next_year_harvests_into_its_voluntary_months() -> None:
     assert harvested((on, off), DECEMBER) == pytest.approx(1000)
     assert _kv(on)[:18] == pytest.approx(_kv(off)[:18])
     assert np.all(_kv(on)[18:] > _kv(off)[18:])
+
+
+SWITCH = date(2026, 7, 1)  # `tax.gkv_from` of the runs below: the PKV for half a year
+PREMIUMS = (
+    Stream(name="kv", amount=-600, health="kv", index=None),
+    Stream(name="pv", amount=-80, health="pv", index=None),
+)
+JOB_LOSS = Scenario(name="j", phases=phases((MONTH, "work"), (SWITCH, "unemployed")))
+AT_49 = Person(born=date(1977, 1, 1))
+LOST_JOB = (
+    Stream(name="pay", kind=StreamKind.SALARY, gross=4000, index=None, phases=["work"]),
+    Stream(name="alg", kind=StreamKind.ALG1, phases=["unemployed"]),
+)
+# the streams of a run with the switch, its scenario and the person
+SWITCHED: dict[str, tuple[tuple[Stream, ...], Scenario | None, Person]] = {
+    "salary": ((Stream(name="pay", kind=StreamKind.SALARY, gross=4000, index=None),), None, AT_49),
+    "alg1": (LOST_JOB, JOB_LOSS, AT_49),
+    "pension": ((PENSION,), _retired(), Person(born=date(1959, 1, 1))),
+    "none": ((), None, AT_49),
+}
+
+
+@pytest.mark.parametrize("case", list(SWITCHED))
+def test_a_switch_runs_the_pkv_before_its_month_and_the_gkv_from_it(case: str) -> None:
+    """`tax.gkv_from`: before it a member of the PKV with its premiums and the subsidy of the
+    employer, the Agentur or the DRV; from it a member of the GKV without them, the premiums
+    ended by themselves: compulsory with a salary, ALG1 or the KVdR, else voluntary. Each month
+    takes its own SV and withholding."""
+    streams, scenario, person = SWITCHED[case]
+    switched, pkv, gkv = (
+        _run(*streams, *premiums, scenario=scenario, person=person, tax=tax)
+        for premiums, tax in ((PREMIUMS, {"gkv_from": SWITCH}), (PREMIUMS, {}), ((), GKV))
+    )
+    for part in (_kv, lambda r: r.income[0], lambda r: r.expenses[0]):
+        assert part(switched)[:6] == pytest.approx(part(pkv)[:6])
+        assert part(switched)[6:] == pytest.approx(part(gkv)[6:])
+    assert switched.taxes[0, :6] == pytest.approx(pkv.taxes[0, :6])
+    assert switched.taxes[0, 6:11] == pytest.approx(gkv.taxes[0, 6:11])
+
+
+def test_a_switch_needs_the_pkv() -> None:
+    with pytest.raises(ValidationError, match="gkv_from needs pkv"):
+        TaxOptions(pkv=False, gkv_from=SWITCH)
+
+
+def test_the_settlement_of_the_switch_year_deducts_what_each_part_paid() -> None:
+    """§10 Abs. 1 Nr. 3 EStG in the year of a switch in July: a higher PKV premium before it and
+    a higher Zusatzbeitrag of the voluntary member after it each lower the income tax of the
+    year. A switch in the first month leaves no premium to pay."""
+    rent = Stream(name="rent", kind=StreamKind.OTHER_INCOME, amount=4000, index=None)
+
+    def income_tax(premium: float, zusatz: float, switch: date = SWITCH) -> float:
+        kv = Stream(name="kv", amount=-premium, health="kv", index=None)
+        r = _run(rent, kv, tax={"gkv_from": switch, "kv_zusatz": zusatz})
+        return float(booked(r, INCOME_TAX).sum())
+
+    assert income_tax(800, 0.025) < income_tax(600, 0.025)
+    assert income_tax(600, 0.035) < income_tax(600, 0.025)
+    assert income_tax(800, 0.025, MONTH) == pytest.approx(income_tax(600, 0.025, MONTH))
+
+
+def test_the_harvest_before_a_switch_keeps_the_voluntary_kv_of_the_next_year() -> None:
+    """A member of the PKV who is a voluntary member of the GKV from January: the harvest of
+    December stops where the base of the next year reaches its minimum beside the rent, as for a
+    member of the GKV (rule `harvest`), though its premiums leave more tax-free room."""
+    pair = _harvests(
+        RENT,
+        *PREMIUMS,
+        scenario=Scenario(name="h", phases=phases((MONTH, "alt"))),
+        tax={"gkv_from": date(2027, 1, 1)},
+    )
+    assert _kv(pair[0]) == pytest.approx(_kv(pair[1]))
+    full = 12 * (TY.kv_min_base - 1000) + TY.kv_capital_werbungskosten
+    assert harvested(pair, DECEMBER) == pytest.approx(full)
+
+
+@pytest.mark.parametrize(
+    ("born", "tax", "marks"),
+    [
+        (date(1977, 1, 1), {}, ["2026-07 exemption"]),  # ALG1 at 49 in the PKV
+        (date(1977, 1, 1), {"gkv_from": SWITCH}, []),  # ALG1 makes a compulsory member
+        (date(1971, 1, 1), {}, []),  # at 55 §6 Abs. 3a SGB V keeps the PKV
+        (date(1971, 1, 1), {"gkv_from": SWITCH}, ["2026-07 gkv"]),  # and seldom lets one switch
+        (date(1977, 1, 1), GKV, []),
+    ],
+)
+def test_alg1_in_the_pkv_before_55_and_a_switch_from_55_are_marked(
+    born: date, tax: dict[str, object], marks: list[str]
+) -> None:
+    """§8 Abs. 1 S. 1 Nr. 1a SGB V: the run keeps the PKV on ALG1 only by an exemption on
+    application; §6 Abs. 3a: from 55 a switch is usually closed. Markers, never refusals."""
+    r = _run(*LOST_JOB, scenario=JOB_LOSS, person=Person(born=born), tax=tax)
+    kinds = [f"{m.month:%Y-%m} {m.kind}" for m in r.markers if m.kind in ("exemption", "gkv")]
+    assert kinds == marks

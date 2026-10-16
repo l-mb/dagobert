@@ -63,6 +63,8 @@ KEY = "assumptions"
 TAX_YEAR: KeyPath = ("tax", "year")
 KV_ZUSATZ: KeyPath = ("tax", "kv_zusatz")
 RV: KeyPath = ("tax", "self_employed", "rv")
+PKV: KeyPath = ("tax", "pkv")
+GKV_FROM: KeyPath = ("tax", "gkv_from")
 FIELDS = tuple(of(Assumptions))
 PHASES = "phases"  # defined in `assumptions.yaml` only, not in the overrides of a scenario
 RELATIVES: KeyPath = ("person", "relatives")
@@ -143,7 +145,8 @@ LABELS: dict[KeyPath, str] = {
     ("tax", "teilfreistellung"): N_("Fund gains tax-free %"),
     ("tax", "werbungskosten"): N_("Work expenses per year €"),
     ("tax", "harvest"): N_("Realize gains each December within the tax-free room"),
-    ("tax", "pkv"): N_("Private health insurance (PKV)"),
+    PKV: N_("Private health insurance (PKV)"),
+    GKV_FROM: N_("Statutory health insurance from"),
     ("tax", "kv_zusatz"): N_("Health fund extra rate %"),
     ("tax", "church"): N_("Church tax"),
     ("tax", "land"): N_("Bundesland"),
@@ -165,7 +168,8 @@ TERMS: dict[KeyPath, str] = {
     ("tax", "teilfreistellung"): "Teilfreistellung",
     ("tax", "werbungskosten"): "Werbungskosten",
     ("tax", "harvest"): "Günstigerprüfung",
-    ("tax", "pkv"): "Private Krankenversicherung",
+    PKV: "Private Krankenversicherung",
+    GKV_FROM: "Gesetzliche Krankenversicherung",
     ("tax", "kv_zusatz"): "Zusatzbeitrag",
     ("tax", "church"): "Kirchensteuer",
     ("tax", "loss_carryforward"): "Verlustvortrag",
@@ -230,6 +234,13 @@ HELPS: dict[KeyPath, str] = {
         "start after a crash stops the cut, one after a boom the increase. The roll forward "
         "changes a value by the consumer prices (default: none)"
     ),
+    GKV_FROM: N_(
+        "With private health insurance: the first month in the statutory health insurance (GKV). "
+        "From it the rules of the GKV apply, and the premiums of the private insurance end. "
+        "Before 55 a salary below the Jahresarbeitsentgeltgrenze or ALG1 makes you a compulsory "
+        "member (§5 SGB V); from 55 §6 Abs. 3a usually blocks the return. A scenario sets it to "
+        "compare both. Empty: the private insurance for the whole run (default: none)"
+    ),
     ("tax", "self_employed", "founded"): N_(
         "The month in which your business was founded. With a fixed contribution the Regelbeitrag "
         "is half up to the end of the third calendar year after it. Empty: the first month in "
@@ -251,8 +262,9 @@ CHOICES: dict[KeyPath, dict[object, str]] = {
 }
 # the fields that take effect only with a value of another
 WHEN: dict[KeyPath, When] = {
+    GKV_FROM: When(PKV, (True,), N_("private insurance only")),
     ("tax", "self_employed", "krankengeld"): When(
-        ("tax", "pkv"), (False,), N_("statutory insurance only")
+        PKV, (False,), N_("statutory insurance only"), unless=GKV_FROM
     ),
     ("tax", "self_employed", "founded"): When(RV, ("regular",), N_("fixed contribution only")),
     **{

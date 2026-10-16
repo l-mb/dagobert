@@ -49,11 +49,13 @@ Derived = Callable[[Mapping[str, Any]], Any]
 @dataclass(frozen=True)
 class When:
     """A field that takes effect only while the field at `path`, drawn before it, holds one of
-    `values`: else it shows disabled, `why` after its label (`statutory insurance only`)."""
+    `values`, or the field at `unless` holds a value: else it shows disabled, `why` after its
+    label (`statutory insurance only`, unless a switch to it is set)."""
 
     path: KeyPath
     values: tuple[object, ...]
     why: str
+    unless: KeyPath | None = None
 
 
 @dataclass(frozen=True)
@@ -759,14 +761,19 @@ def _off(
     when: When | None, typed: Typed, part: Mapping[str, Any], leaves: Mapping[KeyPath, Leaf]
 ) -> str:
     """Why a field has no effect now, in the language of the session: the field of `when` holds
-    another value, as typed, else as the file or its fallback gives it."""
-    if when is None:
+    another value and its `unless` none, each as typed, else as the file or its fallback gives
+    it."""
+
+    def value(path: KeyPath) -> object:
+        got = typed.values.get(path, lookup(part, path))
+        if got is ABSENT:
+            leaf = _leaf(leaves, path)
+            got = None if leaf is None else leaf.value
+        return None if got is NULL else got
+
+    if when is None or value(when.path) in when.values:
         return ""
-    value = typed.values.get(when.path, lookup(part, when.path))
-    if value is ABSENT:
-        leaf = _leaf(leaves, when.path)
-        value = None if leaf is None else leaf.value
-    return "" if (None if value is NULL else value) in when.values else _(when.why)
+    return "" if when.unless is not None and value(when.unless) is not None else _(when.why)
 
 
 def merged(found: Iterable[store.Edit]) -> list[store.Edit]:

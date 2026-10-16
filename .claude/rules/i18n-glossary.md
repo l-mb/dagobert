@@ -77,6 +77,7 @@ this table.
 | at 67 (a value) / at 60 (a condition) / by 90 | mit 67 / ab 60 / bis 90 | a month count on a slider `6 Mon.`: a format has no plural |
 | item / set in / left out by / shift (key) | Eintrag / Festgelegt in / Weggelassen von / Verschiebung | headers capitalised |
 | job loss / Add a job loss / Unemployed (the phase it adds) / move (a phase change) | Jobverlust / Jobverlust hinzufügen / Arbeitslos / verschieben | the Scenarios page; `Arbeitslos` in the context `phase` |
+| Your goals / Stop working at age / Check a job loss in (month) / I own a property / Loan still owed € / pauses (a savings plan) | Deine Ziele / Arbeitsende im Alter von / Jobverlust prüfen im (Monat) / Ich besitze eine Immobilie / Restschuld des Darlehens € / setzt aus | the quick start (rule `first-run`); a pause of a savings plan in the attention table of the Overview; the names of a new plan (`Arbeit`, `Arbeitslos`, `Auszeit`, `Ruhestand`) are data |
 | Summary / Comparison / Difference from / Views / Balance sheet / Liquid, Flows (headings) | Zusammenfassung / Vergleich / Unterschied zu / Ansichten / Bilanz / Liquides Vermögen, Einnahmen, Ausgaben und Steuern | the report; not „Übersicht": the page Overview |
 | € of 2026-10 per year / nominal € per year | € pro Jahr, Kaufkraft 2026-10 / € pro Jahr, nominal | the axis of the flows: `pro Jahr` after the `€` |
 | Kindergeld, Kinderfreibetrag, Kindererziehungszeiten, Entlastungsbetrag, Elterngeld | as is | the English UI uses them (rule `children`) |

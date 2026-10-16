@@ -14,12 +14,20 @@ from builders import ASSETS, PHASES_TEXT
 from dagobert import tax
 from dagobert.model import taxes
 from dagobert.model.taxes import TAX_DIR, TAX_YEARS
+from dagobert.ui import mode
 
 
 @pytest.fixture(autouse=True)
 def plain_terminal(monkeypatch: pytest.MonkeyPatch) -> None:
     """CLI output without ANSI codes: typer forces a rich terminal under GitHub Actions."""
     monkeypatch.setenv("TERM", "dumb")
+
+
+@pytest.fixture(autouse=True)
+def advanced_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A page shows everything unless a test asks for simple mode (`?mode=simple`): a new browser
+    starts simple (`mode.DEFAULT`), which `test_mode` checks."""
+    monkeypatch.setattr(mode, "DEFAULT", "advanced")
 
 
 @pytest.fixture

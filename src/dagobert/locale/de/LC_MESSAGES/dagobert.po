@@ -115,6 +115,29 @@ msgstr "hinzugefügt"
 msgid "removed"
 msgstr "entfernt"
 
+#: datadir.py
+#, python-brace-format
+msgid "type an age ahead of you, {age} or more"
+msgstr "gib ein Alter vor dir ein, {age} oder mehr"
+
+#: datadir.py
+#, python-brace-format
+msgid "type a month from {month} on"
+msgstr "gib einen Monat ab {month} ein"
+
+#: datadir.py
+#, python-brace-format
+msgid "type a month before you stop working in {month}"
+msgstr "gib einen Monat vor deinem Arbeitsende ({month}) ein"
+
+#: datadir.py
+msgid "a job loss needs a salary: type it above"
+msgstr "ein Jobverlust braucht ein Gehalt: Gib es oben ein"
+
+#: datadir.py
+msgid "type the value of the property first"
+msgstr "gib zuerst den Wert der Immobilie ein"
+
 #: difference.py
 #, python-brace-format
 msgid "{a} and {b} differ in their months or paths"
@@ -155,11 +178,6 @@ msgstr ""
 "Datum, geht der Monat nicht darüber hinaus. Die Suche beginnt beim "
 "spätesten Monat und hält beim ersten, der das Ziel verfehlt. Ein noch "
 "früherer Monat kann das Ziel wieder erreichen."
-
-#: goalseek.py ui/__init__.py
-#, python-brace-format
-msgid "{month} (age {age})"
-msgstr "{month} (Alter {age})"
 
 #: goalseek.py
 msgid "no effect in the range"
@@ -279,6 +297,11 @@ msgid ""
 msgstr ""
 "Arbeitsende **{month}** für höchstens {target} Risiko, dass dein Geld vor"
 " {age} ausgeht: dort {p}. Der Plan sieht {plan} vor."
+
+#: goalseek.py ui/__init__.py
+#, python-brace-format
+msgid "{month} (age {age})"
+msgstr "{month} (Alter {age})"
 
 #: goalseek.py ui/knobs.py ui/scenario_overrides.py
 msgid "All spending"
@@ -1334,13 +1357,14 @@ msgstr "Kind bis"
 msgid ""
 "The Kindergeld of the child is paid to you: the plan pays it in each "
 "month in which the child counts, the amount of the tax year, in euros of "
-"the start. Off: another person receives it, or a stream of yours pays "
-"it. The tax compares it with the child allowances either way"
+"the start. Off: another person receives it, or a stream of yours pays it."
+" The tax compares it with the child allowances either way"
 msgstr ""
 "Das Kindergeld des Kindes geht an dich: Der Plan zahlt es in jedem Monat,"
-" in dem das Kind zählt, der Betrag des Steuerjahres, in Euro in "
-"Kaufkraft des Startjahrs. Aus: Eine andere Person erhält es, oder eine deiner Zahlungen"
-" zahlt es. Die Steuer vergleicht es so oder so mit den Kinderfreibeträgen"
+" in dem das Kind zählt, der Betrag des Steuerjahres, in Euro in Kaufkraft"
+" des Startjahrs. Aus: Eine andere Person erhält es, oder eine deiner "
+"Zahlungen zahlt es. Die Steuer vergleicht es so oder so mit den "
+"Kinderfreibeträgen"
 
 #: model/assumptions.py model/plan.py
 msgctxt "key"
@@ -1863,8 +1887,7 @@ msgstr ""
 "plus die Einnahmen des Monats, abzüglich der übrigen Ausgaben, der "
 "Kreditraten und eines Zwölftels der Steuerrechnung des Vorjahres, "
 "mindestens die Untergrenze. In einem Monat mit Erwerbseinkommen geben sie"
-" aus wie geplant. Braucht `Dem ersten Monat ohne "
-"Erwerbseinkommen`"
+" aus wie geplant. Braucht `Dem ersten Monat ohne Erwerbseinkommen`"
 
 #: model/assumptions.py model/plan.py
 msgid "VPW"
@@ -2508,23 +2531,23 @@ msgstr "Verlustrücktrag"
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid ""
 "Losses of capital income carried forward at the start (§20 Abs. 6 EStG), "
-"in euros of the start month: the losses that your bank still holds in its "
-"loss pot (its yearly tax statement) plus those of your last "
+"in euros of the start month: the losses that your bank still holds in its"
+" loss pot (its yearly tax statement) plus those of your last "
 "Feststellungsbescheid (a loss certificate of the bank moves them there). "
-"They offset later capital income, gains and interest, before the "
-"Sparer-Pauschbetrag. A loss from the sale "
-"of single shares (Aktienverlusttopf) counts here only if the BVerfG "
-"strikes §20 Abs. 6 S. 4 EStG, which lets it offset only gains of shares "
-"(2 BvL 3/21): set it in a scenario to compare both outcomes. The roll "
-"forward writes the losses that the plan carries to the new start"
+"They offset later capital income, gains and interest, before the Sparer-"
+"Pauschbetrag. A loss from the sale of single shares (Aktienverlusttopf) "
+"counts here only if the BVerfG strikes §20 Abs. 6 S. 4 EStG, which lets "
+"it offset only gains of shares (2 BvL 3/21): set it in a scenario to "
+"compare both outcomes. The roll forward writes the losses that the plan "
+"carries to the new start"
 msgstr ""
 "Verluste aus Kapitalvermögen, die zum Start vorgetragen werden (§20 Abs. "
 "6 EStG), in Euro in Kaufkraft des Startmonats: die Verluste, die deine "
 "Bank noch in ihrem Verlustverrechnungstopf führt (ihre "
 "Jahressteuerbescheinigung), plus die deines letzten "
-"Feststellungsbescheids (eine Verlustbescheinigung der Bank verschiebt sie "
-"dorthin). Sie mindern spätere Kapitalerträge, Gewinne und Zinsen, vor dem Sparer-"
-"Pauschbetrag. Ein Verlust aus dem Verkauf einzelner Aktien "
+"Feststellungsbescheids (eine Verlustbescheinigung der Bank verschiebt sie"
+" dorthin). Sie mindern spätere Kapitalerträge, Gewinne und Zinsen, vor "
+"dem Sparer-Pauschbetrag. Ein Verlust aus dem Verkauf einzelner Aktien "
 "(Aktienverlusttopf) zählt hier nur, wenn das BVerfG §20 Abs. 6 S. 4 EStG "
 "für verfassungswidrig erklärt, nach dem er nur Gewinne aus Aktien mindert"
 " (2 BvL 3/21): Trage ihn in einem Szenario ein, um beide Ausgänge zu "
@@ -2549,8 +2572,8 @@ msgid ""
 msgstr ""
 "Du erziehst deine Kinder allein, ohne einen anderen Erwachsenen im "
 "Haushalt: Der Entlastungsbetrag (§24b EStG) des Steuerjahres, höher für "
-"jedes weitere Kind, mindert das zu versteuernde Einkommen in jedem "
-"Monat, in dem ein Kind zählt"
+"jedes weitere Kind, mindert das zu versteuernde Einkommen in jedem Monat,"
+" in dem ein Kind zählt"
 
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid "Alleinerziehend"
@@ -4022,9 +4045,17 @@ msgid "Statutory health insurance"
 msgstr "Gesetzliche Krankenversicherung"
 
 #: report/charts.py
+msgid "on the last salary, not on the self-employment"
+msgstr "bemessen nach dem letzten Gehalt, nicht nach der Selbstständigkeit"
+
+#: report/charts.py
+msgid "the claim is used up"
+msgstr "der Anspruch ist verbraucht"
+
+#: report/charts.py
 #, python-brace-format
-msgid "at 55 or older {law} usually blocks the switch"
-msgstr "ab 55 versperrt {law} den Wechsel meist"
+msgid "the claim arose more than four years ago ({law})"
+msgstr "der Anspruch entstand vor mehr als vier Jahren ({law})"
 
 #: report/charts.py
 #, python-brace-format
@@ -4034,6 +4065,11 @@ msgid ""
 msgstr ""
 "der Plan nimmt die Befreiung von der GKV an, binnen drei Monaten "
 "beantragt und unwiderruflich ({law})"
+
+#: report/charts.py
+#, python-brace-format
+msgid "at 55 or older {law} usually blocks the switch"
+msgstr "ab 55 versperrt {law} den Wechsel meist"
 
 #: report/charts.py
 #, python-brace-format
@@ -4061,10 +4097,6 @@ msgid "{claim} with {years} years, deferred from {month}"
 msgstr "{claim} bei {years} Versicherungsjahren, aufgeschoben ab {month}"
 
 #: report/charts.py
-msgid "on the last salary, not on the self-employment"
-msgstr "bemessen nach dem letzten Gehalt, nicht nach der Selbstständigkeit"
-
-#: report/charts.py
 #, python-brace-format
 msgid "{plan} paused"
 msgstr "{plan} ausgesetzt"
@@ -4079,13 +4111,9 @@ msgid "Age and year"
 msgstr "Alter und Jahr"
 
 #: report/charts.py
-msgid "the claim is used up"
-msgstr "der Anspruch ist verbraucht"
-
-#: report/charts.py
 #, python-brace-format
-msgid "the claim arose more than four years ago ({law})"
-msgstr "der Anspruch entstand vor mehr als vier Jahren ({law})"
+msgid "{value} pt"
+msgstr "{value} Pp."
 
 #: report/charts.py report/fan.py
 #, python-brace-format
@@ -4132,10 +4160,12 @@ msgid "Comparison"
 msgstr "Vergleich"
 
 #: report/fan.py
+#, python-format
 msgid "liquid, middle 90% of runs"
 msgstr "liquide, mittlere 90% der Simulationen"
 
 #: report/fan.py
+#, python-format
 msgid "liquid, middle 50% of runs"
 msgstr "liquide, mittlere 50% der Simulationen"
 
@@ -4176,6 +4206,7 @@ msgid "Liquid net worth"
 msgstr "Liquides Vermögen"
 
 #: report/fan.py
+#, python-format
 msgid "middle 90% of runs"
 msgstr "mittlere 90% der Simulationen"
 
@@ -4270,11 +4301,6 @@ msgstr "Nettovermögen"
 #: report/page.py ui/tables.py
 msgid "What the columns mean"
 msgstr "Was die Spalten bedeuten"
-
-#: report/sensitivity.py
-#, python-brace-format
-msgid "{value} pt"
-msgstr "{value} Pp."
 
 #: report/sensitivity.py
 msgid "better"
@@ -4611,6 +4637,7 @@ msgid "Taxes"
 msgstr "Steuern"
 
 #: report/tracker.py
+#, python-format
 msgid "plan, middle 90% of runs"
 msgstr "Plan, mittlere 90% der Simulationen"
 
@@ -4762,10 +4789,6 @@ msgstr "Garantie"
 msgid "transfer tax"
 msgstr "Grunderwerbsteuer"
 
-#: result.py ui/lineage.py
-msgid "inheritance"
-msgstr "Erbschaft"
-
 #: result.py
 msgid "gift"
 msgstr "Schenkung"
@@ -4789,6 +4812,10 @@ msgstr "Einmalzahlung"
 #: result.py ui/events.py
 msgid "purchase costs"
 msgstr "Kaufnebenkosten"
+
+#: result.py ui/lineage.py
+msgid "inheritance"
+msgstr "Erbschaft"
 
 #: result.py ui/summary.py
 msgid "loan"
@@ -5089,6 +5116,10 @@ msgid "How to read this"
 msgstr "So liest du das"
 
 #: ui/__init__.py
+msgid "outside the app"
+msgstr "außerhalb der App"
+
+#: ui/__init__.py
 #, python-brace-format
 msgid "{first} and {then}"
 msgstr "{first} und {then}"
@@ -5376,14 +5407,13 @@ msgstr ""
 msgid ""
 "{name} has no trades, so it shows no securities. An account without "
 "securities, such as Tagesgeld, needs none: its value is enough. To track "
-"securities in it, add the first buy below. The "
-"trades then replace its cost basis."
+"securities in it, add the first buy below. The trades then replace its "
+"cost basis."
 msgstr ""
 "{name} hat keine Transaktionen und zeigt daher keine Wertpapiere. Ein "
-"Konto ohne Wertpapiere, etwa Tagesgeld, braucht keine: Sein Wert "
-"genügt. Um Wertpapiere darin zu verfolgen, füge "
-"unten den ersten Kauf hinzu. Die Transaktionen ersetzen dann seine "
-"Anschaffungskosten."
+"Konto ohne Wertpapiere, etwa Tagesgeld, braucht keine: Sein Wert genügt. "
+"Um Wertpapiere darin zu verfolgen, füge unten den ersten Kauf hinzu. Die "
+"Transaktionen ersetzen dann seine Anschaffungskosten."
 
 #: ui/assets.py
 #, python-brace-format
@@ -5393,9 +5423,8 @@ msgid ""
 "securities in it, add the first buy below."
 msgstr ""
 "{name} hat keine Transaktionen und zeigt daher keine Wertpapiere. Ein "
-"Konto ohne Wertpapiere, etwa Tagesgeld, braucht keine: Sein Wert "
-"genügt. Um Wertpapiere darin zu verfolgen, füge "
-"unten den ersten Kauf hinzu."
+"Konto ohne Wertpapiere, etwa Tagesgeld, braucht keine: Sein Wert genügt. "
+"Um Wertpapiere darin zu verfolgen, füge unten den ersten Kauf hinzu."
 
 #: ui/assets.py
 msgid "About gold and crypto"
@@ -5703,6 +5732,10 @@ msgid "Realize gains each December within the tax-free room"
 msgstr "Gewinne jedes Jahr im Dezember im steuerfreien Rahmen realisieren"
 
 #: ui/assumptions.py
+msgid "Statutory health insurance from"
+msgstr "Gesetzlich versichert ab"
+
+#: ui/assumptions.py
 msgid "Health fund extra rate %"
 msgstr "Zusatzbeitrag der Krankenkasse %"
 
@@ -5888,6 +5921,24 @@ msgstr ""
 
 #: ui/assumptions.py
 msgid ""
+"With private health insurance: the first month in the statutory health "
+"insurance (GKV). From it the rules of the GKV apply, and the premiums of "
+"the private insurance end. Before 55 a salary below the "
+"Jahresarbeitsentgeltgrenze or ALG1 makes you a compulsory member (§5 SGB "
+"V); from 55 §6 Abs. 3a usually blocks the return. A scenario sets it to "
+"compare both. Empty: the private insurance for the whole run (default: "
+"none)"
+msgstr ""
+"Mit privater Krankenversicherung: der erste Monat in der gesetzlichen "
+"Krankenversicherung (GKV). Ab ihm gelten die Regeln der GKV, und die "
+"Beiträge der privaten Versicherung enden. Vor 55 machen dich ein Gehalt "
+"unter der Jahresarbeitsentgeltgrenze oder ALG1 zum Pflichtmitglied (§5 "
+"SGB V); ab 55 versperrt §6 Abs. 3a die Rückkehr meist. Ein Szenario setzt"
+" ihn, um beides zu vergleichen. Leer: die private Versicherung für die "
+"ganze Simulation (Standard: keiner)"
+
+#: ui/assumptions.py
+msgid ""
 "The month in which your business was founded. With a fixed contribution "
 "the Regelbeitrag is half up to the end of the third calendar year after "
 "it. Empty: the first month in which a business runs. The roll forward "
@@ -5919,34 +5970,12 @@ msgid "By profit"
 msgstr "Nach Gewinn"
 
 #: ui/assumptions.py
-msgid "statutory insurance only"
-msgstr "nur gesetzlich versichert"
-
-#: ui/assumptions.py
-msgid "Statutory health insurance from"
-msgstr "Gesetzlich versichert ab"
-
-#: ui/assumptions.py
 msgid "private insurance only"
 msgstr "nur privat versichert"
 
 #: ui/assumptions.py
-msgid ""
-"With private health insurance: the first month in the statutory health "
-"insurance (GKV). From it the rules of the GKV apply, and the premiums of "
-"the private insurance end. Before 55 a salary below the "
-"Jahresarbeitsentgeltgrenze or ALG1 makes you a compulsory member (§5 SGB "
-"V); from 55 §6 Abs. 3a usually blocks the return. A scenario sets it to "
-"compare both. Empty: the private insurance for the whole run (default: "
-"none)"
-msgstr ""
-"Mit privater Krankenversicherung: der erste Monat in der gesetzlichen "
-"Krankenversicherung (GKV). Ab ihm gelten die Regeln der GKV, und die "
-"Beiträge der privaten Versicherung enden. Vor 55 machen dich ein Gehalt "
-"unter der Jahresarbeitsentgeltgrenze oder ALG1 zum Pflichtmitglied (§5 "
-"SGB V); ab 55 versperrt §6 Abs. 3a die Rückkehr meist. Ein Szenario setzt"
-" ihn, um beides zu vergleichen. Leer: die private Versicherung für die "
-"ganze Simulation (Standard: keiner)"
+msgid "statutory insurance only"
+msgstr "nur gesetzlich versichert"
 
 #: ui/assumptions.py
 msgid "fixed contribution only"
@@ -6492,10 +6521,6 @@ msgstr "Keine."
 msgid "change"
 msgstr "Änderung"
 
-#: ui/__init__.py
-msgid "outside the app"
-msgstr "außerhalb der App"
-
 #: ui/cashflows.py
 msgid "Changes since"
 msgstr "Änderungen seit"
@@ -6794,6 +6819,11 @@ msgstr "Dezimalzeichen"
 msgid "Choose a column"
 msgstr "Wähle eine Spalte"
 
+#: ui/csvcolumns.py
+#, python-brace-format
+msgid "line {line}: {reason}"
+msgstr "Zeile {line}: {reason}"
+
 #: ui/data.py
 msgid ""
 "The prices and rates that the simulation uses. Most ship with Dagobert, "
@@ -7080,22 +7110,6 @@ msgstr[0] "{n} Zeile abgelehnt: {lines}"
 msgstr[1] "{n} Zeilen abgelehnt: {lines}"
 
 #: ui/data.py
-msgid "The source is final: nothing to fetch."
-msgstr "Die Quelle ist abgeschlossen: nichts abzurufen."
-
-#: ui/data.py
-msgid "A release brings the next months."
-msgstr "Das nächste Release bringt die nächsten Monate."
-
-#: ui/data.py
-msgid "Ships with Dagobert."
-msgstr "Liegt Dagobert bei."
-
-#: ui/data.py
-msgid "Optional, fetched on request."
-msgstr "Optional, wird auf Wunsch abgerufen."
-
-#: ui/data.py
 #, python-brace-format
 msgid ""
 "Not fetched yet, and your assets hold {code} without a price of their "
@@ -7114,6 +7128,22 @@ msgstr ""
 "Noch nicht abgerufen, und deine Vermögenswerte halten {code} ohne eigenen"
 " Preis: Rufe die Reihe ab oder aktualisiere ihren Wert auf der Seite "
 "Vermögen, um sie zu bewerten."
+
+#: ui/data.py
+msgid "The source is final: nothing to fetch."
+msgstr "Die Quelle ist abgeschlossen: nichts abzurufen."
+
+#: ui/data.py
+msgid "A release brings the next months."
+msgstr "Das nächste Release bringt die nächsten Monate."
+
+#: ui/data.py
+msgid "Ships with Dagobert."
+msgstr "Liegt Dagobert bei."
+
+#: ui/data.py
+msgid "Optional, fetched on request."
+msgstr "Optional, wird auf Wunsch abgerufen."
 
 #: ui/data.py
 msgid "Not fetched yet. Fetch it or import a CSV to use it."
@@ -7136,8 +7166,8 @@ msgstr ""
 "Zeitraum {period}. Mitgeliefert: Das nächste Release bringt die nächste "
 "Tafel."
 
-#: ui/data.py ui/explorer.py ui/features.py ui/fileactions.py ui/forms.py
-#: ui/rename.py ui/save.py ui/scenarios.py ui/spend.py
+#: ui/data.py ui/explorer.py ui/fileactions.py ui/rename.py ui/save.py
+#: ui/scenarios.py ui/spend.py
 #, python-brace-format
 msgid "Not saved: {reason}"
 msgstr "Nicht gespeichert: {reason}"
@@ -7150,11 +7180,6 @@ msgstr "Daten"
 #, python-brace-format
 msgid "Not read: {reason}"
 msgstr "Nicht gelesen: {reason}"
-
-#: ui/data.py ui/pricing.py ui/tradeimport.py
-#, python-brace-format
-msgid "line {line}: {reason}"
-msgstr "Zeile {line}: {reason}"
 
 #: ui/events.py
 msgid "or at age"
@@ -7459,6 +7484,12 @@ msgid "Inherited events"
 msgstr "Geerbte Ereignisse"
 
 #: ui/events.py
+msgid "`Save` at the top saves these switches with the events of the open tab."
+msgstr ""
+"`Speichern` oben speichert diese Schalter mit den Ereignissen des offenen"
+" Tabs."
+
+#: ui/events.py
 msgid "About inherited events"
 msgstr "Zu geerbten Ereignissen"
 
@@ -7541,10 +7572,6 @@ msgstr "Nominale Euro"
 #: ui/explorer.py
 msgid "Reset sliders"
 msgstr "Regler zurücksetzen"
-
-#: ui/explorer.py
-msgid "Move the sliders"
-msgstr "Regler bewegen"
 
 #: ui/explorer.py
 msgid "Show results"
@@ -7695,11 +7722,6 @@ msgstr "Ein blasses Ergebnis unten ist das letzte."
 
 #: ui/explorer.py
 #, python-brace-format
-msgid "Up to date: {how}."
-msgstr "Aktuell: {how}."
-
-#: ui/explorer.py
-#, python-brace-format
 msgid ""
 "{broke} · {worth}, in {unit}; in brackets the change against the run (as "
 "saved)."
@@ -7711,6 +7733,15 @@ msgstr ""
 #, python-brace-format
 msgid "{broke} · {worth}, in {unit}."
 msgstr "{broke} · {worth}, in {unit}."
+
+#: ui/explorer.py
+msgid "Move the sliders"
+msgstr "Regler bewegen"
+
+#: ui/explorer.py
+#, python-brace-format
+msgid "Up to date: {how}."
+msgstr "Aktuell: {how}."
 
 #: ui/explorer.py ui/fileactions.py
 msgid "File name"
@@ -7765,65 +7796,8 @@ msgid "How the switches work"
 msgstr "Wie die Schalter wirken"
 
 #: ui/features.py ui/forms.py
-#, python-brace-format
-msgid ""
-"{changed} since this form was drawn. Your edits stay, but Save refuses "
-"them: discard them to see the file as it is now."
-msgstr ""
-"{changed}, seit dieses Formular angezeigt wurde. Deine Änderungen "
-"bleiben, aber Speichern lehnt sie ab: Verwirf sie, um die Datei zu sehen,"
-" wie sie jetzt ist."
-
-#: ui/features.py ui/forms.py
 msgid "No changes to save"
 msgstr "Keine Änderungen zu speichern"
-
-#: ui/features.py ui/forms.py
-#, python-brace-format
-msgid "Not saved: {changed} since this form was drawn"
-msgstr "Nicht gespeichert: {changed}, seit dieses Formular angezeigt wurde"
-
-#: ui/phases.py ui/save.py
-msgid "Discard my edits"
-msgstr "Meine Änderungen verwerfen"
-
-#: ui/phases.py
-#, python-brace-format
-msgid "{phase} from {month} has no id, so it does not move: change it in {file}"
-msgstr ""
-"{phase} ab {month} hat keine ID und lässt sich nicht verschieben: Ändere "
-"den Wechsel in {file}"
-
-#: ui/phases.py
-#, python-brace-format
-msgid "{phase} from {month} is left out, so it does not move"
-msgstr "{phase} ab {month} ist weggelassen und lässt sich nicht verschieben"
-
-#: ui/phases.py
-#, python-brace-format
-msgid "{phase} from {month}: {typed} is no month, so it does not move"
-msgstr "{phase} ab {month}: {typed} ist kein Monat, daher verschiebt sich nichts"
-
-#: ui/phases.py
-#, python-brace-format
-msgid ""
-"{id} moves as one: {phase} from {month} moves to {then}, not to the month"
-" typed"
-msgstr ""
-"{id} verschiebt sich nur als Ganzes: {phase} ab {month} verschiebt sich "
-"auf {then}, nicht auf den eingegebenen Monat"
-
-#: ui/phases.py
-#, python-brace-format
-msgid "{id} moves as one: {phase} from {month} moves to {then} too"
-msgstr ""
-"{id} verschiebt sich nur als Ganzes: Auch {phase} ab {month} verschiebt "
-"sich auf {then}"
-
-#: ui/phases.py
-#, python-brace-format
-msgid "move {item}"
-msgstr "{item} verschieben"
 
 #: ui/features.py ui/forms.py ui/scenarios.py ui/spend.py ui/tables.py
 msgid "Save"
@@ -8208,15 +8182,6 @@ msgstr ""
 "addiert die drei Zeilen darüber."
 
 #: ui/flows.py
-msgid ""
-"A salary can differ a little from the figure you typed, because it rises "
-"with its own growth rate and prices change during the year."
-msgstr ""
-"Ein Gehalt kann etwas vom getippten Betrag abweichen, weil es mit seiner "
-"eigenen Wachstumsrate steigt und sich die Preise im Lauf eines Jahres "
-"ändern."
-
-#: ui/flows.py
 #, python-brace-format
 msgid ""
 "{factor} times the mean per month over a phase of the run, in euros of "
@@ -8226,6 +8191,15 @@ msgstr ""
 "Das {factor}-Fache des Mittelwerts pro Monat über eine Phase der "
 "Simulation, in Euro mit der Kaufkraft des Simulationsstarts, Abflüsse "
 "unter null: Der Überschuss addiert die drei Zeilen darüber."
+
+#: ui/flows.py
+msgid ""
+"A salary can differ a little from the figure you typed, because it rises "
+"with its own growth rate and prices change during the year."
+msgstr ""
+"Ein Gehalt kann etwas vom getippten Betrag abweichen, weil es mit seiner "
+"eigenen Wachstumsrate steigt und sich die Preise im Lauf eines Jahres "
+"ändern."
 
 #: ui/flows.py
 #, python-brace-format
@@ -8395,6 +8369,11 @@ msgstr "Dieses Szenario ist eine Vorlage und hat keine Simulation."
 #: ui/flows.py
 msgid "Compare with the inputs before"
 msgstr "Vergleichen mit den Eingaben vor"
+
+#: ui/flows.py
+#, python-brace-format
+msgid "`{scenario}` before {day}"
+msgstr "`{scenario}` vor dem {day}"
 
 #: ui/flows.py
 msgid ""
@@ -8583,253 +8562,6 @@ msgstr "Zu speichern"
 #: ui/guard.py ui/spend.py ui/tables.py
 msgid "empty"
 msgstr "leer"
-
-#: ui/lineage.py
-msgid "Sell an asset"
-msgstr "Vermögenswert verkaufen"
-
-#: ui/lineage.py
-msgid "Repay a loan"
-msgstr "Darlehen tilgen"
-
-#: ui/lineage.py
-msgid "Severance pay"
-msgstr "Abfindung"
-
-#: ui/lineage.py
-msgid "Pay into a policy"
-msgstr "In einen Vertrag einzahlen"
-
-#: ui/lineage.py
-msgid "Write off shares"
-msgstr "Aktien ausbuchen"
-
-#: ui/lineage.py
-msgid "End streams"
-msgstr "Zahlungen beenden"
-
-#: ui/lineage.py
-msgid "Change a stream"
-msgstr "Zahlung ändern"
-
-#: ui/lineage.py
-msgid "Add a stream"
-msgstr "Zahlung hinzufügen"
-
-#: ui/lineage.py
-msgid "Buy gold or crypto"
-msgstr "Gold oder Krypto kaufen"
-
-#: ui/lineage.py
-msgid "Buy a property"
-msgstr "Immobilie kaufen"
-
-#: ui/lineage.py
-msgid "sell an asset"
-msgstr "Vermögenswert verkaufen"
-
-#: ui/lineage.py
-msgid "repay a loan"
-msgstr "Darlehen tilgen"
-
-#: ui/lineage.py
-msgid "severance pay"
-msgstr "Abfindung"
-
-#: ui/lineage.py
-msgid "pay into a policy"
-msgstr "in einen Vertrag einzahlen"
-
-#: ui/lineage.py
-msgid "one-off payment"
-msgstr "Einmalzahlung"
-
-#: ui/lineage.py
-msgid "write off shares"
-msgstr "Aktien ausbuchen"
-
-#: ui/lineage.py
-msgid "end streams"
-msgstr "Zahlungen beenden"
-
-#: ui/lineage.py
-msgid "change a stream"
-msgstr "Zahlung ändern"
-
-#: ui/lineage.py
-msgid "add a stream"
-msgstr "Zahlung hinzufügen"
-
-#: ui/lineage.py
-msgid "buy gold or crypto"
-msgstr "Gold oder Krypto kaufen"
-
-#: ui/lineage.py
-msgid "buy a property"
-msgstr "Immobilie kaufen"
-
-#: ui/lineage.py
-msgid "an inheritance"
-msgstr "eine Erbschaft"
-
-#: ui/lineage.py
-msgid "a gift"
-msgstr "eine Schenkung"
-
-#: ui/lineage.py
-msgid "left out by"
-msgstr "Weggelassen von"
-
-#: ui/lineage.py
-msgid "at death"
-msgstr "beim Tod"
-
-#: ui/lineage.py
-msgid "set in"
-msgstr "Festgelegt in"
-
-#: ui/lineage.py
-msgid "this scenario"
-msgstr "dieses Szenario"
-
-#: ui/lineage.py
-msgid "detail"
-msgstr "Detail"
-
-#: ui/lineage.py
-msgid "event"
-msgstr "Ereignis"
-
-#: ui/lineage.py
-msgid "from"
-msgstr "Ab"
-
-#: ui/lineage.py
-msgid "phase"
-msgstr "Phase"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "{age} or {below}"
-msgstr "{age} oder {below}"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "at the later death of {relatives}"
-msgstr "beim späteren Tod von {relatives}"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "at the death of {relative}"
-msgstr "beim Tod von {relative}"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid ""
-"{changed} since these switches were drawn: the file now leaves out "
-"{drops}. Saving stays off: `Discard my edits` shows the file now."
-msgstr ""
-"{changed}, seit diese Schalter angezeigt wurden: Die Datei lässt jetzt "
-"{drops} weg. Speichern bleibt gesperrt: `Meine Änderungen verwerfen` "
-"zeigt die Datei, wie sie jetzt ist."
-
-#: ui/lineage.py
-msgid "nothing"
-msgstr "nichts"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "Leave out {item}"
-msgstr "{item} weglassen"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "Leaves out {items}."
-msgstr "Lässt weg: {items}."
-
-#: ui/lineage.py
-msgid ""
-"No phase or event of the parents has this id, so the scenario does not "
-"load: switch it off."
-msgstr ""
-"Keine Phase und kein Ereignis der Szenarien, auf denen dieses basiert, "
-"hat diese ID, also lädt das Szenario nicht: Schalte das Weglassen aus."
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "leave out {item}"
-msgstr "{item} weglassen"
-
-#: ui/events.py
-msgid "`Save` at the top saves these switches with the events of the open tab."
-msgstr ""
-"`Speichern` oben speichert diese Schalter mit den Ereignissen des offenen "
-"Tabs."
-
-#: ui/lineage.py
-msgid "yes"
-msgstr "ja"
-
-#: ui/lineage.py
-msgid "no"
-msgstr "nein"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "{n} phase"
-msgid_plural "{n} phases"
-msgstr[0] "{n} Phase"
-msgstr[1] "{n} Phasen"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "{n} event"
-msgid_plural "{n} events"
-msgstr[0] "{n} Ereignis"
-msgstr[1] "{n} Ereignisse"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "{phases} and {events}"
-msgstr "{phases} und {events}"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "the phase {phase} from {month} ({file})"
-msgstr "die Phase {phase} ab {month} ({file})"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "{event} {when}: {what} ({file})"
-msgstr "{event} {when}: {what} ({file})"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "{event} {when} ({file})"
-msgstr "{event} {when} ({file})"
-
-#: ui/lineage.py ui/overview.py
-msgid "item"
-msgstr "Eintrag"
-
-#: ui/lineage.py ui/overview.py
-msgid "what"
-msgstr "Was"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "liquid below {amount}"
-msgstr "liquide unter {amount}"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "{event} {when}: {what}"
-msgstr "{event} {when}: {what}"
-
-#: ui/lineage.py
-#, python-brace-format
-msgid "{event} {when}"
-msgstr "{event} {when}"
 
 #: ui/knobs.py
 msgid ""
@@ -9157,8 +8889,8 @@ msgid ""
 msgstr ""
 "Eigenbeitrag pro Jahr bei Pflichtversicherung in der Rentenversicherung, "
 "in Euro in Kaufkraft des Startjahrs. Bis {limit} gibt es die Zulage "
-"({zulage} bei {limit}) und den Sonderausgabenabzug; die Auszahlung wird als sonstige "
-"Einkünfte besteuert. 0 heißt kein Depot."
+"({zulage} bei {limit}) und den Sonderausgabenabzug; die Auszahlung wird "
+"als sonstige Einkünfte besteuert. 0 heißt kein Depot."
 
 #: ui/knobs.py
 #, python-brace-format
@@ -9281,6 +9013,247 @@ msgstr "Gewinne realisieren"
 #, python-brace-format
 msgid "Salary and profit in {phase}"
 msgstr "Gehalt oder Gewinn in {phase}"
+
+#: ui/lineage.py
+msgid "Sell an asset"
+msgstr "Vermögenswert verkaufen"
+
+#: ui/lineage.py
+msgid "Repay a loan"
+msgstr "Darlehen tilgen"
+
+#: ui/lineage.py
+msgid "Severance pay"
+msgstr "Abfindung"
+
+#: ui/lineage.py
+msgid "Pay into a policy"
+msgstr "In einen Vertrag einzahlen"
+
+#: ui/lineage.py
+msgid "Write off shares"
+msgstr "Aktien ausbuchen"
+
+#: ui/lineage.py
+msgid "End streams"
+msgstr "Zahlungen beenden"
+
+#: ui/lineage.py
+msgid "Change a stream"
+msgstr "Zahlung ändern"
+
+#: ui/lineage.py
+msgid "Add a stream"
+msgstr "Zahlung hinzufügen"
+
+#: ui/lineage.py
+msgid "Buy gold or crypto"
+msgstr "Gold oder Krypto kaufen"
+
+#: ui/lineage.py
+msgid "Buy a property"
+msgstr "Immobilie kaufen"
+
+#: ui/lineage.py
+msgid "sell an asset"
+msgstr "Vermögenswert verkaufen"
+
+#: ui/lineage.py
+msgid "repay a loan"
+msgstr "Darlehen tilgen"
+
+#: ui/lineage.py
+msgid "severance pay"
+msgstr "Abfindung"
+
+#: ui/lineage.py
+msgid "pay into a policy"
+msgstr "in einen Vertrag einzahlen"
+
+#: ui/lineage.py
+msgid "one-off payment"
+msgstr "Einmalzahlung"
+
+#: ui/lineage.py
+msgid "write off shares"
+msgstr "Aktien ausbuchen"
+
+#: ui/lineage.py
+msgid "end streams"
+msgstr "Zahlungen beenden"
+
+#: ui/lineage.py
+msgid "change a stream"
+msgstr "Zahlung ändern"
+
+#: ui/lineage.py
+msgid "add a stream"
+msgstr "Zahlung hinzufügen"
+
+#: ui/lineage.py
+msgid "buy gold or crypto"
+msgstr "Gold oder Krypto kaufen"
+
+#: ui/lineage.py
+msgid "buy a property"
+msgstr "Immobilie kaufen"
+
+#: ui/lineage.py
+msgid "an inheritance"
+msgstr "eine Erbschaft"
+
+#: ui/lineage.py
+msgid "a gift"
+msgstr "eine Schenkung"
+
+#: ui/lineage.py
+msgid "left out by"
+msgstr "Weggelassen von"
+
+#: ui/lineage.py
+msgid "at death"
+msgstr "beim Tod"
+
+#: ui/lineage.py
+msgid "set in"
+msgstr "Festgelegt in"
+
+#: ui/lineage.py
+msgid "this scenario"
+msgstr "dieses Szenario"
+
+#: ui/lineage.py
+msgid "detail"
+msgstr "Detail"
+
+#: ui/lineage.py
+msgid "event"
+msgstr "Ereignis"
+
+#: ui/lineage.py
+msgid "from"
+msgstr "Ab"
+
+#: ui/lineage.py
+msgid "phase"
+msgstr "Phase"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{age} or {below}"
+msgstr "{age} oder {below}"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "at the later death of {relatives}"
+msgstr "beim späteren Tod von {relatives}"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "at the death of {relative}"
+msgstr "beim Tod von {relative}"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "liquid below {amount}"
+msgstr "liquide unter {amount}"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{event} {when}: {what}"
+msgstr "{event} {when}: {what}"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{event} {when}"
+msgstr "{event} {when}"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid ""
+"{changed} since these switches were drawn: the file now leaves out "
+"{drops}. Saving stays off: `Discard my edits` shows the file now."
+msgstr ""
+"{changed}, seit diese Schalter angezeigt wurden: Die Datei lässt jetzt "
+"{drops} weg. Speichern bleibt gesperrt: `Meine Änderungen verwerfen` "
+"zeigt die Datei, wie sie jetzt ist."
+
+#: ui/lineage.py
+msgid "nothing"
+msgstr "nichts"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "Leave out {item}"
+msgstr "{item} weglassen"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "Leaves out {items}."
+msgstr "Lässt weg: {items}."
+
+#: ui/lineage.py
+msgid ""
+"No phase or event of the parents has this id, so the scenario does not "
+"load: switch it off."
+msgstr ""
+"Keine Phase und kein Ereignis der Szenarien, auf denen dieses basiert, "
+"hat diese ID, also lädt das Szenario nicht: Schalte das Weglassen aus."
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "leave out {item}"
+msgstr "{item} weglassen"
+
+#: ui/lineage.py
+msgid "yes"
+msgstr "ja"
+
+#: ui/lineage.py
+msgid "no"
+msgstr "nein"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{n} phase"
+msgid_plural "{n} phases"
+msgstr[0] "{n} Phase"
+msgstr[1] "{n} Phasen"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{n} event"
+msgid_plural "{n} events"
+msgstr[0] "{n} Ereignis"
+msgstr[1] "{n} Ereignisse"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{phases} and {events}"
+msgstr "{phases} und {events}"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "the phase {phase} from {month} ({file})"
+msgstr "die Phase {phase} ab {month} ({file})"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{event} {when}: {what} ({file})"
+msgstr "{event} {when}: {what} ({file})"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{event} {when} ({file})"
+msgstr "{event} {when} ({file})"
+
+#: ui/lineage.py ui/overview.py
+msgid "item"
+msgstr "Eintrag"
+
+#: ui/lineage.py ui/overview.py
+msgid "what"
+msgstr "Was"
 
 #: ui/main.py
 msgid "Track"
@@ -9441,6 +9414,14 @@ msgid "job loss"
 msgstr "Jobverlust"
 
 #: ui/mode.py
+msgid ""
+"Off hides the stream kind ALG1 with its columns `sperrzeit` and "
+"`training`, and the event `severance`."
+msgstr ""
+"Aus blendet die Zahlungsart ALG1 mit ihren Spalten `sperrzeit` und "
+"`training` und das Ereignis `severance` aus."
+
+#: ui/mode.py
 msgid "Disability (BU)"
 msgstr "Berufsunfähigkeit (BU)"
 
@@ -9550,9 +9531,7 @@ msgstr "Im einfachen Modus ausgeblendet (auf Standard): {names}."
 #: ui/mode.py
 #, python-brace-format
 msgid "Hidden in simple mode (inherited from the files it extends): {names}."
-msgstr ""
-"Im einfachen Modus ausgeblendet (von den Basisdateien geerbt): "
-"{names}."
+msgstr "Im einfachen Modus ausgeblendet (von den Basisdateien geerbt): {names}."
 
 #: ui/mode.py
 #, python-brace-format
@@ -9585,16 +9564,12 @@ msgstr ""
 
 #: ui/mode.py
 #, python-brace-format
-msgid "Some parts of the app are switched off: {names}."
-msgstr "Einige Teile der App sind abgeschaltet: {names}."
-
-#: ui/mode.py
-msgid ""
-"Off hides the stream kind ALG1 with its columns `sperrzeit` and "
-"`training`, and the event `severance`."
-msgstr ""
-"Aus blendet die Zahlungsart ALG1 mit ihren Spalten `sperrzeit` und "
-"`training` und das Ereignis `severance` aus."
+msgid "{n} part of the app is switched off: the Features page turns it on."
+msgid_plural "{n} parts of the app are switched off: the Features page turns them on."
+msgstr[0] "{n} Teil der App ist abgeschaltet: Die Seite Funktionen schaltet ihn ein."
+msgstr[1] ""
+"{n} Teile der App sind abgeschaltet: Die Seite Funktionen schaltet sie "
+"ein."
 
 #: ui/mode.py ui/sliders.py
 msgid "Gold and crypto"
@@ -9631,6 +9606,20 @@ msgstr ""
 "erfassten Monat."
 
 #: ui/outlook.py
+#, python-brace-format
+msgid ""
+"The recorded liquid of each month with a record over the projection of "
+"your main scenario, as the plan stood at the end of the chosen day: the "
+"Explorer's run with its default options, from the start of the plan on "
+"that day to {ahead} months after the last record."
+msgstr ""
+"Das erfasste liquide Vermögen jedes Monats mit einem Eintrag über der "
+"Projektion deines Hauptszenarios, so wie der Plan am Ende des gewählten "
+"Tages stand: die Simulation des Explorers mit seinen Standardoptionen, "
+"vom Start des Plans an diesem Tag bis {ahead} Monate nach dem letzten "
+"erfassten Monat."
+
+#: ui/outlook.py
 msgid ""
 "A line joins only the records of consecutive months. A day names the "
 "saves that changed the plan. It opens on the plan as it stood when the "
@@ -9646,22 +9635,19 @@ msgstr ""
 "Tag, bevor der erste erfasste Monat endete. In nominalen Euro, wie "
 "erfasst: Um die letzten Monate um die Inflation zu bereinigen, bräuchte "
 "es den neuesten Wert der Verbraucherpreise. Die Projektion zieht die "
-"Steuer auf nicht realisierte Gewinne ab, die erfassten Werte nicht, "
-"daher liegt ein Wert, der den Plan trifft, etwas über dessen Median."
+"Steuer auf nicht realisierte Gewinne ab, die erfassten Werte nicht, daher"
+" liegt ein Wert, der den Plan trifft, etwas über dessen Median."
 
 #: ui/outlook.py
 #, python-brace-format
 msgid ""
-"The recorded liquid of each month with a record over the projection of "
-"your main scenario, as the plan stood at the end of the chosen day: the "
-"Explorer's run with its default options, from the start of the plan on "
-"that day to {ahead} months after the last record."
+"The lifetime figure can be lower than the figure by {age}: it counts a "
+"path only with the chance that you are alive in the month the money runs "
+"out, so a path that runs out late counts little."
 msgstr ""
-"Das erfasste liquide Vermögen jedes Monats mit einem Eintrag über der "
-"Projektion deines Hauptszenarios, so wie der Plan am Ende des gewählten "
-"Tages stand: die Simulation des Explorers mit seinen Standardoptionen, "
-"vom Start des Plans an diesem Tag bis {ahead} Monate nach dem letzten "
-"erfassten Monat."
+"Das Risiko zu Lebzeiten kann unter dem Risiko bis {age} liegen: Es zählt "
+"einen Verlauf nur mit der Wahrscheinlichkeit, dass du in dem Monat lebst,"
+" in dem das Geld ausgeht, ein spät endender Verlauf zählt also wenig."
 
 #: ui/outlook.py
 msgid ""
@@ -9688,6 +9674,47 @@ msgstr ""
 "sichert, in Euro in Kaufkraft des Starts. Erst die Untergrenze macht "
 "**{work_seek}** zu einer Frage: Wann trägt das Vermögen die festen "
 "Ausgaben und diese Untergrenze?"
+
+#: ui/outlook.py
+#, python-brace-format
+msgid ""
+"Spending does not change the chance to run out by {age} between {low} and"
+" {high} a month."
+msgstr ""
+"Zwischen {low} und {high} im Monat ändern die Ausgaben das Risiko, dass "
+"dein Geld vor {age} ausgeht, nicht."
+
+#: ui/outlook.py
+#, python-brace-format
+msgid ""
+"Even {amount} a month, {change}, leaves a {chance} chance to run out by "
+"{age}, above the target."
+msgstr ""
+"Selbst {amount} im Monat, {change}, lassen ein Risiko von {chance}, dass "
+"dein Geld vor {age} ausgeht, über dem Ziel."
+
+#: ui/outlook.py
+#, python-brace-format
+msgid ""
+"Spend at most **{amount} a month**, {change}. The chance to run out by "
+"{age} is {chance} there."
+msgstr ""
+"Gib höchstens **{amount} im Monat** aus, {change}. Das Risiko, dass dein "
+"Geld vor {age} ausgeht, ist dort {chance}."
+
+#: ui/outlook.py
+msgid "the same as now"
+msgstr "wie jetzt"
+
+#: ui/outlook.py
+#, python-brace-format
+msgid "{share} less than now"
+msgstr "{share} weniger als jetzt"
+
+#: ui/outlook.py
+#, python-brace-format
+msgid "{share} more than now"
+msgstr "{share} mehr als jetzt"
 
 #: ui/outlook.py
 #, python-brace-format
@@ -9719,6 +9746,11 @@ msgstr ""
 "vor {age} ausgeht, aus {runs} Simulationen."
 
 #: ui/outlook.py
+#, python-brace-format
+msgid "not even at {age}"
+msgstr "nicht einmal mit {age}"
+
+#: ui/outlook.py
 msgid "see the answer below"
 msgstr "siehe die Antwort unten"
 
@@ -9737,6 +9769,15 @@ msgstr ""
 "für das Risiko, dass dein Geld vor {age} ausgeht, noch einhältst. "
 "**{seek}** unten findet ihn. Die Antwort bleibt, bis du eine Eingabe oder"
 " das Ziel änderst."
+
+#: ui/outlook.py
+#, python-brace-format
+msgid "The plan stops working in {month} (age {age})."
+msgstr "Der Plan hört im Monat {month} auf zu arbeiten (Alter {age})."
+
+#: ui/outlook.py
+msgid "Explorer: try less spending or more saving"
+msgstr "Explorer: weniger ausgeben, mehr sparen"
 
 #: ui/outlook.py
 msgid "Change the main scenario"
@@ -9812,6 +9853,11 @@ msgstr "Kennzahl"
 #, python-brace-format
 msgid "Running the plan of {day}"
 msgstr "Der Plan vom {day} wird simuliert"
+
+#: ui/outlook.py
+#, python-brace-format
+msgid "The plan saved on {day}"
+msgstr "Der am {day} gespeicherte Plan"
 
 #: ui/outlook.py
 #, python-brace-format
@@ -10013,17 +10059,21 @@ msgstr ""
 "Rente"
 
 #: ui/overview.py
+msgid "disability"
+msgstr "Erwerbsminderung"
+
+#: ui/overview.py
 #, python-brace-format
 msgid ""
 "the disability from {month} pays no EM-Rente (insurance time or "
 "contributions)"
 msgstr ""
-"die Erwerbsminderung ab {month} zahlt keine EM-Rente (Versicherungszeit oder "
-"Beiträge)"
+"die Erwerbsminderung ab {month} zahlt keine EM-Rente (Versicherungszeit "
+"oder Beiträge)"
 
 #: ui/overview.py
-msgid "disability"
-msgstr "Erwerbsminderung"
+msgid "pauses: the cash does not cover its rate"
+msgstr "setzt aus: Das Bargeld deckt die Rate nicht"
 
 #: ui/overview.py
 #, python-brace-format
@@ -10126,6 +10176,16 @@ msgstr ""
 
 #: ui/overview.py
 msgid ""
+"A savings plan that pauses in your main scenario shows with the first "
+"month in which the cash does not cover its rate: lower it or the spending"
+" on the Cashflows page."
+msgstr ""
+"Ein Sparplan, der in deinem Hauptszenario aussetzt, steht mit dem ersten "
+"Monat darin, in dem das Bargeld seine Rate nicht deckt: Senke ihn oder "
+"die Ausgaben auf der Seite Cashflows."
+
+#: ui/overview.py
+msgid ""
 "While you keep your actual spending on the Spend page (a record in the "
 "last three months), the table also names the first complete month without"
 " a record since your first one, with a link to that month there."
@@ -10178,13 +10238,13 @@ msgid ""
 " to the new start for the income tax (a Verlustvortrag, such as of a let "
 "flat) would be lost too: the roll writes them as `loss_carryforward` into"
 " the options `tax` that its scenarios take, the losses of capital income "
-"as `capital_losses`. A gift before the "
-"new start moves from its scenario file into the gifts before the start of"
-" its relative on the Assumptions page, with the Schenkungsteuer that the "
-"roll computes, so the ten years of §14 ErbStG keep it. The roll refuses "
-"while an event other than a stream event or a gift lies before the new "
-"start. The roll is one revision. The `Changes since` table of the "
-"Cashflows page shows what it changed in the streams."
+"as `capital_losses`. A gift before the new start moves from its scenario "
+"file into the gifts before the start of its relative on the Assumptions "
+"page, with the Schenkungsteuer that the roll computes, so the ten years "
+"of §14 ErbStG keep it. The roll refuses while an event other than a "
+"stream event or a gift lies before the new start. The roll is one "
+"revision. The `Changes since` table of the Cashflows page shows what it "
+"changed in the streams."
 msgstr ""
 "Das Vorrücken setzt `start` in `assumptions.yaml` auf den gewählten "
 "Monat. Die Beträge in Euro in Kaufkraft des alten Starts, die den "
@@ -10210,14 +10270,48 @@ msgstr ""
 "Verlustvortrag, etwa aus einer vermieteten Wohnung), gingen ebenso "
 "verloren: Das Vorrücken schreibt sie als `loss_carryforward` in die "
 "Optionen `tax`, die seine Szenarien verwenden, die Verluste aus "
-"Kapitalvermögen als `capital_losses`. Eine Schenkung vor dem neuen Start wandert aus ihrer "
-"Szenariodatei in die Schenkungen vor dem Start ihres Angehörigen auf der "
-"Seite Annahmen, mit der Schenkungsteuer, die das Vorrücken berechnet, so "
-"dass die zehn Jahre des §14 ErbStG sie behalten. Das Vorrücken wird "
-"abgelehnt, solange ein Ereignis, das weder ein Ereignis einer Zahlung "
-"noch eine Schenkung ist, vor dem neuen Start liegt. Das Vorrücken ist "
-"eine Version. Die Tabelle `Änderungen seit` der Seite Cashflows zeigt, "
-"was es an den Zahlungen geändert hat."
+"Kapitalvermögen als `capital_losses`. Eine Schenkung vor dem neuen Start "
+"wandert aus ihrer Szenariodatei in die Schenkungen vor dem Start ihres "
+"Angehörigen auf der Seite Annahmen, mit der Schenkungsteuer, die das "
+"Vorrücken berechnet, so dass die zehn Jahre des §14 ErbStG sie behalten. "
+"Das Vorrücken wird abgelehnt, solange ein Ereignis, das weder ein "
+"Ereignis einer Zahlung noch eine Schenkung ist, vor dem neuen Start "
+"liegt. Das Vorrücken ist eine Version. Die Tabelle `Änderungen seit` der "
+"Seite Cashflows zeigt, was es an den Zahlungen geändert hat."
+
+#: ui/overview.py
+#, python-brace-format
+msgid ""
+"The plan carries losses of the income tax to {month}: it writes them as "
+"`loss_carryforward`, so they offset the income after it:"
+msgstr ""
+"Der Plan trägt Verluste der Einkommensteuer bis {month} vor: Das "
+"Vorrücken schreibt sie als `loss_carryforward`, damit sie das Einkommen "
+"danach mindern:"
+
+#: ui/overview.py
+#, python-brace-format
+msgid ""
+"The plan carries losses of capital income to {month}: it writes them as "
+"`capital_losses`, so they offset the capital income after it:"
+msgstr ""
+"Der Plan trägt Verluste aus Kapitalvermögen bis {month} vor: Das "
+"Vorrücken schreibt sie als `capital_losses`, damit sie die Kapitalerträge"
+" danach mindern:"
+
+#: ui/overview.py
+#, python-brace-format
+msgid "{file} keeps the losses carried, {amount}, as `loss_carryforward`."
+msgstr "{file} behält den Verlustvortrag, {amount}, als `loss_carryforward`."
+
+#: ui/overview.py
+#, python-brace-format
+msgid ""
+"{file} keeps the losses of capital income carried, {amount}, as "
+"`capital_losses`."
+msgstr ""
+"{file} behält den Verlustvortrag aus Kapitalvermögen, {amount}, als "
+"`capital_losses`."
 
 #: ui/overview.py
 msgid "Asset values stay as they are: the Snapshot page records them."
@@ -10360,26 +10454,6 @@ msgstr ""
 #: ui/overview.py
 #, python-brace-format
 msgid ""
-"The plan carries losses of the income tax to {month}: it writes them as "
-"`loss_carryforward`, so they offset the income after it:"
-msgstr ""
-"Der Plan trägt Verluste der Einkommensteuer bis {month} vor: Das "
-"Vorrücken schreibt sie als `loss_carryforward`, damit sie das Einkommen "
-"danach mindern:"
-
-#: ui/overview.py
-#, python-brace-format
-msgid ""
-"The plan carries losses of capital income to {month}: it writes them as "
-"`capital_losses`, so they offset the capital "
-"income after it:"
-msgstr ""
-"Der Plan trägt Verluste aus Kapitalvermögen bis {month} vor: Das "
-"Vorrücken schreibt sie als `capital_losses`, damit sie die Kapitalerträge danach mindern:"
-
-#: ui/overview.py
-#, python-brace-format
-msgid ""
 "These gifts lie before {month}: it moves each into the gifts before the "
 "start of its relative, with the tax that it computes on them:"
 msgstr ""
@@ -10431,20 +10505,6 @@ msgstr "{n} Zahlungen alle n Monate haben {old} als `start` erhalten."
 #, python-brace-format
 msgid "{file} keeps the founding of a business, {month}, as `founded`."
 msgstr "{file} behält die Gründung eines Betriebs, {month}, als `founded`."
-
-#: ui/overview.py
-#, python-brace-format
-msgid "{file} keeps the losses carried, {amount}, as `loss_carryforward`."
-msgstr "{file} behält den Verlustvortrag, {amount}, als `loss_carryforward`."
-
-#: ui/overview.py
-#, python-brace-format
-msgid ""
-"{file} keeps the losses of capital income carried, {amount}, as "
-"`capital_losses`."
-msgstr ""
-"{file} behält den Verlustvortrag aus Kapitalvermögen, {amount}, als "
-"`capital_losses`."
 
 #: ui/overview.py
 #, python-brace-format
@@ -10508,6 +10568,112 @@ msgstr "So liest du das erfasste Nettovermögen"
 #: ui/overview.py ui/snapshot.py
 msgid "new"
 msgstr "Neu"
+
+#: ui/phases.py
+msgid "The Assumptions page defines them."
+msgstr "Die Seite Annahmen legt sie fest."
+
+#: ui/phases.py
+msgid "age"
+msgstr "Alter"
+
+#: ui/phases.py
+msgid "ids"
+msgstr "IDs"
+
+#: ui/phases.py
+msgid ""
+"The phase changes of the scenarios that this one extends, which it runs "
+"too. Type another month in a row to move that change here: the scenario "
+"saves a move of its id (`shift` in its overrides), and the events with "
+"that id move with it. The scenario that holds the change keeps it as it "
+"is. Empty the month to take the month of the parent again. A change "
+"without an id does not move: change it in its own scenario. The switches "
+"above leave out every phase change and event of an id."
+msgstr ""
+"Die Phasenwechsel der Szenarien, auf denen dieses basiert. Es durchläuft "
+"sie ebenfalls. Gib in einer Zeile einen anderen Monat ein, um diesen "
+"Wechsel hier zu verschieben: Das Szenario speichert eine Verschiebung "
+"seiner ID (`shift` in seinen Abweichungen), und die Ereignisse mit dieser"
+" ID wandern mit. Das Szenario, das den Wechsel enthält, behält ihn "
+"unverändert. Leere den Monat, um wieder den Monat der Basis zu nehmen. "
+"Ein Wechsel ohne ID lässt sich nicht verschieben: Ändere ihn in seinem "
+"eigenen Szenario. Die Schalter darüber lassen jeden Phasenwechsel und "
+"jedes Ereignis einer ID weg."
+
+#: ui/phases.py
+#, python-brace-format
+msgid "{phase} from {month} has no id, so it does not move: change it in {file}"
+msgstr ""
+"{phase} ab {month} hat keine ID und lässt sich nicht verschieben: Ändere "
+"den Wechsel in {file}"
+
+#: ui/phases.py
+#, python-brace-format
+msgid "{phase} from {month} is left out, so it does not move"
+msgstr "{phase} ab {month} ist weggelassen und lässt sich nicht verschieben"
+
+#: ui/phases.py
+#, python-brace-format
+msgid "{phase} from {month}: {typed} is no month, so it does not move"
+msgstr "{phase} ab {month}: {typed} ist kein Monat, daher verschiebt sich nichts"
+
+#: ui/phases.py
+#, python-brace-format
+msgid ""
+"{id} moves as one: {phase} from {month} moves to {then}, not to the month"
+" typed"
+msgstr ""
+"{id} verschiebt sich nur als Ganzes: {phase} ab {month} verschiebt sich "
+"auf {then}, nicht auf den eingegebenen Monat"
+
+#: ui/phases.py
+#, python-brace-format
+msgid "{id} moves as one: {phase} from {month} moves to {then} too"
+msgstr ""
+"{id} verschiebt sich nur als Ganzes: Auch {phase} ab {month} verschiebt "
+"sich auf {then}"
+
+#: ui/phases.py
+#, python-brace-format
+msgid "move {item}"
+msgstr "{item} verschieben"
+
+#: ui/phases.py
+msgid "Inherited phases"
+msgstr "Geerbte Phasen"
+
+#: ui/phases.py
+msgid "About inherited phases"
+msgstr "Zu geerbten Phasen"
+
+#: ui/phases.py
+#, python-brace-format
+msgid ""
+"The new change to {phase} in {month} repeats the change to {phase} of "
+"{file} in {then}, which stays."
+msgstr ""
+"Der neue Wechsel zu {phase} im {month} wiederholt den Wechsel zu {phase} "
+"aus {file} im {then}, und dieser bleibt."
+
+#: ui/phases.py
+msgid "It has no id, so it does not move here."
+msgstr "Er hat keine ID und lässt sich hier nicht verschieben."
+
+#: ui/phases.py
+#, python-brace-format
+msgid "Move {item} to {month} instead"
+msgstr "Stattdessen {item} auf {month} verschieben"
+
+#: ui/phases.py
+msgid "Saves a move of the inherited change and leaves out the new row."
+msgstr ""
+"Speichert eine Verschiebung des geerbten Wechsels und lässt die neue "
+"Zeile weg."
+
+#: ui/phases.py ui/save.py
+msgid "Discard my edits"
+msgstr "Meine Änderungen verwerfen"
 
 #: ui/pricing.py
 msgid "last price"
@@ -10816,6 +10982,20 @@ msgstr "Neuer Name"
 msgid "Type a new name first."
 msgstr "Gib zuerst einen neuen Namen ein."
 
+#: ui/runs.py
+#, python-brace-format
+msgid "{subject} does not load with this version of the app. Choose a newer day."
+msgstr "{subject} lädt nicht mit dieser Version der App. Wähle einen neueren Tag."
+
+#: ui/runs.py
+#, python-brace-format
+msgid ""
+"{subject} does not run with this version of the app ({why}). Choose a "
+"newer day."
+msgstr ""
+"{subject} läuft nicht mit dieser Version der App ({why}). Wähle einen "
+"neueren Tag."
+
 #: ui/save.py
 #, python-brace-format
 msgid "at {time} outside the app"
@@ -10869,6 +11049,21 @@ msgstr "Dort geändert"
 #, python-brace-format
 msgid "{changed} since this table was drawn: see above the table"
 msgstr "{changed}, seit diese Tabelle angezeigt wurde: siehe über der Tabelle"
+
+#: ui/save.py
+#, python-brace-format
+msgid ""
+"{changed} since this form was drawn. Your edits stay, but Save refuses "
+"them: discard them to see the file as it is now."
+msgstr ""
+"{changed}, seit dieses Formular angezeigt wurde. Deine Änderungen "
+"bleiben, aber Speichern lehnt sie ab: Verwirf sie, um die Datei zu sehen,"
+" wie sie jetzt ist."
+
+#: ui/save.py
+#, python-brace-format
+msgid "Not saved: {changed} since this form was drawn"
+msgstr "Nicht gespeichert: {changed}, seit dieses Formular angezeigt wurde"
 
 #: ui/save.py
 #, python-brace-format
@@ -11032,38 +11227,6 @@ msgstr "Zeitleiste"
 msgid "General"
 msgstr "Allgemein"
 
-#: ui/phases.py
-msgid "The Assumptions page defines them."
-msgstr "Die Seite Annahmen legt sie fest."
-
-#: ui/phases.py
-msgid "age"
-msgstr "Alter"
-
-#: ui/phases.py
-msgid "ids"
-msgstr "IDs"
-
-#: ui/phases.py
-msgid ""
-"The phase changes of the scenarios that this one extends, which it runs "
-"too. Type another month in a row to move that change here: the scenario "
-"saves a move of its id (`shift` in its overrides), and the events with "
-"that id move with it. The scenario that holds the change keeps it as it "
-"is. Empty the month to take the month of the parent again. A change "
-"without an id does not move: change it in its own scenario. The switches "
-"above leave out every phase change and event of an id."
-msgstr ""
-"Die Phasenwechsel der Szenarien, auf denen dieses basiert. Es durchläuft "
-"sie ebenfalls. Gib in einer Zeile einen anderen Monat ein, um diesen "
-"Wechsel hier zu verschieben: Das Szenario speichert eine Verschiebung "
-"seiner ID (`shift` in seinen Abweichungen), und die Ereignisse mit dieser"
-" ID wandern mit. Das Szenario, das den Wechsel enthält, behält ihn "
-"unverändert. Leere den Monat, um wieder den Monat der Basis zu nehmen. "
-"Ein Wechsel ohne ID lässt sich nicht verschieben: Ändere ihn in seinem "
-"eigenen Szenario. Die Schalter darüber lassen jeden Phasenwechsel und "
-"jedes Ereignis einer ID weg."
-
 #: ui/scenarios.py
 msgid "Template: only a base for others, never run"
 msgstr "Vorlage: nur Basis für andere, läuft nie"
@@ -11137,38 +11300,6 @@ msgstr "Vorlage"
 #, python-brace-format
 msgid "Save stays off: {reasons}"
 msgstr "„Speichern“ bleibt gesperrt: {reasons}"
-
-#: ui/phases.py
-msgid "Inherited phases"
-msgstr "Geerbte Phasen"
-
-#: ui/phases.py
-msgid "About inherited phases"
-msgstr "Zu geerbten Phasen"
-
-#: ui/phases.py
-#, python-brace-format
-msgid ""
-"The new change to {phase} in {month} repeats the change to {phase} of "
-"{file} in {then}, which stays."
-msgstr ""
-"Der neue Wechsel zu {phase} im {month} wiederholt den Wechsel zu {phase} "
-"aus {file} im {then}, und dieser bleibt."
-
-#: ui/phases.py
-msgid "It has no id, so it does not move here."
-msgstr "Er hat keine ID und lässt sich hier nicht verschieben."
-
-#: ui/phases.py
-#, python-brace-format
-msgid "Move {item} to {month} instead"
-msgstr "Stattdessen {item} auf {month} verschieben"
-
-#: ui/phases.py
-msgid "Saves a move of the inherited change and leaves out the new row."
-msgstr ""
-"Speichert eine Verschiebung des geerbten Wechsels und lässt die neue "
-"Zeile weg."
 
 #: ui/scenarios.py
 msgid "No phase change or event yet: add them in the tabs Phases and Events."
@@ -12485,24 +12616,61 @@ msgid ""
 "Your plan from a few numbers. Only the date of birth is needed: an empty "
 "field adds nothing, and you can add it later on the pages Assets, "
 "Cashflows and Scenarios. With a salary and under 67 the Overview opens "
-"next, where `Find when to stop working` tells you by when you could stop."
-" Otherwise the Assumptions page opens: check the person and the markets."
+"next and finds by when you could stop working. Otherwise the Assumptions "
+"page opens: check the person and the markets."
 msgstr ""
 "Dein Plan aus wenigen Zahlen. Nur das Geburtsdatum ist nötig: Ein leeres "
 "Feld fügt nichts hinzu, und du kannst es später auf den Seiten Vermögen, "
 "Cashflows und Szenarien ergänzen. Mit einem Gehalt und unter 67 öffnet "
-"sich als Nächstes die Übersicht, wo `Arbeitsende finden` dir sagt, ab "
-"wann du aufhören könntest. Sonst öffnet sich die Seite Annahmen: Prüfe "
-"die Person und die Märkte."
+"sich als Nächstes die Übersicht und findet, ab wann du aufhören könntest "
+"zu arbeiten. Sonst öffnet sich die Seite Annahmen: Prüfe die Person und "
+"die Märkte."
 
 #: ui/welcome.py
 #, python-brace-format
 msgid ""
-"The quick start switches off the parts you did not name ({names}): the "
-"Features page turns them on."
+"After tax and social insurance your salary leaves about {net} a month, "
+"{short} less than what goes out: {out} for spending, savings plan and "
+"loan. The plan takes the gap from your cash and your depot, and the "
+"savings plan pauses whenever the cash runs short."
 msgstr ""
-"Der Schnellstart schaltet die Teile ab, die du nicht genannt hast "
-"({names}): Die Seite Funktionen schaltet sie an."
+"Nach Steuer und Sozialversicherung bleiben von deinem Gehalt etwa {net} "
+"im Monat, {short} weniger als das, was abfließt: {out} für Ausgaben, "
+"Sparplan und Darlehen. Der Plan nimmt die Lücke aus deinem Bargeld und "
+"deinem Depot, und der Sparplan setzt aus, sobald das Bargeld nicht "
+"reicht."
+
+#: ui/welcome.py
+#, python-brace-format
+msgid ""
+"Without a salary the savings plan of {plan} a month comes from your cash,"
+" and it pauses whenever the cash runs short."
+msgstr ""
+"Ohne Gehalt kommt der Sparplan von {plan} im Monat aus deinem Bargeld, "
+"und er setzt aus, sobald das Bargeld nicht reicht."
+
+#: ui/welcome.py
+msgid "Your PKV premium comes on top."
+msgstr "Dein Beitrag zur PKV kommt noch dazu."
+
+#: ui/welcome.py
+#, python-brace-format
+msgid ""
+"The plan pays {payment} a month for the loan: {rate} interest and "
+"{repayment} repayment a year. Leave it out of your spending. The Assets "
+"page takes your own rate and payment."
+msgstr ""
+"Der Plan zahlt {payment} im Monat für das Darlehen: {rate} Zinsen und "
+"{repayment} Tilgung im Jahr. Lass die Rate aus deinen Ausgaben heraus. "
+"Die Seite Vermögen nimmt deinen eigenen Zinssatz und deine eigene Rate."
+
+#: ui/welcome.py
+msgid ""
+"Your home or a flat that you own: its value counts in your net worth, and"
+" the part of the app for property turns on."
+msgstr ""
+"Dein Zuhause oder eine Wohnung, die dir gehört: Ihr Wert zählt zu deinem "
+"Nettovermögen, und der Teil der App für Immobilien schaltet sich ein."
 
 #: ui/welcome.py
 msgid ""
@@ -12564,10 +12732,10 @@ msgstr "Bruttogehalt pro Monat €"
 #: ui/welcome.py
 msgid ""
 "Before tax and social insurance, without a bonus. The plan pays it until "
-"you stop working, at 67 at the latest."
+"you stop working, at the age of your goal below, else at 67."
 msgstr ""
 "Vor Steuer und Sozialversicherung, ohne Bonus. Der Plan zahlt es, bis du "
-"aufhörst zu arbeiten, spätestens mit 67."
+"aufhörst zu arbeiten: mit dem Alter deines Ziels unten, sonst mit 67."
 
 #: ui/welcome.py
 msgid "Spending per month €"
@@ -12575,11 +12743,13 @@ msgstr "Ausgaben pro Monat €"
 
 #: ui/welcome.py
 msgid ""
-"All that you spend in a month, with the rent, as one expense. The "
+"All that you spend in a month, with the rent, as one expense, without the"
+" payment of a loan: the plan pays the loan of a property below. The "
 "Cashflows page splits it into categories."
 msgstr ""
-"Alles, was du in einem Monat ausgibst, mit der Miete, als eine Ausgabe. "
-"Die Seite Cashflows teilt sie in Kategorien auf."
+"Alles, was du in einem Monat ausgibst, mit der Miete, als eine Ausgabe, "
+"ohne die Rate eines Darlehens: Der Plan zahlt das Darlehen einer "
+"Immobilie unten. Die Seite Cashflows teilt sie in Kategorien auf."
 
 #: ui/welcome.py
 msgid "Savings today €"
@@ -12632,6 +12802,58 @@ msgid "Goes into the depot each month until you stop working."
 msgstr "Fließt jeden Monat ins Depot, bis du aufhörst zu arbeiten."
 
 #: ui/welcome.py
+msgid "Stop working at age"
+msgstr "Arbeitsende im Alter von"
+
+#: ui/welcome.py
+msgid ""
+"The age at which the salary and the savings plan stop. Empty: 67. The "
+"statutory pension starts at 67, from 63 after 35 years of insurance, with"
+" a deduction. The Overview then finds the earliest age that your money "
+"allows."
+msgstr ""
+"Das Alter, mit dem Gehalt und Sparplan enden. Leer: 67. Die gesetzliche "
+"Rente beginnt mit 67, nach 35 Versicherungsjahren ab 63, mit Abschlag. "
+"Die Übersicht findet dann das früheste Alter, das dein Geld erlaubt."
+
+#: ui/welcome.py
+msgid "Check a job loss in (month)"
+msgstr "Jobverlust prüfen im (Monat)"
+
+#: ui/welcome.py
+msgid ""
+"A month in which you might lose your job. The plan gets a second scenario"
+" of it: ALG1 for a year or more, then no salary until you stop working. "
+"The Explorer compares it with your plan, and the Scenarios page adds a "
+"new job."
+msgstr ""
+"Ein Monat, in dem du deinen Job verlieren könntest. Der Plan bekommt dazu"
+" ein zweites Szenario: ALG1 für ein Jahr oder länger, dann kein Gehalt "
+"bis zu deinem Arbeitsende. Der Explorer vergleicht es mit deinem Plan, "
+"und die Seite Szenarien fügt einen neuen Job hinzu."
+
+#: ui/welcome.py
+msgid "Value of the property €"
+msgstr "Wert der Immobilie €"
+
+#: ui/welcome.py
+msgid ""
+"What it would sell for today. The plan writes it as 1 m² at this price: "
+"the Assets page takes the living space and the price per m²."
+msgstr ""
+"Was sie heute beim Verkauf brächte. Der Plan schreibt sie als 1 m² zu "
+"diesem Preis: Die Seite Vermögen nimmt die Wohnfläche und den Preis pro "
+"m²."
+
+#: ui/welcome.py
+msgid "Loan still owed €"
+msgstr "Restschuld des Darlehens €"
+
+#: ui/welcome.py
+msgid "The balance of its loan today, if any."
+msgstr "Die heutige Restschuld ihres Darlehens, falls es eines gibt."
+
+#: ui/welcome.py
 msgid "type it as 20.05.1986 or 1986-05-20"
 msgstr "gib es als 20.05.1986 oder 1986-05-20 ein"
 
@@ -12663,6 +12885,14 @@ msgid "Not a date of birth: {reason}."
 msgstr "Kein Geburtsdatum: {reason}."
 
 #: ui/welcome.py
+msgid "Your goals"
+msgstr "Deine Ziele"
+
+#: ui/welcome.py
+msgid "I own a property"
+msgstr "Ich besitze eine Immobilie"
+
+#: ui/welcome.py
 msgid "Quick start"
 msgstr "Schnellstart"
 
@@ -12683,6 +12913,21 @@ msgstr ""
 #: ui/welcome.py
 msgid "Start my plan"
 msgstr "Meinen Plan starten"
+
+#: ui/welcome.py
+#, python-brace-format
+msgid ""
+"The quick start switches off {n} part of the app that your plan does not "
+"use: the Features page turns it on."
+msgid_plural ""
+"The quick start switches off {n} parts of the app that your plan does not"
+" use: the Features page turns them on."
+msgstr[0] ""
+"Der Schnellstart schaltet {n} Teil der App ab, den dein Plan nicht nutzt:"
+" Die Seite Funktionen schaltet ihn ein."
+msgstr[1] ""
+"Der Schnellstart schaltet {n} Teile der App ab, die dein Plan nicht "
+"nutzt: Die Seite Funktionen schaltet sie ein."
 
 #: ui/welcome.py
 msgid "Start a plan"
@@ -12763,70 +13008,3 @@ msgstr "Geerbt vom Standard:"
 msgid "Inherited from {source}:"
 msgstr "Geerbt von {source}:"
 
-#: ui/outlook.py
-#, python-brace-format
-msgid "Even {amount} a month, {change}, leaves a {chance} chance to run out by {age}, above the target."
-msgstr "Selbst {amount} im Monat, {change}, lassen ein Risiko von {chance}, dass dein Geld vor {age} ausgeht, über dem Ziel."
-
-#: ui/outlook.py
-#, python-brace-format
-msgid "Spend at most **{amount} a month**, {change}. The chance to run out by {age} is {chance} there."
-msgstr "Gib höchstens **{amount} im Monat** aus, {change}. Das Risiko, dass dein Geld vor {age} ausgeht, ist dort {chance}."
-
-#: ui/outlook.py
-#, python-brace-format
-msgid "Spending does not change the chance to run out by {age} between {low} and {high} a month."
-msgstr "Zwischen {low} und {high} im Monat ändern die Ausgaben das Risiko, dass dein Geld vor {age} ausgeht, nicht."
-
-#: ui/outlook.py
-#, python-brace-format
-msgid "The lifetime figure can be lower than the figure by {age}: it counts a path only with the chance that you are alive in the month the money runs out, so a path that runs out late counts little."
-msgstr "Das Risiko zu Lebzeiten kann unter dem Risiko bis {age} liegen: Es zählt einen Verlauf nur mit der Wahrscheinlichkeit, dass du in dem Monat lebst, in dem das Geld ausgeht, ein spät endender Verlauf zählt also wenig."
-
-#: ui/outlook.py
-#, python-brace-format
-msgid "The plan stops working in {month} (age {age})."
-msgstr "Der Plan hört im Monat {month} auf zu arbeiten (Alter {age})."
-
-#: ui/outlook.py
-msgid "Explorer: try less spending or more saving"
-msgstr "Explorer: weniger ausgeben, mehr sparen"
-
-#: ui/outlook.py
-#, python-brace-format
-msgid "not even at {age}"
-msgstr "nicht einmal mit {age}"
-
-#: ui/outlook.py
-msgid "the same as now"
-msgstr "wie jetzt"
-
-#: ui/outlook.py
-#, python-brace-format
-msgid "{share} less than now"
-msgstr "{share} weniger als jetzt"
-
-#: ui/outlook.py
-#, python-brace-format
-msgid "{share} more than now"
-msgstr "{share} mehr als jetzt"
-
-#: ui/flows.py
-#, python-brace-format
-msgid "`{scenario}` before {day}"
-msgstr "`{scenario}` vor dem {day}"
-
-#: ui/outlook.py
-#, python-brace-format
-msgid "The plan saved on {day}"
-msgstr "Der am {day} gespeicherte Plan"
-
-#: ui/runs.py
-#, python-brace-format
-msgid "{subject} does not load with this version of the app. Choose a newer day."
-msgstr "{subject} lädt nicht mit dieser Version der App. Wähle einen neueren Tag."
-
-#: ui/runs.py
-#, python-brace-format
-msgid "{subject} does not run with this version of the app ({why}). Choose a newer day."
-msgstr "{subject} läuft nicht mit dieser Version der App ({why}). Wähle einen neueren Tag."

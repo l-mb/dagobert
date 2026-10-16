@@ -9,8 +9,9 @@ The switches are in the file `app.yaml` of your data directory. So they apply on
 opens your plan, in simple and in advanced mode. The mode is different: each browser keeps its own
 mode. See [Simple and advanced mode, and features](index.md#simple-and-advanced-mode-and-features).
 
-A plan of the [quick start](start-a-plan.md#the-quick-start) begins with every feature off. The
-simple example begins with the ten features off that it does not use.
+A plan of the [quick start](start-a-plan.md#the-quick-start) begins with every feature off that
+it does not use: a job loss or a property of its goals keeps its feature on. The simple example
+begins with the ten features off that it does not use.
 
 ## Switch a feature off or on
 

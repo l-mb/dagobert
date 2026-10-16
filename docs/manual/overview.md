@@ -9,7 +9,8 @@ money goes, and the [Assets](assets.md) page shows each asset. The sections come
 Four tiles show your net worth, the liquid and the illiquid part, and your debt. They use the values
 that you recorded on the [Snapshot](snapshot.md) page and the values in `assets.yaml`. Each tile
 shows the change since the end of the previous month. If the value did not change, the tile says `no
-change since` that day in gray.
+change since` that day in gray. A new plan has no value from before the current month, so the
+tiles show no change yet.
 
 ## Outlook
 
@@ -30,7 +31,9 @@ works](models.md#the-results) explains each figure:
 - `Net worth at 67` (`Total@67`): the median net worth at age 67.
 - `Typical shortfall` (`Shortfall`): how far the money falls below zero in the lives that run out.
 - `Stop working`: the month that `Find when to stop working` found, with your age in that month.
-  Until you press the button, the tile shows a dash and `not searched yet`. If even the latest month
+  Until you press the button, the tile shows a dash and `not searched yet`. A plan that you start
+  on the page [Start a plan](start-a-plan.md) searches once by itself when the Overview opens. If
+  even the latest month
   misses the target, the tile shows `not even at` and your age in that month. In other cases without
   a month, the tile shows a dash, and the answer below the buttons says why. The tile keeps the
   month until you change an input or the target.
@@ -104,6 +107,10 @@ The table lists what you must update or know about:
   contributions before it are too short. The row has the date of the disability. The link opens the
   place where the date is written: the [Assumptions](assumptions.md) page or the `Overrides` tab of
   the scenario on the [Scenarios](scenarios.md) page.
+- A savings plan that pauses in the main scenario, because the cash in a month does not cover its
+  rate. The row has the first such month, also years ahead. The simulation of your files with the
+  mean returns finds it. Lower the savings plan or the spending on the [Cashflows](cashflows.md)
+  page, which the link opens.
 
 A red date needs an update of your inputs. The link on the right of a row opens the place where you
 change it:
@@ -208,7 +215,8 @@ In simple mode, and when the feature Records is off, this section and `Records a
 show only when your plan holds a record. Before that, only the line to the Explorer shows.
 
 If the [Features](features.md) page switched off parts of life that your plan does not use, a line
-below names them, with a link to the Features page. Turn a part on there when you need it.
+below gives their number, with a link to the Features page. That page names them. Turn a part on
+there when you need it.
 
 ## Records against the plan
 

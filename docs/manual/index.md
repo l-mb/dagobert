@@ -108,8 +108,9 @@ The mode is a setting of your browser. Simple mode hides the settings for expert
 does not use. Advanced mode shows everything. To change the mode, use the switch `Mode` at the end
 of the sidebar, above the language switch. On a phone, the button at the top left opens the
 sidebar. A cookie in your browser keeps your choice for the next visit. Without a choice, the app
-opens in advanced mode. A plan that you start on the page [Start a plan](start-a-plan.md) opens in
-simple mode. Another browser or another device keeps its own mode.
+opens in simple mode. The page [Start a plan](start-a-plan.md) has no switch of the mode: a plan
+that you start there opens in the mode of your browser. Another browser or another device keeps
+its own mode.
 
 In simple mode the navigation leaves out these pages:
 

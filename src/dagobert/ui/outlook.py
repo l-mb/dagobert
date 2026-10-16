@@ -42,6 +42,8 @@ TILES = (report.BROKE_ALIVE, report.BROKE_AT, report.TOTAL_AT, "Shortfall")
 SEEK = N_("Find the spending limit")
 WORK_SEEK = N_("Find when to stop working")
 STOP = "overview-stop"  # the button of the work seek, whose answer the fifth tile shows
+# session state: the Overview of a plan that the start page started seeks when to stop, once
+SEEK_FIRST = "overview-seek-first"
 AHEAD = 6  # months of the projection after the last record
 # by the array of the run that they show: its words, the name of the records and their reading
 MEASURES = {"total": N_("net worth"), "liquid": N_("liquid")}
@@ -284,7 +286,7 @@ def _answer(
 def plan(data_dir: Path, scenario: str) -> None:
     """The tiles of the explorer's run of the main `scenario`, named with its note and a link that
     changes it, and, on request, the spending it allows and the month to stop working, which the
-    last tile shows."""
+    last tile shows: of a plan that the start page started at once (`SEEK_FIRST`)."""
     path = concrete_scenarios(data_dir)[scenario]
     result = runs.files_run(data_dir, path)
     if result is None:
@@ -323,8 +325,9 @@ def plan(data_dir: Path, scenario: str) -> None:
     seeks = _seeks()
     key = (job.opts, path, job.target, run_stamp(data_dir))
     answers = st.container()
+    first = st.session_state.pop(SEEK_FIRST, False)  # a new plan: its stop tile not left empty
     for button, (label, dial_of, _say) in SEEKS.items():
-        if seek.button(_(label), key=button):
+        if seek.button(_(label), key=button) or (first and button == STOP):
             bar = answers.progress(0.0)
             text = _("{seek}: round by round").format(seek=_(label))
             try:

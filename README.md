@@ -171,9 +171,10 @@ the other pages. It gives you three choices.
   into the data directory, and then opens the Overview. Use one to try Dagobert before you enter
   your own data.
 - `Start my plan` under `Quick start` writes your plan from a few numbers: your date of birth, and
-  if you want, your salary, spending, savings, cash, pension points and a savings plan. With a
-  salary and under 67 the Overview opens and can find by when you can stop working. Otherwise the
-  Assumptions page opens. Add the rest on the Assets, Cashflows and Scenarios pages.
+  if you want, your salary, spending, savings, cash, pension points and a savings plan, and your
+  goals: an age to stop working, a job loss to check, a property that you own. With a salary and
+  under 67 the Overview opens and finds by when you can stop working. Otherwise the Assumptions
+  page opens. Add the rest on the Assets, Cashflows and Scenarios pages.
 - `Import` under `An export` takes the export zip of your plan from another instance or from a
   backup, and then opens the Overview.
 

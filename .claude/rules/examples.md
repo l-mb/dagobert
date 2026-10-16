@@ -6,7 +6,9 @@ paths:
   - "tests/test_examples.py"
 ---
 
-# Examples and the first run
+# Examples
+
+A start from an example, the quick start and the start page: rule `first-run`.
 
 - `src/dagobert/examples/<name>/` (package data, `datadir.EXAMPLES`, so the image holds it; the
   names in `datadir.ExampleName`, which the CLI argument and `welcome.EXAMPLES` take) is a complete
@@ -107,8 +109,9 @@ paths:
   working` of the Overview read `ausstieg`: P(broke)@90 about 6% at 500 paths (5% at 2,000, 6% at
   50), `plan` and `teilzeit` 0%, the contrast. No event: the full example shows them. `features_off`
   holds the ten features that `mode.uses` finds unused: a newcomer's plan (`engineer`: none).
-- A German `engineer` and a German empty plan: issue #5. Spread the features
-  over the scenarios: no one scenario may stack a real life story.
+- A German `engineer`: issue #5 (the empty plan writes the language of the session, rule
+  `first-run`). Spread the features over the scenarios: no one scenario may stack a real life
+  story.
 - Nothing may resemble a real person's situation: no real city, bank, insurer or employer,
   made-up ISINs (`IE000WORLD05`), round amounts. The personal-data hook checks the amounts too:
   change a flagged number, never the list. No licensed series: the Data page fetches them;
@@ -130,69 +133,3 @@ paths:
 - The dates are fixed: a first run months after the start shows the roll forward and stale
   values (the start page and the README say so). Moving the example forward is a roll forward on
   a copy plus new `asof` dates.
-
-## First run
-
-- `datadir.empty`: no tracked input and no revision, or no directory (`lost+found`, `series/` and
-  other files do not count; a file is not empty); `transfer` takes it for an import into an empty
-  target. A start writes only there (`check_empty`, before and again under the lock of the write:
-  two tabs; else `InputError` `holds a plan already`, for a file `not a directory`), creates a
-  missing directory and writes one `revisions.write` with every scenario checked:
-  `start_example(dir, example)` the inputs of an example as they are (`schema.Tree`, `EXAMPLE` by
-  default), source `example` (`FROM_EXAMPLE`); `start_quick(dir, Quick)` the quick start, source
-  `quick start` (`QUICK_START`); `start_empty(dir, born)` (the CLI) its date alone, source `empty
-  plan` (`EMPTY_PLAN`), the same files. `datadir.texts`: `person.born` (`sex`, `rv_since` the
-  January of `since`), `start` the current month (`first_month`), the `phases` of `NEW_PHASES` (four
-  fit the sheet on an upright phone), the four `REQUIRED_CLASSES` of `returns` of the example,
-  `tax.pkv` (off: an empty plan is GKV, the model's default PKV); per answer a row, none for an
-  empty or zero one, named in German as `starter`: `girokonto` (cash), `depot` (equity, `cost_basis`
-  its value; at 0 for a savings plan alone), `Gehalt` (salary, `work`), `Rente` (pension, `retired`,
-  with a salary or points: typed, else `estimate`, a year of `sv.pension_points` of the salary per
-  year since `since`; `point_value` the `rentenwert` of the tax year of `start`), `Lebenshaltung`
-  (cat `Leben`), `Sparplan` (into `depot`, `work`); `app.yaml` every feature off (the plan uses
-  none); `scenarios/plan.yaml` (`Plan`, `SCENARIO`) in `work` from `start`, in `retired` from the
-  month of 67 (`model.months.aged`) with the id `retired`, the change that `goalseek.work` moves
-  (past 67, `starts_retired`, `retired` from `start`); the manifest, so the next `datadir.open`
-  writes nothing. `born` has no default: a placeholder would drive every age rule. `check_born`
-  refuses one after today or before `OLDEST` (1900-01-01), ValueError: the CLI parser, the page and
-  `texts` take it. The example is not rolled forward (a decision).
-- `datadir.open` of an empty or missing directory raises `InputError` that names `dagobert init`
-  (`START`); one with other inputs but no `assumptions.yaml` stays `not a data directory`.
-- `uv run dagobert init [--data DIR] [--example [NAME] | --born YYYY-MM-DD]`: an example (`NAME` of
-  `ExampleName`, `engineer` without it), or an empty plan whose date of birth it asks for without
-  `--born` (`typer.prompt`, again until a date reads; `cli._born`). Typer 0.27 takes no option with
-  an optional value (`flag_value`), so `NAME` is a positional argument that needs `--example`. It
-  refuses a directory with a plan or a file before it asks.
-- `ui/welcome.py`, the page `Start a plan`: `main.py` draws it instead of the page while
-  `datadir.empty(DATA)`, with the navigation registered but hidden (`position="hidden"`), so a start
-  goes on by `st.switch_page` to the `Overview` (an example, a quick start with a salary before 67)
-  or the `Assumptions` page, in simple mode (`_start` sets `mode.MODE` and `MODE_CHOSEN`, the cookie
-  follows; not an import). Two columns, stacked on a phone, buttons of equal weight: `An example`, a
-  line and a button per example of `welcome.EXAMPLES` (`Start simple: …`, `Full example: …`), then
-  `Their scenarios` (name and note of each, the app's defaults first, read without an open) and
-  `Their dates` (their start months and the roll forward), expanders on every device; and `Quick
-  start` (`QUICK`, `overview.explore` of the plan it writes: no page that records; owner,
-  2026-10-13: people configure once and explore): `Date of birth` (a text field with the decimal
-  keypad of a phone, day first with dots or ISO, `welcome.birth` through `fields.day` and
-  `check_born`: bare digits stay unread, `20051986` could be either order; below it the date in
-  words with the age, `welcome.said`, `Born 20 May 1986, age 40.`, so a slip of the order shows, or
-  why it does not read; without a date why the start is off: a calendar took many taps back), `Sex`
-  (none: the model's `m`), the numbers of `ANSWERS` two to a row (`fields.parse` of `field`: at
-  least 0, the year from the birth to now; the error below; below the points `pension_note`, their
-  estimate or `NO_POINTS`; past 67 `RETIRED`: the salary and the savings plan pay in `work`), the
-  toggle of the PKV, `Start my plan` (off while the date or a number does not read) and the caption
-  `OFF` that names every feature (`mode.said`). The path of the data directory is the last caption.
-  A failed start shows `Not started: <dir>: <reason>` (`ValueError`, which `InputError` is, and
-  `OSError`: read-only, locked, a plan there by now). The container's empty `/data` volume reaches
-  it; a bind mount that Docker created is root's, so the README makes the directory first. Below the
-  columns `An export`: the import of `Export and import` (`ui.transfer.import_zip`, rule
-  `transfer`): every file `add`, one revision `import <zip>`, or with the revisions of the zip its
-  history (`_take_history`); then the Overview. The page speaks the language of the session (rule
-  `i18n`: the date in words, `20. Mai 1986`; the points of `pension_note` as `9.24` in both
-  languages), the names and notes of the examples as written (each line names its language); the
-  sidebar: two switches.
-- An empty plan and a quick start render all pages in both modes
-  (`test_pages_render_an_empty_plan`): no asset gives no recorded net worth
-  (`history.actual_values`), an info for the sunburst, no category a text column in the Spend grid.
-  `test_examples`: the date alone is `start_empty` file by file, the month of 67, a salary pays a
-  pension and the work seek finds a month, the estimate.

@@ -30,6 +30,7 @@ from dagobert.ui.gridcolumns import ASSET_MODELS
 from dagobert.ui.mode import FEATURES, Item, Sort, Uses, shown
 
 NOTHING: frozenset[Feature] = frozenset()
+SHIPPED = mode.DEFAULT  # read at collection, before the fixture `advanced_by_default`
 SIMPLE_PAGES = {
     "Overview",
     "Assets",
@@ -277,25 +278,27 @@ def _advanced(at: AppTest) -> bool:
     return at.markdown[0].value == "True"
 
 
-def test_the_mode_comes_from_the_query_the_switch_the_cookie_else_advanced(
+def test_the_mode_comes_from_the_query_the_switch_the_cookie_else_simple(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Advanced without a choice, so every viewer keeps what the app showed before. `?mode` is
-    taken once, the switch keeps its choice and writes it into a cookie for the next visit."""
-    assert _advanced(AppTest.from_string(SWITCH).run())
-    at = AppTest.from_string(SWITCH)
-    at.query_params["mode"] = "simple"
-    at.run()
-    assert not _advanced(at)
-    assert "mode" not in at.query_params
-    assert not _advanced(at.run())
-    at.sidebar.segmented_control(key=mode.MODE).set_value("advanced").run()
-    assert _advanced(at)
-    scripts = [h.proto.body for h in at.get("html")]
-    assert any(f"{mode.MODE_COOKIE}=advanced;" in s for s in scripts)
-    cookies = {mode.MODE_COOKIE: "simple"}
-    monkeypatch.setattr(ContextProxy, "cookies", property(lambda _: cookies))
+    """Simple without a choice: a new browser (owner, 2026-10-16). `?mode` is taken once, the
+    switch keeps its choice and writes it into a cookie for the next visit."""
+    assert SHIPPED == "simple"
+    monkeypatch.setattr(mode, "DEFAULT", SHIPPED)
     assert not _advanced(AppTest.from_string(SWITCH).run())
+    at = AppTest.from_string(SWITCH)
+    at.query_params["mode"] = "advanced"
+    at.run()
+    assert _advanced(at)
+    assert "mode" not in at.query_params
+    assert _advanced(at.run())
+    at.sidebar.segmented_control(key=mode.MODE).set_value("simple").run()
+    assert not _advanced(at)
+    scripts = [h.proto.body for h in at.get("html")]
+    assert any(f"{mode.MODE_COOKIE}=simple;" in s for s in scripts)
+    cookies = {mode.MODE_COOKIE: "advanced"}
+    monkeypatch.setattr(ContextProxy, "cookies", property(lambda _: cookies))
+    assert _advanced(AppTest.from_string(SWITCH).run())
 
 
 def test_features_off_is_a_list_of_known_features(tmp_path: Path) -> None:
@@ -488,14 +491,14 @@ def test_simple_mode_speaks_german(data: Path) -> None:
 
 @pytest.mark.parametrize("simple", [False, True])
 def test_the_pages_render_with_every_feature_off(data: Path, simple: bool) -> None:
-    """The Overview names the features off that the plan does not use (it holds gold and crypto,
-    and VPW, a spending rule), with a link to the Features page."""
+    """The Overview counts the features off that the plan does not use (it holds gold and crypto
+    with trades, records, and VPW, a spending rule), with a link to the Features page."""
     _all_off(data)
     at = render(data, PAGE, mode="simple" if simple else None)
-    [named] = [c.value for c in at.caption if c.value.startswith("Some parts of the app")]
-    assert "long-term care" in named
-    assert "gold and crypto" not in named
-    assert "spending rules" not in named
+    n = len(Feature) - 3
+    assert f"{n} parts of the app are switched off: the Features page turns them on." in [
+        c.value for c in at.caption
+    ]
 
 
 SAVE_GRID = """

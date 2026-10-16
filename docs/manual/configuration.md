@@ -920,4 +920,4 @@ and the Basisrente), `spending_rules` (the spending rule beyond the cut, and VPW
 `allocation` (the allocation and its glide path). An unknown id is an error at its line. The
 [Features](features.md) page writes the key and removes it when the list is empty. The key changes
 no simulation: the defaults of a hidden field still act. A new plan of the quick start lists every
-id, and the simple example lists the ten that it does not use.
+id that it does not use, and the simple example lists the ten that it does not use.

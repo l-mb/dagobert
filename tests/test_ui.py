@@ -33,6 +33,7 @@ from dagobert import (
 )
 from dagobert.runner import DATA_ENV
 from dagobert.ui import (
+    LANGUAGE,
     LANGUAGE_LABEL,
     PAGE_STYLE,
     PAGES,
@@ -302,16 +303,24 @@ def test_a_first_run_starts_a_plan_and_opens_its_page(
     landing: str,
     notes: tuple[str, ...],
 ) -> None:
-    """A missing data directory shows the start instead of the pages. An example opens the
-    Overview; the quick start needs the date of birth, and a number that does not read keeps it
-    off. It opens the Overview with a salary, else the Assumptions page, also at 67, where the
-    salary does not pay: a line says so, as one says what the pension counts without points. A
-    new plan opens in simple mode."""
+    """A missing data directory shows the start instead of the pages, with the language switch
+    alone. An example opens the Overview; the quick start needs the date of birth, and a number
+    that does not read keeps it off. It opens the Overview with a salary, else the Assumptions
+    page, also at 67, where the salary does not pay: a line says so, as one says what the
+    pension counts without points. The Overview of a new plan seeks when to stop working once."""
     data = tmp_path / "data"
     monkeypatch.setenv(DATA_ENV, str(data))
+    sought: list[goalseek.Dial] = []
+
+    def seek(job: object, dial: goalseek.Dial, progress: object) -> goalseek.Found:
+        sought.append(dial)
+        return goalseek.Found(dial.value, 0.01, 1, rising=False)
+
+    monkeypatch.setattr(runs, "seek", seek)
     at = AppTest.from_file(MAIN, default_timeout=60).run()
     assert not at.exception
     assert [t.value for t in at.title] == ["Start a plan"]
+    assert [c.key for c in at.sidebar.segmented_control] == [LANGUAGE]
     assert not any(at.button(key=f"welcome-{e.name}").disabled for e in welcome.EXAMPLES)
     assert at.button(key="welcome-quick").disabled  # the quick start needs a birth date
     assert [u.label for u in at.file_uploader] == ["Choose a Dagobert export (.zip)"]
@@ -328,7 +337,51 @@ def test_a_first_run_starts_a_plan_and_opens_its_page(
     assert not at.exception
     assert [t.value for t in at.title] == [landing]
     assert [e.source for e in revisions.entries(data)] == [source]
-    assert at.session_state[mode.MODE] == "simple"
+    assert mode.MODE in [c.key for c in at.sidebar.segmented_control]
+    assert len(sought) == (landing == "Overview")
+    if sought:
+        stop = next(m for m in at.metric if m.label == goalseek.STOP)
+        assert stop.value == f"{sought[0].month(sought[0].value)[0]:%Y-%m}"  # type: ignore[index]
+        at.run()
+        assert len(sought) == 1  # once
+
+
+@pytest.mark.parametrize(
+    ("typed", "problems", "warned"),
+    [
+        ({"gross": "5.500", "spending": "3.000", "plan": "1.000"}, {}, True),
+        ({"gross": "5.500", "spending": "3.000", "plan": "300"}, {}, False),
+        ({"plan": "300"}, {}, True),  # no salary pays it
+        ({"gross": "5.500", "lost": "2020-01"}, {"lost": "type a month from"}, False),
+        ({"lost": "2030-01"}, {"lost": "a job loss needs a salary"}, False),
+        ({"gross": "5.500", "stop": "50", "lost": "2040-01"}, {"lost": "before you stop"}, False),
+        ({"gross": "5.500", "stop": "71"}, {"stop": "at most 70"}, False),
+        ({"owed": "100.000"}, {"owed": "the value of the property"}, False),
+    ],
+)
+def test_the_quick_start_checks_its_goals_and_the_budget(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    typed: dict[str, str],
+    problems: dict[str, str],
+    warned: bool,
+) -> None:
+    """A goal that does not fit the other answers says why below its field and keeps the start
+    off; a salary that leaves less than the spending and the savings plan warns, and the start
+    stays on."""
+    monkeypatch.setenv(DATA_ENV, str(tmp_path / "data"))
+    at = AppTest.from_file(MAIN, default_timeout=60).run()
+    at.text_input(key="decimal-welcome-born").set_value("14.03.1985").run()
+    if "owed" in typed:
+        at.toggle(key="welcome-owner").set_value(True).run()
+    for key, text in typed.items():
+        at.text_input(key=f"decimal-welcome-{key}").set_value(text).run()
+    assert not at.exception
+    errors = [e.value for e in at.error]
+    assert len(errors) == len(problems)
+    assert all(any(p in e for e in errors) for p in problems.values())
+    assert bool(at.warning) == warned
+    assert at.button(key="welcome-quick").disabled == bool(problems)
 
 
 @pytest.mark.parametrize(("phone", "history"), [(False, False), (True, True)])

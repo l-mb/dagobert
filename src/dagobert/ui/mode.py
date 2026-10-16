@@ -45,6 +45,7 @@ MODE = "ui-mode"  # session state, the key of the switch: `simple` or `advanced`
 MODE_CHOSEN = "ui-mode-chosen"  # session state: the viewer chose the mode on the switch
 MODE_COOKIE = "dagobert-mode"  # the mode that the viewer chose last, for the next visit
 MODES = {"simple": N_("Simple"), "advanced": N_("Advanced")}
+DEFAULT = "simple"  # the mode of a viewer without a choice: a new browser (owner, 2026-10-16)
 MODE_HELP = N_(
     "Simple hides the expert settings that your plan does not use, Advanced shows them all. Each "
     "browser keeps its choice. The Features page switches off parts of life for every device."
@@ -670,7 +671,7 @@ def said(features: Iterable[Feature]) -> str:
 def advanced() -> bool:
     """Whether the viewer sees everything: `?mode=simple|advanced` (tests and links; taken once,
     so the switch can change it), the switch (`mode_switch`), the cookie of an earlier choice,
-    else advanced, so a viewer keeps what the app showed before the mode came."""
+    else `DEFAULT`: a new browser starts simple."""
     chosen = next(
         (
             mode
@@ -681,7 +682,7 @@ def advanced() -> bool:
             )
             if mode in MODES
         ),
-        "advanced",
+        DEFAULT,
     )
     st.session_state[MODE] = chosen
     return chosen == "advanced"
@@ -766,8 +767,15 @@ def hidden_note(
 
 def off_note(data_dir: Path) -> None:
     """The caption of the Overview while `app.yaml` switches off features that the plan does not
-    use, with a link to the Features page: a newcomer whose plan began with them off finds it."""
+    use, their count with a link to the Features page, which names them: a newcomer whose plan
+    began with them off finds it."""
     found = uses(data_dir)
-    if off := [f for f in features_off(data_dir) if not found.used(f)]:
-        st.caption(_("Some parts of the app are switched off: {names}.").format(names=said(off)))
+    if n := len([f for f in features_off(data_dir) if not found.used(f)]):
+        st.caption(
+            ngettext(
+                "{n} part of the app is switched off: the Features page turns it on.",
+                "{n} parts of the app are switched off: the Features page turns them on.",
+                n,
+            ).format(n=n)
+        )
         page_link("Features", _("Features"))

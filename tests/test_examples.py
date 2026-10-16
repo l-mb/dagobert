@@ -17,14 +17,16 @@ from dagobert import (
     datadir,
     goalseek,
     history,
+    i18n,
     loader,
     revisions,
     scenariofiles,
     schema,
     tax,
 )
-from dagobert.model.assets import Asset
+from dagobert.model.assets import Asset, Loan
 from dagobert.model.events import AddStreamEvent, Event
+from dagobert.model.months import aged
 from dagobert.model.plan import Feature, Plan
 from dagobert.model.streams import StreamKind
 from dagobert.problems import InputError
@@ -229,6 +231,91 @@ def test_typed_pension_points_win_over_the_estimate(tmp_path: Path) -> None:
     pension = [s for s in _first(tmp_path).streams if s.kind is StreamKind.PENSION]
     rentenwert = tax.for_year(_first(tmp_path).assumptions.tax_year).rentenwert
     assert [(s.points, s.point_value) for s in pension] == [(10, rentenwert)]
+
+
+@pytest.mark.parametrize("lang", i18n.LANGUAGES)
+def test_a_new_plan_names_its_data_in_the_language_of_the_session(
+    tmp_path: Path, lang: i18n.Language
+) -> None:
+    """Phase labels, assets, streams and categories in `lang`, ids ASCII; an empty plan too."""
+    names = datadir.NAMES[lang]
+    datadir.start_quick(data := tmp_path / "quick", dataclasses.replace(FULL, lang=lang))
+    datadir.start_empty(empty := tmp_path / "empty", BORN, lang)
+    for plan in (_first(data), _first(empty)):
+        assert dict(plan.assumptions.phase_labels) == dict(names.phases)
+    plan = _first(data)
+    assert [(a.id, a.name) for a in plan.assets] == [names.cash, names.depot]
+    assert [(s.name, s.cat) for s in plan.streams if s.kind is not StreamKind.SAVINGS] == [
+        names.salary,
+        names.pension,
+        names.living,
+    ]
+    assert [s.name for s in plan.streams if s.kind is StreamKind.SAVINGS] == [names.savings]
+    assert all(a.id.isascii() for a in plan.assets)
+
+
+GOALS = dataclasses.replace(
+    FULL, stop=55, lost=date.today().replace(day=1) + timedelta(days=400), home=300000, owed=150000
+)
+
+
+def test_the_goals_of_a_quick_start_go_into_its_one_revision(tmp_path: Path) -> None:
+    """The age to stop moves the change to `retired`, which the work seek moves; a job loss is a
+    scenario of its own that extends the plan (`scenariofiles.lost_job`), second in `app.yaml`; a
+    property brings its loan. Each turns its feature on, all in the one revision of the start."""
+    datadir.start_quick(data := tmp_path / "data", GOALS)
+    assert [e.source for e in revisions.entries(data)] == [datadir.QUICK_START]
+    loader.check(data)
+    plan = _first(data)
+    assert plan.scenario.phases[-1].at == aged(BORN, 55)
+    dial = goalseek.work(plan)
+    assert dial.month(dial.value) == (aged(BORN, 55), 55)
+    stem = datadir.NAMES["en"].job_loss[0]
+    assert loader.load_app_settings(data).scenarios == [datadir.SCENARIO, stem]
+    lost = loader.load_plan(data, data / scenariofiles.scenario_file(stem))
+    assert lost.scenario.phase_of(GOALS.lost.replace(day=1)) == "unemployed"  # type: ignore[union-attr]
+    assert [s.kind for s in lost.streams if s.kind is StreamKind.ALG1] == [StreamKind.ALG1]
+    loan = next(a for a in plan.assets if isinstance(a, Loan))
+    assert (loan.balance, loan.annuity) == (-150000, datadir.payment(150000))
+    off = set(loader.load_app_settings(data).features_off)
+    assert {Feature.PROPERTY, Feature.JOB_LOSS}.isdisjoint(off)
+    assert {f for f in Feature if mode.uses(data).used(f)} == {Feature.PROPERTY, Feature.JOB_LOSS}
+    opts = Options(data=data, out=tmp_path, model="fixed", paths=1, seed=42, mortality=False)
+    runs = [opts.run_one(data / scenariofiles.scenario_file(s)) for s in (datadir.SCENARIO, stem)]
+    assert runs[1].total[0, -1] < runs[0].total[0, -1]  # type: ignore[union-attr]
+
+
+@pytest.mark.parametrize(
+    ("goals", "field"),
+    [
+        ({"stop": 30}, "stop"),  # past
+        ({"lost": date(2020, 1, 1)}, "lost"),  # before the start
+        ({"stop": 50, "lost": date(2040, 1, 1)}, "lost"),  # after the stop
+        ({"gross": None, "lost": date(2030, 1, 1)}, "lost"),  # nothing to lose
+        ({"home": None, "owed": 1000}, "owed"),
+    ],
+)
+def test_a_goal_that_does_not_fit_is_refused(
+    tmp_path: Path, goals: dict[str, Any], field: str
+) -> None:
+    quick = dataclasses.replace(FULL, **goals)
+    assert list(datadir.misfits(quick)) == [field]
+    with pytest.raises(ValueError, match=field):
+        datadir.start_quick(tmp_path, quick)
+    assert datadir.empty(tmp_path)
+
+
+def test_the_budget_check_takes_the_net_of_the_salary() -> None:
+    """The example of issue #20: 5,500 € gross leave less than 3,000 € of spending and 1,000 € of
+    savings plan; a lower plan fits. More salary, more net; a PKV member pays no KV from it."""
+    quick = datadir.Quick(BORN, gross=5500, spending=3000, plan=1000)
+    assert quick.short > 0
+    assert dataclasses.replace(quick, plan=300).short == 0
+    assert quick.net < dataclasses.replace(quick, gross=6000).net < 6000
+    assert dataclasses.replace(quick, pkv=True).net > quick.net
+    owner = dataclasses.replace(quick, plan=300, home=300000, owed=150000)
+    assert owner.out == 3300 + datadir.payment(150000) and owner.short > 0
+    assert datadir.Quick(BORN, spending=3000).short == 0  # no salary and no plan: nothing to pay
 
 
 def test_a_start_checks_again_under_the_lock(

@@ -56,7 +56,7 @@ CI builds and scans the image: rule `tooling`.
   `/dev/shm` (the worker pool). `.dockerignore` is an allow list (`pyproject.toml`,
   `uv.lock`, `src/`), so no data reaches a layer; the examples are package data under `src/`. An
   empty `/data` (the anonymous volume, an empty bind mount) opens the page `Start a plan` (rule
-  `examples`); `docker compose run --rm dagobert init --example` starts one on the command line. No
+  `first-run`); `docker compose run --rm dagobert init --example` starts one on the command line. No
   architecture in the file: `docker buildx --platform linux/arm64` works as is. The image is about
   640 MB.
 - `compose.yaml` runs the image locally as the owner of the data directory

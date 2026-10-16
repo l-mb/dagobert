@@ -82,9 +82,10 @@ paths:
   scenario that is gone (`_held`: copied, renamed or deleted elsewhere), a delete while a scenario
   extends it (named) or of the last scenario that runs (raw `abstract`, so a file that does not load
   counts). The page names a rename in the source (`revisions.renaming`), so the history follows it.
-  `lost_job(dir, JobLoss)` (`Add a job loss`, rule `scenarios`): a new file that extends the main
-  one with the change to the phase of unemployment (`_idle`: the first phase of an ALG1 stream,
-  else `unemployed`, else that phase added to `assumptions.yaml` with the label of the page) and,
+  `lost_job(dir, JobLoss)` (`Add a job loss`, rule `scenarios`; the quick start on a copy, rule
+  `first-run`): a new file that extends the main one with the change to the phase of unemployment
+  (`_idle`: the first phase of an ALG1 stream, else `unemployed`, else that phase added to
+  `assumptions.yaml` with the label of the page) and,
   with a new job, back to the phase that the main one has then (`_phase_at`, `loader.written`), ids
   `job-loss`, `new-job` numbered where the chain holds them; an ALG1 stream in that phase where
   none exists (no amount: the engine takes the salary before); each salary without phases limited

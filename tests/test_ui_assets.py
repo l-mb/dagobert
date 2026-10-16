@@ -776,6 +776,8 @@ def test_change_counts_the_assets_known_by_then(data: Path) -> None:
     revisions.write(data, "test", lambda: history.appended(data, observed))
     assets = load_assets(data)
     assert summary.change(data, assets, date(2026, 3, 1), date(2026, 1, 31)) == {"liquid": 300.0}
+    # nothing known before the start: the tiles show no change, as of a new plan
+    assert summary.change(data, assets, date(2026, 3, 1), date(2025, 12, 31)) is None
 
 
 def test_fixed_income_share_leaves_out_deposits_and_cash(data: Path) -> None:

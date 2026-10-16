@@ -579,6 +579,25 @@ def test_attention_names_a_disability_without_a_pension_from_points(data: Path) 
     )
 
 
+@pytest.mark.parametrize(("plan", "paused"), [(1000, True), (300, False)])
+def test_attention_names_a_savings_plan_that_pauses(
+    tmp_path: Path, plan: float, paused: bool
+) -> None:
+    """The example of issue #20: a savings plan that the salary cannot pay pauses in the run of
+    the files, in the month of the engine's marker, linked to the Cashflows page."""
+    quick = datadir.Quick(date(1986, 5, 20), gross=5500, spending=3000, plan=plan)
+    datadir.start_quick(tmp_path, quick)
+    found = [
+        n
+        for n in overview.attention(tmp_path, datadir.SCENARIO, date.today())
+        if n.item == datadir.NAMES["en"].savings
+    ]
+    assert [(n.what, n.fix) for n in found] == (
+        [("pauses: the cash does not cover its rate", overview.CASHFLOWS)] if paused else []
+    )
+    assert all(n.when and n.when >= datadir.first_month() for n in found)
+
+
 @pytest.mark.parametrize(
     ("kind", "query"),
     [

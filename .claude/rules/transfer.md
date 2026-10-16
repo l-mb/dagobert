@@ -90,7 +90,7 @@ The revision store: rule `revisions`. The manifest and the migrations: rule `mig
   `revisions.time_of`: the id read as a raw timestamp) and the file name. `Export.check`
   runs first: Streamlit drops the exception of a callable, the browser shows only `Failed to
   generate file`. Import (`import_zip`, also on the start page of an empty data directory, rule
-  `examples`): `st.file_uploader(_(UPLOADER), type="zip", max_upload_size=UPLOAD_MB)`, `Choose a
+  `first-run`): `st.file_uploader(_(UPLOADER), type="zip", max_upload_size=UPLOAD_MB)`, `Choose a
   Dagobert export (.zip)`, under a nonce (`UPLOAD`: a done
   import empties it), a caption with the limit below it (Streamlit names a refused upload in a
   tooltip only, none on a phone). The preview sits in session state with the id of the upload

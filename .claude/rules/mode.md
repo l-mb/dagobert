@@ -61,7 +61,8 @@ section on the mode and the features) and `features.md`.
   (`InputError`) gives `ALL` (`everything`: every item used, `where` empty): the error screen of
   `main.py` comes with every page.
 - A feature also turns on by an action that adds its items: `Add a job loss` of the Scenarios page
-  drops `job_loss` from `features_off` in its revision (`scenariofiles.lost_job`, rule `store`).
+  drops `job_loss` from `features_off` in its revision (`scenariofiles.lost_job`, rule `store`), a
+  goal of the quick start leaves its feature on (`job_loss`, `property`; `datadir.unused`).
 - `features_off(data_dir)`: the known ids of `features_off` of the raw `app.yaml` (`listed`); a
   file that does not load switches nothing off, an unknown id is an `InputError` of the model
   (`AppSettings`, `Strict`) on the pages that load it.
@@ -75,7 +76,8 @@ section on the mode and the features) and `features.md`.
   `General`, `Phases` (its ids, `Form.hides` of a list: they are made on save) and the Overrides
   tab of the Scenarios page (rule `scenarios`). The Explorer (rule
   `explorer`): `explorer.View` and `drawn`, a moved slider by `Knob.moved` and `Switch.moved`. A
-  quick start switches off every feature, `starter` the ten that it does not use (rule `examples`).
+  quick start switches off the features that it does not use (rule `first-run`), `starter` the ten
+  that it does not use (rule `examples`).
 
 - `main.py` computes `mode.uses` from the raw inputs before `datadir.open` migrates them, so the
   pages of an old schema show by its old keys on the first run. A grid with unsaved edits keeps its
@@ -85,15 +87,16 @@ section on the mode and the features) and `features.md`.
 
 - `mode.advanced()`: `?mode=simple|advanced` (tests and links; popped, so the switch can change
   it), the state of the switch (`MODE`, `ui-mode`), the cookie `dagobert-mode` (`MODE_COOKIE`, of
-  the first request), else advanced: every viewer and every `AppTest` keeps what the app showed
-  before the mode. A plan started on the start page sets simple (`welcome._start`, rule
-  `examples`). `main.py` and a page call it once per run.
+  the first request), else `DEFAULT`, simple: a new browser starts simple (owner 2026-10-16; the
+  mode stays a cookie per browser, not a fact of the plan). A start on the start page keeps the
+  mode of the browser (rule `first-run`). `main.py` and a page call it once per run. The tests keep
+  advanced as the default (`tests/conftest.py`, `advanced_by_default`) unless they ask for simple.
 - `mode.mode_switch`: a segmented control `Simple · Advanced` (ids, words by `format_func`,
   label `Mode` with `:material/tune:`, its help `MODE_HELP`) at the end of the sidebar above the
-  language switch, drawn by `main.py` in its `finally`, so also on the start page and beside `The
-  inputs do not load`. `ui.chose` (its `on_change`, shared with the language switch) carries the
-  grid edits (`gridstate.carry`) and notes the choice; `ui.remember` writes the cookie in every run
-  after it (`SET_COOKIE`, 400 days).
+  language switch, drawn by `main.py` in its `finally`, so also beside `The inputs do not load`;
+  not on the start page (owner 2026-10-16). `ui.chose` (its `on_change`, shared with the language
+  switch) carries the grid edits (`gridstate.carry`) and notes the choice; `ui.remember` writes the
+  cookie in every run after it (`SET_COOKIE`, 400 days).
 - The note of a page that hides something: `hidden_text(expert, off, phone, held)` (pure) and
   `hidden_note` draw `Hidden in simple mode (at their defaults): … Switch to Advanced in the sidebar
   to change them.` (on a phone `in the menu`; `held` is a `Held`: `DEFAULTS`; `INHERITED`
@@ -107,7 +110,8 @@ section on the mode and the features) and `features.md`.
   page by what hides them; the Assets page (the kinds, `securities`), the Cashflows page (the stream
   kinds) and the Events tab (the types) end with it.
 - `off_note(data_dir)`: the caption of the Overview (rule `overview`) while `app.yaml` switches off
-  features that the plan does not use, `Some parts of the app are switched off: …` and the link.
+  features that the plan does not use: their count, `10 parts of the app are switched off: the
+  Features page turns them on.` (`ngettext`), and the link; the Features page names them.
 
 ## The Features page
 
@@ -142,14 +146,14 @@ section on the mode and the features) and `features.md`.
   `deductible`; a lone `update_every` locks `tracking`), `ALL` for a scenario that does not parse,
   the predicate in both modes and with a feature off, `head`, every listed item exists, a required
   field of a section shares its tier, `pages` of an empty plan, the navigation of `main.py`
-  (`ui.PAGES`: None for a page left out), the mode by query, switch, cookie and default (a script of
-  a few lines), `features_off` against the model, the note, the Features page (the lock, a save of
-  `app.yaml` alone, a feature off in use, a change elsewhere), every page (`apps.PAGE`, which holds
-  the Features page, and `apps.EXPLORER` through `apps.render`) in simple mode as a desktop and a
-  phone, in German without a leak, and with every feature off in both modes; the BU tab with the
-  first policy, named in the note until then; data safety: a save in simple mode of one visible cell
-  of each grid of Assets and Cashflows on `starter` and `engineer` changes that key of that row
-  alone (`loader.flatten`).
+  (`ui.PAGES`: None for a page left out), the mode by query, switch, cookie and default, simple (a
+  script of a few lines), `features_off` against the model, the note, the Features page (the lock, a
+  save of `app.yaml` alone, a feature off in use, a change elsewhere), every page (`apps.PAGE`,
+  which holds the Features page, and `apps.EXPLORER` through `apps.render`) in simple mode as a
+  desktop and a phone, in German without a leak, and with every feature off in both modes; the BU
+  tab with the first policy, named in the note until then; data safety: a save in simple mode of one
+  visible cell of each grid of Assets and Cashflows on `starter` and `engineer` changes that key of
+  that row alone (`loader.flatten`).
 - The forms: `tests/test_ui_assumptions.py` (the tabs and the notes of `starter` in simple mode, a
   section in use whole, a feature off in advanced, a save of one visible field of each tab
   changes that key alone while keys at their default stay, a value typed in advanced mode stays

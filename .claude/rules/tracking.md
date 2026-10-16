@@ -183,11 +183,11 @@ The price files, their import and the `Prices` expander: rule `prices`.
   year. `irr` is the money-weighted return of the cash flows (`flows`: buys negative, sales
   positive, a Vorabpauschale is no flow), `returns.deflate` turns them into euros of the last date
   for the real return (`series.consumer_prices`).
-- `summary.py` holds the asset totals, the tiles (in the container `tiles-<page>`; a tile without
-  a change says `no change since …` in gray, without an arrow, so every tile keeps that line), the
-  asset sunburst (`breakdown`: of the height that the page gives, `PHONE_RINGS` on a phone; without
-  an asset an info that names the Assets page), `KINDS` (the names of the asset kinds in tabs,
-  tables and charts, the YAML keeps its keys), `COLORS` of the sectors (those of
+- `summary.py` holds the asset totals, the tiles (in `tiles-<page>`; a tile without a change says
+  `no change since …` in gray, no arrow, so each keeps the line; none while no value predates the
+  month, `change` None: a new plan), the asset sunburst (`breakdown`: of the height that the page
+  gives, `PHONE_RINGS` on a phone; no asset: an info naming the Assets page), `KINDS` (the asset
+  kinds in tabs, tables and charts, the YAML keeps its keys), `COLORS` of the sectors (those of
   `balance._BALANCE_STYLE`) and the fixed-income share (fixed income over fixed income and equity,
   as the engine rebalances it; term deposits join at maturity).
 - `summary.needs_update` is the rule of the Snapshot page and the attention table of the Overview: a

@@ -30,7 +30,8 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   `Dial.month`), from `outlook._seeks`, so it stays until an input or the target changes; before the
   seek a dash and `not searched yet`, without a month a dash and `see the answer below` (no effect,
   no such change), when even the latest month misses the target `not even at <age of that month>`
-  (`outlook.latest`) (a seek takes about 10 s, so it never runs by itself); and on request (`Find
+  (`outlook.latest`) (a seek takes about 10 s: it runs by itself once only, on the Overview of a
+  plan that the start page started, `outlook.SEEK_FIRST`, owner 2026-10-16); on request (`Find
   the spending limit`, beside the target `Target, chance to run out by 90 (%)`, its sentence in the
   help, both shared with the goal seek of the Explorer, `seek.Target` (the age of the run, rule
   `goalseek`), in a row that wraps, the answer below) the one factor on all spending at which
@@ -52,7 +53,10 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   pay); a plan with `disability` and no pension from points, which then pays no EM-Rente
   (`overview._no_em_rente`, undated, linked to the Cashflows page; rule `disability`), or a forced
   onset (`at`) whose run of the files pays none (`RunResult.em`), dated, linked to where `at` is
-  written; the term deposits and fixed loan rates that end within twelve months or ended already;
+  written; a savings plan that pauses in the `fixed` run of the files (`overview._paused`: the
+  marker `savings plan` of the engine, in its month whenever it lies, never derived again, rule
+  `ledger`; issue #20), linked to the Cashflows page; the term deposits and fixed loan rates that
+  end within twelve months or ended already;
   while `actuals.csv` holds one of the last three months (`actuals.KEEPING`), the first complete
   month since the first record in which a planned category has no actual (0 counts), also a gap
   before a later record, with the count: `2026-01: 1 of 12 planned categories`, `actuals.missing`;
@@ -95,7 +99,7 @@ The plan below the tiles (`outlook.py`): rule `explorer`. The `Roll forward`: ru
   Spend pages keep records, each named while `View` shows it, `KEEP`) and the link `Explore
   scenarios` to the Explorer (owner, 2026-10-14: people configure once and explore), no empty column
   beside them. Below the row, while `app.yaml` switches off features that the plan does not use, one
-  caption names them with a link to the Features page (`mode.off_note`, rule `mode`). The outflow
+  caption counts them with a link to the Features page (`mode.off_note`, rule `mode`). The outflow
   and income bars stay on the Cashflows page, the totals per kind on the Assets page (a tab per
   kind): the Overview shows no detail. Then `Records against the plan`: the recorded net worth or
   liquid assets of each month with a record (a dot, a line between consecutive months only) over the

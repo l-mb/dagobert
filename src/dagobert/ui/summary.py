@@ -125,10 +125,12 @@ def totals(assets: list[Asset], day: date) -> tuple[dict[str, float], dict[str, 
     return dict(by_liquidity), dict(by_kind)
 
 
-def change(data_dir: Path, assets: list[Asset], day: date, since: date) -> dict[str, float]:
+def change(data_dir: Path, assets: list[Asset], day: date, since: date) -> dict[str, float] | None:
     """Change by liquidity from `since` to `day`, over the assets observed by `since`: an asset
-    recorded later would show its entry as growth."""
-    then = values_at(observations(data_dir, assets), since)
+    recorded later would show its entry as growth. None while no asset has a value by `since`:
+    nothing to compare with, as in a new plan."""
+    if not (then := values_at(observations(data_dir, assets), since)):
+        return None
     delta: dict[str, float] = defaultdict(float)
     for asset in assets:
         if asset.id in then:
@@ -175,15 +177,17 @@ def fixed_income_share(assets: list[Asset], day: date) -> float | None:
 
 def tiles(data_dir: Path, page: str) -> None:
     """Net worth, liquid, illiquid and debt today, each with the change in the current month, in
-    gray without an arrow when there is none, so every tile keeps the line. The key of their
-    container names the `page` and starts with `tiles` for `ui.PAGE_STYLE`."""
+    gray without an arrow when there is none, so every tile keeps the line; none of them while no
+    asset has a value from before the month (`change`). The key of their container names the
+    `page` and starts with `tiles` for `ui.PAGE_STYLE`."""
     assets = load_assets(data_dir)
     today = date.today()
     since = today.replace(day=1) - timedelta(days=1)
     by_liquidity, by_kind = totals(assets, today)
     delta = change(data_dir, assets, today, since)
-    shown = {N_("net worth"): (sum(by_kind.values()), sum(delta.values()))} | {
-        name: (by_liquidity.get(name, 0.0), delta.get(name, 0.0))
+    moves = delta or {}
+    shown = {N_("net worth"): (sum(by_kind.values()), sum(moves.values()))} | {
+        name: (by_liquidity.get(name, 0.0), moves.get(name, 0.0))
         for name in dict.fromkeys(LIQUIDITY.values())
     }
     for column, (label, (value, moved)) in zip(
@@ -193,7 +197,9 @@ def tiles(data_dir: Path, page: str) -> None:
         column.metric(
             _(label),
             format_eur(value),
-            delta=(_("{amount} since {day}") if moving else _("no change since {day}")).format(
+            delta=None
+            if delta is None
+            else (_("{amount} since {day}") if moving else _("no change since {day}")).format(
                 amount=format_eur(moved), day=since
             ),
             delta_color="normal" if moving else "off",

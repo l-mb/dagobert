@@ -88,7 +88,7 @@ The input model: rule `persistence`; the writes and the revision store: rule `re
   nothing changes). The write records the edits outside the app first (`_adopt`; the first open
   writes the `baseline` of the files as they are, so an old revision migrates again). A
   directory without `assumptions.yaml` raises `InputError` (not a data directory; an empty or
-  missing one names `dagobert init`, rule `examples`, which also holds the starts of `datadir`)
+  missing one names `dagobert init`, rule `first-run`, which also holds the starts of `datadir`)
   and gets nothing. A read-only directory (`os.access`) returns before `write`, so neither
   `_recover` nor `_adopt` runs there: it runs as it is while at most the manifest would be new
   (no manifest, no revision, a save refused with `ReadOnlyError`), and one that needs a

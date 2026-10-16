@@ -215,6 +215,16 @@ def init(
             help="Your date of birth, for an empty plan. Asked for without it",
         ),
     ] = None,
+    lang: Annotated[
+        i18n.Language,
+        typer.Option(
+            "--lang",
+            envvar=LANG_ENV,
+            parser=_language,
+            metavar="|".join(i18n.LANGUAGES),
+            help="The language of the names of an empty plan, such as its phases",
+        ),
+    ] = "en",
 ) -> None:
     """Start a plan in an empty or missing data directory, as its first revision: an example,
     or an empty plan of one scenario to fill in with the app, the Assumptions page first. A data
@@ -232,7 +242,7 @@ def init(
             datadir.start_example(data, chosen)
             if example
             else datadir.start_empty(
-                data, born or typer.prompt("Date of birth (YYYY-MM-DD)", value_proc=_born)
+                data, born or typer.prompt("Date of birth (YYYY-MM-DD)", value_proc=_born), lang
             )
         )
     plan = f"the example {chosen.name}" if example else "an empty plan"

@@ -145,8 +145,9 @@ if __name__ == "__main__":
     # show their problems instead of a traceback. The title of the page names its writes, and
     # a link to another page takes the page registered here (`ui.page_link`; a page that the
     # navigation leaves out is None, so no link goes there). The mode and the language switch
-    # end the sidebar, below the controls of a page, also beside a problem. The toasts of a save
-    # of the run before show first, whichever page it went to.
+    # end the sidebar, below the controls of a page, also beside a problem; the start page has the
+    # language switch alone. The toasts of a save of the run before show first, whichever page it
+    # went to.
     pages = {
         title: p if title in shown else None
         for section in sections.values()
@@ -170,5 +171,6 @@ if __name__ == "__main__":
         st.error(_("Another save is running: reload the page."), icon=":material/error:")
     finally:
         sliders.keep()
-        mode.mode_switch()
+        if not first_run:
+            mode.mode_switch()
         language_switch()

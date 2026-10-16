@@ -7,30 +7,82 @@ import os
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Literal
 
-from dagobert import __version__, files, revisions, schema, sv, tax
-from dagobert.model.assumptions import REGELALTERSGRENZE, REQUIRED_CLASSES
-from dagobert.model.months import aged
+from dagobert import __version__, files, i18n, revisions, scenariofiles, schema, sv, tax
+from dagobert.i18n import N_, _
+from dagobert.loader import APP
+from dagobert.model.assumptions import REGELALTERSGRENZE, REQUIRED_CLASSES, Assumptions, Person
+from dagobert.model.months import aged, months_of_age
 from dagobert.model.plan import Feature
-from dagobert.model.taxes import default_tax_year
+from dagobert.model.taxes import TaxOptions, default_tax_year
 from dagobert.problems import InputError, Problem
+from dagobert.store import Edit
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
 
 EXAMPLES = Path(__file__).parent / "examples"
 ExampleName = Literal["engineer", "starter"]  # the directories of `EXAMPLES`
-# the example of `dagobert init --example`, whose phases and return classes an empty plan takes
+# the example of `dagobert init --example`, whose return classes an empty plan takes
 EXAMPLE = EXAMPLES / "engineer"
 # the sources of their revisions
 FROM_EXAMPLE, EMPTY_PLAN, QUICK_START = "example", "empty plan", "quick start"
 SCENARIO = "plan"  # the stem of the scenario of an empty plan
-CASH, DEPOT = "girokonto", "depot"  # the ids of the assets of a quick start
-# the phases of the example that an empty plan takes: four fit the sheet on an upright phone
+# the phases of a new plan, those of `engineer`: four fit the sheet on an upright phone
 NEW_PHASES = ("work", "unemployed", "alt", "retired")
 START = "start a plan with `dagobert init --example` or `dagobert init`, or in the app"
 OLDEST = date(1900, 1, 1)  # the earliest date of birth that an empty plan takes
+# the loan of an own property of a quick start: the refinance rate of the model, and a first
+# yearly repayment of 2%, a common one; the Assets page takes the real ones
+LOAN_RATE: float = Assumptions.model_fields["refinance_rate"].default
+REPAYMENT = 0.02
+
+
+@dataclass(frozen=True)
+class Names:
+    """The names that a new plan writes, in one language: data of the user, never through `_()`
+    (rule `i18n`). An id and a stem are ASCII."""
+
+    phases: Mapping[str, str]  # the label of each of `NEW_PHASES`
+    cash: tuple[str, str]  # the id and the name of an asset
+    depot: tuple[str, str]
+    home: tuple[str, str]
+    loan: tuple[str, str]
+    salary: tuple[str, str]  # the name and the category of a stream
+    pension: tuple[str, str]
+    living: tuple[str, str]
+    savings: str  # the name of the savings plan
+    job_loss: tuple[str, str]  # the stem and the name of the scenario of a job loss, by `{age}`
+
+
+NAMES: dict[i18n.Language, Names] = {
+    "en": Names(
+        {"work": "Work", "unemployed": "Unemployed", "alt": "Career break", "retired": "Retired"},
+        ("cash", "Current account"),
+        ("depot", "Depot"),
+        ("home", "Home"),
+        ("home-loan", "Home loan"),
+        ("Salary", "salary"),
+        ("Pension", "pension"),
+        ("Living costs", "living"),
+        "Savings plan",
+        ("job-loss", "Job loss at {age}"),
+    ),
+    "de": Names(
+        {"work": "Arbeit", "unemployed": "Arbeitslos", "alt": "Auszeit", "retired": "Ruhestand"},
+        ("girokonto", "Girokonto"),
+        ("depot", "Depot"),
+        ("wohnung", "Wohnung"),
+        ("darlehen", "Darlehen"),
+        ("Gehalt", "Gehalt"),
+        ("Rente", "Rente"),
+        ("Lebenshaltung", "Leben"),
+        "Sparplan",
+        ("jobverlust", "Jobverlust mit {age}"),
+    ),
+}
 
 
 def empty(data_dir: Path) -> bool:
@@ -99,7 +151,9 @@ def start_example(data_dir: Path, example: Path = EXAMPLE) -> revisions.Entry | 
 class Quick:
     """The answers of the quick start of the start page. The date of birth alone gives the empty
     plan; each other answer adds its key or its row, an empty one nothing, nor a zero amount
-    (`texts`). Euros of the start, a month's for the salary, the spending and the savings plan."""
+    (`texts`). Euros of the start, a month's for the salary, the spending and the savings plan.
+    The goals: the age to stop working, the month of a job loss, an own property with the balance
+    of its loan. The names are those of `lang`."""
 
     born: date
     sex: Literal["m", "f"] | None = None
@@ -111,6 +165,96 @@ class Quick:
     points: float | None = None  # the Rentenpunkte so far, from the Renteninformation
     since: int | None = None  # the year of the first contribution to the statutory pension
     plan: float | None = None  # the savings plan into the depot
+    stop: int | None = None  # the age to stop working, else the Regelaltersgrenze
+    lost: date | None = None  # the month of a job loss: a scenario of its own
+    home: float | None = None  # the value of an own property
+    owed: float | None = None  # the balance of its loan
+    lang: i18n.Language = "en"
+
+    @property
+    def stops(self) -> date:
+        """The month of the change to `retired`: at `stop`, else at the Regelaltersgrenze."""
+        return aged(self.born, self.stop or REGELALTERSGRENZE)
+
+    @property
+    def payment(self) -> float:
+        """The monthly payment of the loan of an own property (`payment`), else 0."""
+        return payment(self.owed) if self.home and self.owed else 0.0
+
+    @property
+    def net(self) -> float:
+        """A rough net of the salary a month: less the SV and the Lohnsteuer of the start month
+        (Steuerklasse I, no church, a PKV premium apart: the form does not ask for it); 0
+        without one."""
+        if not self.gross:
+            return 0.0
+        month, opts = first_month(), TaxOptions(pkv=self.pkv)
+        ty = tax.for_year(default_tax_year(month))
+        paid = sv.sv_employee(self.gross, opts, Person(born=self.born), month, ty)
+        withheld = tax.withholding_with_bonus(
+            self.gross, 0.0, (paid, paid), 0.0, ty, church=tax.church_rate(opts, ty)
+        )
+        return float(self.gross - paid.total - withheld)
+
+    @property
+    def out(self) -> float:
+        """What goes out each month while the plan works: the spending, the savings plan and the
+        payment of the loan."""
+        return (self.spending or 0.0) + (self.plan or 0.0) + self.payment
+
+    @property
+    def short(self) -> float:
+        """By how much the rough `net` misses `out` while the plan works, with a salary or a
+        savings plan: 0 when it covers it, also for a plan that starts retired."""
+        if starts_retired(self.born) or not (self.gross or self.plan):
+            return 0.0
+        return max(self.out - self.net, 0.0)
+
+
+def payment(owed: float) -> float:
+    """The monthly payment of a loan of `owed` euros: `LOAN_RATE` and `REPAYMENT` a year."""
+    return round(owed * (LOAN_RATE + REPAYMENT) / 12, 2)
+
+
+def youngest(born: date) -> int:
+    """The youngest age to stop working that a new plan takes: the first whose month lies after
+    its start."""
+    return months_of_age(born, first_month()) // 12 + 1
+
+
+def unused(quick: Quick) -> list[Feature]:
+    """The features that a new plan switches off: all but property with an own property and job
+    loss with a job loss."""
+    used = {Feature.PROPERTY: bool(quick.home), Feature.JOB_LOSS: quick.lost is not None}
+    return [f for f in Feature if not used.get(f)]
+
+
+# why a goal does not fit the other answers, by the key of its field (`misfits`): words of the
+# start page, the CLI says them in English
+STOP_EARLY = N_("type an age ahead of you, {age} or more")
+LOSS_EARLY = N_("type a month from {month} on")
+LOSS_LATE = N_("type a month before you stop working in {month}")
+LOSS_UNPAID = N_("a job loss needs a salary: type it above")
+OWED_ALONE = N_("type the value of the property first")
+
+
+def misfits(quick: Quick) -> dict[str, str]:
+    """Why a goal of `quick` does not fit the other answers, by the key of its field, in the
+    language of the session: an age to stop working at or before the start, a job loss before
+    the start, at or after the stop or without a salary, a loan without its property."""
+    found: dict[str, str] = {}
+    start = first_month()
+    if quick.stop is not None and quick.stops <= start:
+        found["stop"] = _(STOP_EARLY).format(age=youngest(quick.born))
+    if quick.lost is not None and quick.lost < start:
+        found["lost"] = _(LOSS_EARLY).format(month=f"{start:%Y-%m}")
+    elif quick.lost is not None and quick.lost >= quick.stops:
+        found["lost"] = _(LOSS_LATE).format(month=f"{quick.stops:%Y-%m}")
+    elif quick.lost is not None and not quick.gross:
+        found["lost"] = _(LOSS_UNPAID)
+    if quick.owed and not quick.home:
+        found["owed"] = _(OWED_ALONE)
+    return found
 
 
 def estimate(gross: float | None, since: int | None, start: date) -> float:
@@ -142,29 +286,54 @@ def _whole(euros: float) -> float:
     return int(euros) if euros.is_integer() else euros
 
 
-def _assets(quick: Quick) -> Iterator[dict[str, object]]:
+def _assets(quick: Quick, names: Names) -> Iterator[dict[str, object]]:
+    """The assets of the answers: an own property at its value as 1 m² (as a purchase of a
+    scenario), its loan dated today, at `LOAN_RATE` and `Quick.payment`."""
     if quick.cash:
-        yield {"id": CASH, "name": "Girokonto", "kind": "cash", "value": _whole(quick.cash)}
+        cash, name = names.cash
+        yield {"id": cash, "name": name, "kind": "cash", "value": _whole(quick.cash)}
     if quick.savings or quick.plan:  # a savings plan buys into the depot, a new one at 0
         value = _whole(quick.savings or 0.0)
-        yield {"id": DEPOT, "name": "Depot", "kind": "equity", "value": value, "cost_basis": value}
+        depot, name = names.depot
+        yield {"id": depot, "name": name, "kind": "equity", "value": value, "cost_basis": value}
+    if quick.home:
+        home, name = names.home
+        yield {
+            "id": home,
+            "name": name,
+            "kind": "property",
+            "sqm": 1,
+            "per_sqm": _whole(quick.home),
+        }
+        if quick.owed:
+            loan, name = names.loan
+            yield {
+                "id": loan,
+                "name": name,
+                "kind": "loan",
+                "balance": -_whole(quick.owed),
+                "rate": LOAN_RATE,
+                "annuity": _whole(quick.payment),
+                "asof": date.today(),
+                "finances": home,
+            }
 
 
-def _streams(quick: Quick, start: date) -> Iterator[dict[str, object]]:
-    """The streams of the answers, named in German as `starter` names them. A salary brings the
-    pension that pays the points of its months, from the points so far."""
+def _streams(quick: Quick, names: Names, start: date) -> Iterator[dict[str, object]]:
+    """The streams of the answers. A salary brings the pension that pays the points of its
+    months, from the points so far."""
     if quick.gross:
         yield {
-            "name": "Gehalt",
-            "cat": "Gehalt",
+            "name": names.salary[0],
+            "cat": names.salary[1],
             "kind": "salary",
             "gross": _whole(quick.gross),
             "phases": [NEW_PHASES[0]],
         }
     if quick.gross or quick.points:
         yield {
-            "name": "Rente",
-            "cat": "Rente",
+            "name": names.pension[0],
+            "cat": names.pension[1],
             "kind": "pension",
             "points": estimate(quick.gross, quick.since, start)
             if quick.points is None
@@ -173,13 +342,14 @@ def _streams(quick: Quick, start: date) -> Iterator[dict[str, object]]:
             "phases": [NEW_PHASES[-1]],
         }
     if quick.spending:
-        yield {"name": "Lebenshaltung", "cat": "Leben", "amount": -_whole(quick.spending)}
+        name, cat = names.living
+        yield {"name": name, "cat": cat, "amount": -_whole(quick.spending)}
     if quick.plan:
         yield {
-            "name": "Sparplan",
+            "name": names.savings,
             "kind": "savings",
             "amount": -_whole(quick.plan),
-            "into": DEPOT,
+            "into": names.depot[0],
             "phases": [NEW_PHASES[0]],
         }
 
@@ -189,10 +359,15 @@ def texts(quick: Quick) -> dict[str, str]:
     the person, the current month as the start, the phases (`NEW_PHASES`) and the return classes
     that every plan needs (those of the example), `tax.pkv`, the assets and streams of the
     answers, one scenario `plan` that the app opens with, in the first phase from the start and
-    the last at the Regelaltersgrenze (with its id: the change that `goalseek.work` moves; from the
-    start for a person who reached it), and every feature off: the plan uses none. A date of birth
-    after today or before `OLDEST` raises ValueError (`check_born`)."""
+    the last from `Quick.stops` (with its id: the change that `goalseek.work` moves; from the
+    start for a person who reached the Regelaltersgrenze), and every feature off that the plan
+    does not use: `property` with a property, `job_loss` with a job loss (`_lost`). The names of
+    `quick.lang` (`NAMES`). A date of birth after today or before `OLDEST` raises ValueError
+    (`check_born`), so does a goal that the plan cannot take (`misfits`)."""
     check_born(quick.born)
+    if problems := misfits(quick):
+        raise ValueError("; ".join(f"{key}: {why}" for key, why in problems.items()))
+    names = NAMES[quick.lang]
     example = files.yaml().load((EXAMPLE / "assumptions.yaml").read_text(encoding="utf-8"))
     start, retired = first_month(), NEW_PHASES[-1]
     since = date(quick.since, 1, 1) if quick.since is not None else None
@@ -200,7 +375,7 @@ def texts(quick: Quick) -> dict[str, str]:
     assumptions = {
         "person": {key: value for key, value in person.items() if value is not None},
         "start": start,
-        "phases": {k: v for k, v in example["phases"].items() if k in NEW_PHASES},
+        "phases": {phase: {"label": names.phases[phase]} for phase in NEW_PHASES},
         "returns": {name: v for name, v in example["returns"].items() if name in REQUIRED_CLASSES},
         "tax": {"pkv": quick.pkv},
     }
@@ -209,17 +384,43 @@ def texts(quick: Quick) -> dict[str, str]:
         if starts_retired(quick.born)
         else [
             {"from": start, "phase": NEW_PHASES[0]},
-            {"from": aged(quick.born, REGELALTERSGRENZE), "phase": retired, "id": retired},
+            {"from": quick.stops, "phase": retired, "id": retired},
         ]
     )
-    return {
+    off = [str(f) for f in unused(quick)]
+    plan = {
         schema.MANIFEST: schema.manifest_text(),
         "assumptions.yaml": files.dump(assumptions),
-        "assets.yaml": files.dump({"assets": list(_assets(quick))}),
-        "cashflows.yaml": files.dump({"streams": list(_streams(quick, start))}),
-        "app.yaml": files.dump({"scenarios": [SCENARIO], "features_off": [*map(str, Feature)]}),
+        "assets.yaml": files.dump({"assets": list(_assets(quick, names))}),
+        "cashflows.yaml": files.dump({"streams": list(_streams(quick, names, start))}),
+        APP: files.dump({"scenarios": [SCENARIO], "features_off": off}),
         f"scenarios/{SCENARIO}.yaml": files.dump({"name": SCENARIO.title(), "phases": changes}),
     }
+    return plan if quick.lost is None else _lost(plan, quick.born, quick.lost, names)
+
+
+def _lost(plan: Mapping[str, str], born: date, lost: date, names: Names) -> dict[str, str]:
+    """The files `plan` with a job loss in `lost` as a scenario of its own that extends the plan,
+    without a new job (`scenariofiles.lost_job`, on a copy of the files), and second in
+    `app.yaml`: the Explorer compares it."""
+    stem, name = names.job_loss
+    loss = scenariofiles.JobLoss(
+        SCENARIO,
+        lost,
+        None,
+        name.format(age=months_of_age(born, lost) // 12),
+        stem,
+        names.phases[scenariofiles.IDLE],
+    )
+    with TemporaryDirectory() as copy:
+        for file, text in plan.items():
+            (Path(copy) / file).parent.mkdir(parents=True, exist_ok=True)
+            (Path(copy) / file).write_text(text, encoding="utf-8")
+        edits = scenariofiles.lost_job(Path(copy), loss)
+    out = dict(plan)
+    for edit in [*edits, Edit(APP, {("scenarios",): [SCENARIO, stem]})]:
+        out[edit.name] = edit.onto(out.get(edit.name)) or ""
+    return out
 
 
 def start_quick(data_dir: Path, quick: Quick) -> revisions.Entry | None:
@@ -228,10 +429,11 @@ def start_quick(data_dir: Path, quick: Quick) -> revisions.Entry | None:
     return _start(data_dir, QUICK_START, texts(quick))
 
 
-def start_empty(data_dir: Path, born: date) -> revisions.Entry | None:
+def start_empty(data_dir: Path, born: date, lang: i18n.Language = "en") -> revisions.Entry | None:
     """Start an empty plan in the empty `data_dir` as its first revision, source `empty plan`: the
-    quick start of the date of birth alone, without asset or stream (`texts`)."""
-    return _start(data_dir, EMPTY_PLAN, texts(Quick(born)))
+    quick start of the date of birth alone, without asset or stream (`texts`), its names in
+    `lang`."""
+    return _start(data_dir, EMPTY_PLAN, texts(Quick(born, lang=lang)))
 
 
 def check_empty(data_dir: Path) -> None:

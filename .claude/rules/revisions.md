@@ -14,7 +14,7 @@ rule `store`.
   starts of `datadir` and `transfer.apply` call `write` with a `source`, the page title
   (`ui.source`, `Overview: roll forward`) or the command (`prices import`, `series fetch`, `migrate
   1 → 2 (Dagobert 0.1.0)`, `import x.zip`, `example`, `empty plan` and `quick start` of a first run,
-  rule `examples`). A writer that skips it leaves its change to `_adopt` as `outside the app`
+  rule `first-run`). A writer that skips it leaves its change to `_adopt` as `outside the app`
   (`test_revisions.test_every_writer_records_one_revision`; only an import into an empty directory
   moves the revisions of its zip in by a rename, rule `transfer`). The inputs of an earlier day come
   from it (`Records against the plan` of the Overview, `Changes since` of the Cashflows page, the

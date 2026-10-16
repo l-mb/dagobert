@@ -33,7 +33,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
 | `assumptions.py` | `assumptions` (the page), `forms`, `save-guard` |
 | `scenarios.py`, `fileactions.py`, `phases.py` | `scenarios` (the page), `events`, `scenario-overrides`, `forms`, `store` |
 | `transfer.py` | `transfer` (the page) |
-| `welcome.py` | `examples` (the first-run page) |
+| `welcome.py` | `first-run` (the first-run page), `examples` |
 | `mode.py`, `features.py` | `mode` (the mode, the features and their page), `save-guard` |
 | `flows.py` | `flows` (the page), `ledger`, `cashflows` |
 | `__init__.py` | `charts` |
@@ -79,7 +79,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
   (rule `i18n`) and opens the data directory first (`datadir.open`: a migration and the edits
   outside the app become revisions), and inputs that do not load (`InputError`, `SchemaError`) show
   their lines instead of the page. An empty or missing data directory shows the page `Start a plan`
-  (`welcome.py`, rule `examples`) instead, with no navigation but the two switches.
+  (`welcome.py`, rule `first-run`) instead, with no navigation but the language switch.
 - Every save of a page is one revision whose source is the page title (`ui.source`, `app` for a page
   drawn alone, as in `AppTest`): the Save buttons of the grids and `Record` with the history rows
   they add, a price with the values it records, the values that a fetch of the Data page records

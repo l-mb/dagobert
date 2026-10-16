@@ -137,14 +137,15 @@ def attention(data_dir: Path, scenario: str, day: date, *, stale: bool = True) -
     `stale` the values that need an update (`summary.needs_update`), the changes of the plan with
     the events of `scenario` in the next `PLAN_MONTHS` months, the term deposits and fixed loan
     rates that end within `DUE_MONTHS` months or ended already, the months without actual
-    spending (`actuals.missing`), and a plan that draws a disability without a pension from
-    points, which pays no EM-Rente then."""
+    spending (`actuals.missing`), a plan that draws a disability without a pension from
+    points, which pays no EM-Rente then, and the savings plans that pause (`_paused`)."""
     plan = load_plan(data_dir, data_dir / scenario_file(scenario))
     assets = load_assets(data_dir)
     on_sale = summary.selling(plan.scenario)
     notices = [
         *_lagging(load_assumptions(data_dir).start, day),
         *_no_em_rente(data_dir, scenario, plan),
+        *_paused(data_dir, scenario),
         *(
             Notice(
                 a.asof,
@@ -221,6 +222,20 @@ def _no_em_rente(data_dir: Path, scenario: str, plan: Plan) -> list[Notice]:
     what = _("the disability from {month} pays no EM-Rente (insurance time or contributions)")
     link = fix(rollforward.Passed(file.name, at, "", rollforward.DISABILITY, ()))
     return [Notice(at, _("disability"), what.format(month=f"{at:%Y-%m}"), fix=link)]
+
+
+def _paused(data_dir: Path, scenario: str) -> list[Notice]:
+    """The savings plans that pause in the run of the files: the engine marks the first month in
+    which the cash does not cover the rate of each (`savings plan`, rule `engine`), whenever it
+    lies; linked to the Cashflows page, where its rate and the spending change."""
+    if (run := fixed.result(data_dir, scenario)) is None:
+        return []
+    what = _("pauses: the cash does not cover its rate")
+    return [
+        Notice(m.month, m.detail, what, fix=CASHFLOWS)
+        for m in run.markers
+        if m.kind == "savings plan"
+    ]
 
 
 def _lagging(start: date, day: date) -> list[Notice]:
@@ -352,6 +367,10 @@ LISTS = (
         "effect per month in the phase of its date, in euros of the start of the plan."
     ),
     N_(
+        "A savings plan that pauses in your main scenario shows with the first month in which the "
+        "cash does not cover its rate: lower it or the spending on the Cashflows page."
+    ),
+    N_(
         "While you keep your actual spending on the Spend page (a record in the last three "
         "months), the table also names the first complete month without a record since your "
         "first one, with a link to that month there."
@@ -387,8 +406,14 @@ def _attention(data_dir: Path, view: mode.View) -> None:
         )
     else:
         st.caption(_("Nothing."))
-    values, planned, spent, lag = LISTS
-    parts = [*([values] if stale else []), planned, *([spent] if view.shows(SPEND) else []), lag]
+    values, planned, paused, spent, lag = LISTS
+    parts = [
+        *([values] if stale else []),
+        planned,
+        paused,
+        *([spent] if view.shows(SPEND) else []),
+        lag,
+    ]
     name = literal(load_scenario(data_dir / scenario_file(scenario)).name)
     fold(" ".join(_(part).format(scenario=name) for part in parts), _("What the table lists"))
 

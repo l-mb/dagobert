@@ -664,6 +664,10 @@ A list under `streams`. Fields:
   business paid every n months pays the social insurance on a part of 1/n in every month in which it
   runs. Use `rv_voluntary` only in phases without a compulsory pension insurance (§7 Abs. 1 SGB VI).
   An app before this kind does not load a plan with it.
+- A payment that makes up for the deduction of an early pension (§187a SGB VI, from the age of 50)
+  is an `rv_voluntary` stream of one month: `start` its month, `end` the month after, `amount` the
+  payment from the pension insurance below 0, also in a month with a salary. It counts that month
+  as insurance time, which the payment does not ([How the simulation works](models.md#each-month)).
 - A savings plan (`kind: savings`) pays `-amount` from the cash into an asset in the months that
   `every`, `start`, `end` and `phases` give, times `factor`, its index and `scale.savings`. `into`
   (only on this kind) names an `equity`, `fixed_income`, `gold` or `crypto` asset. Without it, the

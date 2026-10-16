@@ -90,6 +90,19 @@ The statutory pension follows the consumer prices of each path, like every amoun
 the start. `pension_growth` adds a real growth on top of that. So a path with high inflation keeps
 the buying power of the pension.
 
+An old-age pension that starts before the statutory pension age loses 0.3% for each month before
+it. From the age of 50 you can pay contributions that make up for this deduction (§187a SGB VI).
+The pension insurance tells you the amount on request, and you can pay it in parts until the
+statutory pension age. The payments are pension contributions for the income tax (§10 Abs. 1 Nr.
+2 a EStG), within the same maximum as your other contributions. If your employer pays them, half
+is free of income tax (§3 Nr. 28 EStG). If your job ends at 50 or later and your employer pays
+it straight to the pension insurance, it does not count as a severance that delays your
+unemployment benefit (§158 Abs. 1 S. 6 SGB III). The plan has no input for this
+payment. Enter it as a voluntary contribution (`rv_voluntary`) that pays once, in its month, with
+the amount of the pension insurance. It buys pension points at the same price and is deductible
+in the same way. One difference: the plan counts that month as insurance time, and a §187a
+payment does not. So check that the extra month does not complete your 35 or 45 years.
+
 With a private health insurance, others pay a part of your premium. The payments of the month
 decide who pays, not the name of the phase. In a month with a salary, your employer pays 8.75% of
 the salary for the health part and 1.8% for the care part. The salary counts up to the

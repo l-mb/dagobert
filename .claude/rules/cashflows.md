@@ -111,7 +111,8 @@ The rows of the run on the Cashflows sheet come from the ledger: rule `ledger`.
   unless the plan still has a row of that name without `start`. A stream paid every n months is
   active from `accrues_from`, n months before the month after its first payment: a yearly bonus that
   starts next January counts today. An ALG1 stream has no amount: the page fills in `sv.alg1_month`
-  on `cashplan.alg1_reference` through `cashplan.with_alg1` (`estimated` takes the plan). As the
+  on `cashplan.alg1_reference` through `cashplan.with_alg1` (`estimated` takes the plan; a course
+  row, `training`, gets none and starts no claim: the claim pays once, rule `alg1`). As the
   engine it takes the last monthly salary before the claim (`_alg1`): in the month before the first
   change to a phase in which an ALG1 stream pays, of the newest phase before it that pays one, so a
   change of jobs counts; without one, on the `As of` date in the phase of the scenario then, else

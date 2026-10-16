@@ -36,7 +36,9 @@ insurance) and PKV (private health insurance). The sheet shows the plan on the s
   salary before the scenario first changes to a phase with ALG1. If you change jobs before that,
   it is the salary of the new job. Without such a change, the estimate takes the salary of the
   `As of` date. A salary conversion lowers it by its part that is free of social insurance, while
-  the policy runs. The estimate is net, and it pays only for the 12 to 24 months of the claim.
+  the policy runs. The estimate is net, and it pays only for the 12 to 24 months of the claim. A
+  Sperrzeit (`sperrzeit`, after you quit) pays nothing for 12 weeks, which the sheet does not
+  show. A course row (`training`) shows no amount: the ALG1 row beside it shows the payment.
 - The rows `from the run`: what no stream pays. These rows come from a single run of the scenario
   with the mean returns. They are the health insurance subsidy, the taxes and social insurance, the
   salary conversion (the part of the gross salary that goes into a company pension), the loan

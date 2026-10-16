@@ -609,6 +609,12 @@ def test_a_compact_marker_legend_wraps_and_the_figure_grows_by_it() -> None:
         (Marker(MONTH, "pension", amount=1.0, years=45), "Pension: 100% with 45 years"),
         (Marker(MONTH, "savings plan", "ETF"), "Savings plan: ETF paused"),
         (Marker(MONTH, "alg1"), "ALG1: on the last salary, not on the self-employment"),
+        (Marker(MONTH, "alg1 used"), "ALG1: the claim is used up"),
+        (
+            Marker(MONTH, "alg1 expired"),
+            "ALG1: the claim arose more than four years ago (§161\u00a0Abs.\u00a02\u00a0SGB"
+            "\u00a0III)",
+        ),
         # the law stays on one line of the legend
         (
             Marker(MONTH, "gkv"),

@@ -50,6 +50,7 @@ this table.
 | income tax / Soli / capital gains tax / SV | Einkommensteuer / Soli / Abgeltungsteuer / Sozialversicherung (SV) | |
 | Vorabpauschale, Teilfreistellung, Sparer-Pauschbetrag, Grunderwerbsteuer, Fünftelregelung, Gewerbesteuer, Hebesatz, Vorsorgepauschale, Basisrente, Altersvorsorgedepot, Hausgeld, ALG1, Rentenpunkte, Krankengeld, PKV, GKV, KVdR, Bundesland | as is | the English UI uses them; PKV, GKV spelled out once in help |
 | Statutory health insurance from (`tax.gkv_from`) / private insurance only / statutory insurance only / switch, change (of the insurance) / exemption / ALG1 in the PKV (a marker) | Gesetzlich versichert ab / nur privat versichert / nur gesetzlich versichert / Wechsel / Befreiung / ALG1 in der PKV | the key `gkv_from` „GKV ab"; the marker `gkv` „Gesetzliche Krankenversicherung" |
+| Sperrzeit / course, training (`training`) / claim (to ALG1) / used up | Sperrzeit / Weiterbildung / Anspruch / verbraucht | rule `alg1`; the key `sperrzeit` „Sperrzeit", `training` „Weiterbildung" |
 | allocation / glide path / invest the rest | Aufteilung / Gleitpfad / Rest anlegen | |
 | realize gains (`tax.harvest`) / Gains realized (a marker) | Gewinne realisieren / Gewinne realisiert | the key `harvest`: „Gewinnrealisierung"; the tax-free room: „steuerfreier Rahmen" |
 | spending rule / cuts / trigger | Ausgabenregel / Kürzungen / Schwelle | `Cut when wealth falls below`: „Kürzung unterhalb dieser Vermögensschwelle" (owner), `liquid_below` of a sale `Vermögensschwelle`; no verb at the end of a label |

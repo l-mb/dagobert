@@ -121,9 +121,10 @@ class Income(Health):
         return gross - withheld * self.deflator
 
     def _apply_streams(self) -> None:
-        """The streams of the month, each step into the cash: ALG1 starts, the plain streams pay
-        and the salaries and pensions add up (`_pay_streams`), the Kindergeld, then what follows
-        from them: the salaries and pensions with their SV, tax and PKV subsidies
+        """The streams of the month, each step into the cash: the claim to ALG1 takes the days of
+        the month (`_claim_alg1`), the plain streams pay and the salaries and pensions add up
+        (`_pay_streams`), the Kindergeld, then what follows from them: the salaries and pensions
+        with their SV, tax and PKV subsidies
         (`_pay_salaries`), the Altersvorsorgedepots and the bAV policies, the GKV beyond the
         salary, a business, the child-raising years on the points of the month, the costs of
         the month and, under VPW, the flexible streams (`_pay_flexible`)."""
@@ -133,7 +134,7 @@ class Income(Health):
         points = p.points.copy()
         self._disable()
         self._mark_switch()
-        self._start_alg1()
+        self._claim_alg1()
         pay = self._pay_streams()
         self._mark_onset()
         self._pay_kindergeld()
@@ -365,14 +366,15 @@ class Income(Health):
         kv_base_real: FloatArray,
     ) -> tuple[FloatArray, FloatArray]:
         """Nominal PKV subsidy and deductible premium in a month of the PKV. The Agentur pays
-        while ALG1 pays, else the employer on the contributory salary `kv_base_real`: in
-        start-year euros, as the constants of `sv`."""
+        for the share of the month that ALG1 pays (§174 SGB III: none in a Sperrzeit), else the
+        employer on the contributory salary `kv_base_real`: in start-year euros, as the constants
+        of `sv`."""
         if not self.pkv:
             return np.zeros(self.paths), np.zeros(self.paths)
-        d = self.deflator
+        d, share = self.deflator, self.alg1.share
         subsidy = d * (
-            sv.agentur_pkv_subsidy(premium / d, pflege / d, self.ty)
-            if self._on_alg1()
+            share * sv.agentur_pkv_subsidy(premium / d, pflege / d, self.ty)
+            if share
             else sv.employer_pkv_subsidy(premium / d, pflege / d, kv_base_real, self.ty)
         )
         return subsidy, tax.health_deductible(self._basis(), subsidy + pension_subsidy)
@@ -417,9 +419,7 @@ class Income(Health):
                     self._note(SPENDING, LOAN_PRINCIPAL, loan.spec.label, paid)
                     self._spend(-paid)
             case StreamKind.ALG1:
-                paid_alg1 = self._alg1(s)
-                self._note(SOURCE, "", s.spec.name, paid_alg1)
-                self._receive(paid_alg1)
+                self._pay_alg1(s)
             case _:
                 expense = self._nominal(s)
                 self._note(SPENDING, s.spec.cat, s.spec.name, -expense)
@@ -876,45 +876,3 @@ class Income(Health):
         if month.month == 12 and due.any():
             free = self.acc.pension_gross * (1 - self._shares()) * self.deflator
             p.freibetrag = np.where(due, free, p.freibetrag)
-
-    def _on_alg1(self) -> bool:
-        """An ALG1 stream pays this month within the entitlement."""
-        return self._alg1_active() and self._alg1_pays()
-
-    def _alg1_pays(self) -> bool:
-        return any(s.spec.kind == StreamKind.ALG1 and self._pays(s) for s in self.streams)
-
-    def _alg1_active(self) -> bool:
-        return self.alg1.start is not None and self.m.i - self.alg1.start < self.alg1.months
-
-    def _start_alg1(self) -> None:
-        """The entitlement from the first month in which an ALG1 stream pays. A member of the
-        PKV before `gkv_return_age` stays in it only by the exemption of §8 Abs. 1 S. 1 Nr. 1a
-        SGB V, which the run assumes and marks: else ALG1 makes a compulsory member (§5 Abs. 1
-        Nr. 2), which `tax.gkv_from` models."""
-        if self.alg1.start is not None or not self._alg1_pays():
-            return
-        self.alg1.start = self.m.i
-        age = self._age(self.m.i)
-        self.alg1.months = sv.alg1_months(int(age), self.ty)
-        if self.first_profit is not None:  # no Anwartschaft of its own without §28a SGB III
-            self._mark("alg1")
-        if self.pkv and age < self.ty.gkv_return_age:
-            self._mark("exemption")
-
-    def _alg1(self, s: StreamState) -> FloatArray:
-        """Nominal ALG1 of the stream `s` within the entitlement."""
-        if not self._alg1_active():
-            return np.zeros(self.paths)
-        if self.alg1.monthly is None:
-            child = bool(self.a.person.counting(self.m.month))
-            last_real = self.last_salary / self.deflator
-            self.alg1.monthly = sv.alg1_month(last_real, self.ty, child=child) * self.deflator
-        working = s.mask * self.working  # none after the onset of a disability
-        monthly = self.alg1.monthly * working
-        self.acc.lohnersatz += monthly / self.deflator
-        self.acc.compulsory = np.maximum(self.acc.compulsory, monthly > 0)
-        points = sv.pension_points(self.last_salary / self.deflator, self.ty) * working
-        self.pension.points += self.ty.alg1_rv_share * points
-        self.pension.counts_now = self.pension.compulsory_now = True
-        return monthly

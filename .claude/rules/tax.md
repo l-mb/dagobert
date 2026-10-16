@@ -17,8 +17,9 @@ pension, the salary conversion: rule `bav`; the KV and PV beyond a salary, the P
 rule `gkv`; the church tax, the own Zusatzbeitrag: rule `tax-options`; a let property, its AfA and
 §10d: rule `rental`; the Werbungskosten above the Pauschbetrag, the Sonderausgaben, §35a, the
 Basisrente and the Zulage per person: rule `deductions`; the children (Kindergeld, §31, §24b, the
-child-raising years): rule `children`; Krankengeld, the EM-Rente, a BU policy: rule `disability`;
-the Erbschaftsteuer: rule `estates`; the harvest: rule `harvest`; the engine: rule `engine`. Inputs:
+child-raising years): rule `children`; ALG1 and its claim: rule `alg1`; Krankengeld, the EM-Rente,
+a BU policy: rule `disability`; the Erbschaftsteuer: rule `estates`; the harvest: rule `harvest`;
+the engine: rule `engine`. Inputs:
 `docs/manual/configuration.md`; in plain English, change with the law: `docs/manual/models.md`
 (the taxes and the simplifications) and `docs/manual/adding-a-tax-year.md` (the year file, its
 sources, the tests).
@@ -148,36 +149,21 @@ sources, the tests).
   65 with 45 years. Ages count in whole months. A birthday after the first of the month
   reaches an age in the following month, so the pension starts there. When a claim is possible, the pension starts with the phases
   of its stream. Otherwise the engine defers to 67 and adds a marker. An EM-Rente: rule `disability`.
-- ALG1 (`sv.alg1_month`) pays 60% (67% with a child) of the Leistungsentgelt of 30 days
-  (§§149, 151, 153, 154 SGB III): the BBG-capped last salary per day (times 12, over 365), less 20%
-  for the SV, less the Lohnsteuer and Soli of a day, 1/360 of the year's (§39b Abs. 2 S. 9 EStG)
-  in Steuerklasse I: Arbeitnehmer- and Sonderausgaben-Pauschbetrag, the Vorsorgepauschale of a GKV
-  member at the reduced KV rate plus the average Zusatzbeitrag, PV at the base rate, the ALV part
-  within 1,900 € with KV and PV (§153 Abs. 1 S. 4; §39b Abs. 2 S. 5 Nr. 3 e). It is the same for a
-  PKV member. `test_alg1_month_matches_the_bundesagentur` pins the Selbstberechnungsprogramm of
-  the Bundesagentur (pub.arbeitsagentur.de) for 2026 to 1 € a month; the former stand-in (the
-  tariff on 80% of the salary) paid 3% too much at the BBG. The engine keeps that salary nominal
-  and applies the rules at the price level of the year of entry. The amount is fixed in nominal
-  euros in the first ALG1 month and does not follow the CPI. The duration follows the age at entry
-  and payments stop by themselves. The phase of the ALG1 stream can be longer than the ALG1
-  duration. The Agentur pays the PKV premium up to a cap. A child that counts: rule `children`.
+- ALG1: its amount (`sv.alg1_month`), the claim of days, a Sperrzeit, a course: rule `alg1`.
 - PKV subsidies follow what the month pays and its insurance (`Core.pkv`, rule `gkv`), never the
   phase (`Income._health_support`). The employer (`sv.employer_pkv_subsidy`): 8.75% (`kv_half`) and
   1.8% (`pv_rate`, its half, §58 Abs. 1 SGB XI) of the KV base of the salary (`sv.sv_bases`: up to
   the KV-BBG, a one-off within what the BBG of the year leaves), at most half of the KV and PV
   premium (§257 Abs. 2 S. 2 SGB V, §61 Abs. 2 S. 2 SGB XI): 508.59 and 104.63 at the BBG in 2026,
-  none without a salary. Instead the Agentur, while an ALG1 stream pays within the entitlement
-  (`Income._on_alg1`): the whole premium (caps 813.75 KV, 167.40 PV: the rates on 80% of the
-  KV-BBG). The DRV: 8.75% of the sum of the pensions, at most half of the KV premium: half of 14.6%
+  none without a salary. Instead the Agentur for the share of the month that ALG1 pays
+  (`Alg1State.share`, rule `alg1`): the whole premium (caps 813.75 KV, 167.40 PV: the rates on 80%
+  of the KV-BBG). The DRV: 8.75% of the sum of the pensions, at most half of the KV premium: half of 14.6%
   plus the average Zusatzbeitrag of the year, 2.9% in 2026 (§106 Abs. 3 SGB VI; DRV brochure
   `Rentner und ihre Krankenversicherung`, 2/2026; a DRV notice of 2026-03-23 still named the 8.55%
   of 2025). A salary beside a pension gets both, up to the whole premium: §257 Abs. 2 and §106 Abs.
   3 hold no joint cap, §106 Abs. 1 S. 2 excludes only GKV-Pflichtversicherte. The PV part is the sum
   of the `health: pv` streams. Caps are in start-year euros, the engine deflates the premium first.
-- Known gaps: Sperrzeit and Ruhen (§§ 158, 159 SGB III) are not modelled, a scenario avoids them
-  through the phase dates (for example a year without salary before the phase of ALG1). The ALG1
-  reference salary is the sum of the monthly (`every: 1`) salary streams in the last month that paid
-  one, however long ago. The gaps of the deductions: rule `deductions`; of the children: rule
+- Known gaps: of ALG1: rule `alg1`; of the deductions: rule `deductions`; of the children: rule
   `children`. A payment counts in the tax year of the month that pays it: a bonus
   that the employer books into an earlier tax year (Märzklausel) needs a one-off salary in the month
   of the booking. The employer's cap of half the premium holds per month; for a one-off the practice

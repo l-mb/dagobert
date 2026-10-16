@@ -118,8 +118,12 @@ def alg1_reference(rows: list[Row], day: date, phases: Iterable[str]) -> tuple[s
 
 
 def with_alg1(rows: list[Row], amount: float) -> list[Row]:
-    """`rows` with `amount` on the ALG1 streams, which have none of their own."""
-    return [row | {"amount": amount} if row.get("kind") == "alg1" else row for row in rows]
+    """`rows` with `amount` on the ALG1 streams, which have none of their own. A course
+    (`training`) gets none: the claim pays once, on the ALG1 row beside it."""
+    return [
+        row | {"amount": amount} if row.get("kind") == "alg1" and not row.get("training") else row
+        for row in rows
+    ]
 
 
 def with_gkv(rows: list[Row], switch: date | None) -> list[Row]:

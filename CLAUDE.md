@@ -82,10 +82,10 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 
 ## Testing
 
-- `tests/test_golden.py` runs `rich_plan` (salary and bonus, ALG1, severance with a bAV part, a
-  sale that repays a loan, a term deposit, bAV, Altersvorsorgedepot, a business, pension,
-  allocation, inflation; PKV) and compares its yearly totals, ledger groups and markers with a
-  snapshot. It checks that the ledger adds up to the engine totals, also of a GKV plan. A feature
+- `tests/test_golden.py` runs `rich_plan` (salary, bonus, ALG1 with Sperrzeit and course, severance
+  with a bAV part, a sale repaying a loan, term deposit, bAV, Altersvorsorgedepot, a business,
+  pension, allocation, inflation; PKV, then GKV) and compares its yearly totals, ledger groups and
+  markers with a snapshot. The ledger adds up to the engine totals, also of a GKV plan. A feature
   that the plan does not reach goes into `rich_plan`, not into a new bookkeeping test.
 - A unit test is for a legal rule (an amount the law defines) or an edge case the rich plan
   cannot show. Write engine tests as a relation between runs (with and without X, lower,
@@ -134,10 +134,11 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 - `src/dagobert/engine/`: monthly path simulation [engine, tax, ledger, bav, harvest, spending,
   disability, children]: `simulation.py` month loop, `core.py` setup, helpers, `state.py`,
   `income.py` streams, `portfolio.py` holdings and sales, `events.py`, `settlement.py` December
-  settlement, `profit.py` [self-employment], `health.py` [gkv]. Also `holdings.py` gold, crypto
-  pools, `carry.py` values from `asof`, `result.py` `RunResult`, `Ledger` [money].
+  settlement, `profit.py` [self-employment], `alg1.py` the claim to ALG1 [alg1], `health.py`
+  [gkv]. Also `holdings.py` gold, crypto pools, `carry.py` values from `asof`, `result.py`
+  `RunResult`, `Ledger` [money].
 - `src/dagobert/tax.py`, `sv.py` (SV): array functions, a year a file in `src/dagobert/data/tax/`
-  [tax, tax-options, bav, gkv, rental, deductions, harvest, disability, children].
+  [tax, tax-options, bav, gkv, rental, deductions, harvest, disability, children, alg1].
 - `src/dagobert/returns.py`: the return providers [returns]; `mortality.py`: the survival curve of
   the Destatis life table, which `runner.Options.run_one` loads [engine].
 - `src/dagobert/series.py`: the registry of the external series, their reads, the fetch and the

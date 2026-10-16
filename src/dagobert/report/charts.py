@@ -200,6 +200,8 @@ MARKER_KINDS: dict[MarkerKind, str] = {
     "bav": "",  # `<policy> pays …` says it
     "av": "",
     "alg1": N_("ALG1"),
+    "alg1 used": N_("ALG1"),
+    "alg1 expired": N_("ALG1"),
     "savings plan": N_("Savings plan"),
     "harvest": N_("Gains realized"),
     "disability": N_("Unable to work"),
@@ -209,6 +211,8 @@ MARKER_KINDS: dict[MarkerKind, str] = {
 # what a marker of a kind always says
 SAYS: dict[MarkerKind, str] = {
     "alg1": N_("on the last salary, not on the self-employment"),
+    "alg1 used": N_("the claim is used up"),
+    "alg1 expired": N_("the claim arose more than four years ago ({law})"),
     "exemption": N_(
         "the plan assumes the exemption from the GKV, applied for within three months and "
         "irrevocable ({law})"
@@ -217,6 +221,7 @@ SAYS: dict[MarkerKind, str] = {
 }
 # the law that a marker names, on one line of its legend
 LAWS: dict[MarkerKind, str] = {
+    "alg1 expired": "§161 Abs. 2 SGB III",
     "exemption": "§8 Abs. 1 S. 1 Nr. 1a SGB V",
     "gkv": "§6 Abs. 3a SGB V",
 }
@@ -230,7 +235,8 @@ PAID = {
 def said(m: Marker) -> str:
     """What a marker says after its kind, in the language of the page: `Car`, `Policy pays 5 €
     per month`, `85.9% with 40 years`, a full claim `100% with 45 years`, the gain of a harvest
-    `19.120 €`, the law of the health insurance behind ALG1 in the PKV and a late switch."""
+    `19.120 €`, the law of the health insurance behind ALG1 in the PKV and a late switch, the
+    end of the claim to ALG1."""
     if (always := SAYS.get(m.kind)) is not None:
         return _(always).format(law=LAWS.get(m.kind, "").replace(" ", "\u00a0"))
     match m.kind:

@@ -69,7 +69,7 @@ Kinderzulage: rule `deductions`; the migration: rule `migrations`. The inputs:
   for each further child per month with a child that counts (Abs. 2, 4), `YearIncome.entlastung`.
   `tax.zve` takes it off the Summe der Einkünfte, at most down to 0 (§2 Abs. 3: it makes no loss
   for §10d), before the Sonderausgaben and the harvest room of rule `harvest`.
-- ALG1 (§149 SGB III): 67% when a child counts in the first month of the claim (`Income._alg1`,
+- ALG1 (§149 SGB III): 67% when a child counts in the first month of the claim (`Alg1._open_alg1`,
   `sv.alg1_month(child=)`; the Cashflows estimate takes the month after its salary), else 60%. A
   child without a date counts for nothing (owner Q4).
 - PV (§55 Abs. 3 SGB XI): the surcharge for the childless until the first birth (`Person.parent`:

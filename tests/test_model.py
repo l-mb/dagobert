@@ -113,6 +113,9 @@ def test_loan_balance_follows_the_schedule() -> None:
         ({"kind": "salary", "gross": 1000, "amount": 900}, "kind salary takes no amount"),
         ({"amount": -1, "gross": 1, "points": 2, "part": 0.5}, "takes no gross, part, points"),
         ({"kind": "alg1", "amount": 1, "gross": 1}, "kind alg1 takes no amount, gross"),
+        ({"kind": "alg1", "sperrzeit": True}, None),
+        ({"kind": "alg1", "training": True, "sperrzeit": True}, "a course takes no Sperrzeit"),
+        ({"kind": "salary", "gross": 1000, "sperrzeit": True}, "salary takes no sperrzeit"),
         ({"kind": "other_income", "amount": 1, "health": "kv"}, "other_income takes no health"),
         ({"kind": "other_income", "amount": 500, "property": "flat"}, None),  # a rent
         ({"amount": -60, "property": "flat"}, None),  # a cost of letting

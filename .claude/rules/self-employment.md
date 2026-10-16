@@ -48,9 +48,9 @@ plain English `docs/manual/models.md`. No phase kind: the engine reads what the 
   the December bill nets the two), a business in several municipalities (Zerlegung).
 - Social insurance (the options `tax.self_employed` of the person: two businesses pay once, on
   the sum of their run rates, `Profit._business`) in a month in which a business is the main
-  work: no salary and no ALG1 within its entitlement (§5 Abs. 5 SGB V; a salary keeps its
-  Pflichtversicherung, ALG1 the KVdA of §5 Abs. 1 Nr. 2, and the profit pays only beside a pension
-  or a Versorgungsbezug, rule `gkv`). GKV (`tax.pkv: false`): freiwillig (§9 Abs. 1 S. 1 Nr. 1,
+  work: no salary and no month of ALG1 (`_on_alg1`, rule `alg1`; §5 Abs. 5 SGB V; a salary keeps
+  its Pflichtversicherung, ALG1 the KVdA of §5 Abs. 1 Nr. 2, and the profit pays only beside a
+  pension or a Versorgungsbezug, rule `gkv`). GKV (`tax.pkv: false`): freiwillig (§9 Abs. 1 S. 1 Nr. 1,
   the Vorversicherungszeit assumed) on all income, the profit at its run rate with the rent, the
   other income and the capital income (rule `gkv`, `sv.kv_voluntary`), between
   `TaxYear.kv_min_base` (the 90th part of `bezugsgroesse_month` per day, 30 days: §240 Abs. 4 S. 1
@@ -88,11 +88,10 @@ plain English `docs/manual/models.md`. No phase kind: the engine reads what the 
   earns no Anwartschaft (§142), with it the fictitious wage of §152 Abs. 2 by Qualifikationsgruppe
   (1/300 of the yearly Bezugsgröße a day for a degree, 158.20 € in 2026); the engine pays on the
   last salary, however long ago (right for a Restanspruch, which lasts four years, §161 Abs. 2), and
-  marks `alg1: on the last salary, not on the self-employment`. `Income._alg1_active` counts from
-  the first ALG1 month, so a second period pays nothing or a wrong rest; the days of a
-  Gründungszuschuss shorten the claim (§148 Abs. 1 Nr. 8); a profit beside ALG1 does not reduce it
-  (§155: 30% flat expenses, a Freibetrag of 165 €); the 4% cut of the deductible KV with
-  Krankengeld: rule `gkv`. `Core.first_profit` is the first month of any business of the run: a
+  marks `alg1: on the last salary, not on the self-employment`; a later stretch pays the days left
+  (rule `alg1`); the days of a Gründungszuschuss shorten the claim (§148 Abs. 1 Nr. 8: issue of
+  its own); a profit beside ALG1 does not reduce it (§155: 30% flat expenses, a Freibetrag of 165
+  €); the 4% cut of the deductible KV with Krankengeld: rule `gkv`. `Core.first_profit` is the first month of any business of the run: a
   second business after a stretch without one gets no new half years (whether a new Aufnahme starts
   them again, §165 Abs. 1 S. 2 SGB VI, is open; `founded` sets the start). Left out: Umsatzsteuer
   (the profit is net of it), the sale or the end of the business (§§16, 34 EStG), the

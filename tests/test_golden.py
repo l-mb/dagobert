@@ -61,7 +61,11 @@ STREAMS: list[dict[str, Any]] = [
     # the rent of the let flat: less its AfA, Hausgeld, upkeep and interest a loss
     {"name": "Miete ein", "kind": "other_income", "amount": 500, "tags": ["wohnung"]}
     | {"property": "wohnung"},
-    {"name": "ALG1", "kind": "alg1", "phases": ["unemployed"]},
+    # the Aufhebungsvertrag of the severance brings a Sperrzeit; a course with a Bildungsgutschein
+    # in the second half of 2029 uses its days at half the rate, 62 days are left
+    {"name": "ALG1", "kind": "alg1", "phases": ["unemployed"], "sperrzeit": True},
+    {"name": "Weiterbildung", "kind": "alg1", "training": True}
+    | {"start": date(2029, 7, 1), "end": date(2030, 1, 1)},
     {"name": "RV voluntary", "kind": "rv_voluntary", "amount": -110, "phases": ["alt"]},
     # a trade business with a Hebesatz and a yearly project fee beside it, the founding set
     # earlier: half the Regelbeitrag up to 2033, the full one in 2034
@@ -165,7 +169,9 @@ RELATIVES = {
 
 
 def rich_plan() -> Plan:
-    """Work, ALG1 at 52, years without income with voluntary contributions, self-employed at 55
+    """Work, ALG1 at 52 after a Sperrzeit (12 weeks without ALG1, its PKV subsidy and points, a
+    quarter of the claim gone) with a course of six months at half the days, years without
+    income with voluntary contributions, self-employed at 55
     (a trade business with the Regelbeitrag of the GRV, a yearly project fee), part time at 58 in a
     phase of its own (half the salary, scaled by 1.2, the bAV goes on), the pension at 64 with 35
     years, a let flat at a loss against the salary (AfA, Hausgeld, upkeep, the interest of its

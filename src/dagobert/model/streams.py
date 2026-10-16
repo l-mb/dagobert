@@ -85,7 +85,7 @@ def stream_index(row: dict[str, Any]) -> str | None:
 TAKES: dict[StreamKind, frozenset[str]] = {
     StreamKind.EXPENSE: frozenset({"cat", "amount", "health", "deduct", "deductible", "property"}),
     StreamKind.SALARY: frozenset({"cat", "gross", "of", "share", "part"}),
-    StreamKind.ALG1: frozenset({"cat"}),
+    StreamKind.ALG1: frozenset({"cat", "sperrzeit", "training"}),
     StreamKind.PENSION: frozenset({"cat", "gross", "points", "point_value"}),
     StreamKind.OTHER_INCOME: frozenset({"cat", "amount", "taxable", "repays", "property"}),
     StreamKind.RV_VOLUNTARY: frozenset({"cat", "amount"}),
@@ -210,6 +210,21 @@ class Stream(Strict):
         "with it",
     )
 
+    sperrzeit: bool = Field(
+        default=False,
+        description="ALG1: a Sperrzeit after you quit or signed an Aufhebungsvertrag (§159 SGB "
+        "III). The first 12 weeks of this row pay no ALG1, no PKV premium and no pension "
+        "contributions, and the claim loses at least a quarter of its days (§148 Abs. 1 Nr. 4). "
+        "Once per row",
+    )
+    training: bool = Field(
+        default=False,
+        description="ALG1: the months of a course with a Bildungsgutschein (§§81, 144 SGB III). "
+        "Add this row beside the ALG1 row, with the start and the end of the course. ALG1 pays "
+        "the same, and two days of the course use one day of the claim, but never below three "
+        "months. After a course of six months a smaller rest rises to three months, once (§148)",
+    )
+
     @builtins.property
     def managed(self) -> bool:
         """An expense that `scale` and the age curve act on: not the health premium, not a cost
@@ -270,6 +285,12 @@ class Stream(Strict):
             raise ValueError(msg)
         if self.of is not None and self.gross is not None:
             msg = f"{self.name}: of takes no gross"
+            raise ValueError(msg)
+        if self.sperrzeit and self.training:
+            msg = (
+                f"{self.name}: a course takes no Sperrzeit: mark the Sperrzeit on the ALG1 row "
+                "before the course"
+            )
             raise ValueError(msg)
         phased = self.phases is not None or self.factor or self.every > 1
         if self.kind == StreamKind.BU and phased:

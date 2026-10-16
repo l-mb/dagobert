@@ -116,17 +116,22 @@ def test_the_alg1_estimate_takes_the_tax_year_of_the_scenario(
 
 
 def test_the_alg1_estimate_takes_the_last_salary_before_the_claim() -> None:
-    """As the engine: after a change of jobs the salary of the new one, on any date."""
+    """As the engine: after a change of jobs the salary of the new one, on any date. A course
+    beside the ALG1 row, in every phase by its dates, starts no claim and pays nothing of its
+    own: the claim pays once."""
     rows: list[gridcolumns.Row] = [
         {"name": "Old", "cat": "gehalt", "kind": "salary", "gross": 4000, "phases": ["old"]},
         {"name": "New", "cat": "gehalt", "kind": "salary", "gross": 6000, "phases": ["new"]},
         {"name": "ALG", "cat": "gehalt", "kind": "alg1", "phases": ["unemployed"]},
+        {"name": "Kurs", "cat": "gehalt", "kind": "alg1", "training": True}
+        | {"start": date(2028, 6, 1), "end": date(2028, 12, 1)},
     ]
     years = {"old": 2026, "new": 2027, "unemployed": 2028}
     scenario = Scenario(name="t", phases=phases(*((date(y, 1, 1), p) for p, y in years.items())))
     p = plan([], [], scenario, phases={name: PhaseSpec() for name in years})
     paid = {cashflows.estimated(rows, date(y, 3, 1), p)[2]["amount"] for y in years.values()}
     assert paid == {float(alg1_month(6000, for_year(p.assumptions.tax_year), child=False))}
+    assert "amount" not in cashflows.estimated(rows, date(2028, 7, 1), p)[3]
 
 
 @pytest.mark.parametrize(

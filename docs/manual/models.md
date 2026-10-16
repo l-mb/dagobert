@@ -83,7 +83,8 @@ With a private health insurance, others pay a part of your premium. The payments
 decide who pays, not the name of the phase. In a month with a salary, your employer pays 8.75% of
 the salary for the health part and 1.8% for the care part. The salary counts up to the
 contribution ceiling of the health insurance, and the employer pays at most half of each part. In
-a month with unemployment benefit (ALG1), the employment agency pays the premium up to a limit.
+a month with unemployment benefit (ALG1), the employment agency pays the premium up to a limit,
+for the days that ALG1 pays. In a Sperrzeit it pays nothing.
 The pension insurance pays 8.75% of your pension, at most half of the health part.
 
 ## What lowers the income tax
@@ -150,13 +151,41 @@ the month of the first birth. A scenario with one more child sets `person.childr
 `person.children_born` in its overrides, with all rows. Enter the Elterngeld of your notice as an
 `other_income` stream with `taxable: false` for its months.
 
+## Unemployment benefit
+
+An `alg1` stream pays unemployment benefit (Arbeitslosengeld, ALG1). The simulation computes the
+amount from your last monthly salary, as the calculator of the Bundesagentur für Arbeit does: 60%
+of a net salary, or 67% with a child. The amount stays the same in euros for the whole claim.
+
+The claim is a number of days, and a month counts as 30 days. The claim starts in the first month
+in which an `alg1` stream pays. Your age in that month sets its length: 12 months, 15 months from
+50, 18 months from 55 and 24 months from 58. Each month of ALG1 uses 30 days. When no days are
+left, the stream pays nothing, and a marker names that month.
+
+A later time with an `alg1` stream pays the days that are left. It must start within four years
+after the first month of the claim. If it starts later, it pays nothing, and a marker says so. A
+time that starts within the four years runs on after them.
+
+A Sperrzeit (`sperrzeit: true`) follows when you quit or sign an Aufhebungsvertrag. For 12 weeks
+after the job ends, the stream pays nothing. In these weeks the employment agency pays no private
+health premium and no pension contributions, so you get no pension points. You stay a compulsory
+member of the statutory health insurance. The claim also loses at least a quarter of its days. So
+a claim of 12 months pays for 9 months, and the first payment comes in the third month.
+
+A course with a Bildungsgutschein (`training: true`) pays the same ALG1. Two days of the course use
+one day of the claim, but a course never takes the claim below three months. After a course of six
+months or longer, a rest below three months grows to three months, once.
+
+The Cashflows sheet shows the monthly ALG1 of a phase. It does not show the Sperrzeit or the end of
+the days: the rows from the run show what the simulation pays.
+
 ## The statutory health insurance
 
 In the statutory health insurance (GKV: `tax.pkv` off, or from `tax.gkv_from`), the payments of the
 month decide how you pay the health insurance (KV) and the care insurance (PV):
 
-- In a month with a salary or with unemployment benefit (ALG1), you are a compulsory member. The
-  salary pays its share, and the employment agency pays for the ALG1. Your other income pays
+- In a month with a salary or with unemployment benefit (ALG1), you are a compulsory member, also
+  in a Sperrzeit. The salary pays its share, and the employment agency pays for the ALG1. Your other income pays
   nothing, except a company pension (see below). A profit pays too if you also get a pension or a
   company pension.
 - In a month with a pension, you are a compulsory member as a pensioner (KVdR) if `person.kvdr`
@@ -664,8 +693,10 @@ Dagobert is approximate by design. These are the main simplifications:
   loss above 1 Mio. € a year (Mindestgewinnbesteuerung) is left out. The losses of private sales
   and of capital income stay in euros of the start, while the losses of the income tax stay in
   euros of their year.
-- A block period (Sperrzeit) of the unemployment benefit is not modeled. A scenario can avoid it
-  with the dates of its phases.
+- The unemployment benefit assumes a full record of insured work, so your age alone sets its
+  length. A new claim after a new job of a year is not modeled: a later time pays the rest of the
+  first claim. The short Sperrzeiten of 3 and 6 weeks, the other Sperrzeiten and the
+  Gründungszuschuss are left out. The claim is the same on every path.
 - The rules for children cover one parent. Nothing splits between two parents. The monthly
   withholding of a salary leaves out the child allowances of the Soli and the church tax, and the
   Entlastungsbetrag. The December settlement refunds the difference.

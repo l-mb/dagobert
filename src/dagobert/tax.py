@@ -113,6 +113,12 @@ class TaxYear(Strict):
     alg1_rate_kinder: float
     alg1_rv_share: float
     alg1_months: dict[int, int]
+    alg1_sperrzeit_days: int
+    alg1_sperrzeit_share: float
+    alg1_training_rate: float
+    alg1_training_floor_days: int
+    alg1_course_months: int
+    alg1_claim_months: int
     alg1_year_days: int
     alg1_month_days: int
     lohnsteuer_year_days: int

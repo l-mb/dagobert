@@ -535,10 +535,24 @@ A list under `streams`. Fields:
   - `self_employed`: the profit, below zero for a loss. 0 is no profit, not off.
   - `bu`: the monthly benefit, at least 0.
 - `gross` for `salary` (required, except with `of`) and `pension`. `alg1` takes neither: the
-  simulation computes it from the last salary. `part` (default 1, 0 to 1) scales a salary gross
+  simulation computes it from the last salary ([How the simulation
+  works](models.md#unemployment-benefit)). Its claim is a number of days: 12 months, 15 from age
+  50, 18 from 55 and 24 from 58 in the first month in which an `alg1` stream pays. A later time
+  with an `alg1` stream pays the rest if it starts within four years after that month. `part` (default 1, 0 to 1) scales a salary gross
   for part time. A field that the kind does not take is rejected, also `amount` beside the `gross`
-  of a salary: each field here names its kinds, `cat` every kind but `savings`, `alg1` none of
-  them.
+  of a salary: each field here names its kinds, `cat` every kind but `savings`, `alg1` only
+  `sperrzeit` and `training`.
+- `sperrzeit` (only `alg1`, default false): you quit or signed an Aufhebungsvertrag, so a
+  Sperrzeit applies (§159 SGB III). It starts in the first month in which the row pays, once for
+  the row. For 12 weeks the row pays no ALG1, and the employment agency pays no private health
+  premium and no pension contributions. The claim loses those days, at least a quarter of its
+  days (§148 Abs. 1 Nr. 4 SGB III). An app before this field does not load a plan with it.
+- `training` (only `alg1`, default false, not with `sperrzeit`): the months of a course with a
+  Bildungsgutschein (§§81, 144 SGB III). Add this row beside the `alg1` row of the phase, with the
+  `start` and the `end` of the course. ALG1 pays once a month, the same amount, and the sheet shows
+  it on the other row. Two days of the course use one day of the claim, but never below three
+  months. After a course of six months or longer, a rest below three months rises to three months,
+  once. An app before this field does not load a plan with it.
 - `of` and `share` (0 to 1) go together: a salary stream without `gross` that pays `share` of the
   gross of another salary stream for `every` months, for example a bonus. `of` names a salary
   stream without `of`. The own `index` of the stream then acts as a payout ratio. When several

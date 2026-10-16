@@ -53,7 +53,7 @@ now.
 | Self-employment | the stream kind of a self-employed profit, the column `hebesatz`, the tax options of self-employment | nothing |
 | Children | your children, `alleinerziehend`, childcare as a deduction | the care insurance surcharge for the childless |
 | Inheritance and gifts | your relatives and their gifts before the start, the events `inheritance` and `gift` | nothing |
-| Job loss | the stream kind ALG1, the event `severance` | nothing |
+| Job loss | the stream kind ALG1 with its columns `sperrzeit` and `training`, the event `severance` | nothing |
 | Disability | the risk of disability, the stream kind of a BU policy and the tab `disability insurance` | nothing |
 | Deductions and Basisrente | the Werbungskosten, the column `deduct` of an expense, a Basisrente, the event `fund_policy` | the Arbeitnehmer-Pauschbetrag |
 | Spending rules beyond the cut | the increase of the spending rule, its ceiling, the spending by age, VPW | nothing: the cut stays in simple and advanced mode |

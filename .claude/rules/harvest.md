@@ -51,14 +51,14 @@ rule `gkv`; the run: rule `engine`. The inputs: `docs/manual/configuration.md`, 
 - GKV cap (always, owner W3; the formulas of rule `gkv`): when the next January is voluntary by the
   inputs (`Health._voluntary_next`, the same on every path: in the GKV then, `tax.pkv: false` or a
   `tax.gkv_from` by then, whose PKV December keeps `kv_rest`, a switch later in the year no cap; no
-  salary stream active then by its dates and phases and `core.pays`, no ALG1 stream within the
-  entitlement, no pension with `person.kvdr` that can be claimed by then; masks and later events
-  left out), the gain is at most `Health._kv_room`, so the base of the next year (`_kv_last`) stays
-  at the minimum and the harvest costs no KV. KV and PV of about 20.5% on the base after the
-  Teilfreistellung are 14.4% of the gain against 18.5% of tax later: the cap pays only through
-  discounting and a later sale free of KV. A compulsory January (a job, ALG1, the KVdR) takes the
-  tax room: after a December of ALG1 whose entitlement ends next year, the voluntary months after it
-  pay on the harvest (a decision of the design).
+  salary stream active then by its dates and phases and `core.pays`, no ALG1 stream that pays or
+  rests (`_alg1_holds`, rule `alg1`), no pension with `person.kvdr` that can be claimed by then;
+  masks and later events left out), the gain is at most `Health._kv_room`, so the base of the next
+  year (`_kv_last`) stays at the minimum and the harvest costs no KV. KV and PV of about 20.5% on
+  the base after the Teilfreistellung are 14.4% of the gain against 18.5% of tax later: the cap pays
+  only through discounting and a later sale free of KV. A compulsory January (a job, ALG1, the KVdR)
+  takes the tax room: after a December of ALG1 whose days end next year, the voluntary months after
+  it pay on the harvest (a decision of the design).
 - Ledger (rule `ledger`): no flow and no group; its tax books as `capital gains tax` of the year
   with the refund (`since` January), so `test_golden` adds up. A marker `harvest` (`once`) in the
   first December in which half of the paths harvest: the median gain of those paths before the

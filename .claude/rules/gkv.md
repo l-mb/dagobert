@@ -14,17 +14,17 @@ Beitragsverfahrensgrundsätze Selbstzahler of the GKV-Spitzenverband (BVSzGs, as
 its Katalog of 2026-05-26 on 2026-10-13). The GRV and the tax of a business: rule `self-employment`.
 In plain English: `docs/manual/models.md`.
 
-- The month (`engine.health.Health._pay_gkv`, per path). A salary (§5 Abs. 1 Nr. 1 SGB V), ALG1
-  within the entitlement (`Income._on_alg1`, KVdA, Nr. 2) or a pension with `person.kvdr` (KVdR,
-  Nr. 11; it needs nine tenths of the second half of the working life insured, the engine does
-  not derive it) make it compulsory, any other month voluntary (§9, §188 Abs. 4): a gap year, ALG1
-  beyond the entitlement, a pension before its claim (`_claim_pension` defers it), a business
+- The month (`engine.health.Health._pay_gkv`, per path). A salary (§5 Abs. 1 Nr. 1 SGB V), ALG1 that
+  pays or a Sperrzeit (`Alg1._on_alg1`, KVdA, Nr. 2, rule `alg1`) or a pension with `person.kvdr`
+  (KVdR, Nr. 11; it needs nine tenths of the second half of the working life insured, the engine
+  does not derive it) make it compulsory, any other month voluntary (§9, §188 Abs. 4): a gap year,
+  ALG1 beyond its days, a pension before its claim (`_claim_pension` defers it), a business
   (`Profit._business`) without a salary or ALG1, a pension with `kvdr: false`. The Krankengeld of an
   employee keeps the month compulsory and free of KV (`sick`, §192 Abs. 1 Nr. 2, §224 Abs. 1 S. 1);
   a voluntary member pays on the benefit of a BU policy (`bu_paid`), not on the Krankengeld of a
-  business (§224 Abs. 1 S. 2; rule `disability`). A business beside a
-  KVdR pension stays in the KVdR: its profit is Arbeitseinkommen (§237 Nr. 3); the engine does not
-  judge whether it is hauptberuflich (§5 Abs. 5). One person: no Familienversicherung (§10).
+  business (§224 Abs. 1 S. 2; rule `disability`). A business beside a KVdR pension stays in the
+  KVdR: its profit is Arbeitseinkommen (§237 Nr. 3); the engine does not judge whether it is
+  hauptberuflich (§5 Abs. 5). One person: no Familienversicherung (§10).
 - The pension pays in every month (`sv.pension_net_month`, `Income._pay_pension`): half of the
   general rate and of the Zusatzbeitrag (§249a, 8.75% in 2026 at the average) and the whole PV
   rate. A voluntary member pays both rates on it (§247 by §240 Abs. 2 S. 5) and the DRV pays half
@@ -113,8 +113,8 @@ In plain English: `docs/manual/models.md`.
   switch year deducts the PKV Basis share before and the GKV contributions after; `kv_last` of the
   first GKV year takes the capital income of the last PKV year. `person.kvdr` stays an input: a
   late switch seldom reaches the nine tenths. No Explorer switch: a scenario per choice.
-- Markers (checked at gesetze-im-internet.de on 2026-10-16), never refusals: `exemption` when an
-  ALG1 stream starts paying (`Income._start_alg1`) in a PKV month before `TaxYear.gkv_return_age`
+- Markers (checked at gesetze-im-internet.de on 2026-10-16), never refusals: `exemption` when the
+  claim to ALG1 arises (`Alg1._open_alg1`, a Sperrzeit too) in a PKV month before `gkv_return_age`
   (55): ALG1 makes a compulsory member (§5 Abs. 1 Nr. 2) unless exempt on application within three
   months, irrevocable (§8 Abs. 1 S. 1 Nr. 1a, Abs. 2), which the run assumes; `gkv` in the month of
   a switch at 55 or later (`Health._mark_switch`): §6 Abs. 3a keeps one who was outside the GKV for

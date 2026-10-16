@@ -215,9 +215,21 @@ class AvState:
 
 @dataclass
 class Alg1State:
-    start: int | None = None
-    months: int = 0
+    """The claim to ALG1, the same on every path (`engine.alg1`), in days of the claim: a month
+    of 30 (§339 SGB III). The fields from `row` on hold the month of the run."""
+
+    start: int | None = None  # the month in which it arose, the first with an ALG1 row
+    days: float = 0.0  # left
+    resting: float = 0.0  # of a Sperrzeit still to run (§159)
+    rested: set[StreamState] = field(default_factory=set)  # the rows whose Sperrzeit began
+    fresh: bool = False  # the stretch began within the four years of §161 Abs. 2
+    course: int = 0  # months of the course that runs, for §148 Abs. 3
+    extended: bool = False  # by §148 Abs. 3, once
+    ended: bool = False  # its marker fell: used up or expired
     monthly: FloatArray | None = None  # nominal, fixed at entry like the Bewilligungsbescheid
+    row: StreamState | None = None  # the ALG1 row that books the month, none without one
+    share: float = 0.0  # of the month that ALG1 pays
+    status: bool = False  # it pays or rests in a Sperrzeit: the KVdA (§5 Abs. 1 Nr. 2 SGB V)
 
 
 @dataclass

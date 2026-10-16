@@ -89,7 +89,9 @@ the source in a comment. Source: §11 GrEStG and the Grunderwerbsteuer law of th
   §61 SGB XI, §174 SGB III, §106 SGB VI.
 - Unemployment benefit (ALG1): the shares, the number of months by age, and the days of a year,
   of a month and of the wage tax year. Source: §§147, 149, 151, 153 and 154 SGB III, and §39b
-  Abs. 2 EStG. To make sure that the values are correct, compare `sv.alg1_month` with the
+  Abs. 2 EStG. The rules of the claim: the days of a Sperrzeit and the share that it takes, the
+  rate, the floor and the months of a course, and the years in which a rest pays. Source: §§148,
+  159, 161 and 339 SGB III. To make sure that the values are correct, compare `sv.alg1_month` with the
   Selbstberechnungsprogramm of the Bundesagentur für Arbeit (pub.arbeitsagentur.de). Select the
   new year there. The two results must agree to about 1 euro per month.
 - Statutory pension: the average salary (`durchschnittsentgelt`), the pension ages, and the

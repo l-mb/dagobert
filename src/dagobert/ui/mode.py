@@ -171,6 +171,8 @@ EXPERT = _items(
             "of",
             "share",
             "hebesatz",
+            "sperrzeit",
+            "training",
         )
     ),
 )
@@ -256,8 +258,13 @@ FEATURES = {
     Feature.JOB_LOSS: Spec(
         N_("Job loss: ALG1 and severance"),
         NP_("inline", "job loss"),
-        N_("Off hides the stream kind ALG1 and the event `severance`."),
-        _items(Sort.STREAM, "alg1") | _items(Sort.EVENT, "severance"),
+        N_(
+            "Off hides the stream kind ALG1 with its columns `sperrzeit` and `training`, and the "
+            "event `severance`."
+        ),
+        _items(Sort.STREAM, "alg1")
+        | _items(Sort.COLUMN, "streams.sperrzeit", "streams.training")
+        | _items(Sort.EVENT, "severance"),
     ),
     Feature.DISABILITY: Spec(
         N_("Disability (BU)"),

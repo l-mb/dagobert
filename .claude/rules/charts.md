@@ -106,7 +106,8 @@ app the skill `app-check`. `ui.chart` draws every chart of the app: rule `ui`.
   below, the title `Age and year`. A marker reads in words, written from its data (rule `engine`):
   `charts.said` what it says (`Policy pays 5 € per month`, `85.9% with 40 years`, a full claim
   `100%` without its `.0`, the gain of a harvest `19.120 €`; `SAYS` of a kind that always says the
-  same: `alg1`, the law behind `exemption` and `gkv`, rule `gkv`, its paragraph `{law}` of `LAWS`
+  same: `alg1`, the end of the claim `alg1 used` and `alg1 expired` (§161, rule `alg1`), the law
+  behind `exemption` and `gkv`, rule `gkv`, its paragraph `{law}` of `LAWS`
   with no-break spaces, so a legend never parts `SGB` from `V`), `readable` its kind in words
   before it (`MARKER_KINDS`, one entry per `result.MarkerKind`, a test holds them equal: a
   `lump_sum` of `Car` is `One-off payment: Car`, `alg1` `ALG1: …`, an estate drawn per path

@@ -131,8 +131,21 @@ alg1_rv_share: 0.80
 alg1_year_days: 365
 lohnsteuer_year_days: 360
 alg1_month_days: 30
-# Months of ALG1 by the age at its start (§147 SGB III), with the full insurance record
+# Months of ALG1 by the age at its start (§147 SGB III), with the full insurance record. The
+# claim is a balance of days, a month of 30 (§339 S. 1, 2)
 alg1_months: {0: 12, 50: 15, 55: 18, 58: 24}
+# A Sperrzeit after a resignation rests the claim for twelve weeks (§159 Abs. 3 S. 1, a week of 7
+# days, §339 S. 1) and takes its days from it, at least a quarter (§148 Abs. 1 Nr. 4)
+alg1_sperrzeit_days: 84
+alg1_sperrzeit_share: 0.25
+# Two days of ALG1 bei Weiterbildung take one day of the claim (§148 Abs. 1 Nr. 7), never below
+# three months (Abs. 2 S. 3); after a course of six months a smaller rest rises to three months
+# once (Abs. 3)
+alg1_training_rate: 0.5
+alg1_training_floor_days: 90
+alg1_course_months: 6
+# A claim cannot be claimed again four years after it arose (§161 Abs. 2)
+alg1_claim_months: 48
 
 # Statutory pension (SGB VI)
 durchschnittsentgelt: 51944.0  # provisional value of 2026, Sozialversicherungs-Rechengrößenverordnung

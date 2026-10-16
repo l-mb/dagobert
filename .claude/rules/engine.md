@@ -3,7 +3,7 @@ paths:
   - "src/dagobert/engine/*.py"
   - "src/dagobert/{result,returns,tax,sv,mortality,holdings,carry}.py"
   - "src/dagobert/data/tax/*.yaml"
-  - "tests/test_{engine,income,portfolio,golden,tax,sv,returns,mortality,profit,health,rental,spending,deductions,harvest,children}.py"
+  - "tests/test_{engine,income,portfolio,golden,tax,sv,returns,mortality,profit,health,rental,spending,deductions,harvest,children,alg1}.py"
   - "tests/{builders,conftest}.py"
   - "tests/__snapshots__/**"
 ---
@@ -22,15 +22,15 @@ simplifications): change it with the behaviour.
   takes the steps of a month from a class per module, each on `core.Core` (the setup of a run and
   the helpers that every step reads, `year_levels`): `portfolio.Portfolio` (the returns, the savings
   plans, invest and sell, the rebalancing, the flat tax), `income.Income` (the streams, a severance)
-  on `health.Health` (the GKV beyond the salary and the pension, rule `gkv`) on `profit.Profit` (a
-  business, rule `self-employment`), `events.Events` and `settlement.Settlement` (December), the
-  last two on `Income` and `Portfolio`. A method calls into its own class, `Core` and the bases of
-  its class only. `state.py`: the dataclasses of the state (`YearAcc`, `MonthState`, `MonthPay`, one
-  per asset kind).
+  on `health.Health` (the GKV beyond the salary and the pension, rule `gkv`) on `alg1.Alg1` (the
+  claim to ALG1, rule `alg1`) on `profit.Profit` (a business, rule `self-employment`),
+  `events.Events` and `settlement.Settlement` (December), the last two on `Income` and `Portfolio`.
+  A method calls into its own class, `Core` and the bases of its class only. `state.py`: the
+  dataclasses of the state (`YearAcc`, `MonthState`, `MonthPay`, one per asset kind).
 - Each step pays into `Core.cash` itself and reports in `MonthFlows`, nominal: `Core._receive`
   (gross income less the taxes and SV taken off it), `_spend` (expenses below zero), `run` reads
-  only `self.flows`. `Income._apply_streams` runs the stream steps in their order: `_start_alg1`
-  (the steps after the streams read the entitlement), `_pay_streams` (the plain streams, the
+  only `self.flows`. `Income._apply_streams` runs the stream steps in their order: `_claim_alg1`
+  (the steps after the streams read the claim), `_pay_streams` (the plain streams, the
   salaries and pensions into a `MonthPay`), `_pay_kindergeld`, `_pay_salaries`, the depots, the bAV
   policies (a lump sum withholds on the salary of the year so far), `_pay_gkv`, `_pay_profit`,
   `_raise_children` (rule `children`), `_costs`, `_pay_flexible` (VPW, rule `spending`),
@@ -51,11 +51,11 @@ simplifications): change it with the behaviour.
   the one place that charges Abgeltungsteuer (Pauschbetrag, memory for the Günstigerprüfung), and
   `_report_capital_tax` the one that reports it.
 - A marker is data (`result.Marker`, `Core._mark`): its kind (`result.MarkerKind`: the event type,
-  `phase`, `pension`, `bav`, `av`, `alg1`, `savings plan`, `harvest`, `disability`, `exemption` and
-  `gkv` (rule `gkv`); a new kind there, the type checker refuses an event type that it lacks), the
-  name as the inputs write it, the median euros or the claim factor, the years, the deferred month,
-  the form (`monthly`, `once`, `half`); the run, which the app caches for every session, holds no
-  words. `report.charts.said` writes them (rule `charts`), `tests/builders.marked` in the words of
+  `phase`, `pension`, `bav`, `av`, `alg1`, `alg1 used` and `alg1 expired` (rule `alg1`), `savings
+  plan`, `harvest`, `disability`, `exemption` and `gkv` (rule `gkv`); a new kind there, the type
+  checker refuses an event type that it lacks), the name as the inputs write it, the median euros
+  or the claim factor, the years, the deferred month, the form (`monthly`, `once`, `half`); the
+  run, which the app caches for every session, holds no words. `report.charts.said` writes them (rule `charts`), `tests/builders.marked` in the words of
   the engine (`sell: flat`), which the snapshots of `test_golden` keep.
 - Engine state is one numpy array of shape `(paths,)` per quantity. Loans are scalar because events
   are deterministic. `RunResult` arrays are `(paths, months)`, the counts of months `reduced` and
@@ -95,7 +95,8 @@ simplifications): change it with the behaviour.
   `test_income.py` (the streams), `test_portfolio.py` (the holdings and their taxes),
   `test_rental.py` (letting, the Verlustvortrag), `test_deductions.py` (rule `deductions`),
   `test_harvest.py` (the harvest, its cap of a GKV member in `test_health.py`), `test_children.py`
-  (rule `children`); the law in amounts in `test_tax.py` and `test_sv.py`.
+  (rule `children`), `test_alg1.py` (rule `alg1`); the law in amounts in `test_tax.py` and
+  `test_sv.py`.
 
 ## Behaviour
 

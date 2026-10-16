@@ -196,6 +196,8 @@ INCOME = Table(
         "property",
         "taxable",
         "hebesatz",
+        "sperrzeit",
+        "training",
     ),
     gates=_GATES,
     sort_by=("cat", "name", "start"),
@@ -267,18 +269,16 @@ SAVINGS = Table(
 
 def _alg1(rows: list[cashplan.Row], day: date, plan: Plan) -> float:
     """The monthly ALG1 that the engine pays, in start-year euros, on the last salary before the
-    claim: in the month before the first change to a phase in which an ALG1 stream pays, of the
-    newest phase before it with a salary. Without such a change or salary, on `day`: of the phase
-    of the scenario then, else of the newest phase before it with a salary. At 67% with a child
-    that counts in the month after that salary, the first of the claim."""
+    claim: in the month before the first change to a phase in which an ALG1 stream pays (not a
+    course, `training`, which runs beside one), of the newest phase before it with a salary.
+    Without such a change or salary, on `day`: of the phase of the scenario then, else of the
+    newest phase before it with a salary. At 67% with a child that counts in the month after
+    that salary, the first of the claim."""
     a, changes = plan.assumptions, plan.scenario.phases
     rows = cashplan.with_levels(rows, a.indices)
+    alg1 = [r for r in rows if r.get("kind") == "alg1" and not r.get("training")]
     claim = next(
-        (
-            n
-            for n, c in enumerate(changes)
-            if any(r.get("kind") == "alg1" and cashplan.applies(r, c.phase) for r in rows)
-        ),
+        (n for n, c in enumerate(changes) if any(cashplan.applies(r, c.phase) for r in alg1)),
         0,
     )
     before = [c.phase for c in reversed(changes[:claim])]

@@ -198,6 +198,8 @@ MarkerKind = Literal[
     "bav",
     "av",
     "alg1",
+    "alg1 used",
+    "alg1 expired",
     "savings plan",
     "harvest",
     "disability",

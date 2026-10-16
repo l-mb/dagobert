@@ -3271,6 +3271,44 @@ msgid ""
 "benefit with it"
 msgstr "BU: das Alter, mit dem der Vertrag endet, und mit ihm Beitrag und Rente"
 
+#: model/events.py model/plan.py model/streams.py
+msgid ""
+"ALG1: a Sperrzeit after you quit or signed an Aufhebungsvertrag (§159 SGB"
+" III). The first 12 weeks of this row pay no ALG1, no PKV premium and no "
+"pension contributions, and the claim loses at least a quarter of its days"
+" (§148 Abs. 1 Nr. 4). Once per row"
+msgstr ""
+"ALG1: eine Sperrzeit, weil du gekündigt oder einen Aufhebungsvertrag "
+"unterschrieben hast (§159 SGB III). Die ersten 12 Wochen dieser Zeile "
+"zahlen kein ALG1, keinen PKV-Beitrag und keine Rentenbeiträge, und der "
+"Anspruch verliert mindestens ein Viertel seiner Tage (§148 Abs. 1 Nr. 4)."
+" Einmal je Zeile"
+
+#: model/events.py model/plan.py model/streams.py
+msgctxt "key"
+msgid "sperrzeit"
+msgstr "Sperrzeit"
+
+#: model/events.py model/plan.py model/streams.py
+msgid ""
+"ALG1: the months of a course with a Bildungsgutschein (§§81, 144 SGB "
+"III). Add this row beside the ALG1 row, with the start and the end of the"
+" course. ALG1 pays the same, and two days of the course use one day of "
+"the claim, but never below three months. After a course of six months a "
+"smaller rest rises to three months, once (§148)"
+msgstr ""
+"ALG1: die Monate einer Weiterbildung mit Bildungsgutschein (§§81, 144 SGB"
+" III). Lege diese Zeile neben der ALG1-Zeile an, mit Beginn und Ende der "
+"Weiterbildung. ALG1 zahlt gleich viel, und zwei Tage der Weiterbildung "
+"verbrauchen einen Tag des Anspruchs, aber nie unter drei Monate. Nach "
+"einer Weiterbildung von sechs Monaten steigt ein kleinerer Rest einmalig "
+"auf drei Monate (§148)"
+
+#: model/events.py model/plan.py model/streams.py
+msgctxt "key"
+msgid "training"
+msgstr "Weiterbildung"
+
 #: model/events.py model/plan.py model/streams.py report/charts.py
 msgid "Pension"
 msgstr "Rente"
@@ -3346,6 +3384,14 @@ msgstr "Nach Verkauf von"
 #: model/events.py model/streams.py
 msgid "Hebesatz"
 msgstr "Hebesatz"
+
+#: model/events.py model/streams.py
+msgid "Sperrzeit"
+msgstr "Sperrzeit"
+
+#: model/events.py model/streams.py
+msgid "Training"
+msgstr "Weiterbildung"
 
 #: model/events.py model/streams.py ui/events.py
 msgid "Property"
@@ -3949,6 +3995,15 @@ msgstr "{item} (in der Hälfte der Verläufe)"
 #: report/charts.py
 msgid "Age and year"
 msgstr "Alter und Jahr"
+
+#: report/charts.py
+msgid "the claim is used up"
+msgstr "der Anspruch ist verbraucht"
+
+#: report/charts.py
+#, python-brace-format
+msgid "the claim arose more than four years ago ({law})"
+msgstr "der Anspruch entstand vor mehr als vier Jahren ({law})"
 
 #: report/charts.py report/fan.py
 #, python-brace-format
@@ -9187,10 +9242,6 @@ msgid "job loss"
 msgstr "Jobverlust"
 
 #: ui/mode.py
-msgid "Off hides the stream kind ALG1 and the event `severance`."
-msgstr "Aus blendet die Zahlungsart ALG1 und das Ereignis `severance` aus."
-
-#: ui/mode.py
 msgid "Disability (BU)"
 msgstr "Berufsunfähigkeit (BU)"
 
@@ -9337,6 +9388,14 @@ msgstr ""
 #, python-brace-format
 msgid "Some parts of the app are switched off: {names}."
 msgstr "Einige Teile der App sind abgeschaltet: {names}."
+
+#: ui/mode.py
+msgid ""
+"Off hides the stream kind ALG1 with its columns `sperrzeit` and "
+"`training`, and the event `severance`."
+msgstr ""
+"Aus blendet die Zahlungsart ALG1 mit ihren Spalten `sperrzeit` und "
+"`training` und das Ereignis `severance` aus."
 
 #: ui/mode.py ui/sliders.py
 msgid "Gold and crypto"

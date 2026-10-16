@@ -8,13 +8,13 @@ from datetime import date
 import numpy as np
 
 from dagobert import sv
+from dagobert.engine.alg1 import Alg1
 from dagobert.engine.core import pays
-from dagobert.engine.profit import Profit
 from dagobert.model.streams import StreamKind
 from dagobert.result import KV, PV, TAX, BoolArray, FloatArray
 
 
-class Health(Profit):
+class Health(Alg1):
     def _versorgung(self) -> tuple[FloatArray, FloatArray]:
         """Nominal payments of the policies this month: the Versorgungsbezüge of the company
         pensions (an annuity, or a lump sum's tail), and the annuities of a Basisrente."""
@@ -40,8 +40,9 @@ class Health(Profit):
         sick: BoolArray,
     ) -> FloatArray:
         """The KV and PV of a GKV member beyond the salary and the pension (`_pay_pension`) out
-        of the cash, returned nominal. A salary, ALG1 within the entitlement, the Krankengeld of an
-        employee on the paths `sick` (free of KV itself, §224 Abs. 1 S. 1 SGB V) or a pension with
+        of the cash, returned nominal. A salary, ALG1 that pays or a Sperrzeit that rests it
+        (`on_alg1`), the Krankengeld of an employee on the paths `sick` (free of KV itself, §224
+        Abs. 1 S. 1 SGB V) or a pension with
         `person.kvdr` make the month compulsory: KV and PV on the Versorgungsbezüge, and on the
         profit beside a pension or a Versorgungsbezug (`sv.kv_compulsory`), in the room below the
         KV-BBG that the salary base `kv_base_real` or the pension leave. Any other month is
@@ -122,8 +123,8 @@ class Health(Profit):
     def _voluntary_next(self) -> bool:
         """A voluntary member of the GKV in the next January by the inputs, the same on every
         path: in the GKV then (`TaxOptions.pkv_in`), no salary pays by its dates and phases (§5
-        Abs. 1 Nr. 1 SGB V), no ALG1 within the entitlement (Nr. 2), no pension that can be
-        claimed by then with `person.kvdr` (Nr. 11)."""
+        Abs. 1 Nr. 1 SGB V), no ALG1 pays or rests (Nr. 2, `_alg1_holds`), no pension that can
+        be claimed by then with `person.kvdr` (Nr. 11)."""
         month = date(self.m.month.year + 1, 1, 1)
         if self.a.tax.pkv_in(month):
             return False
@@ -134,9 +135,7 @@ class Health(Profit):
             s.spec.kind == StreamKind.SALARY and pays(s.spec, self.a, phase, s.factor_override)
             for s in active
         )
-        alg1 = StreamKind.ALG1 in kinds and (
-            self.alg1.start is None or i - self.alg1.start < self.alg1.months
-        )
+        alg1 = StreamKind.ALG1 in kinds and self._alg1_holds(i)
         p = self.pension
         claim = p.claimed is not None or (
             sv.pension_claim(self._age(i), p.insured_months / 12, self.ty) is not None

@@ -4,9 +4,12 @@ its sliders, the comparison of scenarios and of the run of the files."""
 from __future__ import annotations
 
 import json
+import math
+import os
 import threading
-import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures.process import BrokenProcessPool
 from dataclasses import replace
 from datetime import date
 from pathlib import Path
@@ -14,9 +17,10 @@ from typing import Any
 
 import numpy as np
 import pytest
-from apps import EXPLORER, render
+from apps import EXPLORER, LEVERS, OVERVIEW, render
 from builders import fixed_run, plan
 from german import ACTIVATE, leaks, words
+from streamlit.runtime.state import SafeSessionState, SessionState, session_state_proxy
 from streamlit.testing.v1 import AppTest
 
 from dagobert import goalseek, i18n, report, scenariofiles, sensitivity, series
@@ -489,6 +493,7 @@ def test_a_slider_keeps_its_position_while_no_run_draws_it() -> None:
     assert at.slider(key=f"{sliders.KEY}x").value == 0
 
 
+@pytest.mark.usefixtures("threads")
 def test_a_language_switch_runs_nothing_again(data: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The explorer's caches hold no words (rule `i18n`): in German it shows the runs and the
     sensitivity that English ran, the effects named by the levers in German."""
@@ -499,9 +504,9 @@ def test_a_language_switch_runs_nothing_again(data: Path, monkeypatch: pytest.Mo
         ran["runs"] += 1
         return run_one(self, *args)
 
-    def sensed(*args: Any) -> sensitivity.Sensitivity:
+    def sensed(*args: Any, **kwargs: Any) -> sensitivity.Sensitivity:
         ran["sensitivity"] += 1
-        return run(*args)
+        return run(*args, **kwargs)
 
     def equity(lang: i18n.Language) -> bool:
         """Whether a bar of the sensitivity charts names the equity return in `lang`."""
@@ -517,11 +522,11 @@ def test_a_language_switch_runs_nothing_again(data: Path, monkeypatch: pytest.Mo
 
     monkeypatch.setattr(Options, "run_one", counted)
     monkeypatch.setattr(sensitivity, "run", sensed)
-    at = AppTest.from_string(ACTIVATE + EXPLORER.format(data=str(data)), default_timeout=60).run()
+    at = opened(AppTest.from_string(ACTIVATE + EXPLORER.format(data=str(data)), default_timeout=60))
     english = dict(ran)
     assert equity("en")
     at.query_params["lang"] = "de"
-    at.run()
+    opened(at)
     assert not at.exception
     assert at.selectbox(key=f"{sliders.KEY}model").label == "Modell"
     assert all(english.values())
@@ -529,23 +534,130 @@ def test_a_language_switch_runs_nothing_again(data: Path, monkeypatch: pytest.Mo
     assert equity("de") and not equity("en")
 
 
-def test_a_moved_slider_runs_the_sensitivity_again(
-    data: Path, monkeypatch: pytest.MonkeyPatch
+def opened(at: AppTest) -> AppTest:
+    """A run with the fold `What moves the result` of the first tab open, as a click opens it:
+    `AppTest` sends no state of an expander, so it closes again in the next run."""
+    at.session_state[LEVERS] = True
+    return at.run()
+
+
+def figures(at: AppTest) -> int:
+    """The sensitivity charts of the page: their bars lie."""
+    return sum(
+        any(trace.get("orientation") == "h" for trace in json.loads(chart.proto.spec)["data"])
+        for chart in at.get("plotly_chart")
+    )
+
+
+class MovedError(Exception):
+    """A rerun, as a moved slider raises it at the next Streamlit call of a wait."""
+
+
+def moved() -> None:
+    raise MovedError
+
+
+@pytest.mark.parametrize("phone", [False, True])
+def test_the_sensitivity_runs_while_its_fold_is_open_and_the_sliders_rest(
+    data: Path, monkeypatch: pytest.MonkeyPatch, *, phone: bool
 ) -> None:
-    ran: list[object] = []
+    """Closed at first, on a desktop too, so nothing runs. Open, it runs at once while the
+    sliders stand. After a move it waits for the sliders to rest under a progress bar, with the
+    last result faded and its caption; once they rest the new result replaces both."""
+    sensed: list[object] = []
+    rests: list[bool] = []
     run = sensitivity.run
 
-    def sensed(*args: Any) -> sensitivity.Sensitivity:
-        ran.append(args)
-        return run(*args)
+    def counted(*args: Any, **kwargs: Any) -> sensitivity.Sensitivity:
+        sensed.append(args)
+        return run(*args, **kwargs)
 
-    monkeypatch.setattr(sensitivity, "run", sensed)
-    at = AppTest.from_string(ACTIVATE + EXPLORER.format(data=str(data)), default_timeout=60).run()
-    first = len(ran)
-    assert first
-    next(s for s in at.slider if s.label == "Inflation").set_value(4.0).run()
+    def resting(done: Callable[[], bool], _tick: object, _pause: object) -> None:
+        rests.append(done())
+        raise MovedError
+
+    monkeypatch.setattr(sensitivity, "run", counted)
+    at = AppTest.from_string(EXPLORER.format(data=str(data)), default_timeout=60)
+    at.query_params["mobile"] = str(int(phone))
+    at.run()
+    assert "What moves the result" in [e.label for e in at.expander]
+    assert (sensed, figures(at)) == ([], 0)
+    opened(at)
+    assert (len(sensed), figures(at)) == (1, 2)
+    monkeypatch.setattr(explorer, "settle", resting)
+    next(s for s in at.slider if s.label == "Inflation").set_value(4.0)
+    opened(at)
+    assert rests == [False]  # it waits: the sliders just moved
+    assert [p.proto.text for p in at.get("progress")] == [
+        "What moves the result: starts when the sliders rest"
+    ]
+    assert "For the sliders before your last move" in [c.value for c in at.caption]
+    assert (len(sensed), figures(at)) == (1, 2)  # the last result, faded
+    monkeypatch.setattr(explorer, "REST", 0)
+    monkeypatch.setattr(explorer, "settle", runs.settle)
+    opened(at)
     assert not at.exception
-    assert len(ran) > first
+    assert (len(sensed), figures(at)) == (2, 2)
+    assert "For the sliders before your last move" not in [c.value for c in at.caption]
+
+
+def test_the_sliders_rest_since_their_last_move() -> None:
+    """Never moved, they rested long ago; a new position rests from the run that saw it."""
+    first = explorer.rested(None, "a", 5.0)
+    assert first == ("a", -math.inf)
+    assert explorer.rested(first, "a", 9.0) == first
+    assert explorer.rested(first, "b", 9.0) == ("b", 9.0)
+
+
+def test_a_wait_calls_into_streamlit_each_tick_until_it_ends() -> None:
+    """A rerun stops the script at a Streamlit call: the wait makes one each `TICK`."""
+    clock = [0.0]
+    ticks: list[float] = []
+
+    def pause(seconds: float) -> None:
+        clock[0] += seconds
+
+    runs.settle(lambda: clock[0] >= 3.5 * runs.TICK, lambda: ticks.append(clock[0]), pause)
+    assert ticks == pytest.approx([0, runs.TICK, 2 * runs.TICK, 3 * runs.TICK])
+    with pytest.raises(MovedError):
+        runs.settle(lambda: False, moved, pause)
+
+
+def test_a_wait_yields_at_a_read_of_the_session_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The Streamlit call of a wait (`yielded`) sends the browser nothing: a read of the session
+    state, where Streamlit 1.65 checks for a rerun (the script runner's callback)."""
+    state = SafeSessionState(SessionState(), moved)
+    monkeypatch.setattr(session_state_proxy, "get_session_state", lambda: state)
+    with pytest.raises(MovedError):
+        runs.yielded()
+
+
+def test_the_progress_of_the_sensitivity_draws_once_a_second_and_yields_between(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A bar drawn after each run kept the browser busy: `throttled` draws at most each `REDRAW`
+    and yields at the other ticks."""
+    clock, drawn, yields = [0.0], list[int](), list[float]()
+    monkeypatch.setattr(runs, "yielded", lambda: yields.append(clock[0]))
+    tick = runs.throttled(drawn.append, lambda: clock[0])
+    for share in range(1, 26):
+        clock[0] = share * runs.REDRAW / 10
+        tick(share)
+    assert drawn == [10, 20]
+    assert len(yields) == 23
+
+
+def test_an_old_result_shows_in_the_words_and_the_levers_of_this_run() -> None:
+    """Its numbers stay, its words follow this run, and an effect of a lever that this run lacks
+    goes (a slider that simple mode or the model hides now)."""
+    outcome = sensitivity.Outcome(0.1, (1.0,), (1.0,), (90,))
+    old = [sensitivity.Lever(f"old {n}", (n,), 1, 0, 2, step="1") for n in "ab"]
+    effects = tuple(sensitivity.Effect(lever, outcome, outcome) for lever in old)
+    found = sensitivity.Sensitivity("base", date(2026, 1, 1), outcome, effects)
+    now = sensitivity.Lever("neu a", ("a",), 1.5, 0.5, 2.5, step="2")
+    [effect] = explorer.said(found, [now]).effects
+    assert effect.lever == old[0]
+    assert (effect.lever.label, effect.lever.step) == ("neu a", "2")
 
 
 def test_the_run_cache_keeps_the_last_used_runs_within_its_bytes() -> None:
@@ -563,11 +675,12 @@ def test_the_run_cache_keeps_the_last_used_runs_within_its_bytes() -> None:
 
 
 def test_the_explorer_keeps_its_runs_by_their_bytes_and_computes_each_once(
-    data: Path, monkeypatch: pytest.MonkeyPatch
+    data: Path, monkeypatch: pytest.MonkeyPatch, threads: ThreadPoolExecutor
 ) -> None:
     """`nbytes` counts every array of a run, also those of its dicts. A session that asks for a
-    run in the making waits for it, and the least recently used run goes above `RUNS_BYTES`."""
-    opts, scenario = runs.options(data, paths=20), data / "scenarios" / "base.yaml"
+    run in the making waits for it, the least recently used run goes above `RUNS_BYTES`, and a
+    run whose wait a move stopped lands in the cache all the same."""
+    opts, scenario, stamp = runs.options(data, paths=20), data / "scenarios" / "base.yaml", (0.0, 0)
     run = opts.run_one(scenario)
     assert run is not None
     assert run.survival is not None
@@ -590,18 +703,63 @@ def test_the_explorer_keeps_its_runs_by_their_bytes_and_computes_each_once(
     monkeypatch.setattr(runs, "_runs", lambda: found)
     monkeypatch.setattr(runs, "RUNS_BYTES", 2 * runs.nbytes(run))
     monkeypatch.setattr(Options, "run_one", run_one)
-    with ThreadPoolExecutor(2) as sessions:
-        first = sessions.submit(runs.cached_run, opts, scenario, "{}", (0.0, 0))
+    with ThreadPoolExecutor(1) as sessions:
+        first = sessions.submit(runs.cached_run, opts, scenario, "{}", stamp)
         assert started.wait(10)
-        second = sessions.submit(runs.cached_run, opts, scenario, "{}", (0.0, 0))
-        time.sleep(0.2)  # time for a second run to start
+        with pytest.raises(MovedError):  # a second session waits for the same run, then moves
+            runs.cached_run(opts, scenario, "{}", stamp, moved)
         release.set()
-        assert first.result() is second.result() is run
+        assert first.result() is run
     for overrides in ('{"a": 1}', '{"a": 2}', "{}", '{"a": 2}'):
-        runs.cached_run(opts, scenario, overrides, (0.0, 0))
+        runs.cached_run(opts, scenario, overrides, stamp)
     assert calls == [{}, {"a": 1}, {"a": 2}, {}]  # two runs fit: the first went, the last stayed
-    assert runs.cached(opts, scenario, '{"a": 2}', (0.0, 0))
-    assert not runs.cached(opts, scenario, '{"a": 1}', (0.0, 0))
+    assert runs.cached(opts, scenario, '{"a": 2}', stamp)
+    assert not runs.cached(opts, scenario, '{"a": 1}', stamp)
+    release.clear()
+    with pytest.raises(MovedError):
+        runs.cached_run(opts, scenario, '{"a": 3}', stamp, moved)
+    assert not runs.cached(opts, scenario, '{"a": 3}', stamp)
+    release.set()
+    threads.shutdown()  # the runs done, and what they keep
+    assert runs.cached(opts, scenario, '{"a": 3}', stamp)
+
+
+def test_a_run_kept_since_the_miss_of_a_session_is_not_made_again(
+    data: Path, monkeypatch: pytest.MonkeyPatch, threads: ThreadPoolExecutor
+) -> None:
+    """The run of another session lands in the cache between the miss of `cached_run` and its
+    `submit`: the submit takes it from there."""
+    opts, scenario, stamp = runs.options(data, paths=20), data / "scenarios" / "base.yaml", (0.0, 0)
+    run = opts.run_one(scenario)
+    found: dict[tuple[object, ...], RunResult | None] = {}
+    monkeypatch.setattr(runs, "_runs", lambda: found)
+    runs.keep(found, (opts, scenario, "{}", stamp), run)
+    calls: list[object] = []
+    monkeypatch.setattr(Options, "run_one", lambda *args: calls.append(args))
+    future = runs.submit(opts, scenario, "{}", stamp)
+    threads.shutdown()
+    assert future.result(0) is run
+    assert calls == []
+
+
+def test_a_pool_whose_worker_died_gives_way_to_a_new_one(
+    data: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A worker killed for its memory breaks the pool for good: the next run takes a new pool."""
+    monkeypatch.setenv(WORKERS_ENV, "1")
+    found: dict[tuple[object, ...], RunResult | None] = {}
+    monkeypatch.setattr(runs, "_runs", lambda: found)
+    runs.pool.clear()
+    broken = runs.pool()
+    try:
+        with pytest.raises(BrokenProcessPool):
+            broken.submit(os._exit, 1).result(60)
+        opts, scenario = runs.options(data, paths=20), data / "scenarios" / "base.yaml"
+        assert runs.cached_run(opts, scenario, "{}", (0.0, 0)) is not None
+        assert runs.pool() is not broken
+    finally:
+        runs.pool().shutdown()
+        runs.pool.clear()
 
 
 def test_a_run_from_the_cache_shows_no_progress(
@@ -643,9 +801,7 @@ def test_a_scenario_name_with_markdown_shows_as_written_in_the_strip_and_the_cap
     at.sidebar.selectbox[0].set_value("fixed")
     next(s for s in at.slider if s.label == "Inflation").set_value(4.0).run()
     assert any(c.value == f"{escaped} (as saved) less {escaped}" for c in at.caption)
-    script = "from pathlib import Path\nfrom dagobert.store import streams_file\n"
-    script += f"from dagobert.ui import overview\noverview.page(streams_file(Path({str(data)!r})))"
-    overview = AppTest.from_string(script, default_timeout=60).run()
+    overview = AppTest.from_string(OVERVIEW.format(data=str(data)), default_timeout=60).run()
     assert [h.value for h in overview.subheader][:1] == [f"Main scenario: {escaped}"]
 
 
@@ -988,13 +1144,13 @@ def test_what_the_viewer_moved_stays_in_simple_mode(
     """The model, nominal euros, an expert slider and a switch set in advanced mode stay after
     the switch to simple mode and keep their overrides; what stands at its default goes, and a
     note names it. The levers of the goal seek are the sliders drawn. A desktop folds the charts
-    as a phone, so the sensitivity waits for its fold."""
+    as a phone; the sensitivity waits for its fold in either mode."""
     sensed: list[object] = []
     run = sensitivity.run
 
-    def counted(*args: Any) -> sensitivity.Sensitivity:
+    def counted(*args: Any, **kwargs: Any) -> sensitivity.Sensitivity:
         sensed.append(args)
-        return run(*args)
+        return run(*args, **kwargs)
 
     monkeypatch.setattr(sensitivity, "run", counted)
     at = AppTest.from_string(EXPLORER.format(data=str(data)), default_timeout=60).run()
@@ -1003,7 +1159,7 @@ def test_what_the_viewer_moved_stays_in_simple_mode(
     next(s for s in at.slider if s.label == "Pension growth").set_value(1.0)
     next(t for t in at.toggle if t.label == "Realize gains").set_value(True)
     at.run()
-    sensed.clear()
+    assert sensed == []
     at.query_params["mode"] = "simple"
     at.run()
     assert not at.exception

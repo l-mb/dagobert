@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from concurrent.futures import as_completed
+from concurrent.futures import FIRST_COMPLETED, wait
 from dataclasses import dataclass, field, replace
 from datetime import date
 from typing import TYPE_CHECKING, Any
@@ -108,34 +108,49 @@ def _side(future: Future[tuple[str, date, Outcome]], base: Outcome) -> Outcome:
 
 
 def run(
-    job: Job, levers: Sequence[Lever], pool: Executor, tick: Callable[[float], object]
+    job: Job,
+    levers: Sequence[Lever],
+    pool: Executor,
+    workers: int,
+    tick: Callable[[float], object],
+    *,
+    every: float,
 ) -> Sensitivity:
     """2 runs per lever on top of the overrides of `job`, with the seed of its options (common
-    random numbers, so the differences carry far less noise than the values). `tick` gets the
-    share of finished runs. When it raises, the runs that did not start are cancelled. A side
-    that the model refuses counts as the base run."""
+    random numbers, so the differences carry far less noise than the values), at most `workers`
+    in the pool at a time: a run in its queue cannot be cancelled, so a run that the page starts
+    next waits for no more than these. `tick` gets the share of finished runs every `every`
+    seconds, also while no run ends, and after a run ends, before the next goes in. When it
+    raises, no more go in, and those that wait are cancelled. A side that the model refuses
+    counts as the base run."""
     opts = replace(job.opts, mortality=False)
-    base_run = pool.submit(outcome, opts, job.scenario, job.overrides)
-    sides = {
-        (lever, side): pool.submit(
-            outcome, opts, job.scenario, deep_merge(job.overrides, nested({lever.path: side}))
-        )
-        for lever in levers
-        for side in (lever.low, lever.high)
-        if side != lever.value
-    }
+    sides = [
+        (lever, side) for lever in levers for side in (lever.low, lever.high) if side != lever.value
+    ]
+    calls = [
+        job.overrides,
+        *(deep_merge(job.overrides, nested({lever.path: side})) for lever, side in sides),
+    ]
+    futures: list[Future[tuple[str, date, Outcome]]] = []
+    running: set[Future[tuple[str, date, Outcome]]] = set()
     try:
-        for done, _ in enumerate(as_completed([base_run, *sides.values()]), start=1):
-            tick(done / (len(sides) + 1))
+        while len(futures) < len(calls) or running:
+            while len(running) < workers and len(futures) < len(calls):
+                futures.append(pool.submit(outcome, opts, job.scenario, calls[len(futures)]))
+                running.add(futures[-1])
+            running = wait(running, every, FIRST_COMPLETED).not_done
+            tick((len(futures) - len(running)) / len(calls))
     finally:
-        for future in sides.values():
+        for future in running:
             future.cancel()
+    base_run, *side_runs = futures
+    by_side = dict(zip(sides, side_runs, strict=True))
     name, start, base = base_run.result()
     effects = [
         Effect(
             lever,
             *(
-                _side(sides[lever, side], base) if (lever, side) in sides else base
+                _side(by_side[lever, side], base) if (lever, side) in by_side else base
                 for side in (lever.low, lever.high)
             ),
         )

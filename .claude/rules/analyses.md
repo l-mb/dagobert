@@ -10,12 +10,15 @@ paths:
 The sensitivity run, the failure anatomy and the difference of two runs, which the explorer
 (rule `explorer`) and the report (rule `charts`) show. The goal seek: rule `goalseek`.
 
-- `src/dagobert/sensitivity.py`: one-at-a-time sensitivity run. `run` takes `Lever`s and an
-  executor, two engine runs per lever, ranked by the change in P(broke by 90) in whole points,
-  then in the median net worth at 90. A side at its bound is not run, one that the model refuses
-  (`InputError`: a ceiling stepped to the trigger) is the base run too; the base run raises. A
-  `Lever` compares without its words (`label`, `format`, `step`): the explorer keys its caches by
-  it, and no cache key holds words (rule `i18n`).
+- `src/dagobert/sensitivity.py`: one-at-a-time sensitivity run. `run` takes `Lever`s, an executor
+  and its count of workers, two engine runs per lever, at most that many in the executor at a time,
+  the next after a `tick` (the share of finished runs, every `every` seconds, also while no run
+  ends), none after a tick that raises (the explorer's runs of a move then find a worker soon, rule
+  `explorer-runs`), ranked by the change in P(broke by 90) in whole points, then in the median net
+  worth at 90. A side at its bound is not run, one that the
+  model refuses (`InputError`: a ceiling stepped to the trigger) is the base run too; the base run
+  raises. A `Lever` compares without its words (`label`, `format`, `step`): the explorer keys its
+  caches by it, and no cache key holds words (rule `i18n`).
 - `src/dagobert/report/sensitivity.py`: `sensitivity_figure`, the tornado chart of the explorer
   (the report has none): per lever a bar of one step down and one of one step up in a row, the
   upper one thin where both point the same way. A bar takes the color of its effect on the

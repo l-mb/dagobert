@@ -286,9 +286,14 @@ def _answer(
 def plan(data_dir: Path, scenario: str) -> None:
     """The tiles of the explorer's run of the main `scenario`, named with its note and a link that
     changes it, and, on request, the spending it allows and the month to stop working, which the
-    last tile shows: of a plan that the start page started at once (`SEEK_FIRST`)."""
+    last tile shows: of a plan that the start page started at once (`SEEK_FIRST`). On a miss the
+    run waits in the pool under `Simulating the plan …`."""
     path = concrete_scenarios(data_dir)[scenario]
+    waiting = st.empty()
+    if not runs.files_cached(data_dir, path):
+        waiting.caption(_("Simulating the plan …"))
     result = runs.files_run(data_dir, path)
+    waiting.empty()
     if result is None:
         return
     st.subheader(_("Main scenario: {scenario}").format(scenario=literal(result.scenario)))

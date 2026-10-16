@@ -24,9 +24,10 @@ the features: rule `mode`.
   Without a chosen scenario the page asks for one and `Set as default, the first as main` is off;
   its help says why, else it names the first chosen one, which becomes the main scenario (rule
   `scenarios`). Above the table one line never goes (`Status`): `Simulating 2 scenarios, Monte
-  Carlo, 500 paths … A faded result below is the last one.` while the runs compute, only when the
-  cache lacks one (`runs.cached`; Streamlit fades the elements of the last run until the new ones
-  replace them) and the progress of the sensitivity,
+  Carlo, 500 paths … A faded result below is the last one.` while the runs compute in the pool,
+  only when the cache lacks one (`runs.cached`; Streamlit fades the elements of the last run until
+  the new ones replace them), drawn once (the wait yields, rule `explorer-runs`), and the progress
+  of the sensitivity, at most once a second,
   then `Up to date: …`, or `Not simulated: …` for positions that the model refuses (`InputError` of
   the runs with the sliders: the runs of the files run first, so inputs that do not load still raise
   to `main.py`): a warning below the moved sliders, on a phone also in the strip, names the problem
@@ -93,10 +94,24 @@ the features: rule `mode`.
   sensitivity (`st.tabs(on_change="rerun")`, `tab.open`). In a tab the charts sit in folds (`_fold`:
   `st.expander(on_change="rerun")`, drawn only while `open`): `Net worth` (open at first), `Will the
   money last?`, `Income, spending and taxes`, `Why paths run out` (the reading of the anatomy as a
-  caption: no expander inside an expander) and `What moves the result`, so the sensitivity runs only
-  when its fold opens. A desktop draws them all (in simple mode in folds, below), the chart `Will
-  the money last?` (rule `balance`) with its reading (`report.lasting_reading`) as a caption below
-  it on both.
+  caption: no expander inside an expander) and `What moves the result`. A desktop draws them all
+  (in simple mode in folds, below), the chart `Will the money last?` (rule `balance`) with its
+  reading (`report.lasting_reading`) as a caption below it on both.
+- `What moves the result` is a fold on a desktop too, in both modes, closed at first (owner,
+  2026-10-16: the sensitivity took a minute of each move): it draws and runs only while open
+  (`_tab`, `_levers`). A miss waits until the sliders, the model and the paths have rested
+  `REST`, 2 s, since their last change in this session (`rested`, `_rested`: session state `MOVED`;
+  never moved counts as rested, so a fold opened later runs at once), then runs (rule
+  `explorer-runs`). Meanwhile the fold shows a bar, `What moves the result: starts when the sliders
+  rest` (`RESTING`), then the count of runs and its progress, and below it the last result of the
+  scenario that this session showed (`_shown`: session state `SHOWN`, raw, `said` in the words and
+  the levers of this run: a lever that this run lacks goes) at `opacity` 0.4 in the container
+  `explorer-stale-<tab>` (`ui/page.css`), with the caption `For the sliders before your last move`;
+  nothing without one. A move during the wait or the run starts the next one at once. The charts of
+  the run before go when the wait starts (`drawn`, an `st.empty`: a container keeps the children of
+  the one before, also its old copy), the new ones replace the bar and the copy (`Levers.charts`; a
+  phone reads the measure of the copy from the state of its selector, which the new one draws). A
+  hit updates the charts in place.
 - With one result the page hides the chart of the median net worth: the fan chart of the tab shows
   the same lines. With two or more results, a section compares two of them path by path (rule
   `analyses`; A and B: a chosen scenario as B and the nearest chosen one that it extends as A,
@@ -121,9 +136,9 @@ the features: rule `mode`.
   values as saved` (a class slider that stands at its file value is no default), a long note
   folds on a phone under `Hidden in simple mode`. A control dragged back to its file value is no
   longer `moved`: it hides on the next run. On a desktop simple mode takes the folds of a phone
-  (`_fold(folded=)`) with the wide figures: `Net worth` open, the rest closed, so the sensitivity
-  runs when its fold opens. Rejected (design): a fold `Advanced` around expert groups (no expander
-  in an expander), a reset of hidden sliders on the switch.
+  (`_fold(folded=)`) with the wide figures: `Net worth` open, the rest closed. Rejected (design): a
+  fold `Advanced` around expert groups (no expander in an expander), a reset of hidden sliders on
+  the switch.
 
 ## Code
 

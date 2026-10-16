@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import shutil
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from concurrent.futures import ThreadPoolExecutor
 from functools import cache
 from pathlib import Path
 
@@ -28,6 +29,18 @@ def advanced_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
     """A page shows everything unless a test asks for simple mode (`?mode=simple`): a new browser
     starts simple (`mode.DEFAULT`), which `test_mode` checks."""
     monkeypatch.setattr(mode, "DEFAULT", "advanced")
+
+
+@pytest.fixture
+def threads(monkeypatch: pytest.MonkeyPatch) -> Iterator[ThreadPoolExecutor]:
+    """The process pool of the explorer as threads: a patched engine run counts there. Its exit
+    waits for every run and what it keeps. Imported here: most tests need no Streamlit."""
+    from dagobert.ui import explorer, runs  # noqa: PLC0415
+
+    with ThreadPoolExecutor(4) as pool:
+        for module in (runs, explorer):
+            monkeypatch.setattr(module, "pool", lambda: pool)
+        yield pool
 
 
 @pytest.fixture

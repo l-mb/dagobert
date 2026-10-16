@@ -440,6 +440,10 @@
   .st-key-explorer-strip [data-testid="stCaptionContainer"] p {font-size: 0.75rem}
 }
 
+/* Explorer: the last sensitivity result fades while the new one waits for the sliders to rest or
+   runs (`explorer._levers`). */
+[class*="st-key-explorer-stale-"] {opacity: 0.4}
+
 /* Flows page. In a main area up to 860 px (portrait, landscape with the sidebar open, a narrow
    window) the outflow bars with their picker stand in for the Sankey diagram, whose labels need
    the width: the rules hide the layout wrapper, which would keep the gap of the tab. Up to

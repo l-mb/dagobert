@@ -7629,6 +7629,14 @@ msgstr ""
 "zuerst."
 
 #: ui/explorer.py
+msgid "What moves the result: starts when the sliders rest"
+msgstr "Was das Ergebnis bewegt: startet, sobald die Regler ruhen"
+
+#: ui/explorer.py
+msgid "For the sliders before your last move"
+msgstr "Für die Regler vor deiner letzten Änderung"
+
+#: ui/explorer.py
 #, python-brace-format
 msgid "What moves the result: {n} run"
 msgid_plural "What moves the result: {n} runs"

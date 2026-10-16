@@ -83,8 +83,16 @@ CI builds and scans the image: rule `tooling`.
   further moves, each to its end, kept the peak at 2.7 GB and `memory.current` at 1.3 GB (the main
   process 1.2 GB); a second session at 5000 paths that moved another slider at the same time as
   the first, twice, 3.2 GB (one run in the making at a time, the workers shared); the main process
-  at idle after it 1.06 GB. Before: with 16 entries and fast reruns 6.4 GB, and a run of the
-  measure 8 GB, OOM. `dagobert run` of the seven scenarios at 5000 paths 2.1 GB (0.8 GB for one,
+  at idle after it 1.06 GB. Since 2026-10-16 the workers make the two runs of a position too (rule
+  `explorer-runs`): the main process makes no run, it takes the results one at a time (a result
+  and its pickle, 400 MB at 5000 paths, while it arrives), and at most `DAGOBERT_WORKERS` runs are
+  in the making. Measured so in the image on 2026-10-16 (two sessions at 5000 paths, six quick
+  moves of each at the same time, four more each to its end, then the sensitivity of one for 60 s
+  while the other moved twice): a peak of 3.19 GB, in the quick moves (the main process 1.74 GB),
+  0.7 GB a worker that holds a run, 1.4 GB at idle after it (the main process 1.28 GB). A worker
+  killed for its memory breaks the pool, which the next run makes anew (rule `explorer-runs`).
+  Before: with 16 entries and fast reruns 6.4 GB, and a run of the measure 8 GB, OOM. `dagobert
+  run` of the seven scenarios at 5000 paths 2.1 GB (0.8 GB for one,
   0.2 GB for each more; 2026-10-13), under the same `mem_limit` through `docker compose run`. So
   5 GB: 1.8 GB above two sessions that compute at the same time, for a longer plan (a run in the
   making and a worker grow with the months) or a third session; 3 GB hold the Explorer at 500 paths

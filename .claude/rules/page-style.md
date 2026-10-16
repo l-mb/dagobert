@@ -60,6 +60,9 @@ page sits under the heading of that page in `page.css`, and its rule says what i
   length needs `@property`. The DOM of Streamlit 1.65: check it after an upgrade.
 - A segmented control is as high as a text field (2.5rem, its buttons by `data-variant`), so its
   label lines up in a row of fields (`Sex`, `Tax year`, `Amounts` beside a select).
+- A result that a new one is about to replace fades: a container whose key starts with
+  `explorer-stale-` takes `opacity: 0.4` in both themes (the old sensitivity charts, rule
+  `explorer`).
 
 ## Theme
 

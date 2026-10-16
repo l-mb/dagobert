@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Literal
 
 import pytest
-from apps import MAIN, labels, record
+from apps import MAIN, OVERVIEW, labels, record
 from builders import ASSETS, spent
 from german import ACTIVATE, words
 from streamlit.testing.v1 import AppTest
@@ -35,13 +35,6 @@ POLICY = {
     "matures": "2040-01-01",
     "growth": "equity",
 }
-OVERVIEW = """
-from pathlib import Path
-from typing import Literal
-from dagobert.store import streams_file
-from dagobert.ui import overview
-overview.page(streams_file(Path({data!r})))
-"""
 
 
 VPW = {"base": "no_pay", "categories": ["wohnen"], "vpw": {}}  # the rent of `data` flexible
@@ -457,6 +450,7 @@ AT_REVISION = runs.Refused("the run in a directory of its own")
         ({"scenarios/base.yaml": None}, "explorer", False),
     ],
 )
+@pytest.mark.usefixtures("threads")
 def test_the_baseline_is_the_run_of_the_files_while_they_hold_its_plan(
     data: Path,
     monkeypatch: pytest.MonkeyPatch,

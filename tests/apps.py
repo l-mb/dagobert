@@ -15,19 +15,33 @@ from streamlit.testing.v1 import AppTest
 
 from dagobert import i18n, report, revisions
 from dagobert.model.streams import Stream
-from dagobert.ui import assets, main, runs, tables
+from dagobert.ui import assets, main, runs, sliders, tables
 
 # the stream grids with a `factor` column per phase
 STREAMS = tables.Table(Stream, "streams", ("name",), entries={"factor": PHASE_LABELS})
 
 
 # As in `main.py`: a spawned worker of the process pool imports the script as `__mp_main__`, which
-# must not draw the page again (bare, it logged hundreds of warnings past the capture of pytest)
+# must not draw the page again (bare, it logged hundreds of warnings past the capture of pytest).
+# So is every script that runs in the pool: the Explorer and the plan of the Overview
 EXPLORER = """
 if __name__ == "__main__":
     from pathlib import Path
     from dagobert.ui import explorer
     explorer.page(Path({data!r}))
+"""
+
+
+# session state of the fold `What moves the result` of the first scenario tab: open, it runs
+LEVERS = f"{sliders.KEY}fold-levers-0"
+
+
+OVERVIEW = """
+if __name__ == "__main__":
+    from pathlib import Path
+    from dagobert.store import streams_file
+    from dagobert.ui import overview
+    overview.page(streams_file(Path({data!r})))
 """
 
 
@@ -53,22 +67,23 @@ MAIN = main.__file__
 
 # Every page but the Explorer (`EXPLORER`), each drawn alone after the other
 PAGE = """
-from pathlib import Path
-from dagobert.store import assets_file, streams_file
-from dagobert.ui import assets, assumptions, cashflows, features, flows, overview, scenarios
-from dagobert.ui import snapshot, spend
-from dagobert.ui import data as data_page
-data = Path({data!r})
-overview.page(streams_file(data))
-snapshot.page(assets_file(data))
-assets.page(assets_file(data))
-cashflows.page(streams_file(data))
-spend.page(streams_file(data))
-flows.page(data)
-features.page(data)
-data_page.page(data)
-assumptions.page(data)
-scenarios.page(data)
+if __name__ == "__main__":
+    from pathlib import Path
+    from dagobert.store import assets_file, streams_file
+    from dagobert.ui import assets, assumptions, cashflows, features, flows, overview, scenarios
+    from dagobert.ui import snapshot, spend
+    from dagobert.ui import data as data_page
+    data = Path({data!r})
+    overview.page(streams_file(data))
+    snapshot.page(assets_file(data))
+    assets.page(assets_file(data))
+    cashflows.page(streams_file(data))
+    spend.page(streams_file(data))
+    flows.page(data)
+    features.page(data)
+    data_page.page(data)
+    assumptions.page(data)
+    scenarios.page(data)
 """
 
 

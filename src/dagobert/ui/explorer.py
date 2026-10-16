@@ -5,6 +5,8 @@ nothing again."""
 from __future__ import annotations
 
 import json
+import math
+import time
 from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -62,7 +64,21 @@ from dagobert.ui import (
 )
 from dagobert.ui.gridcolumns import on_off
 from dagobert.ui.knobs import NO_SALARIES, STANDING, Salaries, classes, knobs, switches
-from dagobert.ui.runs import PATHS, cached, cached_run, keep, models, options, pool
+from dagobert.ui.runs import (
+    PATHS,
+    TICK,
+    cached,
+    cached_run,
+    keep,
+    models,
+    options,
+    pool,
+    settle,
+    submit,
+    throttled,
+    workers,
+    yielded,
+)
 from dagobert.ui.save import REFUSED, reason
 from dagobert.ui.seek import goal_seek, work_dials
 from dagobert.ui.sliders import ALL_SPENDING, GROUPS, KEY, Knob, Switch, forget
@@ -117,6 +133,10 @@ if (!window.dgSidebarButtons) {
 }
 </script>"""
 PLAN_KEYS = ("scale", *SCENARIO_KEYS)  # override paths of the plan, not of the world
+REST = 2.0  # seconds that the sliders rest before the sensitivity starts
+MOVED = "ui-explorer-moved"  # session state: the positions of the sliders and since when (`rested`)
+SHOWN = "ui-explorer-sensed"  # session state: the last sensitivity shown per scenario (`_shown`)
+RESTING = N_("What moves the result: starts when the sliders rest")
 
 NOMINAL_HELP = N_(
     "Off: euros of the simulation start, each path divided by its own consumer prices, so "
@@ -139,16 +159,102 @@ def _found() -> dict[tuple[object, ...], Sensitivity]:
     return {}
 
 
-def _sensitivity(
-    job: sensitivity.Job, levers: tuple[Lever, ...], stamp: Stamp, status: Status
-) -> Sensitivity:
-    """Its effects named by the `levers` of this run: a lever keys the cache without its words."""
-    found = _found()
+def said(s: Sensitivity, levers: Sequence[Lever]) -> Sensitivity:
+    """`s` in the words of `levers`, those of this run: a lever keys the caches without its words.
+    An effect whose lever this run lacks goes (an old result of other sliders, `_levers`)."""
+    words = {lever.path: lever for lever in levers}
+    return replace(
+        s,
+        effects=tuple(
+            replace(e, lever=replace(e.lever, label=w.label, format=w.format, step=w.step))
+            for e in s.effects
+            if (w := words.get(e.lever.path)) is not None
+        ),
+    )
+
+
+def rested(last: tuple[object, float] | None, sliders: object, now: float) -> tuple[object, float]:
+    """The positions of the sliders and since when they stand there: since ever at first, from
+    `now` when they differ from `last`."""
+    if last is None:
+        return sliders, -math.inf
+    return last if last[0] == sliders else (sliders, now)
+
+
+def _rested(opts: Options, overrides: dict[str, Any]) -> float:
+    """Since when the sliders, the model and the paths of this session stand where they are."""
+    moved = rested(st.session_state.get(MOVED), (opts, json.dumps(overrides)), time.monotonic())
+    st.session_state[MOVED] = moved
+    return moved[1]
+
+
+def _shown() -> dict[Path, Sensitivity]:
+    """The last sensitivity that this session showed per scenario, without the words of a run."""
+    shown: dict[Path, Sensitivity] = st.session_state.setdefault(SHOWN, {})
+    return shown
+
+
+@dataclass(frozen=True)
+class Levers:
+    """The fold `What moves the result` of the scenario tab `i`, its scenario named as the tab
+    names it, and how its charts show."""
+
+    i: int
+    scenario: str
+    nominal: bool
+    compact: bool
+
+    def charts(self, s: Sensitivity, *, fresh: bool) -> None:
+        """The plan apart: next to the world its levers never rank. A phone shows the measure of
+        its selector, which a fresh result draws, an old one only reads."""
+        key = "sensitivity" if fresh else "stale"
+        measure = (
+            (_measure(s) if fresh else st.session_state.get(f"{KEY}measure", 0))
+            if self.compact
+            else 0
+        )
+        for mine in (True, False):
+            part = tuple(e for e in s.effects if (e.lever.path[0] in PLAN_KEYS) == mine)
+            figure = report.sensitivity_figure(
+                replace(s, scenario=self.scenario, effects=part),
+                plan=mine,
+                nominal=self.nominal,
+                compact=self.compact,
+                measure=measure,
+            )
+            chart(figure, key=f"{key}-{self.i}-{mine}")
+
+
+def _levers(
+    job: sensitivity.Job,
+    levers: tuple[Lever, ...],
+    stamp: Stamp,
+    status: Status,
+    *,
+    fold: Levers,
+    since: float,
+) -> None:
+    """The charts of the fold, in the words of this run (`said`). A miss waits until the sliders
+    have rested `REST` seconds (`since`), then runs in the pool, under a progress bar above the
+    last result of the scenario that this session showed, faded (`explorer-stale-`), while the
+    charts of the run before go at once; a moved slider stops the wait and the run at their next
+    tick. A tick draws the bar and the `Status` line at most every `REDRAW` seconds, else it only
+    yields (`throttled`). A hit updates the charts in place."""
+    found, shown = _found(), _shown()
     key = (job.opts, job.scenario, json.dumps(job.overrides), levers, stamp)
-    if key not in found:
+    waiting = st.empty()  # on a hit too: the charts keep their place
+    if (result := found.get(key)) is None:
+        with waiting.container():
+            bar = st.progress(0.0, _(RESTING))
+            if (last := shown.get(job.scenario)) is not None:
+                st.caption(_("For the sliders before your last move"))
+                with st.container(key=f"explorer-stale-{fold.i}"):
+                    fold.charts(said(last, levers), fresh=False)
+        drawn = st.empty()  # replaces the charts of the run before, which a container would keep
+        settle(lambda: time.monotonic() - since >= REST, yielded, time.sleep)
         n = 2 * len(levers)
         text = ngettext("What moves the result: {n} run", "What moves the result: {n} runs", n)
-        bar = st.progress(0.0, text.format(n=n))
+        bar.progress(0.0, text.format(n=n))
         name = load_scenario(job.scenario).name
         busy = ngettext(
             "What moves the result: {n} run of {scenario}, {share}",
@@ -160,10 +266,18 @@ def _sensitivity(
             bar.progress(share, text.format(n=n))
             status.busy(busy.format(n=n, scenario=name, share=format_percent(share, 0)))
 
-        keep(found, key, sensitivity.run(job, levers, pool(), progress))
-    by_path = {lever.path: lever for lever in levers}
-    effects = tuple(replace(e, lever=by_path[e.lever.path]) for e in found[key].effects)
-    return replace(found[key], effects=effects)
+        result = keep(
+            found,
+            key,
+            sensitivity.run(job, levers, pool(), workers(), throttled(progress), every=TICK),
+        )
+        waiting.empty()
+        box = drawn.container()
+    else:
+        box = st.container()
+    shown[job.scenario] = result
+    with box:
+        fold.charts(said(result, levers), fresh=True)
 
 
 def _salaries(data: Path, scenario: Path) -> Salaries:
@@ -728,9 +842,9 @@ def _how(opts: Options, scenarios: int) -> str:
 
 
 def _fold(title: str, key: str, *, folded: bool, expanded: bool = False) -> DeltaGenerator | None:
-    """A group of charts of a scenario tab. `folded` (a phone, or simple mode): a fold that draws
-    them only while open, as the page is long and the sensitivity takes most of a run. None while
-    closed."""
+    """A group of charts of a scenario tab. `folded` (a phone, simple mode, the sensitivity): a
+    fold that draws them only while open, as the page is long and the sensitivity takes most of a
+    run. None while closed."""
     if not folded:
         return st.container()
     fold = st.expander(title, expanded=expanded, key=key, on_change="rerun")
@@ -748,7 +862,8 @@ def _tab(
     plan: bool,
 ) -> DeltaGenerator | None:
     """The charts of a scenario tab, compact on a phone, and the slot of its sensitivity when
-    `plan` (a run of the files has none) and, when `folded`, its fold is open."""
+    `plan` (a run of the files has none) and its fold is open: a fold on a desktop too, as the
+    sensitivity takes most of a run."""
     scenario_note(r.note)
     if (
         box := _fold(_("Net worth"), f"{KEY}fold-worth-{i}", folded=folded, expanded=True)
@@ -779,8 +894,8 @@ def _tab(
                 st.caption(" ".join(reading(why)))
     if not plan:
         return None
-    box = _fold(_("What moves the result"), f"{KEY}fold-levers-{i}", folded=folded)
-    return None if box is None else box.empty()
+    box = _fold(_("What moves the result"), f"{KEY}fold-levers-{i}", folded=True)
+    return None if box is None else box.container()
 
 
 def _runs(
@@ -803,15 +918,24 @@ def _results(
     status: Status,
 ) -> list[tuple[Path, RunResult]]:
     """The runs with the sliders, then, with a slider moved, those of the files as twins: the same
-    scenarios as the files define them, in the charts and tabs. `status` says `Simulating` while
-    the cache lacks one of them: a hit takes no time and must not look like a run. The runs of
-    the files run first: inputs that do not load raise there (`main.py` shows them), so a refusal
-    of the runs with the sliders is one of their positions, which `status` names: no results."""
-    if not all(cached(opts, p, json.dumps(o), stamp) for p in chosen for o in ({}, overrides)):
+    scenarios as the files define them, in the charts and tabs. The runs that the cache lacks
+    start together in the pool, and `status` says `Simulating` while they run: a hit takes no time
+    and must not look like a run. The runs of the files come first: inputs that do not load raise
+    there (`main.py` shows them), so a refusal of the runs with the sliders is one of their
+    positions, which `status` names: no results."""
+    missing = [
+        (p, o)
+        for o in dict.fromkeys(("{}", json.dumps(overrides)))
+        for p in chosen
+        if not cached(opts, p, o, stamp)
+    ]
+    if missing:
         status.busy(
             _("Simulating {how}").format(how=_how(opts, len(chosen))),
             f" {_('A faded result below is the last one.')}",
         )
+    for p, o in missing:
+        submit(opts, p, o, stamp)
     files = _runs(opts, chosen, {}, stamp)
     if not overrides:
         return files
@@ -874,6 +998,7 @@ def page(data: Path) -> None:
         compact=compact,
     )
     opts, overrides, nominal = side.opts, side.overrides, side.nominal
+    since = _rested(opts, overrides)  # in every run: a move counts with every fold closed
     if not chosen:
         return
     status = Status(st.empty(), results_box)
@@ -920,17 +1045,7 @@ def page(data: Path) -> None:
             slots.append((i, p, slot))
     for i, p, slot in slots:  # last: the page shows first
         with slot:
-            found = _sensitivity(sensitivity.Job(opts, p, overrides), side.levers, stamp, status)
-        with slot.container():  # the plan apart: next to the world its levers never rank
-            measure = _measure(found) if compact else 0
-            for mine in (True, False):
-                part = tuple(e for e in found.effects if (e.lever.path[0] in PLAN_KEYS) == mine)
-                figure = report.sensitivity_figure(
-                    replace(found, scenario=chosen[p], effects=part),
-                    plan=mine,
-                    nominal=nominal,
-                    compact=compact,
-                    measure=measure,
-                )
-                chart(figure, key=f"sensitivity-{i}-{mine}")
+            job = sensitivity.Job(opts, p, overrides)
+            fold = Levers(i, chosen[p], nominal, compact)
+            _levers(job, side.levers, stamp, status, fold=fold, since=since)
     status.done(done)

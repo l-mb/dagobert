@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from apps import ASSUMPTIONS, EXPLORER, MAIN, PAGE, labels, note, record, render
+from apps import ASSUMPTIONS, EXPLORER, LEVERS, MAIN, PAGE, labels, note, record, render
 from german import leaks, words
 from streamlit.testing.v1 import AppTest
 
@@ -247,13 +247,15 @@ def test_pages_render_an_empty_plan(
 ) -> None:
     """A first run's empty plan (no asset, no stream, no record) and a quick start, every feature
     off, in simple mode, which a start opens in, and in advanced mode. The desktop Explorer of
-    advanced mode runs the whole sensitivity: at the fewest paths, with the time of a CI runner."""
+    advanced mode opens `What moves the result` and runs the whole sensitivity: at the fewest
+    paths, with the time of a CI runner."""
     for module in (runs, explorer):
         monkeypatch.setattr(module, "PATHS", explorer.PATH_CHOICES[0])
     datadir.start_quick(tmp_path, quick)
     at = AppTest.from_string(pages.format(data=str(tmp_path)), default_timeout=120)
     at.query_params["mobile"] = str(int(phone))
     at.query_params["mode"] = mode
+    at.session_state[LEVERS] = not phone and mode == "advanced"
     at.run()
     assert not at.exception
 

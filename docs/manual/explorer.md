@@ -24,12 +24,14 @@ you tap is the first one. A line below the button names it.
 
 Above the table, one line tells you what the app does. While it computes, the line says so, for
 example `Simulating 2 scenarios, Monte Carlo, 500 paths`. The old table stays grey until the new
-results arrive. When the work is done, the line starts with `Up to date`. The app keeps the results
-that it computed. When you come back to them, also from another page, they show at once without
-that line. A new default choice of scenarios or a change on the Features page keeps them too. Your inputs do not allow
-some positions of the sliders, for example a spending rule whose increase starts at or below the
-wealth where its cut starts. Then the line starts with `Not simulated`, a message below it names the
-problem, and the page shows no results. Move a slider back to see them again.
+results arrive. If you move a slider again during this time, the app stops the wait at once and
+starts the runs for the new position. When the work is done, the line starts with `Up to date`.
+The app keeps the results that it computed. When you come back to them, also from another page,
+they show at once without that line. A new default choice of scenarios or a change on the
+Features page keeps them too. Your inputs do not allow some positions of the sliders, for example
+a spending rule whose increase starts at or below the wealth where its cut starts. Then the line
+starts with `Not simulated`, a message below it names the problem, and the page shows no results.
+Move a slider back to see them again.
 
 The next line names the sliders that you moved, each as `from → to`. When you moved more than three
 sliders, the line shows how many, for example `16 sliders moved`. Click or tap it to see the list.
@@ -219,6 +221,14 @@ Each scenario has a tab. When you moved a slider, the run as saved has a tab too
   change and whether it is better or worse. A step that the inputs do not allow, such as a ceiling
   moved to the trigger, shows no change.
 
+The sensitivity charts are in the group `What moves the result`, which starts closed, also on a
+computer. They need many runs, about half a minute for each scenario at 500 paths. So the app
+computes them only while the group is open, and only when you did not move a slider for 2 seconds.
+While the app waits or computes, the group shows a bar. Below the bar, the charts of your last
+position show in grey, with the line `For the sliders before your last move`. When the new charts
+are ready, they replace the grey ones. If you move a slider during this time, the app stops and
+waits for the sliders again.
+
 ## On a phone
 
 - The scenarios are buttons. A selected one has a colored border.
@@ -229,8 +239,8 @@ Each scenario has a tab. When you moved a slider, the run as saved has a tab too
   shows the rest, and `What the columns mean` explains each column.
 - In the tab of a scenario, the charts sit in groups that open with a tap: `Net worth` (open at
   first), `Will the money last?`, `Income, spending and taxes`, `Why paths run out` and `What moves
-  the result`. Only an open group computes and draws its charts, so the sensitivity runs only when
-  you open it. A selector picks the measure of the sensitivity charts. Their axis marks zero and the
+  the result`. Only an open group computes and draws its charts. A selector picks the measure of
+  the sensitivity charts. Their axis marks zero and the
   end of the longest bar; tap a bar for its value. Only the open tab computes.
 
 ## In simple mode
@@ -256,4 +266,3 @@ For example, when property is off, the sidebar does not show `Loan rate after th
 
 The sensitivity charts and the goal seek use only the sliders that show. On a computer, the charts
 of a scenario tab sit in groups that open with a click, as on a phone. `Net worth` is open at first.
-The sensitivity charts compute only when you open `What moves the result`.

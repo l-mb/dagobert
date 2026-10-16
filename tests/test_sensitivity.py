@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import date
@@ -11,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from dagobert import report
+from dagobert import report, sensitivity
 from dagobert.goalseek import Dial
 from dagobert.loader import load_assumptions
 from dagobert.report.charts import GRAY, GREEN, RED
@@ -27,6 +28,7 @@ EQUITY_DIAL = Dial(
 )
 REFINANCE = Lever("Refinance rate", ("refinance_rate",), 0.04, 0.03, 0.05)
 AT_BOUND = Lever("Cash buffer", ("cash_buffer_months",), 0.0, 0.0, 3.0)
+EVERY = 0.01  # seconds between two ticks: a test waits for no page
 
 
 def _job(data: Path) -> Job:
@@ -37,9 +39,11 @@ def _job(data: Path) -> Job:
 def test_levers_rank_by_effect_and_a_side_at_its_bound_is_the_base_run(data: Path) -> None:
     ticks: list[float] = []
     with ThreadPoolExecutor(2) as pool:
-        found = run(_job(data), [REFINANCE, AT_BOUND, EQUITY], pool, ticks.append)
+        found = run(_job(data), [REFINANCE, AT_BOUND, EQUITY], pool, 2, ticks.append, every=EVERY)
     assert found.scenario == "base"
-    assert ticks == [i / 6 for i in range(1, 7)]  # base, 2 + 1 + 2 sides
+    assert ticks == sorted(ticks)
+    assert ticks[-1] == 1
+    assert set(ticks) <= {i / 6 for i in range(7)}  # base, 2 + 1 + 2 sides
     first, *rest = found.effects
     assert first.lever is EQUITY
     assert first.low.totals[-1] < found.base.totals[-1] < first.high.totals[-1]
@@ -63,18 +67,42 @@ def test_a_side_that_the_model_refuses_is_the_base_run(
         f.write(f"spending: {json.dumps(rule)}\n")
     levers = [k.lever(k.value) for k in knobs.knobs(load_assumptions(data), [])]
     with ThreadPoolExecutor(2) as pool:
-        found = run(_job(data), levers, pool, lambda _: None)
+        found = run(_job(data), levers, pool, 2, lambda _: None, every=EVERY)
     ceiling = next(e for e in found.effects if e.lever.path == ("spending", "ceiling"))
     assert getattr(ceiling.lever, side) != ceiling.lever.value
     assert getattr(ceiling, side) is found.base
 
 
-def test_a_failing_tick_stops_the_run(data: Path) -> None:
-    def stop(_: float) -> None:
-        raise KeyboardInterrupt
+def test_a_tick_comes_while_a_run_takes_long_and_a_failing_one_stops_the_run(
+    data: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A tick comes every `every` seconds, also while no run ends, so a moved slider stops the
+    run at once, whatever a run takes. At most `workers` runs go into the pool at a time, the
+    next after a tick: a tick that raises leaves the pool to the next runs of the page."""
 
-    with ThreadPoolExecutor(1) as pool, pytest.raises(KeyboardInterrupt):
-        run(_job(data), [EQUITY], pool, stop)
+    class Counted(ThreadPoolExecutor):
+        submitted = 0
+
+        def submit(self, *args: Any, **kwargs: Any) -> Any:
+            self.submitted += 1
+            return super().submit(*args, **kwargs)
+
+    release = threading.Event()
+    ticks: list[float] = []
+
+    def stop(share: float) -> None:
+        ticks.append(share)
+        if len(ticks) == 3:
+            raise KeyboardInterrupt
+
+    monkeypatch.setattr(sensitivity, "outcome", lambda *_args: release.wait(10))
+    with Counted(1) as pool, pytest.raises(KeyboardInterrupt):
+        try:
+            run(_job(data), [EQUITY], pool, 1, stop, every=EVERY)
+        finally:
+            release.set()
+    assert ticks == [0, 0, 0]  # the base run has not ended
+    assert pool.submitted == 1  # the base run, of three
 
 
 def _bars(fig: dict[str, Any]) -> list[dict[str, Any]]:
@@ -84,7 +112,7 @@ def _bars(fig: dict[str, Any]) -> list[dict[str, Any]]:
 
 def test_sensitivity_figure_has_two_bars_per_measure(data: Path) -> None:
     with ThreadPoolExecutor(2) as pool:
-        found = run(_job(data), [REFINANCE, EQUITY], pool, lambda _: None)
+        found = run(_job(data), [REFINANCE, EQUITY], pool, 2, lambda _: None, every=EVERY)
     fig = report.sensitivity_figure(found, plan=True).to_dict()
     assert fig["layout"]["title"]["text"] == "base: one step of each part of the plan"
     assert [t["name"] for t in _bars(fig)] == ["one step down", "one step up"] * 3
@@ -162,7 +190,7 @@ def test_outcomes_carry_both_units(data: Path) -> None:
     """The explorer switches the unit without new runs. Prices rise by 2% a year by default,
     so the debt of the rent shrinks in euros of the start."""
     with ThreadPoolExecutor(1) as pool:
-        found = run(_job(data), [], pool, lambda _: None)
+        found = run(_job(data), [], pool, 2, lambda _: None, every=EVERY)
     assert all(
         nominal < real < 0
         for real, nominal in zip(found.base.totals, found.base.nominal_totals, strict=True)

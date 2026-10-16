@@ -30,9 +30,10 @@ The user guide: `docs/manual/assumptions.md`.
   `Rules`; `werbungskosten` (`Work expenses per year €`, the term `Werbungskosten` in `TERMS`, so
   the label fits one line beside its neighbours; rule `deductions`) and `harvest` after
   `teilfreistellung`, `harvest` labeled `Realize gains each December within the tax-free room`;
-  `kv_zusatz`, `church`, `land`, `loss_carryforward` and `capital_losses` come before it, labeled
-  `Health fund extra rate %`, `Church tax`, `Bundesland`, `Losses carried forward €`, `Capital
-  losses carried forward €` (rule `tax-options`); `alleinerziehend` after it,
+  `kv_zusatz`, `church`, `land`, `loss_carryforward`, `loss_carryback` and `capital_losses` come
+  before it, labeled `Health fund extra rate %`, `Church tax`, `Bundesland`, `Losses carried
+  forward €`, `Carry a loss back into the two years before` (rule `rental`), `Capital losses
+  carried forward €` (rule `tax-options`); `alleinerziehend` after it,
   `Single parent (Entlastungsbetrag)`, always on: `WHEN` gates by a value, not by a row of the
   grid). Every field of `Assumptions` lies in one tab but `start` and `scale` (decision: scenario
   overrides only, which the explorer writes): a new field of the model joins a tab
@@ -49,7 +50,8 @@ The user guide: `docs/manual/assumptions.md`.
   The key column of the `returns` grid is headed `asset class`, of `indices` `index` (`LABELS` by
   the path and `name`). `TERMS` put the German term before the help (`Sparer-Pauschbetrag`,
   `Teilfreistellung`, `Werbungskosten`, `Rentenversicherung (RV)`, `Kirchensteuer`, `Zusatzbeitrag`,
-  `Verlustvortrag`, `Verlustvortrag aus Kapitalvermögen`, the `Günstigerprüfung` of the harvest),
+  `Verlustvortrag`, `Verlustrücktrag`, `Verlustvortrag aus Kapitalvermögen`, the
+  `Günstigerprüfung` of the harvest),
   and every help names the default.
   `HELPS` put a help in words where the description of the model names keys of the files (the
   phases, `rv`, `founded`, `loss_carryforward`, `spending.base` and `reference`), `CHOICES` the

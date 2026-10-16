@@ -74,6 +74,9 @@ pv_child_age: 25
 werbungskosten_pauschale: 1230.0  # §9a Nr. 1 a EStG
 pension_pauschbetrag: 102.0  # §9a Nr. 3 EStG
 sonderausgaben_pauschbetrag: 36.0  # §10c EStG
+# The Verlustrücktrag of a single person into the two years before, in all (§10d Abs. 1 S. 1 EStG,
+# 1 Mio. € since 2024; 10 Mio. € for the losses of 2020 to 2023)
+loss_carryback_max: 1000000.0
 # Kinderbetreuungskosten (§10 Abs. 1 Nr. 5 S. 1 EStG, since 2025): `childcare_share` of the costs
 # of a child under `childcare_age`, at most `childcare_max` a year per child. Donations (§10b
 # Abs. 1 S. 1 Nr. 1): up to `donation_share` of the Gesamtbetrag der Einkünfte. The credit for

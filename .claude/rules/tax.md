@@ -174,10 +174,10 @@ sources, the tests).
   for a reference salary at or above the KV-BBG (§232a Abs. 1 S. 1 Nr. 1 SGB V: 80% of it, else
   less). The PV split of Saxony is left out: there the employee bears 1 point alone (§58 Abs. 3 SGB
   XI), so the employer's share and its PKV subsidy (§61 Abs. 2 S. 2) are 1.3% in 2026, not 1.8%.
-  Negative income of a year (rule `rental`) and §23 losses carry forward only: the carryback into
-  the year before (§10d Abs. 1) is optional, so leaving it out errs towards more tax. The carried
-  §23 losses offset a year's §23 gain in full. The Mindestgewinnbesteuerung of §10d Abs. 2 (BMF
-  2004-11-29, BStBl I S. 1097) lets them offset only 70% of the part of a year's §23 gain above 1
+  Negative income of a year goes back two years first (§10d Abs. 1, rule `rental`); §23 losses
+  carry forward only (their carryback into the §23 gains of the year before, §23 Abs. 3 S. 8, is
+  left out: errs towards more tax). The carried §23 losses offset a year's §23 gain in full. The
+  Mindestgewinnbesteuerung of §10d Abs. 2 (BMF 2004-11-29, BStBl I S. 1097) lets them offset only 70% of the part of a year's §23 gain above 1
   Mio. € (60% from 2028). Gold and crypto leave out: income from staking and lending (§22 Nr. 3
   EStG, Freigrenze 256 €, BMF 2025-03-06 Rn. 65 ff.; its coins are new purchases, Rn. 54), gold lent
   against interest (ten years, §23 Abs. 1 S. 1 Nr. 2 S. 4), a swap of coins, which starts a new

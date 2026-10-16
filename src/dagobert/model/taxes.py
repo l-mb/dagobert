@@ -176,9 +176,10 @@ class TaxOptions(Strict):
         ge=0,
         description="Your work expenses (Werbungskosten) of a year with a salary all year, as the "
         "Steuerbescheid lists them: the commute, a home office, work equipment, union dues, in "
-        "euros of the start. A year with fewer salary months counts its share. They count when "
-        "above the Arbeitnehmer-Pauschbetrag (1.230 € in 2026), which applies anyway. The "
-        "monthly withholding ignores them: the settlement refunds",
+        "euros of the start. A year with fewer salary months counts its share, at most the salary "
+        "of the year. They count when above the Arbeitnehmer-Pauschbetrag (1.230 € in 2026), which "
+        "applies anyway. The monthly withholding ignores them: the settlement refunds. Costs at a "
+        "date, such as a course, are an expense deductible as work expenses on the Cashflows page",
     )
     harvest: bool = Field(
         default=False,
@@ -234,6 +235,16 @@ class TaxOptions(Strict):
         "losses of earlier years, such as of a let flat or a business, that offset your income "
         "before the Sonderausgaben, in euros of `start`. The roll forward writes the losses that "
         "the plan carries to the new start",
+    )
+    loss_carryback: bool = Field(
+        default=True,
+        description="A loss of a year, when the income of the year is below zero, goes back first "
+        "(§10d Abs. 1 EStG): into the year before, the rest into the year "
+        "before that, up to their income and 1.000.000 €; what is left carries forward. The refund "
+        "comes in the December after the year of the loss. The carryback comes off before the "
+        "Sonderausgaben and can use up the tax-free Grundfreibetrag of a year of low income. Since "
+        "2022 the law lets you waive it only as a whole: switch it off for that, and the loss "
+        "carries forward only",
     )
     capital_losses: Euros = Field(
         default=0.0,

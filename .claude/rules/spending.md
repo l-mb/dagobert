@@ -48,8 +48,8 @@ forum's).
 - State (`Core._init_spending_rule`, `(paths,)`): `budget` nominal (NaN before), `budget_year`,
   `settled` (the regular bill of the last December, `Settlement._settle_december`: `_settle_year`
   and every late round, less `oneoff_tax`, the Fünftelregelung part of the settlement: a refund of
-  the withholding on a lump sum goes to the wealth, not to the flexible spending; 0 in the first
-  year), `cash_mark` (`Engine.run` copies `cash` after `_apply_returns`, before `_service_loans`),
+  the withholding on a lump sum goes to the wealth, not to the flexible spending, and so does the
+  refund of a loss carried back, paid before it, rule `rental`; 0 in the first year), `cash_mark` (`Engine.run` copies `cash` after `_apply_returns`, before `_service_loans`),
   `liquid_prev` (`_update_spending_rule` keeps it and returns: the band's state is unused).
   `reduced` and `raised` stay False, so `_index` and the buffer need no guard.
 - `Income._pay_flexible`, after `earns` of this month and before `_record_earned` (owner 4: the

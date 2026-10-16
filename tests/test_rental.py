@@ -11,7 +11,7 @@ import pytest
 from builders import booked, plan, purchase, zero_returns, zero_run
 
 from dagobert.engine.simulation import simulate
-from dagobert.model.assets import CashAsset, Loan, PropertyAsset
+from dagobert.model.assets import CashAsset, Loan, PropertyAsset, TermDeposit
 from dagobert.model.events import EndStreamsEvent, InvestAction, RepayAction, SellEvent
 from dagobert.model.plan import Scenario
 from dagobert.model.streams import Stream, StreamKind
@@ -264,6 +264,91 @@ def test_a_business_loss_carries_too() -> None:
     carried = run([shop, later], [], months=24)
     lower = run([other(3000, start=date(2027, 1, 1))], [], months=24)
     assert taxed(carried, NEXT) == pytest.approx(taxed(lower, NEXT), abs=1)
+
+
+def yearly(*months: float, back: bool = True) -> RunResult:
+    """Other income of each year from 2026 by its monthly amount, a run of those years and one
+    more, in which the refund of a carryback comes; `back` the option `tax.loss_carryback`."""
+    streams = [
+        other(amount, start=date(2026 + i, 1, 1), end=date(2027 + i, 1, 1))
+        for i, amount in enumerate(months)
+        if amount
+    ]
+    return run(streams, [], months=12 * len(months) + 12, tax={"loss_carryback": back})
+
+
+def test_a_loss_goes_back_into_the_year_before_and_refunds_a_december_later() -> None:
+    """§10d Abs. 1 S. 1 EStG: 12,000 € of loss in 2027 come off the income of 2026, whose tax
+    falls to that of 12,000 € less; the assessment of 2027 refunds it in December 2028. Without
+    the carryback the loss waits for later income."""
+    back, forward = yearly(4000, -1000), yearly(4000, -1000, back=False)
+    refund = taxed(back, YEAR) - taxed(yearly(3000), YEAR)
+    assert refund > 2000
+    assert back.taxes[0, 12:35].tolist() == forward.taxes[0, 12:35].tolist() == [0.0] * 23
+    assert back.taxes[0, 35] == pytest.approx(refund)
+    assert forward.taxes[0, 35] == 0.0
+    assert back.liquid[0, -1] == pytest.approx(forward.liquid[0, -1] + refund)
+
+
+def test_switched_off_a_loss_carries_forward_only() -> None:
+    """`tax.loss_carryback: false` waives the carryback (§10d Abs. 1 S. 6): the loss offsets the
+    income of 2028 as the Verlustvortrag did alone, and with the carryback 2028 pays the tax of
+    its whole income less the refund of 2026."""
+    loss = (4000, -1000, 4000)
+    forward = yearly(*loss, back=False)
+    back, plain = yearly(*loss), yearly(4000, 0, 4000)
+    third = slice(24, 36)
+    assert taxed(forward, third) == pytest.approx(taxed(yearly(4000, 0, 3000), third), abs=1)
+    refund = taxed(plain, YEAR) - taxed(yearly(3000), YEAR)
+    assert taxed(back, third) == pytest.approx(taxed(plain, third) - refund, abs=1)
+
+
+def test_a_loss_beyond_the_year_before_goes_into_the_second() -> None:
+    """§10d Abs. 1 S. 2 EStG: 25,000 € of loss in 2028 take the 10,000 € of 2027 and 15,000 € of
+    the 30,000 € of 2026."""
+    back = yearly(2500, 10_000 / 12, -25_000 / 12)
+    two = slice(0, 24)
+    refund = taxed(yearly(2500, 10_000 / 12), two) - taxed(yearly(1250), two)
+    assert back.taxes[0, 47] == pytest.approx(refund, abs=1)
+
+
+def test_a_loss_goes_back_into_the_capital_income_that_the_tariff_taxed() -> None:
+    """§10d Abs. 1 S. 1 with §32d Abs. 6 S. 1 EStG: a term deposit pays 21,000 € of interest in
+    2026, which the Günstigerprüfung taxes at the tariff, so it joins the Gesamtbetrag der
+    Einkünfte; 10,000 € of loss in 2027 go back into it and refund in December 2028 what the same
+    loss in 2026 saved."""
+    deposit = TermDeposit(
+        id="t",
+        kind="term_deposit",
+        value=100_000,
+        rate=0.10,
+        start=date(2024, 3, 1),
+        matures=date(2026, 3, 1),
+    )
+
+    def paid(streams: list[Stream], months: slice) -> float:
+        r = run(streams, [deposit], months=36)
+        return float(-(r.taxes[0, months] + r.capital_taxes[0, months]).sum())
+
+    def lost(year: int) -> list[Stream]:
+        return [other(-10_000 / 12, start=date(year, 1, 1), end=date(year + 1, 1, 1))]
+
+    saved = paid([], YEAR) - paid(lost(2026), YEAR)
+    assert saved > 1000
+    assert paid(lost(2027), slice(35, 36)) == pytest.approx(-saved, abs=1)
+
+
+def test_a_carryback_takes_the_grundfreibetrag_of_a_year_of_low_income() -> None:
+    """Since 2022 the law waives the carryback only as a whole (§10d Abs. 1 S. 6): 10,000 € of
+    loss go back into the 15,000 € of 2026 and refund its little tax, the Grundfreibetrag of 2026
+    unused; carried forward they would have saved more of the tax of 2028."""
+    loss = (1250, -10_000 / 12, 20_000 / 12)
+    back, forward = yearly(*loss), yearly(*loss, back=False)
+    plain = yearly(1250, 0, 20_000 / 12)
+    third = slice(24, 36)
+    assert taxed(back, third) == pytest.approx(taxed(plain, third) - taxed(plain, YEAR), abs=1)
+    assert taxed(forward, third) == pytest.approx(taxed(yearly(1250, 0, 10_000 / 12), third))
+    assert taxed(forward, slice(0, 48)) < taxed(back, slice(0, 48))
 
 
 def test_a_bought_flat_takes_its_afa_from_the_purchase() -> None:

@@ -18,20 +18,30 @@ rule `tax-options`; §10d and a let property: rule `rental`. The inputs:
 `docs/manual/configuration.md`, in plain English `docs/manual/models.md`. Individuals only: no
 spouse rule anywhere.
 
-- Werbungskosten (`tax.werbungskosten`, `TaxOptions`): the yearly work expenses of the
-  Steuerbescheid, start-year euros, the one source of them (no stream adds to it: two sources of one
-  truth). `tax.werbungskosten(salary, pension, ty, actual)`: `clip(max(pauschale, actual), 0,
-  salary)` plus the 102 of the pension (§9a S. 1 Nr. 1 a, Nr. 3); the settlement passes `actual`
-  times `YearAcc.sv_months / 12` (a job that ends in March deducts a quarter, the month the work-end
-  seek moves). The clip at the Arbeitslohn leaves out the loss of §19 that higher costs make (§2
-  Abs. 3; errs towards more tax). The withholding (`_zve_year`, §39b Abs. 2 S. 5 Nr. 1, 2: the
-  Arbeitnehmer- and the Sonderausgaben-Pauschbetrag) and `sv.alg1_month` (§153 SGB III) pass 0: a
-  Freibetrag of §39a is on application, the settlement refunds. ALG1 under the
-  Progressionsvorbehalt counts less the part of the Pauschbetrag that the Arbeitslohn leaves unused,
-  `max(0, pauschale - deducted)`, at least 0 (§32b Abs. 2 S. 1 Nr. 1; the negative
-  Progressionsvorbehalt it could give is left out). `rollforward.rebase` scales it (rule
-  `rollforward`), a scenario overrides it.
-- Expenses with `deduct` (`model.streams.Deduction`: `donation`, `childcare`, `household`,
+- Werbungskosten (owner 2026-10-16, which ended their one source): `tax.werbungskosten`
+  (`TaxOptions`), the yearly costs of the job of the Steuerbescheid, start-year euros, and the
+  expenses with `deduct: work`, costs at a date (§9 EStG: a course, applications, also before a job,
+  vorweggenommene Werbungskosten), in the year that pays them. `tax.werbungskosten(salary, pension,
+  ty, actual, dated)`: `max(min(pauschale, salary⁺), min(actual, salary⁺) + dated)` plus the 102 of
+  the pension (§9a S. 1 Nr. 1 a, Nr. 3, S. 2); the settlement passes `actual` times
+  `YearAcc.sv_months / 12` (a job that ends in March deducts a quarter, the month the work-end seek
+  moves) and `dated` = `YearIncome.work` (`YearAcc.deduct[work]`). The yearly costs stop at the
+  Arbeitslohn, the dated ones do not: a loss of §19 (§2 Abs. 3) joins §10d, back first (rule
+  `rental`). The withholding (`_zve_year`, §39b Abs. 2 S. 5 Nr. 1, 2: the Arbeitnehmer- and the
+  Sonderausgaben-Pauschbetrag) and `sv.alg1_month` (§153 SGB III) pass 0: a Freibetrag of §39a is
+  on application, the settlement refunds. ALG1 under the Progressionsvorbehalt counts less the part
+  of the Pauschbetrag that the deducted work expenses leave, `max(0, pauschale - deducted)` (§32b
+  Abs. 2 S. 1 Nr. 1): none where higher costs came off (BFH III R 61/12 of 2014-09-25, also dated
+  ones in a year without a salary), the rest of it where dated costs below it came off without a
+  salary. The judgment decides costs above the Pauschbetrag: the wording of §32b is neutral, the
+  actual costs and the Pauschbetrag never come off both. Dated costs below it without a salary it
+  does not decide (review 2026-10-16): a modelling choice keeps the relief, §19 and ALG1 together,
+  at `max(deducted, pauschale)` at every point. The literal reading, `pauschale - min(pauschale,
+  salary⁺)` unless the costs are higher, relieves costs of 1,229 € without a salary by 2,459 € in
+  all and costs of 1,231 € by 1,231 €; the choice errs by a few euros of rate towards more tax. The
+  negative Progressionsvorbehalt it could give is left out.
+  `rollforward.rebase` scales `tax.werbungskosten` (rule `rollforward`), a scenario overrides it.
+- Expenses with `deduct` (`model.streams.Deduction`: `work`, `donation`, `childcare`, `household`,
   `craftsman`; `TAKES` of an expense only, `Stream._together` refuses it with `health` or with
   `property`: a cost of letting is a Werbungskosten of the rent, §35a Abs. 5 S. 1). The cash flow
   stays an expense of its category. `deductible` is the share that counts (default 1; of a `health`
@@ -93,17 +103,20 @@ spouse rule anywhere.
   with a comment. A payment into any other policy without `basisrente`, also one that a payment
   without the flag funds too, stops it, and `FUNDING` names the event: the user marks the
   Basisrente or removes the event.
-- Gaps: Werbungskosten of a rent beyond rule `rental`; the commute's 4,500 € cap, Verpflegung,
-  doppelte Haushaltsführung (typed into the yearly euros); the donation carry (§10b Abs. 1 S. 9),
+- Gaps: Werbungskosten of a rent beyond rule `rental`; `deduct: work` is of the Arbeitslohn only (a
+  business holds its costs in its profit); the commute's 4,500 € cap, Verpflegung, doppelte
+  Haushaltsführung (typed into the yearly euros); the donation carry (§10b Abs. 1 S. 9),
   §34g (parties), a Stiftungsstock (§10b Abs. 1a); §35a Abs. 1 (a Minijob at home) and Abs. 2 S. 2
   (care), two single people sharing the caps (Abs. 5 S. 4); the Berufseinsteiger-Bonus (§84 S. 2);
   the Zulage for at most two contracts (§10a Abs. 5); capital above the subsidized cap (§22 Nr. 5
   S. 2); an own after-tax contribution to a company pension; a Basisrente with BU cover (§10 Abs. 1
   Nr. 2 b bb); the Vorauszahlungen of §37 on the deductions.
 - Tests: `tests/test_deductions.py` (relations: the costs above the Pauschbetrag and by the salary
-  months, ALG1 unchanged, a donation up to its cap without carry, `deductible`, `scale` and the cut,
+  months, dated costs on top and beyond the salary, also without one, a loss that carries, ALG1
+  unchanged, a donation up to its cap without carry, `deductible`, `scale` and the cut,
   §35a, childcare by the months and its cap, the premium against a `fund_policy`, the share of a
   Basisrente and its KV, the refusals, two depots, the Kinderzulage), the law in amounts in
-  `test_tax.py`, the trade credit beside a rental loss and the refund after the pot in
-  `test_rental.py`, `rich_plan` (the costs, a donation, household services) and `gkv_plan` (a
-  premium in `work`) of `test_golden.py`, `to_5` in `test_schema.py`.
+  `test_tax.py` (dated costs, the ALG1 of §32b without a jump), the trade credit beside a rental
+  loss and the refund after the pot in `test_rental.py`, `rich_plan` (the costs, a donation,
+  household services, a course of 30,000 € in 2030 without a salary: rule `rental`) and `gkv_plan`
+  (a premium in `work`) of `test_golden.py`, `to_5` in `test_schema.py`.

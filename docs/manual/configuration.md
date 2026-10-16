@@ -243,11 +243,12 @@ Overview moves it) and `scale` (the overrides of a scenario).
   - `werbungskosten` (default 0, at least 0): your work expenses of a year with a salary in every
     month, as the Steuerbescheid lists them: the commute, a home office, work equipment, union
     dues. Enter the euros of the start. A year with fewer months of salary counts its share: a job
-    that ends in March counts a quarter. The income tax takes them when they are higher than the
-    Arbeitnehmer-Pauschbetrag (1,230 € in 2026), which applies anyway. The monthly withholding
-    does not know them, so the December settlement refunds. ALG1 does not change with them. The
-    `Roll forward` of the Overview changes the amount by the consumer prices. A scenario can
-    override it, for example with 0 for a remote job.
+    that ends in March counts a quarter. They count at most up to the salary of the year. Costs at
+    a date, for example a course, are an expense with `deduct: work`. The income tax takes them
+    when they are higher than the Arbeitnehmer-Pauschbetrag (1,230 € in 2026), which applies
+    anyway. The monthly withholding does not know them, so the December settlement refunds. ALG1
+    does not change with them. The `Roll forward` of the Overview changes the amount by the
+    consumer prices. A scenario can override it, for example with 0 for a remote job.
   - `harvest` (default false): each December, sell the equity whose gains fit into the tax-free
     room of the year, and buy it back at the next price. The room is the Sparer-Pauschbetrag that
     is left, and the part of the Grundfreibetrag that your other income leaves. A later sale then
@@ -284,6 +285,14 @@ Overview moves it) and `scale` (the overrides of a scenario).
     of a scenario that it extends, else that of `assumptions.yaml`, where it adds `tax` when the
     file has none. Scenarios that share one `tax` take the smallest amount. The losses of
     capital income are another pot: see `capital_losses`.
+  - `loss_carryback` (default true): a loss of a year goes back first (Verlustrücktrag, §10d Abs. 1
+    EStG). It goes into the year before, and the rest into the year before that. Each year takes it
+    up to its income, at most 1,000,000 € in all, and the losses that a year carried forward come
+    first. The refund comes in the December after the year of the loss. What is left carries
+    forward. The carryback comes off before the Sonderausgaben, so in a year of low income it can
+    use up the tax-free amount (Grundfreibetrag). Since 2022 the law lets you waive only the whole
+    carryback. For that, set false: the whole loss then carries forward. The years before `start`
+    take no carryback. See [How the simulation works](models.md#a-loss-of-a-year).
   - `capital_losses` (default 0, at least 0): the losses of capital income that you carry forward
     at the start (§20 Abs. 6 EStG), in euros of `start`. Enter the sum of two amounts: the losses
     that your bank still holds in its loss pot (its yearly tax statement lists them), and the
@@ -424,8 +433,9 @@ comments too. Trades and price files name a security, not the asset, so they do 
     Teilfreistellung (InvStG). Its value then grows with the `equity` return.
   - Not modelled: income from staking and lending (§22 Nr. 3 EStG), gold lent against interest
     (a holding period of ten years), a swap of one coin for another (write a sale and a `buy`),
-    the carryback of a loss into the year before, and the limit of §10d Abs. 2 EStG on a carried
-    loss against the part of a year's gain above 1 Mio. €.
+    the carryback of a loss of private sales into the gains of private sales of the year before
+    (§23 Abs. 3 S. 8 EStG), and the limit of §10d Abs. 2 EStG on a carried loss against the part
+    of a year's gain above 1 Mio. €.
 - `property`: `sqm` (the living space, above 0), `per_sqm` (the market value per m², at least 0),
   optional `bought_for` (what the purchase cost: the price with the Grunderwerbsteuer, the notary
   and the broker), `growth` (return class, default `property`), `upkeep` (yearly share of the
@@ -590,6 +600,10 @@ A list under `streams`. Fields:
   for `kv`. A `health` stream ends in the month of `tax.gkv_from`.
 - `deduct` (an `expense` without `health` and without `property`, default none): what the expense
   is for the income tax. The cash flow stays an expense of its category.
+  - `work`: work expenses (Werbungskosten, §9 EStG) at a date, for example a course that you pay
+    yourself or the costs of applications. They count in the year that pays them, on top of
+    `tax.werbungskosten`, also in a year without a salary. Above the salary of the year they make a
+    loss, which goes back and forward (`tax.loss_carryback`).
   - `donation`: up to 20% of the income (the Gesamtbetrag der Einkünfte) lowers the taxable
     income. The simulation loses the rest. The law carries it to later years.
   - `childcare`: 80% of the costs lowers the taxable income, at most 4,800 € a year for each child
@@ -614,8 +628,8 @@ A list under `streams`. Fields:
   Such a cost is no spending: `scale.categories` and the age curve leave it as it is.
   The income tax takes the rent less its costs (§21 EStG): the AfA, the interest of the loans that
   name it in `finances`, its `upkeep` and the expenses that name it. The cash flows stay the same. A
-  net loss lowers the other income of its year and carries forward (`tax.loss_carryforward`). Enter
-  the rent and the Hausgeld both with or both without the costs that the tenant pays back
+  net loss lowers the other income of its year, then goes back and forward (`tax.loss_carryback`).
+  Enter the rent and the Hausgeld both with or both without the costs that the tenant pays back
   (Nebenkosten). Leave the reserve of the owners (Erhaltungsrücklage) out of the Hausgeld with
   `property`: it is a cost only when the owners spend it. When you move into the flat, end the rent
   with `end_streams`. A `set_stream` with `factor: 0` keeps the rent active and reads as a vacant

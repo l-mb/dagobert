@@ -2282,16 +2282,21 @@ msgid ""
 "Your work expenses (Werbungskosten) of a year with a salary all year, as "
 "the Steuerbescheid lists them: the commute, a home office, work "
 "equipment, union dues, in euros of the start. A year with fewer salary "
-"months counts its share. They count when above the Arbeitnehmer-"
-"Pauschbetrag (1.230 € in 2026), which applies anyway. The monthly "
-"withholding ignores them: the settlement refunds"
+"months counts its share, at most the salary of the year. They count when "
+"above the Arbeitnehmer-Pauschbetrag (1.230 € in 2026), which applies "
+"anyway. The monthly withholding ignores them: the settlement refunds. "
+"Costs at a date, such as a course, are an expense deductible as work "
+"expenses on the Cashflows page"
 msgstr ""
 "Deine Werbungskosten eines Jahres mit Gehalt in jedem Monat, wie der "
 "Steuerbescheid sie nennt: der Arbeitsweg, ein Homeoffice, Arbeitsmittel, "
 "Gewerkschaftsbeiträge, in Euro in Kaufkraft des Startmonats. Ein Jahr mit"
-" weniger Gehaltsmonaten zählt seinen Anteil. Sie zählen, wenn sie über "
-"dem Arbeitnehmer-Pauschbetrag liegen (1.230 € in 2026), der ohnehin gilt."
-" Die monatliche Lohnsteuer übergeht sie: Die Abrechnung erstattet"
+" weniger Gehaltsmonaten zählt seinen Anteil, höchstens das Gehalt des "
+"Jahres. Sie zählen, wenn sie über dem Arbeitnehmer-Pauschbetrag liegen "
+"(1.230 € in 2026), der ohnehin gilt. Die monatliche Lohnsteuer übergeht "
+"sie: Die Abrechnung erstattet. Kosten zu einem Datum, etwa eine "
+"Weiterbildung, sind auf der Seite Cashflows eine Ausgabe, absetzbar als "
+"Werbungskosten"
 
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid "Werbungskosten"
@@ -2469,6 +2474,36 @@ msgstr "Verlustvortrag"
 msgctxt "key"
 msgid "loss_carryforward"
 msgstr "Verlustvortrag"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid ""
+"A loss of a year, when the income of the year is below zero, goes back "
+"first (§10d Abs. 1 EStG): into the year before, the rest into the year "
+"before that, up to their income and 1.000.000 €; what is left carries "
+"forward. The refund comes in the December after the year of the loss. "
+"The carryback comes off before the Sonderausgaben and can use up the "
+"tax-free Grundfreibetrag of a year of low income. Since 2022 the law lets"
+" you waive it only as a whole: switch it off for that, and the loss "
+"carries forward only"
+msgstr ""
+"Ein Verlust eines Jahres, wenn die Einkünfte des Jahres unter null "
+"liegen, geht zuerst zurück (§10d Abs. 1 EStG): in das "
+"Vorjahr, der Rest in das Jahr davor, bis zu deren Einkünften und "
+"1.000.000 €; was bleibt, wird vorgetragen. Die Erstattung kommt im "
+"Dezember nach dem Jahr des Verlusts. Der Rücktrag geht den "
+"Sonderausgaben vor und kann den steuerfreien Grundfreibetrag eines Jahres"
+" mit wenig Einkommen aufbrauchen. Seit 2022 erlaubt das Gesetz den "
+"Verzicht nur auf den ganzen Rücktrag: Schalte ihn dafür aus, dann wird "
+"der Verlust nur vorgetragen"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid "Loss carryback"
+msgstr "Verlustrücktrag"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgctxt "key"
+msgid "loss_carryback"
+msgstr "Verlustrücktrag"
 
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid ""
@@ -3183,13 +3218,21 @@ msgstr "Krankenversicherung"
 #: model/events.py model/plan.py model/streams.py
 #, python-format
 msgid ""
-"Expense: what it is for the income tax. A donation (up to 20% of the "
-"income) and childcare (80% of the costs of a child under 14, at most "
-"4.800 € a year per child) lower the taxable income; household services "
-"and a craftsman's labour lower the tax by 20% of the costs, at most 4.000"
-" € and 1.200 € a year (§35a EStG). The cash flow stays an expense"
+"Expense: what it is for the income tax. Work expenses (Werbungskosten, §9"
+" EStG) that you pay at a date, such as a course or applications, also "
+"without a job: they count in the year that pays them, on top of the "
+"yearly work expenses of the Assumptions page, and a loss carries to other"
+" years. A donation (up to 20% of the income) and childcare (80% of the "
+"costs of a child under 14, at most 4.800 € a year per child) lower the "
+"taxable income; household services and a craftsman's labour lower the tax"
+" by 20% of the costs, at most 4.000 € and 1.200 € a year (§35a EStG). The"
+" cash flow stays an expense"
 msgstr ""
-"Ausgabe: was sie für die Einkommensteuer ist. Eine Spende (bis zu 20% der"
+"Ausgabe: was sie für die Einkommensteuer ist. Werbungskosten (§9 EStG), "
+"die du zu einem Datum zahlst, etwa eine Weiterbildung oder Bewerbungen, "
+"auch ohne Job: Sie zählen im Jahr der Zahlung, zusätzlich zu den "
+"jährlichen Werbungskosten der Seite Annahmen, und ein Verlust geht in "
+"andere Jahre. Eine Spende (bis zu 20% der"
 " Einkünfte) und Kinderbetreuung (80% der Kosten eines Kindes unter 14, "
 "höchstens 4.800 € im Jahr je Kind) senken das zu versteuernde Einkommen; "
 "haushaltsnahe Dienstleistungen und Handwerkerleistungen senken die Steuer"
@@ -3216,6 +3259,10 @@ msgstr "Spende"
 #: model/events.py model/plan.py model/streams.py
 msgid "household services (§35a)"
 msgstr "haushaltsnahe Dienstleistung (§35a)"
+
+#: model/events.py model/plan.py model/streams.py
+msgid "work expenses"
+msgstr "Werbungskosten"
 
 #: model/events.py model/plan.py model/streams.py
 msgid ""
@@ -5672,6 +5719,10 @@ msgid "Losses carried forward €"
 msgstr "Verlustvortrag €"
 
 #: ui/assumptions.py
+msgid "Carry a loss back into the two years before"
+msgstr "Verlust in die zwei Vorjahre zurücktragen"
+
+#: ui/assumptions.py
 msgid "Capital losses carried forward €"
 msgstr "Kapitalverlustvortrag €"
 
@@ -6332,13 +6383,15 @@ msgstr ""
 #: ui/cashflows.py
 #, python-brace-format
 msgid ""
-"Werbungskosten: the costs of the work, such as the commute. The income "
-"tax takes the flat {werbungskosten} a year, or the higher sum that you "
-"enter on the Assumptions page"
+"Werbungskosten: the costs of the work, such as the commute or a course. "
+"The income tax takes the flat {werbungskosten} a year, or the higher sum "
+"of what you enter on the Assumptions page and the expenses deductible as "
+"work expenses"
 msgstr ""
-"Werbungskosten: die Kosten der Arbeit, etwa der Arbeitsweg. Die "
-"Einkommensteuer nimmt pauschal {werbungskosten} im Jahr oder die höhere "
-"Summe, die du auf der Seite Annahmen einträgst"
+"Werbungskosten: die Kosten der Arbeit, etwa der Arbeitsweg oder eine "
+"Weiterbildung. Die Einkommensteuer nimmt pauschal {werbungskosten} im "
+"Jahr oder die höhere Summe aus dem, was du auf der Seite Annahmen "
+"einträgst, und den Ausgaben, absetzbar als Werbungskosten"
 
 #: ui/cashflows.py
 #, python-brace-format

@@ -100,8 +100,9 @@ TERMS = (
     N_("Altersvorsorgedepot: a pension depot from 2027 with a state grant, the Zulage"),
     N_("Basisrente: a private pension whose premiums reduce the income tax (Rürup)"),
     N_(
-        "Werbungskosten: the costs of the work, such as the commute. The income tax takes the "
-        "flat {werbungskosten} a year, or the higher sum that you enter on the Assumptions page"
+        "Werbungskosten: the costs of the work, such as the commute or a course. The income tax "
+        "takes the flat {werbungskosten} a year, or the higher sum of what you enter on the "
+        "Assumptions page and the expenses deductible as work expenses"
     ),
     N_(
         "Sonderausgaben: costs that lower the taxable income, such as the church tax, donations "

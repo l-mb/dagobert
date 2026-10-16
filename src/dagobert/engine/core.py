@@ -6,7 +6,7 @@ the loans, the liquid net worth and its latent tax."""
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import defaultdict, deque
 from collections.abc import Callable
 from datetime import date
 
@@ -17,6 +17,7 @@ from dagobert import carry, mortality, tax
 from dagobert.engine.state import (
     Acquisition,
     Alg1State,
+    Assessed,
     AvState,
     LoanState,
     MonthFlows,
@@ -259,6 +260,12 @@ class Core:
         self.private_losses = np.zeros(self.paths)  # §23 losses carried, start-year euros
         # the Verlustvortrag of the income tax (§10d Abs. 2 EStG), nominal as the law carries it
         self.income_losses = np.full(self.paths, self.a.tax.loss_carryforward)
+        # the last two years settled, the last first, which a loss carries back into (Abs. 1),
+        # and what that refunds with the next settlement, nominal: the income tax and the flat
+        # tax of a Günstigerprüfung
+        self.assessed: deque[Assessed] = deque(maxlen=2)
+        self.refund_back = np.zeros(self.paths)
+        self.flat_back = np.zeros(self.paths)
         # the monthly base of a freiwilliges GKV member from the last year (`Health._kv_last`)
         self.kv_last = np.zeros(self.paths)
         # the rest of that base in the month, what caps a harvest (`Health._kv_room`)

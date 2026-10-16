@@ -83,6 +83,11 @@ STREAMS: list[dict[str, Any]] = [
     # half of the gifts are donations (§10b), the cleaning a household service (§35a)
     {"name": "Geschenke", "cat": "base", "amount": -200, "deduct": "donation", "deductible": 0.5},
     {"name": "Putzhilfe", "cat": "wohnen", "amount": -150, "deduct": "household"},
+    # a course paid by the person in the career break, work expenses without a salary: the loss
+    # of 2030 beyond its capital income goes back into the severance year 2029 (§10d Abs. 1, §34
+    # Abs. 1 S. 3 EStG), whose refund comes in December 2031
+    {"name": "Kurs", "cat": "bildung", "amount": -5000, "deduct": "work"}
+    | {"start": date(2030, 5, 1), "end": date(2030, 11, 1)},
     {"name": "PKV", "amount": -700, "index": "insurance"} | KV,
     {"name": "PKV Pflege", "amount": -70, "health": "pv", "cat": "versicherung"},
     # a BU policy to 65: its premium, as the fixed run draws no disability
@@ -183,15 +188,17 @@ def rich_plan() -> Plan:
     Gold and Bitcoin with lots inside and outside the holding period, a purchase under §20 and a
     conditional sale. A member of a church: 9% church tax, the reduced flat tax. Werbungskosten
     above the Pauschbetrag, by the salary months; gifts half of them donations, household services
-    (§35a). Losses of capital income carried to the start (§20 Abs. 6 EStG), which the capital
-    income of 2026 uses up. The gains of the depot harvested each December in the tax-free room. A
-    child in education to 2040: its Kindergeld, its half allowances where they save more (§31
-    EStG), in the base of the Soli and the church tax, its Kinderzulage, ALG1 at 67%. ALG1 at 52
-    in the PKV marks the exemption that it assumes; the PKV ends with the part time at 58
-    (`gkv_from`, marked: §6 Abs. 3a SGB V usually blocks it): its premiums and subsidies stop, the
-    salary pays the GKV and its conversion the KV and PV saved, the bAV lump sum of 2040 a
-    Versorgungsbezug beside it, and the pension without the KVdR (`kvdr: false`) a voluntary member
-    at the KV-BBG."""
+    (§35a). A course of 30,000 € in the career break of 2030 (`deduct: work`): its loss beyond the
+    capital income of 2030 goes back into the severance year 2029 (§10d Abs. 1, §34 Abs. 1 S. 3
+    EStG), refunded in December 2031. Losses of capital income carried to the start (§20 Abs. 6
+    EStG), which the capital income of 2026 uses up. The gains of the depot harvested each December
+    in the tax-free room. A child in education to 2040: its Kindergeld, its half allowances where
+    they save more (§31 EStG), in the base of the Soli and the church tax, its Kinderzulage, ALG1
+    at 67%. ALG1 at 52 in the PKV marks the exemption that it assumes; the PKV ends with the part
+    time at 58 (`gkv_from`, marked: §6 Abs. 3a SGB V usually blocks it): its premiums and
+    subsidies stop, the salary pays the GKV and its conversion the KV and PV saved, the bAV lump
+    sum of 2040 a Versorgungsbezug beside it, and the pension without the KVdR (`kvdr: false`) a
+    voluntary member at the KV-BBG."""
     a = Assumptions.model_validate(
         {
             "person": {"born": date(1977, 1, 1), "horizon_age": 71, "rv_since": date(1999, 1, 1)}

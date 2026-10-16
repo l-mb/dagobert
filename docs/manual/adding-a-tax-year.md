@@ -76,7 +76,8 @@ the source in a comment. Source: §11 GrEStG and the Grunderwerbsteuer law of th
 - Care insurance: the surcharge for the childless, and the discount for each child under 25 with
   its limits. Source: §55 Abs. 3 SGB XI.
 - Deductions: the flat work expenses, the flat amount against a pension, the flat amount for
-  special expenses (`sonderausgaben_pauschbetrag`) and the ceiling of the pension contributions.
+  special expenses (`sonderausgaben_pauschbetrag`), the limit of the carryback of a loss
+  (`loss_carryback_max`, §10d Abs. 1 EStG) and the ceiling of the pension contributions.
   Also the limit of the unemployment insurance part in the Vorsorgepauschale of the wage tax
   (`vorsorge_alv_cap`), and the default share of a private health premium that is deductible.
   Source: §9a, §10 Abs. 3, §10c and §39b Abs. 2 EStG. The share and the limit per child of the

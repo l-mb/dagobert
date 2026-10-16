@@ -16,6 +16,7 @@ from dagobert.model.assumptions import Assumptions
 from dagobert.model.events import Acquired, GiftEvent
 from dagobert.model.streams import Stream
 from dagobert.result import BoolArray, FloatArray, IntArray
+from dagobert.tax import YearIncome, YearSettlement
 
 TEN_YEARS = 120  # months in which §14 ErbStG adds the acquisitions from one giver
 
@@ -303,6 +304,16 @@ class YearAcc:
                 "pauschbetrag_left": np.full_like(equity_jan, pauschbetrag),
             }
         )
+
+
+@dataclass
+class Assessed:
+    """A settled year that a loss of one of the two years after it amends (§10d Abs. 1 EStG): its
+    income as settled, with the losses carried back into it, its settlement and its price level."""
+
+    income: YearIncome
+    settlement: YearSettlement
+    level: FloatArray
 
 
 @dataclass

@@ -135,11 +135,12 @@ Some rules help you:
   Freiberufler, who pays no trade tax. `property` names a let property: on other income the rent
   of that property, on an expense a cost of letting it, such as the Hausgeld. The income tax then
   takes the rent less its costs, the depreciation and the interest of its loan. A loss lowers the
-  tax of your salary and carries forward to the next years ([How the simulation
-  works](models.md#letting-a-property)).
-  `deductible as` marks an expense that lowers the income tax: a donation, childcare, household
-  services or a craftsman's labour. `deductible` is the share of it that counts, for example the
-  labour part of a craftsman's bill. The expense stays in its category ([How the simulation
+  tax of your salary, then goes back into the two years before and forward to the next years
+  ([How the simulation works](models.md#a-loss-of-a-year)).
+  `deductible as` marks an expense that lowers the income tax: work expenses at a date (for example
+  a course that you pay yourself), a donation, childcare, household services or a craftsman's
+  labour. `deductible` is the share of it that counts, for example the labour part of a
+  craftsman's bill. The expense stays in its category ([How the simulation
   works](models.md#what-lowers-the-income-tax)).
   Your edits that are not saved yet stay when you turn it on or off.
 - The scenarios and a bonus name a stream by its name, so you cannot change the name of a

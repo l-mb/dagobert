@@ -104,8 +104,11 @@ The December settlement takes these costs off your income before the tax:
 
 - Work expenses (Werbungskosten). The tax takes 1,230 € a year from a salary in any case (the
   Arbeitnehmer-Pauschbetrag), or `tax.werbungskosten` when that is higher. A year with fewer months
-  of salary takes the share of its months. The monthly withholding does not know your own costs,
-  so the settlement refunds the difference.
+  of salary takes the share of its months, at most the salary of the year. An expense stream with
+  `deduct: work` adds costs at a date, for example a course that you pay yourself or the costs of
+  applications. They count in full in the year that pays them, also in a year without a salary, so
+  they can make a loss (see [A loss of a year](#a-loss-of-a-year)). The monthly withholding does
+  not know your own costs, so the settlement refunds the difference.
 - Special expenses (Sonderausgaben): the church tax paid in the year, donations up to 20% of the
   income, and 80% of the costs of childcare, at most 4,800 € a year for each child under 14. The
   tax takes at least 36 € a year. A refund of church tax beyond what the year paid raises the
@@ -121,11 +124,42 @@ after these credits, so they never take it.
 An expense stream with `deduct` holds such a cost: its cash flow stays an expense, and the tax
 falls. A Basisrente takes a monthly `premium` from the cash. Its pension is taxed like the
 statutory pension: at the share of the year in which it starts, 84% for 2026. Unemployment benefit
-(ALG1) is free of tax, but it raises the rate on your other income. In a year without a salary,
-the 1,230 € of work expenses come off the benefit first.
+(ALG1) is free of tax, but it raises the rate on your other income. The part of the 1,230 € of
+work expenses that your salary and your own work expenses of the year do not use comes off the
+benefit first. If your own work expenses of the year are higher than 1,230 €, nothing comes off
+the benefit.
 
 You get one state grant of the Altersvorsorgedepot, however many depots you have. From 2027 each
 child whose Kindergeld you get adds up to 300 € a year to it.
+
+## A loss of a year
+
+Your income of a year can be below zero. For example, a let flat costs more than its rent, a
+business makes a loss, or you pay a course while you earn nothing. The settlement of that year then
+has a loss (a negative Gesamtbetrag der Einkünfte, §10d EStG). The loss goes these ways:
+
+- In a year in which the flat tax on capital income is refunded at your personal rate
+  (Günstigerprüfung), the loss first offsets that capital income.
+- Then the loss goes back into the year before (Verlustrücktrag), and the rest into the year
+  before that. Each year takes the loss up to its income, after the losses that it carried forward
+  itself. In a year of the Günstigerprüfung, its capital income counts as income too. The limit is
+  1,000,000 €. The simulation computes the tax of those years again. The
+  difference comes back in the December after the year of the loss, because the tax office
+  assesses that year in the next year.
+- What is left carries forward to the next years (Verlustvortrag). It lowers your income of the
+  next year before the Sonderausgaben, such as the health insurance. This is also true in a year
+  whose income stays below the tax-free amount.
+
+The carryback also comes off before the Sonderausgaben. In a year of low income it can use up the
+tax-free amount (Grundfreibetrag), so a part of the loss saves no tax. Since 2022 the law lets you
+waive the carryback only as a whole. If you want that, set `tax.loss_carryback` to false. The whole
+loss then carries forward. The losses stay in euros of their year.
+
+An example: you get a severance of 150,000 € in 2029 and no salary after it. In 2030 you pay a
+course of 30,000 € yourself. You enter it as an expense with `deduct: work`. Your income of 2030
+falls below zero, and the loss first offsets your capital income of 2030. The rest goes back into
+2029. There it comes off your other income first, then off the severance, so the tax of the
+severance falls. The refund comes in December 2031.
 
 ## Children
 
@@ -266,7 +300,8 @@ A stream of the kind `self_employed` is the profit of a business: what is left o
 the business expenses, before the income tax and your own social insurance.
 
 - The income tax treats the profit as other income. A loss lowers the tax on your other income of
-  the same year. The rest of a loss carries forward to the next years (see Letting a property).
+  the same year. The rest of a loss goes back into the two years before, then forward to the next
+  years (see [A loss of a year](#a-loss-of-a-year)).
 - Each month the simulation keeps back the tax on the profit, as if you earned the same profit all
   year. This stands in for the advance payments (Vorauszahlungen) that the tax office sets. The
   December settlement pays or refunds the difference.
@@ -336,13 +371,10 @@ though the tax law counts it: a twelfth of the AfA of a year. A `taxable` sale w
 prepayment penalty of a loan that the sale repays lowers the gain.
 
 A loss, the costs above the rent, lowers your other income of the same year, for example the
-salary. What is left of a loss carries forward to the next years (Verlustvortrag, §10d EStG). It
-lowers your income of the next year before the Sonderausgaben, such as the health insurance, also
-in a year whose income stays below the tax-free amount. The carried losses stay in euros of their
-year. In a year in which the flat tax on capital income is refunded at your personal rate
-(Günstigerprüfung), a loss first offsets that capital income. A business loss carries forward the
-same way. `tax.loss_carryforward` holds the losses of your last tax notice, and the roll forward
-writes there what the plan carries to the new start.
+salary. What is left goes back into the two years before, then forward to the next years (see
+[A loss of a year](#a-loss-of-a-year)). A business loss does the same. `tax.loss_carryforward`
+holds the losses of your last tax notice, and the roll forward writes there what the plan carries
+to the new start.
 
 In the statutory health insurance, a voluntary member pays on the rent after its costs, at least
 0: a loss of the rent lowers no other kind of income.
@@ -690,8 +722,8 @@ Dagobert is approximate by design. These are the main simplifications:
 - The church tax has no cap (Kappung).
 - The rules of one tax year apply to the whole plan. Later changes of the law are unknown.
 - Your work expenses are one number a year. The limit of 4,500 € for the commute without a car,
-  meals away from home and a second home are not computed: enter them in the number. Costs above
-  the salary make no loss.
+  meals away from home and a second home are not computed: enter them in the number. Yearly costs
+  above the salary make no loss. Enter such costs as an expense with `deduct: work`.
 - A donation above 20% of the income is lost. The law carries it to later years. Donations to
   parties and to the capital of a foundation have rules of their own that are left out.
 - The tax credit of §35a leaves out a mini-job in your home and the costs of care. Two single
@@ -699,11 +731,18 @@ Dagobert is approximate by design. These are the main simplifications:
 - The state grant of the Altersvorsorgedepot leaves out the bonus for a young saver and the limit
   of two contracts.
 - A Basisrente with a disability cover, or one that started before 2023, is left out.
-- A loss carries forward only. Carrying it back into the year before (Verlustrücktrag) is left
-  out, so the tax comes out a little too high in the year before a loss. The limit on a carried
-  loss above 1 Mio. € a year (Mindestgewinnbesteuerung) is left out. The losses of private sales
-  and of capital income stay in euros of the start, while the losses of the income tax stay in
-  euros of their year.
+- A loss goes back only into the years of the plan, not into the years before the start. So after
+  a roll forward, a loss of the first year carries forward only. The refund of a carryback that
+  falls after the end of the plan is lost. A roll forward by one year keeps the whole loss of that
+  year for the new start. A roll forward by two years or more loses the refund of a loss of its
+  last year, and the part of that loss that went back no longer carries forward. For such a roll,
+  set `tax.loss_carryback` to false, and set it back to true after the roll: the whole loss then
+  carries to the new start. In a year of the Günstigerprüfung a loss first offsets the capital
+  income of that year, also when a carryback would save more. The losses of private sales carry
+  forward only. The
+  limit on a carried loss above 1 Mio. € a year (Mindestgewinnbesteuerung) is left out. The losses
+  of private sales and of capital income stay in euros of the start, while the losses of the
+  income tax stay in euros of their year.
 - The unemployment benefit assumes a full record of insured work, so your age alone sets its
   length. A new claim after a new job of a year is not modeled: a later time pays the rest of the
   first claim. The short Sperrzeiten of 3 and 6 weeks, the other Sperrzeiten and the

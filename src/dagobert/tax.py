@@ -95,6 +95,7 @@ class TaxYear(Strict):
     kv_pv_bbg_month: float
     werbungskosten_pauschale: float
     sonderausgaben_pauschbetrag: float
+    loss_carryback_max: float
     childcare_share: float
     childcare_max: float
     childcare_age: int
@@ -307,16 +308,21 @@ def fuenftelregelung(zve: Num, severance: Num, ty: TaxYear, *, alg1: Num = 0.0) 
     return floats(np.where((z < 0) & (z + s > 0), negative, regular))
 
 
-def werbungskosten(salary_year: Num, pension_taxable: Num, ty: TaxYear, actual: Num) -> FloatArray:
-    """§9a EStG: the Arbeitnehmer-Pauschbetrag on Arbeitslohn unless the `actual` work expenses
-    are higher (S. 1 Nr. 1 a), and 102 EUR on the taxable pension (Nr. 3), each capped at the
-    income it belongs to: costs beyond the Arbeitslohn would be a loss, left out. Other income
-    gets neither."""
-    work = np.maximum(ty.werbungskosten_pauschale, floats(actual))
-    return floats(
-        np.clip(floats(salary_year), 0.0, work)
-        + np.clip(floats(pension_taxable), 0.0, ty.pension_pauschbetrag)
+def werbungskosten(
+    salary_year: Num, pension_taxable: Num, ty: TaxYear, actual: Num, dated: Num = 0.0
+) -> FloatArray:
+    """§9a EStG: the Arbeitnehmer-Pauschbetrag on Arbeitslohn unless the work expenses are higher
+    (S. 1 Nr. 1 a), and 102 EUR on the taxable pension (Nr. 3), each capped at the income it
+    belongs to (S. 2). The yearly `actual` costs of the job stop at the Arbeitslohn too; the
+    `dated` costs of the year (§9 EStG: a course, applications, also before a job: vorweggenommene
+    Werbungskosten) count in full, so they can make a loss (§2 Abs. 3). Other income gets
+    neither."""
+    salary = np.maximum(floats(salary_year), 0.0)
+    work = np.maximum(
+        np.minimum(ty.werbungskosten_pauschale, salary),
+        np.minimum(floats(actual), salary) + floats(dated),
     )
+    return floats(work + np.clip(floats(pension_taxable), 0.0, ty.pension_pauschbetrag))
 
 
 def taxable_income(
@@ -447,6 +453,7 @@ class YearIncome:
     other_taxable: Num = 0.0
     rent: Num = 0.0  # the net rent of the let properties (§21 EStG), part of `other_taxable`
     werbungskosten: Num = 0.0  # the work expenses of the salary months, when above the Pauschbetrag
+    work: Num = 0.0  # the dated work expenses of the year (§9 EStG), on top, without a cap
     rv_paid: Num = 0.0  # own GRV share, voluntary contributions and Basisrente premiums
     rv_employer: Num = 0.0  # employer GRV share, counts against the Höchstbetrag only
     health_deductible: Num = 0.0
@@ -459,6 +466,7 @@ class YearIncome:
     trade_tax: Num = 0.0  # their Gewerbesteuer
     trade_credit: Num = 0.0  # its credit before the cap by the tariff tax (`trade_tax`)
     loss_carried: Num = 0.0  # the Verlustvortrag of the years before (§10d Abs. 2 EStG)
+    loss_back: Num = 0.0  # the losses of the next two years carried back (§10d Abs. 1 EStG)
     donations: Num = 0.0  # Zuwendungen (§10b EStG)
     childcare: Num = 0.0  # the costs of the care of a child under 14 (§10 Abs. 1 Nr. 5)
     children: Num = 0.0  # the children under 14 in any month of the year
@@ -479,6 +487,8 @@ class YearSettlement:
     refund: FloatArray  # Günstigerprüfung on flat-taxed capital income
     loss_left: FloatArray  # the Verlustvortrag into the next year
     credit: FloatArray  # the credits of §35 and §35a that came off the tariff tax
+    loss: FloatArray  # of `loss_left` the negative Gesamtbetrag of the year, which may go back
+    room: FloatArray  # the Gesamtbetrag der Einkünfte that a loss of a later year may take back
 
 
 def health_deductible(basis: Num, subsidy: Num) -> FloatArray:
@@ -558,12 +568,30 @@ def guenstigerpruefung(
 
 def carried(gde: Num, pot: Num) -> tuple[FloatArray, FloatArray]:
     """§10d Abs. 2 EStG: the losses carried `pot` offset the Gesamtbetrag der Einkünfte `gde`
-    before the Sonderausgaben, and a negative one joins them (Abs. 1 S. 1 with §2 Abs. 3). A
-    negative zvE from the Sonderausgaben alone carries nothing. Returns the losses used and those
-    left."""
+    before the Sonderausgaben, and a negative one joins them (Abs. 1 S. 1 with §2 Abs. 3), less
+    what goes back (`carryback`). A negative zvE from the Sonderausgaben alone carries nothing.
+    Returns the losses used and those left."""
     g, p = floats(gde), floats(pot)
     used = np.minimum(p, np.maximum(g, 0.0))
     return floats(used), floats(p - used + np.maximum(-g, 0.0))
+
+
+def carryback(loss: Num, rooms: Sequence[Num], ty: TaxYear) -> list[FloatArray]:
+    """§10d Abs. 1 S. 1, 2 EStG: the negative Gesamtbetrag der Einkünfte `loss` of a year goes
+    back into the year before it, the rest into the second year before it, at most
+    `loss_carryback_max` in all, each year up to its room (`YearSettlement.room`: the Gesamtbetrag
+    der Einkünfte that the Verlustvortrag left, which comes first where both meet, with the capital
+    income where its Günstigerprüfung refunds), all in the euros of the year of the loss. It comes
+    off before the Sonderausgaben, so it may take the Grundfreibetrag of a year of low income:
+    since 2022 the law waives the carryback on application as a whole, no part of it (S. 6).
+    Returns what each year takes, the year before first."""
+    left = np.minimum(floats(loss), ty.loss_carryback_max)
+    taken = []
+    for room in rooms:
+        take = floats(np.minimum(left, floats(room)))
+        taken.append(take)
+        left = left - take
+    return taken
 
 
 def sonderausgaben(income: YearIncome, gde: Num, ty: TaxYear) -> FloatArray:
@@ -627,13 +655,19 @@ def _credited(
 class Zve:
     """The zvE of a year (§2 Abs. 5 EStG), below 0 too, and the Verlustvortrag into the next (§10d
     Abs. 2), without and with the flat-taxed capital income, which the Günstigerprüfung adds to the
-    Einkünfte (§32d Abs. 6 S. 1); the ALG1 of the Progressionsvorbehalt."""
+    Einkünfte (§32d Abs. 6 S. 1); the ALG1 of the Progressionsvorbehalt; the Gesamtbetrag der
+    Einkünfte that a loss of a later year can still take back (Abs. 1) and the negative one of the
+    year, each without and with the capital income."""
 
     regular: FloatArray
     left: FloatArray
     capital: FloatArray
     left_capital: FloatArray
     alg1: FloatArray
+    room: FloatArray
+    room_capital: FloatArray
+    loss: FloatArray
+    loss_capital: FloatArray
 
 
 def zve(income: YearIncome, ty: TaxYear) -> Zve:
@@ -641,31 +675,42 @@ def zve(income: YearIncome, ty: TaxYear) -> Zve:
     higher (`werbungskosten`), the Sonderausgaben `sonderausgaben`. The Entlastungsbetrag comes off
     the Summe der Einkünfte, at most down to 0: it makes no loss (§2 Abs. 3, §24b). The losses
     carried offset the Gesamtbetrag der Einkünfte before the Sonderausgaben (`carried`), before
-    and after the capital income joins it. ALG1 raises the rate less the part of the Pauschbetrag
-    that the Arbeitslohn leaves unused (§32b Abs. 2 S. 1 Nr. 1)."""
+    and after the capital income joins it, then those carried back (`carryback`). Both come off
+    the regular income first, so beyond it a severance takes them (R 34.1 Abs. 1 S. 3 EStR, §34
+    Abs. 1 S. 3). ALG1 raises the rate less the part of the Pauschbetrag that the deducted work
+    expenses leave unused (§32b Abs. 2 S. 1 Nr. 1): none when higher costs came off (BFH III R
+    61/12)."""
     salary = floats(income.salary_gross)
-    work = werbungskosten(salary + floats(income.severance), 0.0, ty, income.werbungskosten)
+    work = werbungskosten(
+        salary + floats(income.severance), 0.0, ty, income.werbungskosten, income.work
+    )
     wk = work + werbungskosten(0.0, income.pension_taxable, ty, 0.0)
     regular = salary + floats(income.pension_taxable) + income.other_taxable
     summe = regular - wk + income.severance
     relief = np.minimum(income.entlastung, np.maximum(summe, 0.0))
     gde = summe - relief  # §2 Abs. 3
     used, left = carried(gde, income.loss_carried)
+    back = floats(income.loss_back)
     z = taxable_income(
-        regular - used - relief,
+        regular - used - back - relief,
         wk,
         rv_deductible(income.rv_paid, income.rv_employer, ty),
         floats(income.health_deductible) + sonderausgaben(income, gde, ty),
     )
     with_capital = summe + income.capital_income
     relief_capital = np.minimum(income.entlastung, np.maximum(with_capital, 0.0))
-    used_capital, left_capital = carried(with_capital - relief_capital, income.loss_carried)
+    gde_capital = with_capital - relief_capital
+    used_capital, left_capital = carried(gde_capital, income.loss_carried)
     return Zve(
         z,
         left,
         floats(z + income.capital_income + used - used_capital + relief - relief_capital),
         left_capital,
         floats(np.maximum(income.alg1 - np.maximum(ty.werbungskosten_pauschale - work, 0.0), 0.0)),
+        floats(np.maximum(gde - used - back, 0.0)),
+        floats(np.maximum(gde_capital - used_capital - back, 0.0)),
+        floats(np.maximum(-gde, 0.0)),
+        floats(np.maximum(-gde_capital, 0.0)),
     )
 
 
@@ -696,9 +741,10 @@ def year_settlement(income: YearIncome, ty: TaxYear, *, church: float) -> YearSe
     the tariff tax before the Soli (§3 Abs. 2 SolZG), the church tax takes it before §35 (§51a
     Abs. 2 S. 3; `_credited`). The Günstigerprüfung settles the losses carried on the Gesamtbetrag
     der Einkünfte with the capital income, which joins the Einkünfte (§32d Abs. 6 S. 1), and where
-    it refunds, its losses left hold. The children: the check of §31 (`_with_children`) on both
-    sides, the Soli and the church tax on the tax with every child allowance, whichever wins (§3
-    Abs. 2 SolZG, §51a Abs. 2 S. 1 EStG)."""
+    it refunds, its losses left, the loss of the year (what may go back, `carryback`) and the room
+    that a later loss may take back hold. The
+    children: the check of §31 (`_with_children`) on both sides, the Soli and the church tax on
+    the tax with every child allowance, whichever wins (§3 Abs. 2 SolZG, §51a Abs. 2 S. 1 EStG)."""
     z = zve(income, ty)
     other, rent, trade = (
         floats(x) for x in (income.other_taxable, income.rent, income.trade_income)
@@ -732,8 +778,19 @@ def year_settlement(income: YearIncome, ty: TaxYear, *, church: float) -> YearSe
         church=church,
         bases=(base, base_capital),
     )
-    loss_left = floats(np.where(refund > 0, z.left_capital, z.left))
-    return YearSettlement(tax, soli_amt, church_amt, trade_tax, total, refund, loss_left, credit)
+    taken = refund > 0
+    return YearSettlement(
+        tax,
+        soli_amt,
+        church_amt,
+        trade_tax,
+        total,
+        refund,
+        floats(np.where(taken, z.left_capital, z.left)),
+        credit,
+        floats(np.where(taken, z.loss_capital, z.loss)),
+        floats(np.where(taken, z.room_capital, z.room)),
+    )
 
 
 def _with_children(

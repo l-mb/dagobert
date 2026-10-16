@@ -26,6 +26,7 @@ from dagobert.tax import (
     av_deduction,
     av_zulage,
     capital_gains_tax,
+    carryback,
     church_rate,
     entlastungsbetrag,
     erbschaftsteuer,
@@ -52,6 +53,7 @@ from dagobert.tax import (
     year_settlement,
     year_tax,
 )
+from dagobert.tax import zve as zve_of
 
 PERSON = Person(born=date(1985, 1, 1))
 MONTH = date(2026, 1, 1)
@@ -224,7 +226,65 @@ def test_the_guenstigerpruefung_takes_the_losses_against_the_capital_income(
         church=0.0,
     )
     assert (float(settled.refund) > 0) == refund
-    assert settled.loss_left == pytest.approx(left)
+    assert settled.loss_left == settled.loss == pytest.approx(left)
+
+
+@pytest.mark.parametrize(
+    "income",
+    [
+        YearIncome(other_taxable=8000.0, health_deductible=8000.0),
+        YearIncome(other_taxable=2000.0, severance=10000.0),
+    ],
+    ids=["sonderausgaben", "severance"],
+)
+def test_a_loss_carried_back_comes_off_as_one_carried_forward(income: YearIncome) -> None:
+    """§10d Abs. 1 S. 1 EStG: a loss of a later year comes off the Gesamtbetrag der Einkünfte
+    before the Sonderausgaben, the regular income first, so beyond it the zvE below zero joins the
+    fifth of a severance (R 34.1 Abs. 1 S. 3 EStR, §34 Abs. 1 S. 3), as the losses carried
+    forward do, and carries nothing on. Its room is what the losses carried forward leave."""
+    back = year_settlement(replace(income, loss_back=5000.0), TY, church=0.0)
+    forward = year_settlement(replace(income, loss_carried=5000.0), TY, church=0.0)
+    assert (back.tax, back.loss_left) == pytest.approx((forward.tax, 0.0))
+    gde = zve_of(income, TY).room
+    both = replace(income, loss_carried=3000.0, loss_back=1000.0)
+    assert zve_of(both, TY).room == pytest.approx(gde - 4000.0)
+
+
+@pytest.mark.parametrize(
+    ("capital", "room", "refunded"),
+    [(15_000.0, 20_000.0, 15_000.0 * 0.26375), (200_000.0, 5000.0, 0.0)],
+    ids=["refund", "flat tax"],
+)
+def test_a_loss_goes_back_into_the_capital_income_that_the_tariff_taxed(
+    capital: float, room: float, refunded: float
+) -> None:
+    """§10d Abs. 1 S. 1 with §32d Abs. 6 S. 1 EStG: where the Günstigerprüfung of a year refunds,
+    its capital income joins the Gesamtbetrag der Einkünfte that a later loss takes back, and a
+    loss of all of it refunds the whole flat tax; under the flat tax the regular income alone."""
+    income = YearIncome(
+        other_taxable=5000.0, capital_income=capital, capital_tax_paid=capital * 0.26375
+    )
+    assert year_settlement(income, TY, church=0.0).room == pytest.approx(room)
+    again = year_settlement(replace(income, loss_back=room), TY, church=0.0)
+    assert (again.total, again.refund) == pytest.approx((0.0, refunded))
+
+
+@pytest.mark.parametrize(
+    ("loss", "rooms", "taken"),
+    [
+        (5000.0, [3000.0, 10_000.0], [3000.0, 2000.0]),  # the year before first
+        (5000.0, [0.0, 0.0], [0.0, 0.0]),  # no room: all of it carries forward
+        (1_500_000.0, [300_000.0, 2_000_000.0], [300_000.0, 700_000.0]),  # 1 Mio. € in all
+        (5000.0, [], []),  # the first year of a run
+    ],
+    ids=["two years", "no room", "limit", "first year"],
+)
+def test_a_loss_goes_back_one_year_then_two_up_to_its_limit(
+    loss: float, rooms: list[float], taken: list[float]
+) -> None:
+    """§10d Abs. 1 S. 1, 2 EStG: into the year before, the rest into the second year before, at
+    most 1,000,000 € of a single person."""
+    assert [float(t) for t in carryback(loss, rooms, TY)] == pytest.approx(taken)
 
 
 @pytest.mark.parametrize(
@@ -336,6 +396,48 @@ def test_the_withholding_takes_the_pkv_premium_and_settles_the_year() -> None:
         church=0.0,
     )
     assert float(settled.total) == pytest.approx(12 * float(withheld), abs=1.0)
+
+
+@pytest.mark.parametrize(
+    ("salary", "yearly", "dated", "deducted"),
+    [
+        (5000.0, 20_000.0, 0.0, 5000.0),  # the yearly costs stop at the Arbeitslohn
+        (5000.0, 20_000.0, 3000.0, 8000.0),  # dated ones count on top, beyond it
+        (0.0, 9000.0, 3000.0, 3000.0),  # without a salary only the dated ones
+        (50_000.0, 0.0, 500.0, 1230.0),  # below the Pauschbetrag: the Pauschbetrag
+        (50_000.0, 1000.0, 500.0, 1500.0),
+    ],
+)
+def test_dated_work_expenses_count_in_full(
+    salary: float, yearly: float, dated: float, deducted: float
+) -> None:
+    """§9 EStG: the work expenses of a year at a date (a course, applications, vorweggenommene
+    Werbungskosten) count without the cap at the Arbeitslohn that the yearly costs keep (§9a S.
+    2), so they can make a loss (§2 Abs. 3)."""
+    assert werbungskosten(salary, 0.0, TY, yearly, dated) == pytest.approx(deducted)
+
+
+@pytest.mark.parametrize(
+    ("salary", "dated", "rated"),
+    [
+        (0.0, 0.0, 10_000.0 - 1230.0),
+        (500.0, 0.0, 10_000.0 - 730.0),  # the part of the Pauschbetrag that the salary leaves
+        (0.0, 2000.0, 10_000.0),  # costs above the Pauschbetrag: none (BFH III R 61/12)
+        (0.0, 500.0, 10_000.0 - 730.0),  # costs below it: the rest of it
+        (0.0, 1229.0, 10_000.0 - 1.0),  # no jump at the Pauschbetrag (Rz. 17)
+        (0.0, 1231.0, 10_000.0),
+        (500.0, 300.0, 10_000.0 - 730.0),  # the Pauschbetrag came off
+    ],
+)
+def test_alg1_rates_less_the_pauschbetrag_that_the_work_expenses_leave(
+    salary: float, dated: float, rated: float
+) -> None:
+    """§32b Abs. 2 S. 1 Nr. 1 EStG: ALG1 raises the rate less the Arbeitnehmer-Pauschbetrag as far
+    as the Arbeitslohn does not take it; not at all when higher costs came off (BFH III R 61/12 of
+    2014-09-25), also dated costs in a year without a salary. Below it the costs and the
+    Pauschbetrag never relieve both (Rz. 15), so the relief does not jump at it."""
+    income = YearIncome(alg1=10_000.0, salary_gross=salary, work=dated)
+    assert zve_of(income, TY).alg1 == pytest.approx(rated)
 
 
 def test_werbungskosten_splits_salary_and_pension_per_9a() -> None:

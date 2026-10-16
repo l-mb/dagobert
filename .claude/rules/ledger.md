@@ -19,7 +19,8 @@ After a change, run the check of the rule `engine`.
   `spending` row of its `cat`: rule `disability`). A business books `RV` and its reserve as `income
   tax` monthly, the Gewerbesteuer `trade tax` with the settlement; the KV and PV of a GKV member
   beyond the salary and the pension book monthly as `KV` and `PV` (`Health._pay_gkv`, rule `gkv`).
-  `income tax` holds the Soli and the church tax too. A let property adds no flow: the AfA is no
+  `income tax` holds the Soli and the church tax too; the refund of a loss carried back books it
+  below zero in the December after the year of the loss, alone (rule `rental`). A let property adds no flow: the AfA is no
   cash, it shows as a lower `income tax` (rule `rental`). The sides `one-off in` and `one-off out`
   are part of the engine totals (severance, lump sum, policy payout, the tax on them; the cash of an
   inheritance or a gift, group `inheritance` or `gift` by the label of the giver, and its

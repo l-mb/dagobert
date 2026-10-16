@@ -1,18 +1,18 @@
 ---
 paths:
   - "src/dagobert/tax.py"
-  - "src/dagobert/engine/{core,income,health,events,settlement,simulation}.py"
+  - "src/dagobert/engine/{core,income,health,events,settlement,simulation,state}.py"
   - "src/dagobert/model/{assets,streams,taxes}.py"
   - "tests/test_rental.py"
 ---
 
-# Letting and the Verlustvortrag
+# Letting and the losses of the income tax
 
-A let property (§21 EStG), its AfA, the Verlustvortrag of the income tax (§10d EStG), with their
-sources (gesetze-im-internet.de, BFH and BSG, the BVSzGs and Katalog of the GKV-Spitzenverband, read
-on 2026-10-13). The rest of the tax law: rule `tax`; the GKV: rule `gkv`; the run: rule `engine`.
-The inputs: `docs/manual/configuration.md`, in plain English `docs/manual/models.md` (`Letting a
-property`). Individuals only.
+A let property (§21 EStG), its AfA, the Verlustrücktrag and the Verlustvortrag of the income tax
+(§10d EStG), with their sources (gesetze-im-internet.de, BFH and BSG, the BVSzGs and Katalog of the
+GKV-Spitzenverband, read on 2026-10-13). The rest of the tax law: rule `tax`; the GKV: rule `gkv`;
+the run: rule `engine`. The inputs: `docs/manual/configuration.md`, in plain English
+`docs/manual/models.md` (`Letting a property`, `A loss of a year`). Individuals only.
 
 - Inputs. `Stream.property` (an asset id) on `other_income` makes the amount a rent of that
   property, on an `expense` without `health` a Werbungskosten of it (§9 Abs. 1 S. 3 Nr. 2: Hausgeld,
@@ -70,8 +70,36 @@ property`). Individuals only.
   beyond the regular income (a severance), the zvE below zero joins the fifth (§34 Abs. 1 S. 3).
   The Günstigerprüfung settles the pot again on the Gesamtbetrag with the capital income (§32d
   Abs. 6 S. 1): where it refunds, its `loss_left` holds, so a loss first shelters the flat-taxed
-  gains of its year. Carryforward only (owner R4: the Verlustrücktrag of Abs. 1 is waivable, S. 6;
-  errs towards more tax). A business loss falls out of the same sum (rule `self-employment`).
+  gains of its year. A business loss falls out of the same sum (rule `self-employment`), so do
+  dated work expenses (rule `deductions`).
+- Verlustrücktrag (owner 2026-10-16, which reversed R4; Abs. 1 read at gesetze-im-internet.de that
+  day): `tax.loss_carryback` (`TaxOptions`, default true). `YearSettlement.loss`, the negative
+  Gesamtbetrag der Einkünfte of the year (with the capital income where the Günstigerprüfung
+  refunds), goes back into the year before, the rest into the second before (S. 1, 2), each up to
+  its `YearSettlement.room` (the Gesamtbetrag der Einkünfte less the Vortrag used and the losses
+  carried back so far: the Vortrag first where both meet, Haufe `Verluste/Verlustabzug` 4.5; with
+  the capital income where its Günstigerprüfung refunds, §32d Abs. 6 S. 1, `Zve.room_capital`), at
+  most `loss_carryback_max` in all (1 Mio. € of a single person since 2024, year file;
+  `tax.carryback`). `YearIncome.loss_back` comes off as the pot does, before the Sonderausgaben,
+  the regular income first, so beyond it the zvE below zero joins the fifth of a severance (R 34.1
+  Abs. 1 S. 3 EStR, §34 Abs. 1 S. 3), and beyond the regular room the capital income of the
+  Günstigerprüfung. The rest joins the pot. S. 6 since 2022 (Viertes Corona-Steuerhilfegesetz,
+  BGBl. 2022 I S. 911; read again 2026-10-16: "insgesamt abzusehen"): the waiver on application is
+  whole, no part of it (a partial waiver down to the Grundfreibetrag is the law before 2022, not
+  modelled): the default carries back in full; `false` is the waiver, forward only, the engine
+  before the option.
+- The engine (`Settlement._carry_back`, in `_settle_december` after the rounds, the church tax due
+  set): `Core.assessed`, a `deque` of two `state.Assessed`, the last year first (its final
+  `YearIncome` with `loss_back`, its settlement, its price level), a loss of no path skips. The
+  rooms (`YearSettlement.room`) at their levels in the euros of the loss year; each year settles
+  again and is amended in place
+  (a year takes from two later ones). `refund_back` (the old `total` less the new: income tax, Soli,
+  church and trade tax) and `flat_back` (the new Günstigerprüfung refund less the old), nominal at
+  the level of the year amended, `_refund_back` pays first in the next `_settle_december` (the
+  assessment of the loss year comes the next year; the last settlement of a run too): `income tax`
+  and `capital gains tax` below zero in that month (rule `ledger`), before `settled` (rule
+  `spending`). The church tax refunded lowers `church_due`, the church tax paid in the year of the
+  refund (§10 Abs. 4b S. 3).
 - The pot is nominal, as the law carries it: `Core.income_losses`, seeded from
   `tax.loss_carryforward` (the Feststellungsbescheid, Abs. 4, nominal at `start`), `/ d` into
   `_settle_year`, kept by `_settle_late_sales` and the `plain` recompute of the ledger split through
@@ -89,13 +117,26 @@ property`). Individuals only.
   Liebhaberei; the AfA of the month of a sale (R 7.4 Abs. 8 EStR counts it; the events run before
   the streams, so `_let` is false then: a twelfth of a year); the Erhaltungsrücklage when the WEG
   spends it (BFH IX R 119/83: the example leaves it without `property`); Vorauszahlungen on the
-  rent; the Gewerbesteuer carryforward (§10a GewStG); the Verlustrücktrag. The §35 share leaves a
-  rental loss out of the positive income (`YearIncome.rent`), a church tax refund comes after the
-  pot (BFH IX R 34/17), and `deduct` refuses `property` (§35a Abs. 5 S. 1): rule `deductions`.
+  rent; the Gewerbesteuer carryforward (§10a GewStG). Of the Verlustrücktrag: none into the years
+  before `start` (after a roll forward the loss of its first year carries forward only); a refund
+  due after the end of the run is lost, so is one across a roll forward (`rollforward.built`
+  writes the pot of `simulation.before` only, not `refund_back`, `flat_back` or `assessed`). A
+  roll of one year settles one December with `assessed` empty: the whole loss is in the pot. A
+  roll of two or more loses the carryback of a loss of its last year, refund and loss; models.md
+  names the waiver for the roll as the remedy (an issue for the owner, review 2026-10-16); the
+  Günstigerprüfung of the loss year takes the loss against its capital income also where a
+  carryback saves more (the application of §32d Abs. 6 is per year); §23 losses forward only (rule
+  `tax`). The §35 share leaves a rental loss out of the positive income
+  (`YearIncome.rent`), a church tax refund comes after the pot (BFH IX R 34/17), and `deduct`
+  refuses `property` (§35a Abs. 5 S. 1): rule `deductions`.
 - Tests: `tests/test_rental.py` (relations: a cost lowers the tax as much as a rent lower by it;
   the AfA rate, share and end; the end of the rent and a sale; the §23 basis, once for a GKV
   member too, and the penalty; the costs that the age curve and `scale` leave; the pot over years,
-  nominal with inflation, the seed, a business loss, a purchase, the GKV), the law
-  in amounts in `test_tax.py`, `rich_plan` (a let flat at a loss, its taxable sale) and `gkv_plan`
+  nominal with inflation, the seed, a business loss, a purchase, the GKV; the carryback a December
+  later, switched off, into the second year, into the capital income of a Günstigerprüfung, the
+  Grundfreibetrag it takes), the law in amounts in `test_tax.py` (`carryback`, `loss_back` as the
+  pot, the room, with the capital income), `rich_plan` (a let flat at a loss,
+  its taxable sale; a course of 2030, whose loss beyond the capital income goes back into the
+  severance year 2029, refunded in December 2031) and `gkv_plan`
   (a let flat with a loan repaid in 2033, its loss against the capital gains of the gap years, a
   seed of 20,000 €) of `test_golden.py`.

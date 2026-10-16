@@ -53,8 +53,10 @@ SAVINGS_TARGETS = ("equity", "fixed_income", "gold", "crypto")  # the kinds that
 
 
 class Deduction(Titled):
-    """What an expense is for the income tax: a Sonderausgabe or the base of a credit."""
+    """What an expense is for the income tax: Werbungskosten, a Sonderausgabe or the base of a
+    credit."""
 
+    WORK = "work"  # §9 EStG, in the year it is paid
     DONATION = "donation"  # §10b EStG
     CHILDCARE = "childcare"  # §10 Abs. 1 Nr. 5 EStG
     HOUSEHOLD = "household"  # §35a Abs. 2 EStG
@@ -63,6 +65,7 @@ class Deduction(Titled):
     @classmethod
     def titles(cls) -> dict[str, str]:
         return {
+            "work": "work expenses",
             "donation": "donation",
             "childcare": "childcare",
             "household": "household services (§35a)",
@@ -155,7 +158,10 @@ class Stream(Strict):
     )
     deduct: Deduction | None = Field(
         default=None,
-        description="Expense: what it is for the income tax. A donation (up to 20% of the income) "
+        description="Expense: what it is for the income tax. Work expenses (Werbungskosten, §9 "
+        "EStG) that you pay at a date, such as a course or applications, also without a job: "
+        "they count in the year that pays them, on top of the yearly work expenses of the "
+        "Assumptions page, and a loss carries to other years. A donation (up to 20% of the income) "
         "and childcare (80% of the costs of a child under 14, at most 4.800 € a year per child) "
         "lower the taxable income; household services and a craftsman's labour lower the tax by "
         "20% of the costs, at most 4.000 € and 1.200 € a year (§35a EStG). The cash flow stays an "

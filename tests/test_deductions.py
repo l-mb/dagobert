@@ -75,6 +75,40 @@ def test_werbungskosten_count_by_the_salary_months() -> None:
     assert taxed(run(idle, tax={"werbungskosten": 9000})) == taxed(run(idle))
 
 
+@pytest.mark.parametrize(
+    ("yearly", "course", "salaried", "forward"),
+    [
+        (20_000.0, 0.0, True, 0.0),  # the yearly costs stop at the salary
+        (0.0, 20_000.0, True, 14_000.0),  # a course does not
+        (0.0, 6000.0, False, 6000.0),  # also without a salary
+    ],
+    ids=["yearly", "course", "no salary"],
+)
+def test_dated_work_expenses_make_a_loss_that_carries(
+    yearly: float, course: float, *, salaried: bool, forward: float
+) -> None:
+    """§9 EStG: work expenses with `deduct: work` count in the year that pays them beyond the
+    Arbeitslohn, 6,000 € in 2026 here, so the loss carries into 2027 (§10d: the start has no year
+    before it to go back into); the yearly costs of the Assumptions page stop at the
+    Arbeitslohn."""
+    end = date(2027, 1, 1)
+    earned = [salary(500.0, end=end)] if salaried else []
+    paid = [expense(-course / 12, end=end, deduct="work")] if course else []
+    carried = run(
+        [*earned, *paid, other(4000.0, start=end)], months=24, tax={"werbungskosten": yearly}
+    )
+    lower = run([*earned, other(4000.0 - forward / 12, start=end)], months=24)
+    assert taxed(carried, NEXT) == pytest.approx(taxed(lower, NEXT), abs=1)
+
+
+def test_dated_work_expenses_count_on_top_of_the_yearly_ones() -> None:
+    """A course of 2,000 € beside 3,000 € of yearly costs deducts as 5,000 € of yearly costs."""
+    course = expense(-2000.0, every=12, start=date(2026, 6, 1), deduct="work")
+    assert taxed(run([salary(), course], tax={"werbungskosten": 3000})) == pytest.approx(
+        taxed(run([salary()], tax={"werbungskosten": 5000}))
+    )
+
+
 def test_the_alg1_of_the_bundesagentur_ignores_the_own_costs() -> None:
     """§153 SGB III takes the Pauschbetrag into the Leistungsentgelt, never the own costs."""
     scenario = Scenario(
@@ -103,14 +137,15 @@ def test_a_donation_lowers_the_tax_up_to_a_fifth_of_the_income_and_carries_nothi
     assert taxed(more, NEXT) == pytest.approx(taxed(plain, NEXT))
 
 
-def test_a_deduction_counts_what_was_paid_its_share_that_counts() -> None:
+@pytest.mark.parametrize("kind", ["donation", "work"])
+def test_a_deduction_counts_what_was_paid_its_share_that_counts(kind: str) -> None:
     """The expense after `scale.categories` and the spending cut, times `deductible`: half of a
     gift of 4,000 € deducts as a donation of 2,000 €, and a gift of 4,000 € that the scale halves
-    the same."""
+    the same; so do work expenses."""
     income = other(5000.0)
-    half = run([income, expense(-4000.0, deduct="donation", deductible=0.5)])
-    scaled = run([income, expense(-4000.0, deduct="donation")], scale={"categories": {"life": 0.5}})
-    plain = run([income, expense(-2000.0, deduct="donation")])
+    half = run([income, expense(-4000.0, deduct=kind, deductible=0.5)])
+    scaled = run([income, expense(-4000.0, deduct=kind)], scale={"categories": {"life": 0.5}})
+    plain = run([income, expense(-2000.0, deduct=kind)])
     assert taxed(half) == pytest.approx(taxed(plain))
     assert taxed(scaled) == pytest.approx(taxed(plain))
 

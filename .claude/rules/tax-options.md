@@ -11,8 +11,9 @@ paths:
 
 Options of the person in `tax` (`model.taxes.TaxOptions`, beside `pkv`), the law checked at
 gesetze-im-internet.de on 2026-10-13. The rest of the tax and SV law: rule `tax`; a business: rule
-`self-employment`. The inputs: `docs/manual/configuration.md`, in plain English
-`docs/manual/models.md`.
+`self-employment`; the losses of §10d (`loss_carryforward`, `loss_carryback`): rule `rental`; the
+yearly work expenses (`werbungskosten`): rule `deductions`. The inputs:
+`docs/manual/configuration.md`, in plain English `docs/manual/models.md`.
 
 - Church tax (`tax.church`, `tax.land`, a `model.taxes.Land`: the file keeps its ISO code, the
   selects show its English name; the model refuses a church without a Land):

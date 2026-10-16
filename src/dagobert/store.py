@@ -208,19 +208,25 @@ class RowFile:
         observed: Sequence[history.Observation] = (),
         read: Read | None = None,
         seen: revisions.Seen | None = None,
+        values: Mapping[Keys, Any] | None = None,
+        check: Callable[[], object] = lambda: None,
     ) -> None:
         """Write the edits as one revision of `source`, with the `observed` asset values that
         they set appended to `history.csv`. With `read`, the edits refer to the rows that a page
         read, and go onto the rows of the file then (`moved`). With `seen`, every row must be
         as a page showed them, or `revisions.ConflictError` refuses the edits: new rows that were
-        checked against all of them (the trade import). An input that no scenario can load
-        changes nothing and raises."""
+        checked against all of them (the trade import). `values` of the file (`Edit.values`)
+        save with the rows, `check` runs first inside the write (the drops of a scenario with
+        the Save of its events). An input that no scenario can load changes nothing and
+        raises."""
 
         def edit() -> dict[str, str | None]:
+            check()
             if seen is not None:
                 revisions.unchanged(self.data_dir, seen, self.rows())
             moved = edits if read is None else self.moved(edits, read)
-            return {self.name: self.text(moved)} | history.appended(self.data_dir, observed)
+            text = Edit(self.name, dict(values or {}), {self.keys: moved}).text(self.data_dir)
+            return {self.name: text} | history.appended(self.data_dir, observed)
 
         revisions.write(self.data_dir, source, edit)
 

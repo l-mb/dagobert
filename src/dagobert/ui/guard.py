@@ -295,11 +295,13 @@ def check(
     names: Mapping[str, str] | None = None,
     made: Collection[str] = (),
     notes: Sequence[str] = (),
+    more: Sequence[Change] = (),
 ) -> bool:
-    """`review` of the edits of a row file, in the order of the grid."""
+    """`review` of the edits of a row file, in the order of the grid, and of the changes `more`
+    that its Save writes with them (the drops of a scenario)."""
     removed = [label(rows[i]) for i in _ordered(edits.deleted, order, len(rows))]
     found = changes(rows, edits, order, units=units, names=names, made=made)
-    return review(found, removed, key=key, notes=notes)
+    return review([*found, *more], removed, key=key, notes=notes)
 
 
 def _ordered(indices: Iterable[int], order: Sequence[int], rows: int) -> list[int]:

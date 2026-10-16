@@ -41,7 +41,8 @@ field and save.
   factor on every salary payment and profit of the phase, so a bonus changes by the same share. A
   phase that pays neither in the plan shows the factor, `Salary and profit in Work`.
 - `Dates`: moves the phases and events with an id by months. Below the table, each moved group
-  shows its month before and after: `job-loss 2039-06 → 2039-09`.
+  shows its month before and after: `job-loss 2039-06 → 2039-09`. When you type a month into a
+  phase change of a parent in the tab `Phases`, the app writes the same move here.
 - `Event fields`: sets a field of the events with an id, for example the `price` of a sale.
 - `Assets`: sets a field of an asset of `assets.yaml`, for example the `contribution` of an
   Altersvorsorgedepot.

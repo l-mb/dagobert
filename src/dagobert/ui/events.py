@@ -2,9 +2,9 @@
 type, named in plain words (`TITLES`), with the form `Add an event` and the grid of the events of
 the file (`tables.edit_table`), under the grid of the sales the repayments of one sale, and below
 the types the events that the file inherits through `extends`, with a toggle per id that leaves
-its items out (`drop`), then the events read only with their file. Each Save is one revision
-through the save guard, refused when what it changes changed elsewhere since it was
-drawn."""
+its items out (`drop`, saved with the grid of the type open), then the events read only with
+their file. Each Save is one revision through the save guard, refused when what it changes
+changed elsewhere since it was drawn."""
 
 from __future__ import annotations
 
@@ -470,12 +470,13 @@ def tab(path: Path) -> None:
     if st.session_state.pop(f"{opened}-reveal", False):
         strip = tables.key_class(f"{opened}-tabs")
         st.html(_REVEAL.substitute(strip=strip), unsafe_allow_javascript=True)
-    for k, box in zip(kinds, boxes, strict=True):
-        with box:
-            _type(here, k)
     hidden = (mode.Item(mode.Sort.EVENT, (k,)) for k in TYPES if k not in kinds)
     view.note({h: _(INLINE[h.key[0]]) for h in hidden}, held=mode.Held.KINDS)
-    _inherited(here, parents, chain)
+    with st.container():  # below the types, drawn first: the Save of a type writes its drops
+        drops = _inherited(here, parents, chain)
+    for k, box in zip(kinds, boxes, strict=True):
+        with box:
+            _type(here, k, drops)
 
 
 def _edited(here: Tab, kind: str) -> bool:
@@ -488,12 +489,13 @@ def _edited(here: Tab, kind: str) -> bool:
     return key is not None and (base := save.kept(key)) is not None and _then_held(key, base)
 
 
-def _type(here: Tab, kind: str) -> None:
-    """The tab of one event type: the form that adds one, the grid, the ids that other items use,
-    and under the sales the repayments of one."""
+def _type(here: Tab, kind: str, drops: save.Part) -> None:
+    """The tab of one event type: the form that adds one, the grid, whose Save in the header also
+    writes the `drops` of the inherited events, the ids that other items use, and under the sales
+    the repayments of one."""
     spec = here.table(kind)
     _add(here, kind, spec)
-    edit_table(here.events, spec)
+    edit_table(here.events, spec, part=drops)
     _ids(here, [row for row in here.rows if row.get("type") == kind])
     if kind == SELL:
         _repayments(here)
@@ -720,16 +722,17 @@ def _then_changes(
     return found, [_action(then[i]) for i in edits.deleted]
 
 
-def _inherited(here: Tab, parents: list[Inherited], chain: Chain) -> None:
+def _inherited(here: Tab, parents: list[Inherited], chain: Chain) -> save.Part:
     """The events that the file inherits: a toggle per id that leaves them out
-    (`lineage.leave_out`), then the events read only with their file and the file below that
-    drops them."""
+    (`lineage.leave_out`, which the Save of the grid of the type open writes), then the events
+    read only with their file and the file below that drops them."""
     if not parents:
-        return
+        return save.NO_PART
     st.markdown(f"**{_('Inherited events')}**")
-    ids = lineage.ids(reach(chain))
-    lineage.leave_out(
-        here.data_dir, here.name, ids, chain, key=f"events-{here.stem}-drop", stale=True
-    )
+    ids, key = lineage.ids(reach(chain)), f"events-{here.stem}-drop"
+    leave = lineage.leave_out(here.data_dir, here.name, ids, chain, key=key, stale=True)
+    if leave.grids:
+        st.caption(_("`Save` at the top saves these switches with the events of the open tab."))
     lineage.table(parents)
     fold(_(DROP_HELP), _("About inherited events"))
+    return leave

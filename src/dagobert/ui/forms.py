@@ -31,13 +31,13 @@ from dagobert.ui.fields import ABSENT, SYMBOL, Field, Kind, dicts, fallback, loo
 from dagobert.ui.formguard import changes
 from dagobert.ui.gridcolumns import Row
 from dagobert.ui.gridstate import touched
-from dagobert.ui.save import REFUSED, discard_form, form_not_saved, form_stale
+from dagobert.ui.save import REFUSED, Grid, discard_form, form_not_saved, form_stale
 from dagobert.ui.widgets import KEY, Names, Spot, prefix, same
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from dagobert.ui.tables import MapRows
+    from dagobert.ui.tables import Computed, MapRows
 
 REQUIRED = N_("required")  # why a required field that is empty and has no fallback keeps Save off
 # the source of a `derived` value in its placeholder: `own-flat from the name`
@@ -81,7 +81,9 @@ class Form:
     `parts`: the top keys of the part beyond those of `fields`, the keys of a tab whose fields the
     mode or a feature hides (rule `mode`): the part keeps its shape whatever shows. `hides`: the
     columns of a mapping by name, by its path, that the mode or a feature hides while no entry of
-    the part holds them: they go behind `All columns`. The words of a page in these (labels,
+    the part holds them: they go behind `All columns`; of a list of rows they go (the `id` of a
+    phase change in simple mode). `computed`: read-only columns of a list of rows by its path,
+    which each row gives (the age of a phase change). The words of a page in these (labels,
     nulls, terms, helps, choices, `When.why`, plain words) are English: the form says them in the
     language of the session."""
 
@@ -104,6 +106,7 @@ class Form:
     rows: Mapping[KeyPath, MapRows] = dataclasses.field(default_factory=dict)
     parts: tuple[str, ...] = ()
     hides: Mapping[KeyPath, frozenset[str]] = dataclasses.field(default_factory=dict)
+    computed: Mapping[KeyPath, tuple[Computed, ...]] = dataclasses.field(default_factory=dict)
 
     def label(self, field: Field) -> str:
         """The label of `field` in the language of the session."""
@@ -724,6 +727,7 @@ def _draw(
             off=_off(form.when.get(path), typed, part, leaves),
             rows=form.rows.get(path),
             hidden=form.hides.get(path, frozenset()),
+            computed=form.computed.get(path, ()),
         )
         typed.widgets[spot.key] = path
         if field.kind is Kind.SECTION:
@@ -796,16 +800,6 @@ def merged(found: Iterable[store.Edit]) -> list[store.Edit]:
     return list(out.values())
 
 
-@dataclass(frozen=True)
-class Grid:
-    """What a grid of a tab adds to its Save: its edit, the check of its part inside the write
-    (`revisions.unchanged`) and the session key of its nonce, which a save raises."""
-
-    edit: store.Edit
-    check: Callable[[], object]
-    nonce: str
-
-
 def save(
     data_dir: Path,
     shown_forms: Sequence[Shown],
@@ -813,11 +807,9 @@ def save(
     *,
     key: str,
     flagged: bool,
-    label: str | None = None,
     action: str = "",
     ready: bool = True,
     why: str = "",
-    primary: bool = True,
 ) -> None:
     """The one Save of a tab: its forms and grids as one revision of the page and its `action`,
     the tab (`ui.source`: `Assumptions: Markets`), each part checked inside the write. Off while
@@ -825,15 +817,14 @@ def save(
     changed on disk or the caller is not `ready` (a grid of its own whose cell does not read). A
     refused save keeps the edits and says why; a saved one starts a new generation of each form
     and grid. Without a press, a form whose placeholders lag behind its edits (`Shown.refresh`)
-    reruns the page. `label`: `Save` without one. `why`: its help while the caller is not
-    `ready`. `primary` off: a neutral button beside the Save
-    of the page. A save says `Saved <files>` in a toast of the run after it (`ui.tell`)."""
+    reruns the page. `why`: its help while the caller is not `ready`. A save says `Saved <files>`
+    in a toast of the run after it (`ui.tell`)."""
     found = merged([*(s.edit() for s in shown_forms if s.changed), *(g.edit for g in grids)])
     ready = ready and not any(s.typed.unread or s.stale or s.refused for s in shown_forms)
     if not st.button(
-        guard.marked(label or _("Save"), flagged),
+        guard.marked(_("Save"), flagged),
         key=key,
-        type="primary" if primary else "secondary",
+        type="primary",
         disabled=not found or not ready,
         help=why or (None if found else _("No changes to save")),
     ):

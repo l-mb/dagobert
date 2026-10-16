@@ -7,7 +7,7 @@ import threading
 import time
 import unicodedata
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from functools import reduce
 from pathlib import Path
 from string import Template
@@ -19,6 +19,7 @@ import streamlit as st
 from dagobert import i18n, revisions, schema, series
 from dagobert.i18n import N_, _
 from dagobert.loader import load_scenario
+from dagobert.model.months import months_of_age
 from dagobert.ui import gridstate
 
 if TYPE_CHECKING:
@@ -335,6 +336,16 @@ if (!window.dgKeys) {
   keys();
 }
 </script>"""
+
+
+def at_age(month: date, born: date | None) -> str:
+    """A month with the age then in whole years, `2051-06 (age 65)`, the month alone without a
+    date of birth: the month sliders of the Explorer, the phase changes of a scenario."""
+    if born is None:
+        return f"{month:%Y-%m}"
+    return _("{month} (age {age})").format(
+        month=f"{month:%Y-%m}", age=months_of_age(born, month) // 12
+    )
 
 
 def titled(stem: str, name: object) -> str:

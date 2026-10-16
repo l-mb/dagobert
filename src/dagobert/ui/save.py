@@ -14,7 +14,7 @@ import streamlit as st
 from dagobert import revisions
 from dagobert.history import Observation
 from dagobert.i18n import N_, _
-from dagobert.store import Merge, Read, RowEdits, RowFile
+from dagobert.store import Edit, Merge, Read, RowEdits, RowFile
 from dagobert.ui import guard, joined, literal, page_said, source, tell, timezone
 from dagobert.ui.gridcolumns import Row
 
@@ -88,6 +88,30 @@ class Base:
     def read(self, key: tuple[str, ...]) -> Read:
         """What a save of the edits of the grid needs, rows named by the fields `key`."""
         return Read(self.rows, self.holder, self.seen.revision, key)
+
+
+@dataclass(frozen=True)
+class Grid:
+    """What a grid of a tab adds to its Save: its edit, the check of its part inside the write
+    (`revisions.unchanged`) and the session key of its nonce, which a save raises."""
+
+    edit: Edit
+    check: Callable[[], object]
+    nonce: str
+
+
+@dataclass(frozen=True)
+class Part:
+    """A part of a tab that saves with the Save of another: its `Grid`s, its lines of the save
+    guard, and whether a save may take it (`ready`: not while it changed elsewhere since it
+    drew). The toggles that leave out the items of the parents (`lineage.leave_out`)."""
+
+    grids: tuple[Grid, ...] = ()
+    changes: tuple[guard.Change, ...] = ()
+    ready: bool = True
+
+
+NO_PART = Part()  # a Save of its own grid alone
 
 
 @dataclass(frozen=True)
@@ -316,16 +340,30 @@ def button(
     nonce_key: str,
     toast: str,
     flagged: bool,
+    part: Part = NO_PART,
 ) -> None:
     """The Save button: write `edits` of the rows `read` and `observed` into the history as one
     revision, bump the nonce and rerun. The edits go onto the rows of the file then, row by row;
     a row that they change and that changed since refuses the save and keeps the edits. A failed
     write shows the error instead of saving (`reason`). The caller lists the edits first
     (`guard.check`) with the rows it holds, and its label carries a mark while one of them has a
-    warning (`flagged`)."""
-    if st.button(guard.marked(label, flagged), key=key, disabled=not edits, type="primary"):
+    warning (`flagged`). The values of the grids of `part`, in the same file, save with them;
+    while it is not `ready` Save stays off."""
+    if stray := [g.edit.name for g in part.grids if g.edit.name != file.name or g.edit.rows]:
+        msg = f"a part saves values of {file.name} only, not {', '.join(stray)}"
+        raise ValueError(msg)
+    disabled = not (edits or part.grids) or not part.ready
+    if st.button(guard.marked(label, flagged), key=key, disabled=disabled, type="primary"):
+
+        def check() -> None:
+            for grid in part.grids:
+                grid.check()
+
+        values = {k: v for grid in part.grids for k, v in grid.edit.values.items()}
         try:
-            file.apply(edits, source=source(), observed=observed, read=read)
+            file.apply(
+                edits, source=source(), observed=observed, read=read, values=values, check=check
+            )
         except revisions.ConflictError as err:
             text = _("Not saved: {changed}, in a row that you edited").format(
                 changed=changed_at(err)
@@ -338,6 +376,7 @@ def button(
         except REFUSED as err:
             st.error(_("Not saved: {reason}").format(reason=reason(err)))
         else:
-            st.session_state[nonce_key] += 1
+            for nonce in (nonce_key, *(grid.nonce for grid in part.grids)):
+                st.session_state[nonce] = st.session_state.get(nonce, 0) + 1
             tell(toast)
             st.rerun()

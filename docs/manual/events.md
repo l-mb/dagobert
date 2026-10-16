@@ -112,8 +112,10 @@ You can leave out inherited events by their id. Each switch names the id and how
 events it leaves out, for example `Leave out car (2 events)`:
 
 1. Switch on `Leave out` with the id.
-2. Read the list of changes, for example `leave out car (2 events) no → yes`.
-3. Press `Save what to leave out`.
+2. Read the list of changes below the table of the open tab, for example `leave out car (2
+   events) no → yes`.
+3. Press `Save` at the top of the page. It saves the switches together with the edits of the
+   events of the open tab.
 
 This leaves out every phase and event of those files with that id, also in the scenarios that
 extend this one. The tab `Phases` has the same switches for the phases. An event without an id

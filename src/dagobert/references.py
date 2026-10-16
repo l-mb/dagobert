@@ -6,6 +6,7 @@ counts as written."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
+from datetime import date
 from enum import Enum, StrEnum
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, get_args
@@ -379,6 +380,18 @@ def phases(data_dir: Path) -> dict[str, str]:
     """The phases of `assumptions.yaml` in its order, each with how the pages name it (its `label`,
     else its name), from the raw file: one that does not load still gives them."""
     return _labeled(read(data_dir, "assumptions.yaml").get("phases"))
+
+
+def born(data_dir: Path) -> date | None:
+    """The date of birth of `assumptions.yaml`, from the raw file: None where it does not read."""
+    person = read(data_dir, "assumptions.yaml").get("person")
+    held = person.get("born") if isinstance(person, dict) else None
+    if isinstance(held, date):
+        return held
+    try:
+        return date.fromisoformat(str(held))
+    except ValueError:
+        return None
 
 
 def relatives(data_dir: Path) -> dict[str, str]:

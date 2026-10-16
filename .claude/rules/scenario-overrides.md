@@ -59,11 +59,12 @@ The forms, their fallbacks and Save: rule `forms`; the override algebra (`overri
   grid pins its first column on a phone, its column help in the popover `Columns`. Below it the
   entries that the file inherits, with their file; below the dates each group that moves,
   `job-end 2027-05 → 2027-08 (from base)` (`moved`, from the first month that the chain writes,
-  after the edits).
+  after the edits). The Phases tab writes the same `shift` when a month of an inherited phase
+  change is moved (rule `scenarios`): each checks the other by its `Seen` of the part.
 - Save conflicts: the forms keep their own bases; the grids one `overridegrids.Base` per nonce of
   their part (`part`: `shift`, `events`, `assets` of the file), the revision taken before the read.
   A change of it on disk without edits starts a new generation, with edits it warns above the parts
-  with `Discard my edits` and keeps Save off; their `forms.Grid` checks again inside the write.
+  with `Discard my edits` and keeps Save off; their `save.Grid` checks again inside the write.
 - The live check (`trial`): once every form and grid reads, the merged edit of the tab is written
   to a copy of the plan files (`revisions.PLAN`) in a temporary directory, and `load_plan` runs for
   the scenario and those that extend it (`Here.below`). A problem that the files now do not

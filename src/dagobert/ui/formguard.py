@@ -144,10 +144,11 @@ def _cells(
                     else (f"{head} {name} {col.name}", f"{shown} {name} {keywords(col.name)}")
                 )
                 capped = at[-1] not in guard.ABOVE_ONE
+                words = dict(col.words)  # an option as the grid shows it: a phase by its label
                 yield guard.Change(
                     label,
-                    _cell(before, col.unit),
-                    _cell(after, col.unit),
+                    _cell(words.get(str(before), before), col.unit),
+                    _cell(words.get(str(after), after), col.unit),
                     unit=col.unit,
                     capped=capped,
                     key=key,

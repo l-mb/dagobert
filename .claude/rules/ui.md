@@ -31,7 +31,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
 | `spend.py` | `spend` (the page), `save-guard` |
 | `data.py` | `series` (the page), `prices` |
 | `assumptions.py` | `assumptions` (the page), `forms`, `save-guard` |
-| `scenarios.py`, `fileactions.py` | `scenarios` (the page), `events`, `scenario-overrides`, `forms`, `store` |
+| `scenarios.py`, `fileactions.py`, `phases.py` | `scenarios` (the page), `events`, `scenario-overrides`, `forms`, `store` |
 | `transfer.py` | `transfer` (the page) |
 | `welcome.py` | `examples` (the first-run page) |
 | `mode.py`, `features.py` | `mode` (the mode, the features and their page), `save-guard` |

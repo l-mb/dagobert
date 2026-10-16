@@ -168,7 +168,7 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   `overview.py`, `snapshot.py`, `assets.py` (`tradeform.py`, `tradeimport.py`) [grids, tracking],
   `cashflows.py` (`bars.py`), `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode],
   `data.py`, `assumptions.py`, `transfer.py`, `welcome.py`, `scenarios.py` (`fileactions.py`; tabs
-  `events.py`, `scenario_overrides.py`, `overridegrids.py`; `lineage.py`).
+  `phases.py`, `events.py`, `scenario_overrides.py`, `overridegrids.py`; `lineage.py`).
 - `src/dagobert/data/`: shipped series, read only, see `SOURCES.md` there [series].
 - `data/`: personal inputs; `tmp/`: scratch files; both gitignored. In `data/`: `history.csv`
   [tracking], `actuals.csv` [spend], `prices/` [prices], `revisions/` [revisions], `series/`: the

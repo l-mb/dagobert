@@ -25,11 +25,11 @@ from dagobert.model.base import KeyPath, Unit
 from dagobert.model.months import add_months
 from dagobert.overrides import Leaf
 from dagobert.references import Kind, References
-from dagobert.ui import fields, formguard, forms, gridstate, guard, joined, literal, tables
+from dagobert.ui import fields, formguard, gridstate, guard, joined, literal, tables
 from dagobert.ui.events import TYPES
 from dagobert.ui.gridcolumns import ASSET_MODELS, Column, Row, keyword, number
 from dagobert.ui.lineage import read_only
-from dagobert.ui.save import changed_at, discard, stays
+from dagobert.ui.save import Grid, changed_at, discard, stays
 from dagobert.ui.widgets import same
 
 if TYPE_CHECKING:
@@ -326,7 +326,7 @@ class Grids:
     listed: list[guard.Change]
     unread: dict[str, str]
     stale: bool
-    grid: forms.Grid | None
+    grid: Grid | None
 
 
 def _widget(here: Here, nonce: int, key: str) -> str:
@@ -433,7 +433,7 @@ def grids(here: Here, leaves: Mapping[KeyPath, Leaf], top: DeltaGenerator) -> Gr
         with top:
             _changed(here, changed)
     grid = (
-        forms.Grid(
+        Grid(
             store.Edit(here.file, {(*OWN, *p): v for p, v in found.items()}),
             lambda: revisions.unchanged(here.data_dir, base.seen, part(doc(here.path))),
             f"{here.key}-grids-nonce",

@@ -18,6 +18,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Literal
 
+import pandas as pd
 import streamlit as st
 from pydantic import BaseModel
 from streamlit.elements.lib.column_types import ColumnConfig
@@ -502,6 +503,30 @@ def pin(config: Mapping[str, ColumnConfig], *names: str, width: int | None = Non
                     config[name]["width"] = width
 
 
+@dataclass(frozen=True)
+class Computed:
+    """A read-only column of a small grid that each row gives, after the column `after`: the age
+    of a phase change. `header` is English, said in the language of the session. It shows the
+    row as saved: a grid keeps its edits only while its data stays."""
+
+    name: str
+    header: str
+    after: str
+    value: Callable[[Row], object]
+
+
+def computed(
+    data: pd.DataFrame, config: dict[str, Any], extra: Sequence[Computed], rows: Sequence[Row]
+) -> None:
+    """The columns `extra` inserted into the cells `data` of `rows` and their configs, read only.
+    A new row of the carried edits has none."""
+    for c in extra:
+        if c.after in data.columns:
+            cells = [c.value(row) for row in rows] + [None] * (len(data) - len(rows))
+            data.insert(list(data.columns).index(c.after) + 1, c.name, cells)
+            config[c.name] = st.column_config.TextColumn(_(c.header), disabled=True)
+
+
 def small_grid(
     cols: list[Column],
     rows: Sequence[tuple[int, Row]],
@@ -510,21 +535,24 @@ def small_grid(
     shown: list[Column] | None = None,
     add_only: bool = False,
     helps: bool = True,
+    extra: Sequence[Computed] = (),
 ) -> RowEdits:
     """A grid of `rows`, each with its index in its list, in the columns `shown` (all of `cols`
-    without them), and its edits by those indices: a list of a form, the repayments of a sale, an
-    override by id. It grows with its rows, its first column stays in view on a phone, and with
-    `helps` the help of its columns sits in a popover there (`column_help`). The edits are read
-    with every column, also those carried over a new grid (`gridstate.carry`), which a switch of
-    the language draws (`gridstate.drawn`)."""
+    without them) and the read-only columns `extra`, and its edits by those indices: a list of a
+    form, the repayments of a sale, an override by id. It grows with its rows, its first column
+    stays in view on a phone, and with `helps` the help of its columns sits in a popover there
+    (`column_help`). The edits are read with every column, also those carried over a new grid
+    (`gridstate.carry`), which a switch of the language draws (`gridstate.drawn`)."""
     visible = shown or cols
     if helps:
         column_help({c.header: text for c in visible if (text := c.help)})
     config = {c.name: c.config() for c in visible}
     pin(config, visible[0].name)
     drawn({key: len(rows)})
+    data = frame(visible, [row for _i, row in rows], st.session_state.get(f"carried-{key}"))
+    computed(data, config, extra, [row for _i, row in rows])
     st.data_editor(
-        frame(visible, [row for _i, row in rows], st.session_state.get(f"carried-{key}")),
+        data,
         column_config=config,
         num_rows="add" if add_only else "dynamic",
         hide_index=True,
@@ -765,13 +793,17 @@ def _lead(table: Table, rows: list[Row]) -> Row | None:
     return row
 
 
-def edit_table(file: RowFile, table: Table, view: mode.View = mode.EVERYTHING) -> None:
+def edit_table(
+    file: RowFile, table: Table, view: mode.View = mode.EVERYTHING, part: save.Part = save.NO_PART
+) -> None:
     """Show the rows of `table` as its grid read them first (`save.base`): the edits keep their
     rows when another device changes the file, and a change of the rows of the grid shows with
     the difference. Save the edits on request, onto the file as it is then. A row that a link
     opened (`focus`) comes first. A column that the mode or a feature hides by `view` goes
     behind `All columns`, an option that they hide goes: what the other inputs give stays with
-    the base while the grid holds edits, the mode follows its switch, which carries them."""
+    the base while the grid holds edits, the mode follows its switch, which carries them. The
+    Save of a table without groups also writes `part` and lists its changes (the drops of the
+    Events tab)."""
     save_key = f"{table.key}-save"
     save_in_header(save_key)
     table = replace(table, focus=st.session_state.get(f"{table.key}-focus"))
@@ -845,6 +877,7 @@ def edit_table(file: RowFile, table: Table, view: mode.View = mode.EVERYTHING) -
             names=table.names(),
             made=table.made,
             notes=notes,
+            more=part.changes,
         )
     save.button(
         file,
@@ -856,4 +889,5 @@ def edit_table(file: RowFile, table: Table, view: mode.View = mode.EVERYTHING) -
         nonce_key=f"{table.key}-nonce",
         toast=_("Saved {files}").format(files=file.path.name),
         flagged=flagged,
+        part=part,
     )

@@ -1,6 +1,6 @@
 ---
 paths:
-  - "src/dagobert/ui/{scenarios,fileactions}.py"
+  - "src/dagobert/ui/{scenarios,fileactions,phases}.py"
   - "tests/test_scenarios.py"
 ---
 
@@ -55,11 +55,19 @@ rule `scenario-overrides`.
   buttons in a row that wraps (a column of four ran past the screen in landscape), which a tap on an
   action closes (`key` and `on_change`: it covered the dialog): `New` (name first, then the file
   name, whose placeholder and default `ui.slug` makes of the name, `Früh in Rente!` gives
-  `frueh-in-rente`; parent), `Copy` (name and file name; the text with its comments and parent),
-  `Rename file` (the file; every `extends` and entry of `app.yaml` follow, the name stays),
-  `Delete`. Each is an `st.dialog`, its title made per call and the language taken first (rule
-  `i18n`: it reruns alone), that lists what it writes through the save guard (`listing`: the moved
-  or copied file, each value with the one before, the removed files) or why it is refused
+  `frueh-in-rente`; `Extends` at the main scenario, owner 2026-10-16: none dropped the phases and
+  events of the plan; `Plan.parents`, the main one first, the others, `none: a scenario of its
+  own` last, each `stem · name` by `Plan.said`, `titled` and `main_marked` on the raw files: a
+  template is a parent, so not `ui.scenario_titles`; on a phone no typing, `filter_mode=None`),
+  `Copy` (name and file name; the text with its comments and parent), `Rename file` (the file;
+  every `extends` and entry of `app.yaml` follow, the name stays), `Delete`, and with a main
+  scenario `Add a job loss` (`_job_loss`). Each is an `st.dialog`, its title made per call and the
+  language taken first (rule `i18n`: it reruns alone), that lists what it writes through the save
+  guard (`listing`: the moved or copied file, each value with the one before, each row that it adds
+  to a list or cell that it changes, the removed files; a value in words, never a Python repr,
+  `worded`: phase changes `Work from 2026-10` by their labels, also a label that the edits define,
+  events by `lineage.worded`, a stream kind by its title, a month `2026-10`; `features_off` per
+  feature `job loss off → on`, as the Features page) or why it is refused
   (`Refused:`, `literal`: the store names the characters in words), says why its button is off
   (`why`: `Type a name first.`), and writes it as one revision `Scenarios: new b`, `Scenarios:
   rename scenarios/a.yaml → scenarios/b.yaml` (`revisions.renaming`: the Overview and the Flows
@@ -70,6 +78,15 @@ rule `scenario-overrides`.
   follow (`FOLLOW`: the explorer's scenarios, the Cashflows and the Flows scenario; `followed`). A
   written action says what it did in a toast of the next run (`ui.tell`, `Created Früh in Rente!,
   which extends plan`): the dialog closes with a rerun.
+- `Add a job loss` (owner 2026-10-16, for a first-time user; `scenariofiles.lost_job`, rule `store`,
+  which the quick start and the goal steps can call): the month of the loss and, optional, of a new
+  job (text fields read by `fields.parse` of a month, the error as `why`), the name (placeholder
+  `Job loss at <age>`, numbered `(2)` where taken; the file name its slug, numbered `-2`), the
+  label of a phase it adds in the language of the session (`pgettext("phase", "Unemployed")`: a
+  context, so the leak check of user data does not count it). A new job in a month where the
+  main scenario is unemployed or has no phase is refused (`Refused:`): it would change no phase.
+  One revision `Scenarios: job loss
+  <stem>`, then the chooser opens the new scenario. It shows in both modes (rule `mode`).
 
 ## Tabs
 
@@ -98,20 +115,44 @@ rule `scenario-overrides`.
   scenario of its own`, through `NULLS`; off where every other scenario extends it, rule `forms`)
   and `abstract` (label `Template: only a base for others, never run`). `drop` is no field here: the
   toggles of `Phases` and `Events` leave out the items of the parents where they show
-  (`lineage.leave_out`). `extends` offers the scenarios that do not extend it
-  (`scenariofiles.parents`, so no cycle). The scenarios that extend it are named: a change reaches
+  (`lineage.leave_out`), saved with the Save of `Phases` or of the type open in `Events`.
+  `extends` offers the scenarios that do not extend it (`scenariofiles.parents`, so no cycle). The scenarios that extend it are named: a change reaches
   them. `refusals` (no model checks these) keeps Save off for a name of another scenario and for
   `Template` on the last scenario that runs: a warning, and `forms.save(ready=False)`; the write
-  checks again (a `forms.Grid` without edits).
-- `Phases`: one form with the `phases` grid (`from` pinned on a phone; `phase` a select of the
-  phases of `assumptions.yaml` in their order, `references.phases`, no new name: a scenario defines
-  none; `PHASE_HELP` names the Assumptions page; a row added or changed without an id takes one
-  before the guard lists it, `phase_ids` through `forms.Shown.fill`: its phase, else with its year,
-  `retired-2051`, else numbered, none that the chain holds, so the seek `Stop working` and the month
-  sliders of the Explorer reach a plain plan), and below it `Inherited phases`: a toggle per id of
-  those that reach it (`lineage.reach`, `lineage.leave_out`) with `Save what to leave out`, then the
-  phases of the parents read only (`inherited_phases`, raw chain), each with its file (`set in`)
-  and, where a file below drops its id, `left out by`.
+  checks again (a `save.Grid` without edits).
+- `Phases`: `phases.tab`. One form with the `phases` grid (`from` pinned on a phone; then `age`, the
+  age in whole years at the month as saved, `tables.Computed` through `Form.computed`: a grid keeps
+  its edits only while its data stays, so the guard says the age of a new month, `ui.at_age`;
+  `phase` a select of the phases of `assumptions.yaml` in their order by their labels as written,
+  `Column.words`, `references.phases`, no new name: a scenario defines none; `PHASE_HELP` names
+  the Assumptions page; `id` only in advanced mode, `Form.hides`, with the note `Hidden in simple
+  mode: ids.`; a row added or changed without an id takes one before the guard lists it,
+  `phase_ids` through `forms.Shown.fill`: its phase, else with its year, `retired-2051`, else
+  numbered, none that the chain holds, so the seek `Stop working` and the month sliders of the
+  Explorer reach a plain plan). A new row whose phase a change of a parent that runs has
+  (`repeats`) warns that that change stays, and where it has an id a toggle `Move <id (1 phase and
+  2 events)> to <month (age)> instead` saves its move and leaves the row out of the save
+  (`_without`; the grid shows it until the save starts it anew: a page cannot remove a row of a
+  grid); the toggle is keyed by the phase and month of its row, so a row deleted above keeps it
+  with its row. Below `Inherited phases`: a toggle per id of those that reach it (`lineage.reach`,
+  `lineage.leave_out`), then the changes of the parents in a grid of fixed rows (`_moves`) by
+  month, a timeline whatever file holds them, the month as the run sees it (`moving`, after
+  `lineage.shifts`) the one cell to edit, `age`, the
+  phase by its label, the id in advanced mode, `left out by` while one is dropped, `set in`. A month
+  typed there saves `overrides.shift.<id>` of the file (`shifted`: the months from the month that
+  the parent writes, cleared where that is what the parents give, so an emptied cell takes their
+  month again; a child's shift replaces its parent's, `loader.merged_overrides`); a row without an
+  id or one left out moves nothing and the guard notes it, so does a text that is no month
+  (`2051-13`: it keeps its month, `typed_moves`). An id moves as one: the guard notes the new month
+  of its other rows (`along`; the grid keeps their months until the save: new data would drop its
+  edits), also of one whose month typed does not count. The guard lists `move retirement (1
+  phase) 2051-06 (age 65) → 2049-06 (age 63)`. Its base (`Placed`) keeps the rows and a
+  `revisions.Seen` per file of the chain of what places them (`_placing`: phases, drops, shifts,
+  the revision taken before the read): a change without an edit starts it anew, with one a
+  warning, `Discard my edits` and Save off; the write checks again. One Save for the tab (owner
+  2026-10-16: three Saves read as three save models): the form, the moves and the drops as one
+  revision; the Events tab saves its drops with the grid of the type open (rule `events`), the
+  main scenario box has its own (`app.yaml`).
 - `Events`: `events.tab` (rule `events`). `Overrides`: `scenario_overrides.tab` (rule
   `scenario-overrides`).
 - Simple mode (rule `mode`; `mode.view` once per run): `Overrides` shows while the scenario holds

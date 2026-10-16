@@ -9,9 +9,12 @@ from operator import itemgetter
 from typing import TYPE_CHECKING, Any
 
 import pytest
+from builders import fixed_run
+from german import edited
 from streamlit.testing.v1 import AppTest
 
-from dagobert import references, revisions, scenariofiles, store
+from dagobert import loader, references, revisions, scenariofiles, store
+from dagobert.budget import ledger, regular_salary
 from dagobert.loader import APP, chain, load_scenario, read_yaml
 from dagobert.model.base import KeyPath
 from dagobert.model.plan import Scenario
@@ -19,18 +22,17 @@ from dagobert.problems import InputError
 from dagobert.scenariofiles import act, copied, removed, renamed
 from dagobert.store import RowEdits
 from dagobert.ui import assumptions, forms, slug
-from dagobert.ui.fileactions import followed, listing
-from dagobert.ui.lineage import AT_DEATH, LEFT_OUT, ON_CONDITION, SET_IN, THIS
+from dagobert.ui.fileactions import Plan, followed, listing
+from dagobert.ui.lineage import AT_DEATH, LEFT_OUT, ON_CONDITION, SET_IN, THIS, Inherited
+from dagobert.ui.phases import Moving, moving, phase_ids, shifted, typed_moves
 from dagobert.ui.scenarios import (
     FIELDS,
     LABELS,
     TABS,
     compare_label,
-    inherited_phases,
     label,
     opening,
     option,
-    phase_ids,
     promoted,
     refusals,
     timeline,
@@ -198,11 +200,29 @@ def test_the_timeline_words_a_dropped_gift_and_sale_as_the_rows_it_runs(family: 
 
 
 def test_the_phases_of_the_parents_name_their_file_and_who_drops_them(family: Path) -> None:
+    """The month as the run sees it, moved by the shift of the child; a dropped one as written."""
+    found = moving(chain(family / "scenarios" / "child.yaml"))
+    assert [(r.phase, r.month, r.item.file, r.item.dropped) for r in found] == [
+        ("work", date(2026, 1, 1), "base", None),
+        ("retired", date(2052, 1, 1), "base", None),  # `shift: {retirement: 24}`
+    ]
     (family / "scenarios" / "child.yaml").write_text(CHILD.replace("[bonus]", "[retirement]"))
-    assert inherited_phases(chain(family / "scenarios" / "child.yaml")) == [
-        {"from": "2026-01", "phase": "work", "id": "", SET_IN: "base", LEFT_OUT: ""},
-        {"from": "2050-01", "phase": "retired", "id": "retirement", SET_IN: "base"}
-        | {LEFT_OUT: "child"},
+    dropped = moving(chain(family / "scenarios" / "child.yaml"))[1]
+    assert (dropped.month, dropped.item.dropped, dropped.movable) == (
+        date(2050, 1, 1),
+        "child",
+        False,
+    )
+    # a timeline by month, whatever file holds a change
+    (family / "scenarios" / "child.yaml").write_text(
+        CHILD + "phases:\n  - {from: 2040-01-01, phase: alt, id: break}\n"
+    )
+    (family / "scenarios" / "grand.yaml").write_text("name: Grand\nextends: child\n")
+    found = moving(chain(family / "scenarios" / "grand.yaml"))
+    assert [(r.month, r.item.file) for r in found] == [
+        (date(2026, 1, 1), "base"),
+        (date(2040, 1, 1), "child"),
+        (date(2052, 1, 1), "base"),
     ]
 
 
@@ -334,14 +354,18 @@ def test_a_link_opens_the_tab_of_its_query(family: Path, query: dict[str, str], 
 
 
 def test_a_phase_change_takes_a_phase_of_the_assumptions(family: Path) -> None:
-    """In the order of `assumptions.yaml`, no new name: a scenario defines no phase."""
+    """In the order of `assumptions.yaml`, by its label, no new name: a scenario defines no
+    phase."""
     at = AppTest.from_string(PAGE.format(data=str(family)), default_timeout=30)
     at.query_params.update({"scenario": "child", "tab": "Phases"})
     at.run()
     assert not at.exception
     columns = (json.loads(g.proto.columns) for g in at.dataframe)
     phase = next(c["phase"]["type_config"] for c in columns if "phase" in c)
-    assert phase == {"type": "selectbox", "options": ["work", "unemployed", "alt", "retired"]}
+    labels = ("Work", "Unemployed", "Career break", "Retired")
+    names = ("work", "unemployed", "alt", "retired")
+    options = [{"value": n, "label": t} for n, t in zip(names, labels, strict=True)]
+    assert phase == {"type": "selectbox", "options": options}
 
 
 def test_the_items_of_the_parents_are_left_out_in_their_tabs(family: Path) -> None:
@@ -356,11 +380,11 @@ def test_the_items_of_the_parents_are_left_out_in_their_tabs(family: Path) -> No
     toggles = {str(t.key).rsplit("-", 1)[-1]: t for t in at.toggle if t.label.startswith("Leave")}
     assert (toggles["retirement"].value, toggles["bonus"].value) == (False, True)
     toggles["retirement"].set_value(True).run()
-    next(b for b in at.button if b.key == "scenarios-phases-child-drop-save").click().run()
+    next(b for b in at.button if b.key == "scenarios-phases-child-save").click().run()
     assert any("no event or phase with this id" in e.value for e in at.error)  # its own shift
     bonus = next(t for t in at.toggle if str(t.key).endswith("events-child-drop-0-bonus"))
     bonus.set_value(False).run()
-    next(b for b in at.button if b.key == "events-child-drop-save").click().run()
+    at.button(key="events-child-lump_sum-save").click().run()  # the Save of the type open
     assert not at.exception
     assert "drop" not in read_yaml(family / "scenarios" / "child.yaml")
     assert "bonus" in {e.id for e in load_scenario(family / "scenarios" / "child.yaml").events}
@@ -504,3 +528,224 @@ def test_simple_mode_shows_the_template_switch_of_a_template_only(
     assert (LABELS[("abstract",)] in [t.label for t in at.toggle]) == shown
     notes = [c.value for c in at.caption if c.value.startswith("Hidden in simple mode")]
     assert any("Template." in note for note in notes) != shown
+
+
+def test_a_new_scenario_extends_the_main_one_and_lists_its_phases_in_words(family: Path) -> None:
+    plan = Plan(scenariofiles.raw_scenarios(family), "child")
+    assert plan.parents == ["child", "base", None]
+    assert plan.said("child") == "child · Keep going (main)"
+    labels = references.phases(family)
+
+    def listed(parent: str | None) -> list[str]:
+        edits = scenariofiles.created(family, "new", "New", parent)
+        return [c.text for c in listing(edits, lambda n: references.read(family, n), labels)[0]]
+
+    assert listed("child") == [
+        "**scenarios/new.yaml name** empty → New",
+        "**scenarios/new.yaml extends** empty → child",
+    ]
+    assert listed(None)[1] == "**scenarios/new.yaml phases** empty → Work from 2026-01"
+
+
+def test_a_moved_month_shifts_the_inherited_change_as_the_parents_give_it() -> None:
+    """The months from the parent's month; the parents' own shift or an emptied cell sets none;
+    a change without an id or one left out does not move."""
+    row = Moving(Inherited("base", {"phase": "retired", "id": "r"}, None), date(2050, 1, 1), None)
+    rows = [replace(row, month=date(2052, 1, 1)), replace(row, raw=None)]
+    rows += [Moving(Inherited("base", {"phase": "work"}, None), date(2026, 1, 1), None)]
+    typed = {0: date(2049, 6, 1), 1: date(2049, 1, 1), 2: date(2027, 1, 1)}
+    assert {i: m for i, (_r, _d, m) in shifted(rows, typed, {}).items()} == {"r": -7}
+    assert shifted(rows, {0: date(2051, 1, 1)}, {"r": 12})["r"][2] is None  # what base gives
+    assert shifted(rows, {0: None}, {})["r"][1:] == (date(2050, 1, 1), None)  # emptied
+    assert shifted(rows, {0: date(2052, 1, 1)}, {"r": 24}) == {}  # as shown
+
+
+def test_the_rows_of_one_id_move_as_one_and_a_text_that_is_no_month_moves_nothing() -> None:
+    """The guard notes the other rows of an id that moves, also one typed in vain, and a month
+    that does not read: it keeps its month, not the parents' one."""
+
+    def row(phase: str, month: date) -> Moving:
+        return Moving(Inherited("base", {"phase": phase, "id": "alg1"}, None), month, month)
+
+    rows = [row("unemployed", date(2028, 7, 1)), row("work", date(2029, 10, 1))]
+    labels = {"unemployed": "Unemployed", "work": "Work"}
+    found, notes = typed_moves(rows, {0: "2028-09"}, {}, labels)
+    assert {i: m for i, (_r, _d, m) in found.items()} == {"alg1": 2}
+    assert notes == ["alg1 moves as one: Work from 2029-10 moves to 2029-12 too"]
+    found, notes = typed_moves(rows, {0: "2028-09", 1: "2030-06"}, {}, labels)
+    assert found["alg1"][1] == date(2028, 9, 1)  # the first row typed
+    assert notes == [
+        "alg1 moves as one: Work from 2029-10 moves to 2029-12, not to the month typed"
+    ]
+    assert typed_moves(rows, {0: "2028-13"}, {"alg1": 3}, labels) == (
+        {},
+        ["Unemployed from 2028-07: 2028-13 is no month, so it does not move"],
+    )
+
+
+def test_an_inherited_change_moves_in_place_and_a_repeat_offers_to_move_it(family: Path) -> None:
+    """The child moves `retirement` (24 months later now) by a month typed into the grid of the
+    parents' changes; a new row of the same phase warns and moves it instead of adding a row.
+    `AppTest` keeps no edit of a grid: each run that needs one sends it (`german.edited`)."""
+    at = _page(family, "child", "advanced")
+    grid, save = "scenarios-phases-child-move-0", "scenarios-phases-child-save"
+    move = {"edited_rows": {"1": {"from": "2049-06"}}, "added_rows": [], "deleted_rows": []}
+    at = edited(at, grid, move)
+    lines = [c.value for c in at.caption if c.value.startswith("To save")]
+    moved = "move retirement (1 phase)** 2052-01 (age 75) → 2049-06 (age 72)"
+    assert any(moved in line for line in lines)
+    at.button(key=save).click()
+    at = edited(at, grid, move)
+    assert not at.exception
+    child = family / "scenarios" / "child.yaml"
+    assert read_yaml(child)["overrides"]["shift"] == {"retirement": -7}
+    assert "phases" not in read_yaml(child)
+    new = {"edited_rows": {}, "added_rows": [{"from": "2048-01", "phase": "retired"}]}
+    own, added = "scenarios-phases-child-1-phases", new | {"deleted_rows": []}
+    at = edited(at, own, added)
+    assert any("repeats the change to Retired of base in 2049-06" in w.value for w in at.warning)
+    next(t for t in at.toggle if "instead" in t.label).set_value(True)
+    at.button(key=save).click()
+    at = edited(at, own, added)
+    assert not at.exception
+    assert read_yaml(child)["overrides"]["shift"] == {"retirement": -24}
+    assert "phases" not in read_yaml(child)
+    retired = [p.at for p in loader.load_plan(family, child).scenario.phases if p.id]
+    assert retired == [date(2048, 1, 1)]
+
+
+def test_a_move_instead_stays_with_its_row_when_a_row_above_goes(family: Path) -> None:
+    at = _page(family, "child", "advanced")
+    own, rows = (
+        "scenarios-phases-child-0-phases",
+        [
+            {"from": "2047-01", "phase": "retired"},
+            {"from": "2048-01", "phase": "retired"},
+        ],
+    )
+    both = {"edited_rows": {}, "added_rows": rows, "deleted_rows": []}
+    at = edited(at, own, both)
+    next(t for t in at.toggle if "instead" in t.label and "2048-01" in t.label).set_value(True)
+    at = edited(at, own, both)
+    at = edited(at, own, both | {"added_rows": rows[1:]})  # the first new row deleted
+    [toggle] = [t for t in at.toggle if "instead" in t.label]
+    assert "2048-01" in toggle.label
+    assert toggle.value
+
+
+@pytest.mark.parametrize("phone", [False, True])
+def test_the_phases_grid_shows_labels_and_ages_and_the_ids_in_advanced_mode(
+    family: Path, phone: bool
+) -> None:
+    for mode, ids in (("simple", False), ("advanced", True)):
+        at = AppTest.from_string(PAGE.format(data=str(family)), default_timeout=30)
+        at.query_params.update({"scenario": "base", "tab": "Phases", "mode": mode})
+        at.query_params["mobile"] = str(int(phone))
+        at.run()
+        assert not at.exception
+        grid = next(g for g in at.dataframe if g.key == "scenarios-phases-base-0-phases")
+        assert ("id" in grid.value.columns) == ids
+        assert grid.value["age"].tolist() == ["49", "73"]  # born 1977-01-01
+
+
+def test_a_job_loss_adds_what_the_plan_lacks_and_stops_the_salary(data: Path) -> None:
+    """A salary without phases, no ALG1, no phase `unemployed`, the feature off: the action adds
+    the phase, the stream and the feature, limits the salary, and the run pays ALG1 then."""
+    assumptions = data / "assumptions.yaml"
+    assumptions.write_text(assumptions.read_text().replace("unemployed: {label: Unemployed}, ", ""))
+    (data / "cashflows.yaml").write_text(
+        "streams:\n  - {name: Gehalt, kind: salary, gross: 5000}\n  - {name: Miete, amount: -500}\n"
+    )
+    (data / APP).write_text("scenarios: [base]\nfeatures_off: [job_loss, care]\n")
+    loss = scenariofiles.JobLoss(
+        "base", date(2026, 6, 1), date(2027, 6, 1), "Job loss at 49", "job-loss", "Arbeitslos"
+    )
+    edits = scenariofiles.lost_job(data, loss)
+    found, _gone = listing(edits, lambda n: references.read(data, n), references.phases(data))
+    assert [c.text for c in found][2:] == [
+        "**scenarios/job-loss.yaml phases** empty → Arbeitslos from 2026-06, Work from 2027-06",
+        "**assumptions.yaml phases.unemployed** empty → Arbeitslos",
+        "**cashflows.yaml streams Gehalt phases** empty → Work, Career break, Retired",
+        "**cashflows.yaml streams** name ALG1, cat ALG1, kind Unemployment benefit (ALG1), "
+        "phases Arbeitslos",
+        "**job loss** off → on",
+    ]
+    act(data, lambda d: scenariofiles.lost_job(d, loss), source="test")
+    assert read_yaml(data / APP)["features_off"] == ["care"]
+    with pytest.raises(ValueError, match="exists"):
+        scenariofiles.lost_job(data, loss)  # once
+    base, lost = fixed_run(data), fixed_run(data, "job-loss")
+    assert regular_salary(base).keys() == {"work"}
+    assert "unemployed" in lost.phases
+    assert "unemployed" not in regular_salary(lost)
+    alg1 = [row for (_s, _g, item), row in ledger(lost).entries.items() if item == "ALG1"]
+    assert sum(row.sum() for row in alg1) > 0
+
+
+@pytest.mark.parametrize(("runs", "limited"), [(False, True), (True, False)])
+def test_a_job_loss_limits_a_salary_only_where_no_scenario_runs_the_phase(
+    family: Path, runs: bool, limited: bool
+) -> None:
+    """A limit of a salary without phases would change a scenario that runs `unemployed`."""
+    (family / "cashflows.yaml").write_text("streams:\n  - {name: Gehalt, kind: salary, gross: 1}\n")
+    if runs:
+        change = "\n  - {from: 2040-01-01, phase: unemployed}"
+        (family / "scenarios" / "base.yaml").write_text(
+            PARENT.replace("\nevents:", change + "\nevents:")
+        )
+    loss = scenariofiles.JobLoss("base", date(2027, 1, 1), None, "Lost", "lost", "Unemployed")
+    rows = next(e for e in scenariofiles.lost_job(family, loss) if e.name == "cashflows.yaml")
+    assert bool(rows.rows[("streams",)].edited) == limited
+
+
+@pytest.mark.parametrize(
+    ("lost", "back", "refused"),
+    [
+        (date(2025, 6, 1), None, "before the start 2026-01"),
+        (date(2026, 6, 1), date(2026, 6, 1), "the new job starts before the job loss"),
+        # the main scenario is unemployed then: the new job would change no phase
+        (date(2039, 6, 1), date(2041, 1, 1), "is unemployed or has no phase in 2041-01"),
+    ],
+)
+def test_a_job_loss_refuses_a_month_out_of_order(
+    family: Path, lost: date, back: date | None, refused: str
+) -> None:
+    change = "\n  - {from: 2040-01-01, phase: unemployed}"
+    (family / "scenarios" / "base.yaml").write_text(
+        PARENT.replace("\nevents:", change + "\nevents:")
+    )
+    loss = scenariofiles.JobLoss("base", lost, back, "Lost", "lost", "Unemployed")
+    with pytest.raises(ValueError, match=refused):
+        scenariofiles.lost_job(family, loss)
+
+
+@pytest.mark.parametrize("phone", [False, True])
+def test_the_job_loss_dialog_writes_one_revision(family: Path, phone: bool) -> None:
+    """`AppTest` draws a dialog only in the run of the click of its button: the months come
+    through the session state, the confirm with that click."""
+    at = AppTest.from_string(PAGE.format(data=str(family)), default_timeout=30)
+    at.query_params["mobile"] = str(int(phone))
+    at.run()
+    action = next(b for b in at.button if b.key == "scenarios-job-loss")
+    action.click().run()
+    assert not at.exception
+    assert next(b for b in at.button if b.key == "scenarios-confirm").disabled
+    at.session_state["scenarios-loss-lost"] = "2027-03"
+    at.session_state["scenarios-loss-back"] = "2028-01"
+    next(b for b in at.button if b.key == "scenarios-job-loss").click().run()
+    assert at.text_input(key="scenarios-loss-name").placeholder == "Job loss at 50"
+    listed = next(c.value for c in at.caption if c.value.startswith("To save"))
+    assert "Unemployed from 2027-03, Work from 2028-01" in listed
+    next(b for b in at.button if b.key == "scenarios-job-loss").click()
+    next(b for b in at.button if b.key == "scenarios-confirm").click().run()
+    assert not at.exception
+    last = revisions.entries(family)[-1]
+    assert (last.source, last.files) == (
+        "app: job loss job-loss-at-50",
+        ("cashflows.yaml", "scenarios/job-loss-at-50.yaml"),
+    )
+    lost = load_scenario(family / "scenarios" / "job-loss-at-50.yaml")
+    assert [(p.at, p.phase) for p in lost.phases][1:3] == [
+        (date(2027, 3, 1), "unemployed"),
+        (date(2028, 1, 1), "work"),
+    ]

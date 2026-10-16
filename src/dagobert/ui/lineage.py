@@ -1,8 +1,8 @@
 """What a scenario file inherits through its `extends` chain: the phases and events of its
-parents (`inherited`, `reach`), a toggle per id that leaves their items out (`leave_out`, which
-writes `drop`) and their read-only tables (`read_only`, `table`), with an event in words (`TITLES`,
-`describe`, `when`). The Events tab and the Phases and Timeline tabs of the Scenarios page share
-them."""
+parents (`inherited`, `reach`) and the months they move by (`shifts`), a toggle per id that
+leaves their items out (`leave_out`, which writes `drop`) and their read-only tables
+(`read_only`, `table`), with an event in words (`TITLES`, `describe`, `when`, `said`). The Events
+tab and the Phases and Timeline tabs of the Scenarios page share them."""
 
 from __future__ import annotations
 
@@ -13,11 +13,11 @@ from typing import TYPE_CHECKING, Any
 
 import streamlit as st
 
-from dagobert import revisions
+from dagobert import loader, revisions
 from dagobert.i18n import N_, _, ngettext
 from dagobert.money import format_eur
 from dagobert.store import Edit, RowFile
-from dagobert.ui import forms, gridcolumns, guard, is_mobile, joined, save, tables
+from dagobert.ui import gridcolumns, guard, is_mobile, joined, save, tables
 from dagobert.ui.gridcolumns import Row
 
 if TYPE_CHECKING:
@@ -111,6 +111,21 @@ def reach(chain: Chain, key: str = "events") -> list[Inherited]:
     return [i for i in inherited(chain, key) if i.dropped in (None, chain[-1][0].stem)]
 
 
+def shifts(chain: Chain, *, own: bool = True) -> dict[str, float]:
+    """The `shift` of each id as a run of the last file of `chain` takes it: those of the files
+    merged, the root first, so a later file replaces the months of an earlier one, less those of
+    an id that a file below drops (`loader.kept`). Without `own` those of the parents alone: what
+    the file inherits when it sets none."""
+    found: dict[str, float] = {}
+    for n, (_path, raw) in enumerate(chain if own else chain[:-1]):
+        gone = {str(i) for _below, held in chain[n + 1 :] for i in _listed(held.get("drop"))}
+        mine = raw.get("overrides")
+        moves = loader.kept(mine if isinstance(mine, dict) else {}, gone).get("shift")
+        if isinstance(moves, dict):
+            found |= {str(i): m for i, m in moves.items() if isinstance(m, int | float)}
+    return found
+
+
 def _listed(value: object) -> list[Any]:
     return value if isinstance(value, list) else []
 
@@ -180,6 +195,15 @@ def when(row: Mapping[str, Any]) -> str:
     return condition(rule.get("age"), rule.get("liquid_below")) or _("never")
 
 
+def worded(row: Mapping[str, Any]) -> str:
+    """An event in a few words: its type, when it falls and what it names, `Sell an asset
+    2036-06: flat`."""
+    kind = str(row.get("type"))
+    event, named = _(TITLES[kind]) if kind in TITLES else kind, describe(row)
+    text = _("{event} {when}: {what}") if named else _("{event} {when}")
+    return text.format(event=event, when=when(row), what=named)
+
+
 def month(row: Mapping[str, Any]) -> str:
     """The month of an event as the timeline and the table sort it: its own, else `AT_DEATH` for
     an inheritance, else `ON_CONDITION`."""
@@ -237,16 +261,18 @@ def read_only(
 
 def leave_out(
     data_dir: Path, name: str, ids: Sequence[str], chain: Chain, *, key: str, stale: bool = False
-) -> None:
+) -> save.Part:
     """A toggle `Leave out <id> (2 events)` per id of the items of the parents that reach the
-    scenario file `name` (`ids`), its help the phases and events of that id, and a neutral `Save
-    what to leave out`, which writes its `drop` list: the order kept, new ids last, the key gone
-    when empty. With `stale` also the ids that the file drops and no item of the parents has,
-    which keep it from loading. Save conflicts: the toggles keep the list that they drew while one
-    differs (`save.base`); a change of it elsewhere then warns and keeps Save off, and the write
-    checks again (`_drop_check`)."""
+    scenario file `name` (`ids`), its help the phases and events of that id, and what a save of
+    them writes (a `save.Part`: no grid without a toggled switch), its `drop` list: the order
+    kept, new ids last, the key gone when empty. The caller lists it and saves it with the Save of
+    its tab, the Phases tab with its rows, the Events tab with the grid of the type open. With
+    `stale` also the ids that the file drops and no item of the parents has, which keep it from
+    loading. Save conflicts: the toggles keep the list that they drew while one differs
+    (`save.base`); a change of it elsewhere then warns, and the part is not `ready`: Save stays
+    off. The write checks again (`_drop_check`)."""
     file = RowFile(data_dir, name, ("drop",))
-    items = _items(chain)
+    items = by_id(chain)
     base, changed = save.base(file, key, list, partial(_drop_held, key, ids))
     toggles, held = f"{key}-{base.nonce}", [str(item) for item in base.rows]  # what it drops
     shown = [*ids, *(i for i in held if stale and i not in items and i not in ids)]
@@ -265,7 +291,7 @@ def leave_out(
     with st.container(horizontal=not is_mobile(), wrap=True):
         wanted = {
             item: st.toggle(
-                _("Leave out {item}").format(item=_named(item, items)),
+                _("Leave out {item}").format(item=named(item, items)),
                 value=item in held,
                 key=f"{toggles}-{item}",
                 help=_("Leaves out {items}.").format(items="; ".join(map(_said, items[item])))
@@ -280,37 +306,24 @@ def leave_out(
     toggled = {item: on for item, on in wanted.items() if on != (item in held)}
     drops = [item for item in held if toggled.get(item, True)]
     drops += [item for item, on in toggled.items() if on and item not in held]
-    flagged = guard.review(
-        [
-            guard.Change(
-                _("leave out {item}").format(item=_named(i, items)),
-                _yes(not on),
-                _yes(on),
-                unit=None,
-            )
-            for i, on in toggled.items()
-        ],
-        key=key,
-    )
-    edit = forms.Grid(
+    changes = [
+        guard.Change(
+            _("leave out {item}").format(item=named(i, items)), _yes(not on), _yes(on), unit=None
+        )
+        for i, on in toggled.items()
+    ]
+    edit = save.Grid(
         Edit(name, {("drop",): drops or None}), partial(_drop_check, file, base), f"{key}-nonce"
     )
-    forms.save(
-        data_dir,
-        [],
-        [edit] if toggled and changed is None else [],
-        key=f"{key}-save",
-        flagged=flagged,
-        label=_("Save what to leave out"),
-        primary=False,
-    )
+    ready = changed is None or not toggled
+    return save.Part((edit,) if toggled else (), tuple(changes), ready=ready)
 
 
 def _yes(value: bool) -> str:
     return _("yes") if value else _("no")
 
 
-def _named(item: str, items: Mapping[str, Sequence[Inherited]]) -> str:
+def named(item: str, items: Mapping[str, Sequence[Inherited]]) -> str:
     """An id with what it leaves out: `car (2 events)`, `job-end (1 phase and 1 event)`."""
     found = items.get(item, ())
     phases = sum("phase" in i.row for i in found)
@@ -345,7 +358,7 @@ def _drop_check(file: RowFile, base: save.Base) -> None:
     revisions.unchanged(file.data_dir, base.seen, file.rows())
 
 
-def _items(chain: Chain) -> dict[str, list[Inherited]]:
+def by_id(chain: Chain) -> dict[str, list[Inherited]]:
     """Per id, the phases and events of the parents with it that reach the file."""
     found: dict[str, list[Inherited]] = {}
     for item in [*reach(chain, "phases"), *reach(chain)]:

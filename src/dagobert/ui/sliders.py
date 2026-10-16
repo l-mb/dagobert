@@ -15,10 +15,11 @@ from streamlit.errors import StreamlitWidgetAlreadyInstantiatedError
 
 from dagobert import goalseek
 from dagobert.i18n import N_, NP_, _, pgettext
-from dagobert.model.months import add_months, months_of_age
+from dagobert.model.months import add_months
 from dagobert.money import EUR_COLUMN, printf
 from dagobert.runner import ModelName
 from dagobert.sensitivity import Lever
+from dagobert.ui import at_age
 
 if TYPE_CHECKING:
     from collections.abc import Collection
@@ -203,11 +204,7 @@ class Knob:
     def reached(self, shift: int) -> str:
         """The month that a shift of `shift` months reaches from `origin`, with the age then."""
         assert self.origin is not None
-        month = add_months(self.origin, shift)
-        if self.born is None:
-            return f"{month:%Y-%m}"
-        age = months_of_age(self.born, month) // 12
-        return _("{month} (age {age})").format(month=f"{month:%Y-%m}", age=age)
+        return at_age(add_months(self.origin, shift), self.born)
 
     def slider(self, *, disabled: bool = False) -> float:
         unit = self.unit

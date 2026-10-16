@@ -155,6 +155,8 @@ class Column:
     new: bool = False  # a list takes names besides its options, such as a new tag
     inner: str | None = None  # the field of the row whose mapping holds this one, see `columns`
     titles: tuple[tuple[str, str], ...] = ()  # the options in words (`model.base.Titled`)
+    # the options in words as written, in their order: the labels of the phases (user data)
+    words: tuple[tuple[str, str], ...] = ()
     # a number that the file keeps below zero, shown without its minus: the loan of a purchase,
     # whose header names the direction. The table saves it negative (`Table.negative`)
     unsigned: bool = False
@@ -318,7 +320,7 @@ class Column:
             case "array":
                 return st.column_config.ListColumn(**common)
             case _ if self.options:
-                titles = {option: _(title) for option, title in self.titles}
+                titles = {option: _(title) for option, title in self.titles} | dict(self.words)
                 return st.column_config.SelectboxColumn(
                     **common,
                     options=[

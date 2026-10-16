@@ -20,7 +20,8 @@ simple example begins with the ten features off that it does not use.
 3. Press `Save` at the top of the page.
 
 The save changes only `app.yaml`. A switch never changes your other data. If you turn a feature
-on again, everything that it hid shows again.
+on again, everything that it hid shows again. `Add a job loss` on the
+[Scenarios](scenarios.md#add-a-job-loss) page turns on the feature `Job loss` too.
 
 The help of each switch tells what it hides. On a phone the help shows below the switch.
 

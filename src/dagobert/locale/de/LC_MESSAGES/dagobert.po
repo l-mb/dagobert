@@ -156,7 +156,7 @@ msgstr ""
 "spätesten Monat und hält beim ersten, der das Ziel verfehlt. Ein noch "
 "früherer Monat kann das Ziel wieder erreichen."
 
-#: goalseek.py
+#: goalseek.py ui/__init__.py
 #, python-brace-format
 msgid "{month} (age {age})"
 msgstr "{month} (Alter {age})"
@@ -4061,7 +4061,7 @@ msgstr "Erbschaft"
 msgid "Gift"
 msgstr "Schenkung"
 
-#: report/charts.py ui/lineage.py ui/outlook.py ui/scenarios.py
+#: report/charts.py ui/lineage.py ui/outlook.py
 #, python-brace-format
 msgid "age {age}"
 msgstr "Alter {age}"
@@ -4715,7 +4715,7 @@ msgstr "Garantie"
 msgid "transfer tax"
 msgstr "Grunderwerbsteuer"
 
-#: result.py
+#: result.py ui/lineage.py
 msgid "inheritance"
 msgstr "Erbschaft"
 
@@ -6439,7 +6439,7 @@ msgstr "Keine."
 msgid "change"
 msgstr "Änderung"
 
-#: ui/cashflows.py
+#: ui/__init__.py
 msgid "outside the app"
 msgstr "außerhalb der App"
 
@@ -7730,9 +7730,47 @@ msgstr "Keine Änderungen zu speichern"
 msgid "Not saved: {changed} since this form was drawn"
 msgstr "Nicht gespeichert: {changed}, seit dieses Formular angezeigt wurde"
 
-#: ui/features.py ui/forms.py ui/save.py
+#: ui/phases.py ui/save.py
 msgid "Discard my edits"
 msgstr "Meine Änderungen verwerfen"
+
+#: ui/phases.py
+#, python-brace-format
+msgid "{phase} from {month} has no id, so it does not move: change it in {file}"
+msgstr ""
+"{phase} ab {month} hat keine ID und lässt sich nicht verschieben: Ändere "
+"den Wechsel in {file}"
+
+#: ui/phases.py
+#, python-brace-format
+msgid "{phase} from {month} is left out, so it does not move"
+msgstr "{phase} ab {month} ist weggelassen und lässt sich nicht verschieben"
+
+#: ui/phases.py
+#, python-brace-format
+msgid "{phase} from {month}: {typed} is no month, so it does not move"
+msgstr "{phase} ab {month}: {typed} ist kein Monat, daher verschiebt sich nichts"
+
+#: ui/phases.py
+#, python-brace-format
+msgid ""
+"{id} moves as one: {phase} from {month} moves to {then}, not to the month"
+" typed"
+msgstr ""
+"{id} verschiebt sich nur als Ganzes: {phase} ab {month} verschiebt sich "
+"auf {then}, nicht auf den eingegebenen Monat"
+
+#: ui/phases.py
+#, python-brace-format
+msgid "{id} moves as one: {phase} from {month} moves to {then} too"
+msgstr ""
+"{id} verschiebt sich nur als Ganzes: Auch {phase} ab {month} verschiebt "
+"sich auf {then}"
+
+#: ui/phases.py
+#, python-brace-format
+msgid "move {item}"
+msgstr "{item} verschieben"
 
 #: ui/features.py ui/forms.py ui/scenarios.py ui/spend.py ui/tables.py
 msgid "Save"
@@ -7839,6 +7877,11 @@ msgid "copy of {file}"
 msgstr "Kopie von {file}"
 
 #: ui/fileactions.py
+#, python-brace-format
+msgid "{phase} from {month}"
+msgstr "{phase} ab {month}"
+
+#: ui/fileactions.py
 msgid "The scenario whose phases, events and overrides it starts from."
 msgstr "Das Szenario, von dessen Phasen, Ereignissen und Abweichungen es ausgeht."
 
@@ -7859,6 +7902,54 @@ msgstr "{name} angelegt"
 #: ui/fileactions.py
 msgid "Type a name first."
 msgstr "Gib zuerst einen Namen ein."
+
+#: ui/fileactions.py
+#, python-brace-format
+msgid ""
+"A new scenario that extends {scenario}. From the month of the job loss "
+"the salary stops and ALG1 pays, until the month of a new job, if you type"
+" one. Where the plan lacks them, the app adds the payment ALG1, a phase "
+"without a job and the feature Job loss."
+msgstr ""
+"Ein neues Szenario, das auf {scenario} basiert. Ab dem Monat des "
+"Jobverlusts endet das Gehalt, und ALG1 zahlt, bis zum Monat eines neuen "
+"Jobs, wenn du einen eingibst. Wo der Plan sie nicht hat, ergänzt die App "
+"die Zahlung ALG1, eine Phase ohne Job und die Funktion Jobverlust."
+
+#: ui/fileactions.py
+msgid "Month of the job loss"
+msgstr "Monat des Jobverlusts"
+
+#: ui/fileactions.py
+msgid "Month of a new job (optional)"
+msgstr "Monat eines neuen Jobs (optional)"
+
+#: ui/fileactions.py
+#, python-brace-format
+msgid "Job loss at {age}"
+msgstr "Jobverlust mit {age}"
+
+#: ui/fileactions.py
+msgid "Job loss"
+msgstr "Jobverlust"
+
+#: ui/fileactions.py
+msgctxt "phase"
+msgid "Unemployed"
+msgstr "Arbeitslos"
+
+#: ui/fileactions.py
+msgid "Add the job loss"
+msgstr "Jobverlust hinzufügen"
+
+#: ui/fileactions.py
+#, python-brace-format
+msgid "Created {name}: a job loss in {month}"
+msgstr "{name} angelegt: ein Jobverlust ab {month}"
+
+#: ui/fileactions.py
+msgid "Type the month of the job loss first."
+msgstr "Gib zuerst den Monat des Jobverlusts ein."
 
 #: ui/fileactions.py
 #, python-brace-format
@@ -7953,6 +8044,10 @@ msgstr "Datei umbenennen"
 #: ui/fileactions.py
 msgid "Delete the scenario"
 msgstr "Szenario löschen"
+
+#: ui/fileactions.py
+msgid "Add a job loss"
+msgstr "Jobverlust hinzufügen"
 
 #: ui/fileactions.py ui/overview.py ui/transfer.py
 msgid "file"
@@ -8612,9 +8707,11 @@ msgstr ""
 msgid "leave out {item}"
 msgstr "{item} weglassen"
 
-#: ui/lineage.py
-msgid "Save what to leave out"
-msgstr "Weglassen speichern"
+#: ui/events.py
+msgid "`Save` at the top saves these switches with the events of the open tab."
+msgstr ""
+"`Speichern` oben speichert diese Schalter mit den Ereignissen des offenen "
+"Tabs."
 
 #: ui/lineage.py
 msgid "yes"
@@ -8666,10 +8763,20 @@ msgstr "Eintrag"
 msgid "what"
 msgstr "Was"
 
-#: ui/lineage.py ui/scenarios.py
+#: ui/lineage.py
 #, python-brace-format
 msgid "liquid below {amount}"
 msgstr "liquide unter {amount}"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{event} {when}: {what}"
+msgstr "{event} {when}: {what}"
+
+#: ui/lineage.py
+#, python-brace-format
+msgid "{event} {when}"
+msgstr "{event} {when}"
 
 #: ui/knobs.py
 msgid ""
@@ -10872,9 +10979,37 @@ msgstr "Zeitleiste"
 msgid "General"
 msgstr "Allgemein"
 
-#: ui/scenarios.py
+#: ui/phases.py
 msgid "The Assumptions page defines them."
 msgstr "Die Seite Annahmen legt sie fest."
+
+#: ui/phases.py
+msgid "age"
+msgstr "Alter"
+
+#: ui/phases.py
+msgid "ids"
+msgstr "IDs"
+
+#: ui/phases.py
+msgid ""
+"The phase changes of the scenarios that this one extends, which it runs "
+"too. Type another month in a row to move that change here: the scenario "
+"saves a move of its id (`shift` in its overrides), and the events with "
+"that id move with it. The scenario that holds the change keeps it as it "
+"is. Empty the month to take the month of the parent again. A change "
+"without an id does not move: change it in its own scenario. The switches "
+"above leave out every phase change and event of an id."
+msgstr ""
+"Die Phasenwechsel der Szenarien, auf denen dieses basiert. Es durchläuft "
+"sie ebenfalls. Gib in einer Zeile einen anderen Monat ein, um diesen "
+"Wechsel hier zu verschieben: Das Szenario speichert eine Verschiebung "
+"seiner ID (`shift` in seinen Abweichungen), und die Ereignisse mit dieser"
+" ID wandern mit. Das Szenario, das den Wechsel enthält, behält ihn "
+"unverändert. Leere den Monat, um wieder den Monat der Basis zu nehmen. "
+"Ein Wechsel ohne ID lässt sich nicht verschieben: Ändere ihn in seinem "
+"eigenen Szenario. Die Schalter darüber lassen jeden Phasenwechsel und "
+"jedes Ereignis einer ID weg."
 
 #: ui/scenarios.py
 msgid "Template: only a base for others, never run"
@@ -10950,17 +11085,37 @@ msgstr "Vorlage"
 msgid "Save stays off: {reasons}"
 msgstr "„Speichern“ bleibt gesperrt: {reasons}"
 
-#: ui/scenarios.py
+#: ui/phases.py
 msgid "Inherited phases"
 msgstr "Geerbte Phasen"
 
-#: ui/scenarios.py
+#: ui/phases.py
+msgid "About inherited phases"
+msgstr "Zu geerbten Phasen"
+
+#: ui/phases.py
+#, python-brace-format
 msgid ""
-"The phases of the scenarios that this one extends, which it runs too, "
-"unless it leaves out their id. Change them in their own scenario."
+"The new change to {phase} in {month} repeats the change to {phase} of "
+"{file} in {then}, which stays."
 msgstr ""
-"Die Phasen der Szenarien, auf denen dieses basiert. Es durchläuft sie "
-"auch, außer es lässt ihre ID weg. Ändere sie in ihrem eigenen Szenario."
+"Der neue Wechsel zu {phase} im {month} wiederholt den Wechsel zu {phase} "
+"aus {file} im {then}, und dieser bleibt."
+
+#: ui/phases.py
+msgid "It has no id, so it does not move here."
+msgstr "Er hat keine ID und lässt sich hier nicht verschieben."
+
+#: ui/phases.py
+#, python-brace-format
+msgid "Move {item} to {month} instead"
+msgstr "Stattdessen {item} auf {month} verschieben"
+
+#: ui/phases.py
+msgid "Saves a move of the inherited change and leaves out the new row."
+msgstr ""
+"Speichert eine Verschiebung des geerbten Wechsels und lässt die neue "
+"Zeile weg."
 
 #: ui/scenarios.py
 msgid "No phase change or event yet: add them in the tabs Phases and Events."

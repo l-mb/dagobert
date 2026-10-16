@@ -12,7 +12,8 @@ The save guard of the grids is in the rule `save-guard`.
   (`model.base.units`), bounds, default and description as help, the options of an enum (in words
   through `format_func` where it is a `model.base.Titled`: the `kind` of a stream, a `Land` by its
   name, in the order of the names of the session where the English lists them so,
-  `gridcolumns.in_order`, also in a form). A number takes the format of its unit
+  `gridcolumns.in_order`, also in a form; `Column.words` as written, in their order, user data
+  never through `_()`: a phase by its label, also in a line of the guard, `formguard._cells`). A number takes the format of its unit
   (`gridcolumns.FORMATS`: euros `EUR_COLUMN`, a share or a rate `%g%%`, a plain number
   `NUMBER_COLUMN` (units, m², Rentenpunkte; rule `money`), else none: months, ages, factors), the
   bounds of the field (exclusive ones too: the model refuses the bound itself) and `Unit.step` (1

@@ -163,8 +163,7 @@ The editors build their forms here; each page that uses them has its own rule. T
   `Edit` per file (`merged`, which keeps `create` and `remove`). It is off while nothing changed, a
   field does not read, the model refuses what the edit adds, a part changed on disk or the caller is
   not `ready` (a grid of its own whose cell does not read, the live check of the Overrides tab);
-  while nothing changed its help says `No changes to save`. `primary` off makes it neutral (the
-  drops beside the Save of the header). `Not saved: …` (`save.reason`) keeps the edits; a save
+  while nothing changed its help says `No changes to save`. `Not saved: …` (`save.reason`) keeps the edits; a save
   raises every nonce and reruns, and the next run toasts `Saved <files>` (`ui.tell`: a toast before
   `st.rerun` is lost in Streamlit 1.65). The tab pins the button into the header: the style of
   `tables.SAVE_IN_HEADER` is its first element.
@@ -184,4 +183,6 @@ The editors build their forms here; each page that uses them has its own rule. T
 - `Form.hides`: the columns of a mapping by name that the mode hides by a path of their own
   (`returns.*.equity_correlation`). `widgets.mapping` puts those that no entry of the part holds
   behind `All columns` (`Spot.hidden`, as the key column of a `lead`): fixed per generation, the
-  edits read with every column.
+  edits read with every column. A list of rows (`widgets.rows`) leaves them out (the ids of the
+  phase changes), its edits read with every column too. `Form.computed`: read-only columns of a
+  list of rows that each row gives (`tables.Computed`: the age of a phase change).

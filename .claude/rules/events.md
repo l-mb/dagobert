@@ -65,7 +65,8 @@ user guide of the tab: `docs/manual/events.md`.
   `references.phases`), with the columns of the stream grids of the Cashflows page after `at`, `id`
   and `note`, the rare ones behind `All columns`, and no sign rule (one table holds income and
   spending). `id` stays text: a select column takes no new name. Each grid saves with its own Save
-  in the header (a hidden tab hides it).
+  in the header (a hidden tab hides it), which also writes the drops of `Inherited events`
+  (`edit_table(part=)`, below).
 - The form `Add an event` above the grid, on every device (a phone adds no grid row, rule `ui`:
   `forms.Form`, `new={"type": kind}` on `("events",)`, the labels of `LABELS`): the fields of the
   type without `then`, of an `add_stream` a `factor` per phase (`fields.entries`, `FACTORS`) and its
@@ -105,7 +106,10 @@ user guide of the tab: `docs/manual/events.md`.
   each an `Inherited`: the stem of its file, the row, and the stem of the nearest file below that
   drops its id (`dropped`); the Scenarios page takes it too (its `Timeline` and `Phases`). `reach`
   keeps those that a toggle can take back: not dropped, or by the file itself, not by a file
-  between (an id that no file above keeps does not load).
+  between (an id that no file above keeps does not load). `shifts(chain, own=)`: the `shift` of
+  each id as the run takes it, a later file replacing an earlier one, less a dropped id; `by_id`
+  and `named` (`retirement (1 phase and 2 events)`) serve the moves of the Phases tab too, `worded`
+  an event in a few words (`Sell an asset 2036-06: flat`) the list of a file action.
 - `Inherited events` below the type tabs (`events._inherited`): first `leave_out` for the ids of
   `reach` (below a long table the toggles lay far from the rows), which the `Phases` tab of the
   Scenarios page calls for the phases (one id can name both, each tab has its toggle); then all of
@@ -118,15 +122,20 @@ user guide of the tab: `docs/manual/events.md`.
 - `leave_out`: a toggle `Leave out <id> (2 events)` per id (`_named`: `1 phase and 1 event`), its
   help lists the phases and events of the parents with it (`_items`, `_said`); an event without an
   id has none. In the Events tab (`stale`) also an id that the file drops and no item of the parents
-  has: it keeps the file from loading. `Save what to leave out` (`forms.save` with a `Grid`,
-  `primary` off: a primary button beside the Save of the header read as a second save model) writes
-  `drop`: the order kept, new ids last, the key removed when empty. The guard lists `leave out car
+  has: it keeps the file from loading. It returns a `save.Part` (the `save.Grid` of `drop`, its
+  guard lines, `ready`), which the caller saves with the Save of its section (owner 2026-10-16:
+  one Save per section): the Phases tab with its one Save (rule `scenarios`), the Events tab with
+  the Save of the grid of each type (`tables.edit_table(part=)`, `save.button(part=)`,
+  `RowFile.apply(values=, check=)`: the rows and `drop` as one revision; `guard.check(more=)`
+  lists the drops under each grid; the section is drawn into a container before the types fill
+  theirs, and a caption below the toggles names the Save at the top). It writes `drop`: the order
+  kept, new ids last, the key removed when empty. The guard lists `leave out car
   (2 events) no → yes`. Save conflicts: `save.base` on `RowFile(…, ("drop",))`; a change of the
   drops elsewhere while a toggle differs warns, keeps Save off and offers `Discard my edits`, and
   `_drop_check` refuses inside the write. A drop also ends the `shift` and `events` overrides of the
   files above for its id; one of this file that names it does not load, and the save says so.
 - One Save per part, not per tab or page: each grid is an `edit_table` with its own base and Save,
-  the repayments name rows of another list, and the drops merge into a list of names.
+  which writes the drops too, and the repayments name rows of another list.
 - Words (rule `i18n`): the constants hold English marked `N_` (`TITLES`, `HEADERS`, `LABELS`,
   `HELPS`, `PLAIN`, `EITHER`), said where they show; `INLINE` names a type inside a sentence (the
   help of a `leave_out` toggle; lowercase in English). `read_only` heads the read-only tables of

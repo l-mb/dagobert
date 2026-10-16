@@ -82,15 +82,18 @@ the BU` lets it lapse. Its scenario `Unable to work at 51` forces the onset in e
 
 ## Create, copy, rename and delete
 
-The buttons `New`, `Copy`, `Rename file` and `Delete` are next to the list `Edit scenario`. On a
-phone they are in the menu `File`. Each button opens a window. The window lists each change before
+The buttons `New`, `Copy`, `Rename file`, `Delete` and `Add a job loss` are next to the list
+`Edit scenario`. On a phone they are in the menu `File`. Each button opens a window. The window lists each change before
 you save it. If the app refuses the change, the window shows the reason. If the button of the
 window is off, a line above it says what is missing. After the change, a short message at the
 bottom of the page says what the app did.
 
-- `New`: type a name and, if you want, the scenario that the new one extends. The app makes the
-  file name from the name, for example `frueh-in-rente` from `Früh in Rente!`. Type a file name
-  if you want another one.
+- `New`: type a name. The new scenario extends the main scenario, so it starts with its phases,
+  events and overrides. `Extends` shows each scenario with its file name and its name. Select
+  another scenario there, or `none: a scenario of its own`. A scenario of its own starts in the
+  first phase of the [Assumptions](assumptions.md) page. The app makes the file name from the
+  name, for example `frueh-in-rente` from `Früh in Rente!`. Type a file name if you want another
+  one. The list `To save` shows the phases in words, for example `Work from 2026-10`.
 - `Copy`: makes a copy of the selected scenario under a new name and a new file name. The copy
   keeps the comments of the file and extends the same scenario.
 - `Rename file`: gives the file a new name. Every scenario that extends it, the main scenario and
@@ -101,6 +104,30 @@ bottom of the page says what the app did.
 - `Delete`: removes the file, also from the list `Also compare in the Explorer`. If you delete the
   main scenario, the first scenario of that list becomes the main scenario. If the list is empty,
   the first scenario file that runs becomes the main scenario. The revisions keep a copy.
+
+## Add a job loss
+
+`Add a job loss` makes a new scenario that extends the main scenario. In this scenario you lose
+your job and get unemployment benefit (ALG1). Type the month of the job loss. If you find a new
+job, type its month too. The name and the file name come from your age, for example `Job loss at
+48`. Type a name if you want another one.
+
+The scenario changes to the phase of unemployment in the month of the job loss. A salary that
+pays only in the phases of work stops then. In the month of the new job, the scenario changes back
+to the phase that the main scenario has in that month. If the main scenario is unemployed in
+that month too, the action refuses it: type a later month. If you type no new job, the phase of
+unemployment lasts until the next phase change of the main scenario, for example your retirement.
+
+If your plan does not have these parts yet, the action adds them too:
+
+- A phase `unemployed` on the [Assumptions](assumptions.md) page.
+- A payment ALG1 on the [Cashflows](cashflows.md) page, which pays in that phase. It has no
+  amount: the app calculates ALG1 from the salary before the job loss.
+- The feature `Job loss` on the [Features](features.md) page.
+
+If a salary has no phases, it pays in every phase, also while you are unemployed. If no scenario
+uses the phase of unemployment yet, the action limits such a salary to the other phases. The list
+`To save` shows every change before you save it. The action saves all of them as one revision.
 
 A file name can contain letters, digits, spaces, dots, underscores and dashes. It must start with a
 letter or a digit. The app refuses a file name that YAML reads as a value, such as `on`, `no`,
@@ -137,18 +164,33 @@ than the screen fades out at its right edge: swipe it to see the other columns.
   a base for other scenarios and does not run. `Extends` offers every scenario except this one and
   the scenarios that extend it. If it is empty, it shows `none: a scenario of its own`. The tab
   names the scenarios that extend this one, because a change here changes them too.
-- `Phases`: the phase changes of this file as a table, with the month, the phase and an id. The
-  phase is one of the phases of the [Assumptions](assumptions.md) page. A row that you add or
-  change without an id gets one when you save: its phase, for example `retired`. If another phase
-  change or event of the scenario has that id, the year follows, for example `retired-2051`. The
-  Explorer and the Overview move a phase change by its id, for example to find when you can stop
-  working. A scenario that runs
-  needs a phase change in the month of the simulation start or before it, in its own file or in
-  a parent. A new scenario without a parent starts in the first phase. Below
-  the table, `Inherited phases` shows the phases of the parents without edit. A phase that this
-  scenario leaves out shows with `left out by`. To change a phase of a parent, open the parent. To
-  leave out a phase of a parent, switch on `Leave out` with its id and press `Save what to leave
-  out`.
+- `Phases`: the phase changes of this file as a table, with the month, the age in that month and
+  the phase. The phase shows with its `name on the pages` of the [Assumptions](assumptions.md)
+  page, and you select one of those phases. The age shows the saved month: for a new or a changed
+  month, the list `To save` shows the age. A row that you add or change without an id gets one
+  when you save: its phase, for example `retired`. If another phase change or event of the
+  scenario has that id, the year follows, for example `retired-2051`. The Explorer and the
+  Overview move a phase change by its id, for example to find when you can stop working. The
+  column `id` shows only in advanced mode. A scenario that runs needs a phase change in the month
+  of the simulation start or before it, in its own file or in a parent. A new scenario without a
+  parent starts in the first phase.
+
+  Below the table, `Inherited phases` shows the phase changes of the parents by month. To move
+  one of them, type another month in its row. The scenario then saves a move of the id of that
+  change (`shift` in its overrides), and the events with the same id move with it. The parent
+  does not change. To take the month of the parent again, empty the month. If two phase changes
+  have the same id, they move together by the same number of months: the list `To save` names the
+  new month of the other one. A change without an id does not move: change it in its own
+  scenario. To leave out the phase changes and events of an id, switch
+  on `Leave out` with that id. A phase change that this scenario leaves out shows with `left out
+  by`.
+
+  If you add a row with the phase of a change of a parent, for example `Retired` at 60 while the
+  parent retires at 65, the app warns you: the change of the parent stays, with its events. Switch
+  on `Move … instead` to move the change of the parent to your month. Then the save does not add
+  your row.
+
+  One `Save` saves the table, the moves and the switches `Leave out` together.
 - `Events`: the sales, payments and other events of the file, one tab for each type, and the
   events of the parents. See [Events of a scenario](events.md).
 - `Overrides`: the assumptions and the items of the parents that the scenario changes, such as
@@ -162,8 +204,11 @@ overrides. Simple mode also hides `Template` in the tab `General`, except for a 
 `Overrides` hides the same fields as the [Assumptions](assumptions.md#simple-mode) page. A field or
 a tab with a value that you did not save stays when you switch to simple mode.
 
-Each tab with fields has its own `Save` button at the top of the page. A list below the fields
-shows each change before you save it. While nothing changed, `Save` is off, and its tooltip says
+Each tab with fields has its own `Save` button at the top of the page. In the tab `Phases`, it
+saves the table, the moves and the switches `Leave out` together. In the tab `Events`, the `Save`
+of the open event type also saves the switches `Leave out` below the types. The box of the main
+scenario has a `Save` of its own, because it saves another file, `app.yaml`. A list below the
+fields shows each change before you save it. While nothing changed, `Save` is off, and its tooltip says
 `No changes to save`. After a save, a short message `Saved` with the file name shows at the bottom
 of the page.
 

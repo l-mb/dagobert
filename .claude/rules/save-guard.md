@@ -56,9 +56,11 @@ paths:
 - `guard.listing` writes the list under a title: `To save:` (`review`), `Changed there:` (the
   difference of a grid whose rows changed elsewhere, `save.warn`, rule `grids`). `save.py` also
   holds the base of a grid (`Base`, `base`, `kept`, `renew`), `warn`, `changed_at`, the refusal
-  of a save whose rows changed since (`save.button` with `read`) and `listed`, the list that the
-  button of a dialog writes (a file action, a rename): the one of the run before, none while the
-  list now refuses.
+  of a save whose rows changed since (`save.button` with `read`), `Grid` (what a part of a tab
+  adds to its Save: edit, check, nonce; `forms.save`), `Part` (grids, guard lines and `ready` of a
+  part that saves with the Save of another: the drops of a scenario, `save.button(part=)`) and
+  `listed`, the list that the button of a dialog writes (a file action, a rename): the one of the
+  run before, none while the list now refuses.
 - The guard speaks the language of the session (rule `i18n`): its sentences, the warnings, a cell
   of a grid by `names` beside `units` (`Table.names`, `gridcolumns.names`: its keys as the headers
   name them), a field of a form by its keys (`formguard.changes`); `Change.key` (`named`) keeps the

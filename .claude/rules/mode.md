@@ -60,6 +60,8 @@ section on the mode and the features) and `features.md`.
   (the Overrides tab, rule `scenarios`). `used(feature)`: a place exists. A file that does not parse
   (`InputError`) gives `ALL` (`everything`: every item used, `where` empty): the error screen of
   `main.py` comes with every page.
+- A feature also turns on by an action that adds its items: `Add a job loss` of the Scenarios page
+  drops `job_loss` from `features_off` in its revision (`scenariofiles.lost_job`, rule `store`).
 - `features_off(data_dir)`: the known ids of `features_off` of the raw `app.yaml` (`listed`); a
   file that does not load switches nothing off, an unknown id is an `InputError` of the model
   (`AppSettings`, `Strict`) on the pages that load it.
@@ -70,7 +72,8 @@ section on the mode and the features) and `features.md`.
   Scenarios page with one (`scenario_overrides.unsaved`). The grids, the kinds, the types and the
   Overview: rules `grids`, `tracking`, `cashflows`, `events`, `overview`. The forms: the
   Assumptions page and the Overrides tab (rules `assumptions`, `scenario-overrides`, `forms`),
-  `General` and the Overrides tab of the Scenarios page (rule `scenarios`). The Explorer (rule
+  `General`, `Phases` (its ids, `Form.hides` of a list: they are made on save) and the Overrides
+  tab of the Scenarios page (rule `scenarios`). The Explorer (rule
   `explorer`): `explorer.View` and `drawn`, a moved slider by `Knob.moved` and `Switch.moved`. A
   quick start switches off every feature, `starter` the ten that it does not use (rule `examples`).
 

@@ -18,7 +18,7 @@ from dagobert.ui import fold, is_mobile
 from dagobert.ui.fields import ABSENT, Field, Kind, marked, placeholder, read, shown
 from dagobert.ui.gridcolumns import Column, also, in_order, number
 from dagobert.ui.gridstate import carry, frame
-from dagobert.ui.tables import MapRows, pin, small_grid
+from dagobert.ui.tables import Computed, MapRows, pin, small_grid
 
 PROSE = frozenset({"name", "note"})  # text for people, which a phone may start with a capital
 LONG = frozenset({"note"})  # text that takes a text area
@@ -49,9 +49,10 @@ class Spot:
     choice (`null` without one; `care.index`: nominal), the header of the key column of a
     mapping by name (`name` without one; `returns`: `asset class`), the words of the options of a
     choice (`rv`: `By profit` for `income`), why the field has no effect now (it shows disabled,
-    `off` after its label), the rows of a mapping by name (`MapRows` without them) and its
-    columns that the mode hides while no entry holds them (`hidden`). The texts are in the
-    language of the session (`forms.Form` translates them)."""
+    `off` after its label), the rows of a mapping by name (`MapRows` without them), its columns
+    that the mode hides (`hidden`: of a mapping while no entry holds them, of a list of rows
+    always) and the read-only columns of a list of rows (`computed`: the age of a phase change).
+    The texts are in the language of the session (`forms.Form` translates them)."""
 
     key: str
     label: str
@@ -64,6 +65,7 @@ class Spot:
     off: str = ""
     rows: MapRows | None = None
     hidden: frozenset[str] = frozenset()
+    computed: tuple[Computed, ...] = ()
 
 
 def prefix(field: Field) -> str:
@@ -314,27 +316,29 @@ def _editor(
     *,
     add_only: bool = False,
     shown: list[Column] | None = None,
+    extra: Sequence[Computed] = (),
 ) -> RowEdits:
     """A small grid of `rows` (`tables.small_grid`) and its edits by their indices, so the store
     keeps the comments and the layout of the rows it does not change."""
-    return small_grid(cols, list(enumerate(rows)), key, shown=shown, add_only=add_only)
+    return small_grid(cols, list(enumerate(rows)), key, shown=shown, add_only=add_only, extra=extra)
 
 
 def rows(field: Field, old: object, spot: Spot) -> object:
-    """A list of rows as a small grid in the units of its columns. A list of the file gives
+    """A list of rows as a small grid in the units of its columns, without those that the mode
+    hides (`Spot.hidden`), with the read-only columns of `Spot.computed`. A list of the file gives
     `RowEdits`, kept per row and cell; without one, the rows as a list (`ABSENT` for none). In an
     override the toggle `Override` starts it from the inherited list; off shows that list read
     only."""
     _heading(field, spot)
     cols = list(field.columns)
+    shown = [c for c in cols if c.name not in spot.hidden] if spot.hidden else None
     inherited = spot.leaf.value if spot.leaf and isinstance(spot.leaf.value, list) else []
     if not _own(spot, old):
-        _inherited(cols, inherited, spot)
+        _inherited(shown or cols, inherited, spot)
         return ABSENT
-    if isinstance(old, list):
-        return _editor(cols, old, spot.key)
-    start = inherited if spot.override else []
-    return _editor(cols, start, spot.key).result(start) or ABSENT
+    held = old if isinstance(old, list) else inherited if spot.override else []
+    edits = _editor(cols, held, spot.key, shown=shown, extra=spot.computed)
+    return edits if isinstance(old, list) else edits.result(held) or ABSENT
 
 
 def mapping(field: Field, old: object, spot: Spot) -> object:

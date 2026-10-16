@@ -1,7 +1,8 @@
 """The `Scenarios` page: the main scenario and the others that the Explorer compares
 (`app.yaml`), every scenario file in the order of its `extends` tree, the file actions
-(`fileactions`), and the tabs of the scenario to edit: its timeline, its own fields, its phases and
-its events with the inherited ones that it leaves out, and its overrides. Simple mode hides the
+(`fileactions`), and the tabs of the scenario to edit: its timeline, its own fields, its phases
+(`phases`) and its events with the inherited ones that it moves or leaves out, and its
+overrides. Simple mode hides the
 overrides of a scenario that holds none and the field `Template` of one that is none (rule
 `mode`). A file that does not load still opens: the page reads the raw YAML and shows the
 problems."""
@@ -9,11 +10,10 @@ problems."""
 from __future__ import annotations
 
 import textwrap
-from collections.abc import Callable, Collection, Mapping, Sequence
-from dataclasses import dataclass, replace
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from functools import cached_property
-from itertools import chain, count
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import streamlit as st
 from babel.lists import format_list
@@ -26,7 +26,7 @@ from dagobert.model.base import KeyPath
 from dagobert.model.events import AcquisitionEvent, Event, InheritanceEvent, SellEvent
 from dagobert.model.plan import Scenario
 from dagobert.problems import InputError
-from dagobert.references import Kind, References
+from dagobert.references import References
 from dagobert.ui import (
     COMPARE,
     EVENT,
@@ -41,14 +41,15 @@ from dagobert.ui import (
     literal,
     mode,
     page_link,
+    phases,
     scenario_overrides,
     source,
     tell,
     titled,
 )
 from dagobert.ui import fields as model_fields
-from dagobert.ui.fileactions import KEY, NO_PARENT, PENDING, Doc, actions, shut
-from dagobert.ui.forms import Form, Grid, edited, save, show
+from dagobert.ui.fileactions import KEY, NO_PARENT, PENDING, Doc, Plan, actions, shut
+from dagobert.ui.forms import Form, edited, save, show
 from dagobert.ui.gridcolumns import keyword
 from dagobert.ui.lineage import (
     AT_DEATH,
@@ -60,8 +61,8 @@ from dagobert.ui.lineage import (
     Chain,
     describe,
 )
-from dagobert.ui.save import reason
-from dagobert.ui.tables import known, save_in_header
+from dagobert.ui.save import Grid, reason
+from dagobert.ui.tables import save_in_header
 from dagobert.ui.widgets import Names
 
 if TYPE_CHECKING:
@@ -77,7 +78,6 @@ TABS = (N_("Timeline"), N_("General"), N_("Phases"), N_("Events"), OVERRIDES)
 FIELDS = {f.path: f for f in model_fields.of(Scenario)}
 TEMPLATE = "abstract"
 GENERAL = ("name", "note", "extends", TEMPLATE)
-PHASE_HELP = N_("The Assumptions page defines them.")
 LABELS: dict[KeyPath, str] = {("abstract",): N_("Template: only a base for others, never run")}
 NULLS: dict[KeyPath, str] = {("extends",): NO_PARENT}
 
@@ -175,19 +175,6 @@ def _detail(event: Event) -> str:
 
 def _month(day: object) -> str:
     return "" if day is None else str(day)[:7]
-
-
-def inherited_phases(chain: Chain) -> list[dict[str, str]]:
-    """The phases of the parents in a chain of raw files (so one that does not load shows too),
-    the root first, each with its file and the file below that drops it."""
-    return _marked(
-        [
-            {"from": _month(i.row.get("from")), "phase": str(i.row.get("phase", ""))}
-            | {"id": str(i.row.get("id") or ""), SET_IN: i.file}
-            | ({LEFT_OUT: i.dropped} if i.dropped else {})
-            for i in lineage.inherited(chain, "phases")
-        ]
-    )
 
 
 def _marked(rows: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -460,65 +447,6 @@ def _general(chosen: Chosen, refs: References, docs: Mapping[str, Doc], view: mo
     )
 
 
-def _phases(chosen: Chosen) -> None:
-    """The phases of the file as a grid, `phase` a select of those of `assumptions.yaml`, and
-    those of its parents read only below it, marked where this file or one between drops them,
-    with a toggle per id that leaves them out (`lineage.leave_out`)."""
-    key = f"{KEY}phases-{chosen.stem}"
-    save_in_header(f"{key}-save")
-    grid = FIELDS[("phases",)]
-    defined = tuple(references.phases(chosen.data_dir))
-    cols = tuple(
-        replace(c, options=defined, more=(*c.more, PHASE_HELP)) if c.name == "phase" else c
-        for c in grid.columns
-    )
-    form = Form(key, chosen.file, (replace(grid, columns=cols),), Scenario)
-    shown = show(chosen.data_dir, form)
-    held = [r for r in shown.candidate.get("phases") or [] if isinstance(r, dict)]
-    taken = {*known(chosen.data_dir).names(Kind.ITEM, chosen.stem), *(r.get("id") for r in held)}
-    shown = shown.fill(("phases",), phase_ids({str(i) for i in taken if i}))
-    flagged = guard.review(shown.changes(), key=key)
-    save(chosen.data_dir, [shown], key=f"{key}-save", flagged=flagged, action=chosen.stem)
-    try:
-        rows = inherited_phases(chosen.chain)
-    except InputError as err:
-        st.error(str(err))
-        return
-    if rows:
-        st.markdown(f"**{_('Inherited phases')}**")
-        ids = [str(i.row["id"]) for i in lineage.reach(chosen.chain, "phases") if i.row.get("id")]
-        lineage.leave_out(
-            chosen.data_dir, chosen.file, list(dict.fromkeys(ids)), chosen.chain, key=f"{key}-drop"
-        )
-        lineage.read_only(rows, "from", wide="detail")
-        fold(
-            _(
-                "The phases of the scenarios that this one extends, which it runs too, unless it "
-                "leaves out their id. Change them in their own scenario."
-            )
-        )
-
-
-def phase_ids(taken: Collection[str]) -> Callable[[Mapping[str, Any]], dict[str, str]]:
-    """The id of a phase change that a save of the Phases tab writes without one: its phase
-    (`retired`), else with the year of its month (`retired-2051`), else numbered, none that the
-    chain (`taken`) or this save holds. The seek `Stop working` and the month sliders of the
-    Explorer move a change by its id."""
-    used = set(taken)
-
-    def fill(row: Mapping[str, Any]) -> dict[str, str]:
-        if row.get("id") or not (phase := row.get("phase")):
-            return {}
-        year = f"{phase}-{str(row.get('from', ''))[:4]}"
-        made = next(
-            i for i in chain([str(phase), year], (f"{year}-{n}" for n in count(2))) if i not in used
-        )
-        used.add(made)
-        return {"id": made}
-
-    return fill
-
-
 def _timeline(chosen: Chosen) -> None:
     """Every phase change and event that a run of the scenario sees, with the file that holds it,
     and a button per parent that opens it."""
@@ -579,11 +507,11 @@ def page(data_dir: Path) -> None:
     row = st.container(horizontal=True, vertical_alignment="bottom", wrap=True)
     if not docs:
         st.info(_("No scenario yet: start one with `New`."))
-        actions(data_dir, None, refs, row)
+        actions(data_dir, None, Plan(docs, first), row)
         return
     stem = _chooser(docs, order, first, row)
     chosen = Chosen(data_dir, stem, docs[stem])
-    actions(data_dir, chosen, refs, row)
+    actions(data_dir, chosen, Plan(docs, first), row)
     try:
         loader.load_plan(data_dir, chosen.path)
     except InputError as err:
@@ -619,7 +547,7 @@ def page(data_dir: Path) -> None:
     with drawn["General"]:
         _general(chosen, refs, docs, view)
     with drawn["Phases"]:
-        _phases(chosen)
+        phases.tab(data_dir, chosen.path, view)
     with drawn["Events"]:
         events.tab(chosen.path)
     if overridden:

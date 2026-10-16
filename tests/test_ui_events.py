@@ -383,18 +383,31 @@ def test_the_tab_renders_with_a_grid_per_type(plans: Path, phone: bool) -> None:
     assert any("-add-" in str(w.key) for w in at.text_input)  # the form `Add an event`
 
 
-def test_a_toggle_leaves_out_an_inherited_event(plans: Path) -> None:
+def test_a_toggle_leaves_out_an_inherited_event_with_the_save_of_the_type_open(
+    plans: Path,
+) -> None:
+    """One Save for the section: the grid of the type open writes its edits and the toggles
+    below the types as one revision, and its guard lists both."""
     at = _tab(plans, "child")
     toggle = next(t for t in at.toggle if t.label == "Leave out flat-sale (1 event)")
     toggle.set_value(True).run()
-    assert any("**leave out flat-sale (1 event)** no → yes" in c.value for c in at.caption)
-    next(b for b in at.button if b.label == "Save what to leave out").click().run()
+    assert not any(b.label == "Save what to leave out" for b in at.button)
+    kind = at.session_state["events-child-open"]
+    grid, edit = f"events-child-{kind}-0", {"edited_rows": {"0": {"amount": 6000}}}
+    at = edited(at, grid, edit)
+    listed = [c.value for c in at.caption if c.value.startswith("To save")]  # a list per type
+    drop = "**leave out flat-sale (1 event)** no → yes"
+    assert all(drop in line for line in listed)
+    assert any("6.000,00 €" in line for line in listed)
+    at.button(key=f"events-child-{kind}-save").click()
+    at = edited(at, grid, edit)
     assert not at.exception
     child = plans / "scenarios" / "child.yaml"
     assert read_yaml(child)["drop"] == ["flat-sale"]
+    assert read_yaml(child)["events"][0]["amount"] == 6000
     kept = [e.id for _, own in chain_of(child) for e in own.events]
     assert "flat-sale" not in kept
-    assert revisions.entries(plans)[-1].source == "app"
+    assert [e.source for e in revisions.entries(plans)] == ["baseline", "app"]  # one revision
 
 
 def test_the_repayments_of_a_sale_save_by_themselves(plans: Path) -> None:

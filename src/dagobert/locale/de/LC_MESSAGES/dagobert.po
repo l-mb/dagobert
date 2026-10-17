@@ -13620,14 +13620,15 @@ msgstr "Weiterbildung"
 #, python-brace-format
 msgid ""
 "A new scenario that extends {scenario}: from the month that you type you "
-"run a business instead of your job, until the plan stops working. In this"
-" phase the salary and the savings plan stop and the profit pays. You pay "
-"its income tax and your health insurance yourself, and no statutory "
-"pension insurance: the Assumptions page changes that."
+"run a business instead of your job, until the next phase of the plan "
+"begins, such as the retirement. In this phase the salary and the savings "
+"plan stop and the profit pays. You pay its income tax and your health "
+"insurance yourself, and no statutory pension insurance: the Assumptions "
+"page changes that."
 msgstr ""
 "Ein neues Szenario, das auf {scenario} basiert: Ab dem Monat, den du "
-"eingibst, führst du statt deines Jobs einen Betrieb, bis zum Arbeitsende "
-"deines Plans. In dieser Phase enden Gehalt und Sparplan, stattdessen "
+"eingibst, führst du statt deines Jobs einen Betrieb, bis die nächste "
+"Phase deines Plans beginnt, etwa der Ruhestand. In dieser Phase enden Gehalt und Sparplan, stattdessen "
 "kommt der Gewinn. Du zahlst seine Einkommensteuer und deine "
 "Krankenversicherung selbst und keine gesetzliche Rentenversicherung: Die "
 "Seite Annahmen ändert das."
@@ -13818,6 +13819,11 @@ msgid "the course ends after you stop working in {month}: type fewer months"
 msgstr ""
 "die Weiterbildung endet nach deinem Arbeitsende ({month}): Gib weniger "
 "Monate ein"
+
+#: whatifs.py
+#, python-brace-format
+msgid "type a month before {month}, when the last phase of your plan begins"
+msgstr "gib einen Monat vor {month} ein, dem Beginn der letzten Phase deines Plans"
 
 #: whatifs.py
 msgid "a job loss needs a salary: the Cashflows page adds one"

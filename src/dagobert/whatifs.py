@@ -44,6 +44,7 @@ EARLY, LATE = datadir.LOSS_EARLY, datadir.LOSS_LATE
 NOT_EARLIER = N_("type an age below {age}, at which your plan stops working now")
 TOO_EARLY = N_("type an age from {age} on: your plan can stop in {month} at the earliest")
 COURSE_LATE = N_("the course ends after you stop working in {month}: type fewer months")
+BUSINESS_LATE = N_("type a month before {month}, when the last phase of your plan begins")
 UNPAID = N_("a job loss needs a salary: the Cashflows page adds one")
 NEW_JOB_EARLY = N_("type a month after the job loss")
 OWN_MORE = N_("type at most the price with tax and costs, {cost}")
@@ -114,6 +115,13 @@ def _youngest(dial: goalseek.Dial) -> int:
     earliest = add_months(stop, round(dial.low))
     age = months_of_age(born, earliest) // 12
     return age + (aged(born, age) < earliest)
+
+
+def _last_change(data_dir: Path, main: str) -> date | None:
+    """The month of the last change of phase of the main scenario, None without one."""
+    phases = load_plan(data_dir, data_dir / scenario_file(main)).scenario.phases
+    changes = [c.at for i, c in enumerate(phases) if i and c.phase != phases[i - 1].phase]
+    return changes[-1] if changes else None
 
 
 def _salaried(data_dir: Path) -> bool:
@@ -322,8 +330,9 @@ class Business:
     """A business from `start` with a `profit` a month before tax and own social insurance: the
     change to the phase `BUSINESS`, which stops the salary, and a `self_employed` stream that pays
     in it (rule `self-employment`; `tax.self_employed` at its defaults: no statutory pension,
-    no sick pay), with `gruendungszuschuss` where `founded` (rule `alg1`). The change out of work
-    after it stays: the business ends when the plan stops working."""
+    no sick pay), with `gruendungszuschuss` where `founded` (rule `alg1`). The changes after it
+    stay: the business ends at the next, the stop of work or a job loss of the main scenario, and
+    starts after a job loss without a new job too, which stops the work."""
 
     main: str
     start: date
@@ -333,12 +342,13 @@ class Business:
     founded: bool = False
 
     def misfits(self, data_dir: Path) -> dict[str, str]:
-        """A start before the start of the plan or at or after its stop."""
-        stop = stops(data_dir, self.main)
+        """A start before the start of the plan or in its last phase, which it would replace to
+        the end of the plan."""
+        last = _last_change(data_dir, self.main)
         if (early := _early(data_dir, self.start)) is not None:
             return {"start": early}
-        if stop is not None and self.start >= stop:
-            return {"start": _(LATE).format(month=f"{stop:%Y-%m}")}
+        if last is not None and self.start >= last:
+            return {"start": _(BUSINESS_LATE).format(month=f"{last:%Y-%m}")}
         return {}
 
     def edits(self, data_dir: Path) -> list[Edit]:

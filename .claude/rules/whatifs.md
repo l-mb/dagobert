@@ -42,14 +42,17 @@ the Scenarios page: rule `scenarios`; `away`, `lost_job` and `compared`: rule `s
   salary.
 - `Business` (`Start a business`): from `start` the phase `BUSINESS` (`self-employed`), no return
   (`away`: the salary limited as for a job loss), and an `add_stream` of a `self_employed` stream
-  (`profit`) in that phase, so the change out of work ends it (the caption: the salary and the
-  savings plan stop in it, as those of a quick start pay in `work` only); `tax.self_employed` at its defaults
-  (`rv: none`, no Krankengeld; rule `self-employment`); `Feature.SELF_EMPLOYMENT` on. Refused: a
-  start before the start or at or after the stop. `founded` writes `gruendungszuschuss: true` on
-  the stream (rule `alg1`). `founding(dir, main, month)`: the claim of the main scenario before the
-  month (`simulation.before`, `engine.alg1.refusal`), a `Founding` (`days`, `why`), None without a
-  claim (no job loss before). A job loss without a new job is the stop of work (`goalseek.work`),
-  so a business after it is refused: the GZ needs one with a new job (the manual says so).
+  (`profit`) in that phase, so the next change of the main scenario ends it, the stop of work or a
+  job loss (the caption: the salary and the savings plan stop in it, as those of a quick start pay
+  in `work` only); `tax.self_employed` at its defaults (`rv: none`, no Krankengeld; rule
+  `self-employment`); `Feature.SELF_EMPLOYMENT` on. Refused: a start before the start or at or
+  after the last change of phase of the main scenario (`_last_change`, `BUSINESS_LATE`), whose
+  phase it would replace to the end of the plan. So it starts after a job loss without a new job
+  too (owner 2026-10-17), which is the stop of work (`goalseek.work`), and runs to the next
+  change, the pension. `founded` writes `gruendungszuschuss: true` on the stream (rule `alg1`).
+  `founding(dir, main, month)`: the claim of the main scenario before the month
+  (`simulation.before`, `engine.alg1.refusal`), a `Founding` (`days`, `why`), None without a
+  claim (no job loss before).
 - `Purchase` (`Buy a property`): a `buy_property` (rule `engine`) with the Grunderwerbsteuer of
   `land` (a quick start writes no `tax.land`), `COSTS` 5% of the price (notary, land register,
   broker: those of `buy-home`), `UPKEEP` 1% a year (a rule of thumb), a loan of the cost less the
@@ -108,8 +111,8 @@ entry, each step as runs (fewer months of work, ALG1 in the course months and th
 them, less tax with costs, the profit in the new phase, the property from its month, the loan,
 the rent equal to a `set_stream` by hand), the costs to the cent, the spending of a rent, the
 misfits, the guard line of `Stop earlier`, each dialog one revision as a desktop and a phone, the
-Land and the own funds marked at once, the Gründungszuschuss after a job loss with a new job
-(`founding` at 270 and 120 days, its six months in the run and on the sheet, the box on and off
-with its reason).
+Land and the own funds marked at once, the Gründungszuschuss after a job loss with and without a
+new job (`founding` at 270 and 120 days, its six months in the run and on the sheet, without a new
+job the business to the stop, the box on and off with its reason).
 `test_ui_overview`: the invitation
 and the row of a what-if. `test_scenarios`: `lost_job`.

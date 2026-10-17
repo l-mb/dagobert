@@ -188,26 +188,27 @@ def test_a_business_replaces_the_salary_until_the_plan_stops_working(quick: Path
     assert months_in(run.phases, whatifs.BUSINESS) == months_between(LATER, STOP)
     assert Feature.SELF_EMPLOYMENT not in read_yaml(quick / APP)["features_off"]
     assert whatifs.Business("plan", STOP, 1, "x", "x").misfits(quick) == {
-        "start": f"type a month before you stop working in {STOP:%Y-%m}"
+        "start": f"type a month before {STOP:%Y-%m}, when the last phase of your plan begins"
     }
 
 
 FOUNDED = add_months(LATER, 3)  # three months after a job loss: 270 days of the claim left
 
 
-def lost(quick: Path) -> None:
-    """The main scenario `lost`: unemployed from `LATER` for a year, the plan before it. Without
-    a new job its work would stop with the loss, and a business after it would be refused."""
-    back = add_months(LATER, 12)
-    written(quick, whatifs.Loss("plan", LATER, back, "Lost", "lost", "Unemployed"))
+def lost(quick: Path, *, back: bool = True) -> None:
+    """The main scenario `lost`: unemployed from `LATER`, with a new job a year later (`back`),
+    the plan before it."""
+    again = add_months(LATER, 12) if back else None
+    written(quick, whatifs.Loss("plan", LATER, again, "Lost", "lost", "Unemployed"))
     (quick / APP).write_text("scenarios: [lost, plan]\n")
 
 
-def test_a_business_after_a_job_loss_takes_the_gruendungszuschuss(quick: Path) -> None:
+@pytest.mark.parametrize("back", [True, False], ids=["a new job", "no new job"])
+def test_a_business_after_a_job_loss_takes_the_gruendungszuschuss(quick: Path, back: bool) -> None:
     """The claim of the main scenario before the business decides it (`engine.alg1.refusal`): six
     months pay with the flag after three months of ALG1, none after eight; a plan without a job
-    loss has no claim to ask about."""
-    lost(quick)
+    loss has no claim to ask about. Without a new job the business runs to the stop of the plan."""
+    lost(quick, back=back)
     assert whatifs.founding(quick, "plan", FOUNDED) is None
     assert whatifs.founding(quick, "lost", FOUNDED) == whatifs.Founding(FOUNDED, 270, None)
     late = add_months(LATER, 8)
@@ -222,6 +223,7 @@ def test_a_business_after_a_job_loss_takes_the_gruendungszuschuss(quick: Path) -
     sheet = beyond_streams(run, plan, FOUNDED)[whatifs.BUSINESS].sources
     months = [j for j in range(i, i + 12) if run.phases[j] == whatifs.BUSINESS]  # the new job
     assert sheet[GRUENDUNGSZUSCHUSS] == pytest.approx(paid[months].mean())
+    assert back or months_in(run.phases, whatifs.BUSINESS) == months_between(FOUNDED, STOP)
 
 
 @pytest.mark.parametrize(("start", "ticked"), [(FOUNDED, True), (add_months(LATER, 8), False)])

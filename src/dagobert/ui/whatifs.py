@@ -297,7 +297,8 @@ def _business(data_dir: Path, plan: Plan) -> None:
     st.caption(
         _(
             "A new scenario that extends {scenario}: from the month that you type you run a "
-            "business instead of your job, until the plan stops working. In this phase the "
+            "business instead of your job, until the next phase of the plan begins, such as "
+            "the retirement. In this phase the "
             "salary and the savings plan stop and the profit pays. You pay its income tax and "
             "your health insurance yourself, and no statutory pension insurance: the Assumptions "
             "page changes that."

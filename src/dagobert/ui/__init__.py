@@ -442,14 +442,16 @@ def keyboard() -> None:
 STAMPED = (*(p for p in schema.INPUTS if p.endswith(".yaml")), f"{series.FETCHED}/*.csv")
 
 
-type Stamp = tuple[float, int]
+type Stamp = tuple[int, int, int]
 
 
 def data_stamp(data_dir: Path, inputs: Sequence[str] = STAMPED) -> Stamp:
-    """Latest mtime and number of the files of `inputs`: a cache key that changes when one is
-    changed, added or removed."""
-    times = [p.stat().st_mtime for pattern in inputs for p in data_dir.glob(pattern)]
-    return max(times, default=0.0), len(times)
+    """The sums of the mtimes (ns) and of the sizes and the number of the files of `inputs`: a
+    cache key that changes when one is changed, added or removed. A write after the read of a time
+    takes a later one, but maybe the time of another file: the latest time missed such an edit;
+    two writes within one tick of the clock of the kernel keep the time, mostly not the size."""
+    stats = [p.stat() for pattern in inputs for p in data_dir.glob(pattern)]
+    return sum(s.st_mtime_ns for s in stats), sum(s.st_size for s in stats), len(stats)
 
 
 def run_stamp(data_dir: Path) -> Stamp:

@@ -7,7 +7,9 @@ paths:
 # The store
 
 - `src/dagobert/store.py`: writes to the YAML inputs with `ruamel.yaml` (comments survive), scenario
-  files from the explorer, `app.yaml`. `scenariofiles.concrete_scenarios` leaves out the templates,
+  files from the explorer, `app.yaml`. `scenariofiles.concrete_scenarios` leaves out the templates
+  (kept by the texts of the scenario files, which alone decide it, `_concrete`: a page asks up to
+  six times a run, 28 ms each, `test_the_scenarios_that_run_follow_each_edit_of_their_files`),
   `default_scenarios` holds the concrete ones of `app.yaml`, `scenario_labels` names each by stem,
   the stem added where two share a name (the explorer, the report). `Edit` changes one file in its
   document, `text` gives the new text (`RowFile.text` is one): first `rows` (`RowEdits` by key path

@@ -281,6 +281,13 @@ STREAMLIT_ENV = {
     # a rerun waits for the next Streamlit call of the run before: with fast reruns each quick move
     # of a slider started a script thread, and the engine runs of eight piled up past 8 GB
     "STREAMLIT_RUNNER_FAST_RERUNS": "false",
+    # no full collection after each run: it took 60 ms of every rerun, and without it the memory
+    # stays as bounded, 15 MB more (rule `container`)
+    "STREAMLIT_RUNNER_POST_SCRIPT_GC": "false",
+    # the browser keeps an element of 10 kB or more for ten runs after it last drew it, and the
+    # server sends its hash instead: the figures of the Explorer, 2 MB, on a revisit within them
+    # (by default two runs, so two other pages lost them)
+    "STREAMLIT_GLOBAL_MAX_CACHED_MESSAGE_AGE": "10",
     # a blue accent per scheme (`.streamlit/config.toml` says why)
     "STREAMLIT_THEME_LIGHT_PRIMARY_COLOR": "#1c64d1",
     "STREAMLIT_THEME_DARK_PRIMARY_COLOR": "#4a8ff0",

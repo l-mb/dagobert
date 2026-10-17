@@ -3,8 +3,7 @@ driver, and its words."""
 
 from __future__ import annotations
 
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+from typing import TYPE_CHECKING
 
 from dagobert.anatomy import (
     AGES,
@@ -28,13 +27,19 @@ from dagobert.money import format_percent
 from dagobert.report.charts import (
     BLUE,
     GRAY,
+    Grid,
+    Trace,
     class_name,
-    layout,
+    figure,
+    hline,
     run_out,
     split_title,
     tick_format,
     title_room,
 )
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
 
 COLUMNS = 3
 ROW, GAP, TOP = 240, 110, 180  # pixels: a row of panels, the gap between rows, the top margin
@@ -143,7 +148,7 @@ def anatomy_figure(a: Anatomy, *, compact: bool = False) -> go.Figure:
     )
     rows = -(-len(a.drivers) // columns)
     plot = rows * (row + GAP) - GAP
-    fig = make_subplots(
+    grid = Grid(
         rows=rows,
         cols=columns,
         shared_yaxes=True,  # and one range for all rows below
@@ -151,15 +156,17 @@ def anatomy_figure(a: Anatomy, *, compact: bool = False) -> go.Figure:
         vertical_spacing=GAP / plot,
         subplot_titles=[f"{label(d, a.age)}<br><sup>{groups(d, a.age)}</sup>" for d in a.drivers],
     )
-    for i, d in enumerate(a.drivers):
-        y, x = divmod(i, columns)
+    plots = [grid.axes(*(n + 1 for n in divmod(i, columns))) for i in range(len(a.drivers))]
+    traces: list[Trace] = []
+    for d, axes in zip(a.drivers, plots, strict=True):
         bins = [bin_label(d, b) for b in d.bins]
-        fig.add_trace(
-            go.Bar(
-                x=bins,
-                y=[b.broke for b in d.bins],
-                marker={"color": BLUE},
-                hovertext=[
+        traces.append(
+            {
+                "type": "bar",
+                "x": bins,
+                "y": [b.broke for b in d.bins],
+                "marker": {"color": BLUE},
+                "hovertext": [
                     "<br>".join(
                         [
                             f"{label(d, a.age)}: {shown.replace('<br>', ' ')}",
@@ -170,25 +177,30 @@ def anatomy_figure(a: Anatomy, *, compact: bool = False) -> go.Figure:
                     )
                     for b, shown in zip(d.bins, bins, strict=True)
                 ],
-                hoverinfo="text",
-                showlegend=False,
-            ),
-            row=y + 1,
-            col=x + 1,
+                "hoverinfo": "text",
+                "showlegend": False,
+            }
+            | axes
         )
-    fig.add_hline(
-        y=a.p_broke, line={"color": GRAY, "dash": "dash", "width": 1.5}, row="all", col="all"
-    )
     top = max(b.broke for d in a.drivers for b in d.bins)
     top = 1.1 * max(top, a.p_broke)
-    fig.update_yaxes({"range": [0, top]} | tick_format(".0%", [top]))
-    fig.update_yaxes(title=run_out(a.age), col=1)
-    fig.update_xaxes(tickfont={"size": 11})
-    fig.update_layout(
-        layout(),
-        title={"text": title} | ({} if compact else {"subtitle": {"text": "<br>".join(lines)}}),
-        height=margin + plot + 80,  # the default bottom margin
-        margin={"t": margin},
-        bargap=0.15,
+    first = grid.names("yaxis", col=1)
+    return figure(
+        traces,
+        grid.layout,
+        hline(a.p_broke, {"color": GRAY, "dash": "dash", "width": 1.5}, plots),
+        {
+            name: {"range": [0, top]}
+            | tick_format(".0%", [top])
+            | ({"title": run_out(a.age)} if name in first else {})
+            for name in grid.names("yaxis")
+        },
+        {name: {"tickfont": {"size": 11}} for name in grid.names("xaxis")},
+        {
+            "title": {"text": title}
+            | ({} if compact else {"subtitle": {"text": "<br>".join(lines)}}),
+            "height": margin + plot + 80,  # the default bottom margin
+            "margin": {"t": margin},
+            "bargap": 0.15,
+        },
     )
-    return fig

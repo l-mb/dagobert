@@ -1,20 +1,29 @@
 """The shared parts of every figure: the layout, the color palette, titles and legends, the hover
 labels, and the age axis with the bands of the phases and the markers. A figure speaks the
-language of the page that builds it (rule `i18n`): the builders translate where they write."""
+language of the page that builds it (rule `i18n`): the builders translate where they write.
+
+A builder composes its traces and its layout as mappings and makes the figure once (`figure`):
+plotly validates each property that a setter (`add_trace`, `update_layout`) sets, so a figure
+of setters took some 40 ms, of mappings a few."""
 
 from __future__ import annotations
 
 import math
 import textwrap
 from collections import Counter
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import dataclass
 from datetime import date
+from functools import reduce
+from typing import Any
 
 import numpy as np
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from dagobert.budget import stretches
 from dagobert.i18n import N_, NP_, _, language, pgettext
+from dagobert.loader import deep_merge
 from dagobert.model.base import named
 from dagobert.model.months import add_months, months_between
 from dagobert.money import (
@@ -27,12 +36,73 @@ from dagobert.money import (
 )
 from dagobert.result import FloatArray, Marker, MarkerKind, RunResult
 
+type Trace = dict[str, Any]  # a trace of plotly as a mapping, its `type` included
+type Layout = dict[str, Any]
+
 
 def layout() -> dict[str, object]:
     """The layout of every figure. The app replaces the template with its own theme, the
     separators stay: the decimal mark of the language (`money.separators`), euros read like
     `format_eur`."""
     return {"template": "plotly_dark", "separators": separators()}
+
+
+def merged(*layouts: Mapping[str, Any]) -> Layout:
+    """`layouts` merged in their order, as `update_layout` applies them one after the other: a
+    mapping merges into the one before, any other value replaces it."""
+    return reduce(deep_merge, map(dict, layouts), {})
+
+
+def figure(traces: Iterable[Trace], *layouts: Mapping[str, Any]) -> go.Figure:
+    """The figure of `traces` and the `layouts`, merged (`merged`), validated once. Built so, its
+    JSON gives the same figure, byte for byte, as the app keeps it (`ui.figures`)."""
+    return go.Figure(data=list(traces), layout=merged(layout(), *layouts))
+
+
+class Grid:
+    """Plots in rows and columns as `make_subplots` (its keywords) lays them out: the layout of
+    their axes and titles, the axes of a trace in a plot, the names of the axes."""
+
+    def __init__(self, *, rows: int, cols: int, **subplots: Any) -> None:  # noqa: ANN401
+        self.rows, self.cols = rows, cols
+        self._plots = make_subplots(rows=rows, cols=cols, **subplots)
+
+    @property
+    def layout(self) -> Layout:
+        return {k: v for k, v in self._plots.layout.to_plotly_json().items() if k != "template"}
+
+    def _names(self, row: int, col: int) -> dict[str, str]:
+        plot = self._plots.get_subplot(row, col)
+        return {k: str(getattr(plot, k).plotly_name) for k in ("xaxis", "yaxis")}
+
+    def axes(self, row: int, col: int) -> dict[str, str]:
+        """The `xaxis` and `yaxis` of a trace in the plot of `row` and `col`: `x2`, `y2`."""
+        return {k: name.replace("axis", "") for k, name in self._names(row, col).items()}
+
+    def names(self, axis: str, col: int | None = None) -> list[str]:
+        """The names of the `xaxis` or the `yaxis` of the plots, of one column or all:
+        `yaxis4`."""
+        cols = range(1, self.cols + 1) if col is None else (col,)
+        return [self._names(r, c)[axis] for r in range(1, self.rows + 1) for c in cols]
+
+
+def hline(y: float, line: Mapping[str, object], plots: Iterable[Mapping[str, str]]) -> Layout:
+    """A line across each of the `plots` (`Grid.axes`) at `y`, as `add_hline` draws it."""
+    return {
+        "shapes": [
+            {
+                "type": "line",
+                "x0": 0,
+                "x1": 1,
+                "xref": f"{p['xaxis']} domain",
+                "y0": y,
+                "y1": y,
+                "yref": p["yaxis"],
+                "line": line,
+            }
+            for p in plots
+        ]
+    }
 
 
 EUR_TICKS = ",.0f"  # euro axes: whole euros with thousands separators
@@ -113,20 +183,20 @@ def title_room(title: str) -> int:
     return _TITLE_LINE * max(0, title.count("<br>") - 1)
 
 
-def tap_lists_all(fig: go.Figure, value: str) -> None:
+def tap_lists_all(traces: Iterable[Trace], value: str) -> Layout:
     """Compact: a tap anywhere lists every line at its age, by name and `value`, a template of
-    `y`."""
-    fig.update_traces(
-        hovertext=None,
-        hovertemplate=f"%{{fullData.name}}: {value}<extra></extra>",
-        selector={"hoverinfo": "text"},
-    )
-    unified(fig)
+    `y`: the traces of a hover text take it instead. The layout of `unified`."""
+    for trace in traces:
+        if trace.get("hoverinfo") == "text":
+            trace.pop("hovertext", None)
+            trace["hovertemplate"] = f"%{{fullData.name}}: {value}<extra></extra>"
+    return unified()
 
 
-def unified(fig: go.Figure) -> None:
-    fig.update_layout(hovermode="x unified")
-    fig.update_xaxes(unifiedhovertitle={"text": _("age {age}").format(age="%{x:.1f}")})
+def unified(axes: Iterable[str] = ("xaxis",)) -> Layout:
+    """The hover lists every line at its age, on the x `axes`."""
+    title = _("age {age}").format(age="%{x:.1f}")
+    return {"hovermode": "x unified"} | {a: {"unifiedhovertitle": {"text": title}} for a in axes}
 
 
 # the bands of the phases, by their order in `assumptions.yaml`: the four of a new plan first
@@ -180,13 +250,12 @@ def _phase_colors(r: RunResult) -> dict[str, str]:
     return {phase: PHASE_COLORS[i % len(PHASE_COLORS)] for i, phase in enumerate(order)}
 
 
-def add_phase_bands(fig: go.Figure, r: RunResult) -> None:
-    """One band per stretch of a phase. It sets the shapes in one step, so call it before any
-    other shape: `add_vrect` validates every earlier shape again and grows quadratic."""
-    # No annotation text: the markers of `_add_markers` name the phase transitions.
+def phase_bands(r: RunResult) -> Layout:
+    """One band per stretch of a phase, the shapes of the layout."""
+    # No annotation text: the markers of `_markers` name the phase transitions.
     colors = _phase_colors(r)
-    fig.update_layout(
-        shapes=[
+    return {
+        "shapes": [
             {
                 "type": "rect",
                 "xref": "x",
@@ -201,7 +270,7 @@ def add_phase_bands(fig: go.Figure, r: RunResult) -> None:
             }
             for s in stretches(r)
         ]
-    )
+    }
 
 
 # Marker badges: a badge closer to the one before than this share of the age axis (the second
@@ -322,18 +391,28 @@ def _marker_groups(r: RunResult) -> dict[int, list[str]]:
     }
 
 
-def _add_markers(fig: go.Figure, r: RunResult, *, compact: bool) -> int:
+@dataclass(frozen=True)
+class Overlays:
+    """The chrome that `liquid_fan_figure` and `balance_figure` share: the traces and the layout
+    of the phase bands, the event markers and the axis of ages and years, and the height of the
+    compact marker legend."""
+
+    traces: list[Trace]
+    layout: Layout
+    legend: int
+
+
+def _markers(r: RunResult, *, compact: bool) -> Overlays:
     """A dashed line per month with markers and a numbered badge on it. The legend below the
     plot lists the numbers with their labels, and a click on an entry hides line and badge.
     Badges that would touch stagger downwards. They live on a hidden paper-scaled y-axis, so
-    they never widen the autorange of the data axis. Compact: a line per label, wrapped.
-    Returns the height of the compact legend."""
+    they never widen the autorange of the data axis. Compact: a line per label, wrapped."""
     groups = _marker_groups(r)
     if not groups:
-        return 0
+        return Overlays([], {}, 0)
     gap = _BADGE_GAP[compact] * float(r.ages[-1] - r.ages[0])
     rows: list[float] = []  # age of the last badge in each row
-    traces: list[go.Scatter] = []
+    traces: list[Trace] = []
     legend = lines = 0
     for n, (i, labels) in enumerate(groups.items(), start=1):
         age, month = float(r.ages[i]), f"{r.months[i]:%Y-%m}"
@@ -357,83 +436,92 @@ def _add_markers(fig: go.Figure, r: RunResult, *, compact: bool) -> int:
             lines += len(wrapped)
             name = "<br>".join(wrapped)
         traces += [
-            go.Scatter(
-                x=[age, age],
-                y=[0, 1],
-                yaxis="y2",
-                legend="legend2",
-                legendgroup=group,
-                mode="lines",
-                line={"color": GRAY, "width": 1, "dash": "dash"},
-                showlegend=False,
-                hoverinfo="skip",
-            ),
-            go.Scatter(
-                x=[age],
-                y=[_BADGE_TOP - _BADGE_ROW * row],
-                yaxis="y2",
-                legendgroup=group,
-                cliponaxis=False,
-                mode="markers+text",
-                marker={"size": 17, "color": GRAY},
-                text=[str(n)],
-                textfont={"color": "white", "size": 11},
-                name=name,
-                legend="legend2",
-                hovertext="<br>".join(
+            {
+                "type": "scatter",
+                "x": [age, age],
+                "y": [0, 1],
+                "yaxis": "y2",
+                "legend": "legend2",
+                "legendgroup": group,
+                "mode": "lines",
+                "line": {"color": GRAY, "width": 1, "dash": "dash"},
+                "showlegend": False,
+                "hoverinfo": "skip",
+            },
+            {
+                "type": "scatter",
+                "x": [age],
+                "y": [_BADGE_TOP - _BADGE_ROW * row],
+                "yaxis": "y2",
+                "legendgroup": group,
+                "cliponaxis": False,
+                "mode": "markers+text",
+                "marker": {"size": 17, "color": GRAY},
+                "text": [str(n)],
+                "textfont": {"color": "white", "size": 11},
+                "name": name,
+                "legend": "legend2",
+                "hovertext": "<br>".join(
                     [_("{month}, age {age}").format(month=month, age=f"{age:.0f}"), *labels]
                 ),
                 # compact a tap lists the lines at its age (`tap_lists_all`), and the nearest
                 # badge, even a far one, would join them: the legend has the labels
-                hoverinfo="skip" if compact else "text",
-            ),
+                "hoverinfo": "skip" if compact else "text",
+            },
         ]
-    fig.add_traces(traces)
-    fig.update_layout(
-        yaxis2={"overlaying": "y", "range": [0, 1], "visible": False, "fixedrange": True},
-        legend2={
-            "orientation": "h",
-            "yref": "container",
-            "y": 0,
-            "yanchor": "bottom",
-            "x": 0,
-            "xanchor": "left",
-            "tracegroupgap": 0,  # each entry is a group of its own
-        }
-        # all of the height, an entry per row also in landscape from the edge of the figure: the
-        # builder makes room
-        | ({"maxheight": 1, "xref": "container"} | _row_share(1) if compact else {}),
-        # the entries wrap into about one row per two, compact the builder sets the height
-        height=None if compact else 450 + 12 * lines,
+    return Overlays(
+        traces,
+        {
+            "yaxis2": {"overlaying": "y", "range": [0, 1], "visible": False, "fixedrange": True},
+            "legend2": {
+                "orientation": "h",
+                "yref": "container",
+                "y": 0,
+                "yanchor": "bottom",
+                "x": 0,
+                "xanchor": "left",
+                "tracegroupgap": 0,  # each entry is a group of its own
+            }
+            # all of the height, an entry per row also in landscape from the edge of the figure:
+            # the builder makes room
+            | ({"maxheight": 1, "xref": "container"} | _row_share(1) if compact else {}),
+            # the entries wrap into about one row per two, compact the builder sets the height
+            "height": None if compact else 450 + 12 * lines,
+        },
+        legend,
     )
-    return legend
 
 
-def age_axis(fig: go.Figure, ages: FloatArray, months: list[date], *, compact: bool) -> None:
-    """One axis: a tick at every fifth age, compact every tenth, with its calendar year below.
-    Compact a right margin keeps the label of the last age: a phone has no side margins."""
+def age_axis(
+    ages: FloatArray, months: list[date], *, compact: bool, axes: Iterable[str] = ("xaxis",)
+) -> Layout:
+    """One axis, each of the x `axes`: a tick at every fifth age, compact every tenth, with its
+    calendar year below. Compact a right margin keeps the label of the last age: a phone has no
+    side margins."""
     step = 10 if compact else 5
     vals = list(range(math.ceil(float(ages[0]) / step) * step, int(ages[-1]) + 1, step))
     years = [months[int(np.searchsorted(ages, age))].year for age in vals]
-    fig.update_xaxes(
-        tickmode="array",
-        tickvals=vals,
-        ticktext=[f"{age}<br>{year}" for age, year in zip(vals, years, strict=True)],
-        title=_("Age and year"),
-        automargin=True,
+    ticks = [f"{age}<br>{year}" for age, year in zip(vals, years, strict=True)]
+    return {
+        a: {
+            "tickmode": "array",
+            "tickvals": vals,
+            "ticktext": ticks,
+            "title": _("Age and year"),
+            "automargin": True,
+        }
+        for a in axes
+    } | ({"margin": {"r": TICK_ROOM}} if compact else {})
+
+
+def overlays(r: RunResult, *, compact: bool) -> Overlays:
+    """Phase bands, event markers and the axis of ages and years."""
+    marked = _markers(r, compact=compact)
+    return Overlays(
+        marked.traces,
+        merged(phase_bands(r), marked.layout, age_axis(r.ages, r.months, compact=compact)),
+        marked.legend,
     )
-    if compact:
-        fig.update_layout(margin={"r": TICK_ROOM})
-
-
-def add_overlays(fig: go.Figure, r: RunResult, *, compact: bool) -> int:
-    """Phase bands, event markers and the axis of ages and years: the chrome shared by
-    `liquid_fan_figure` and `balance_figure`. Returns the height of the compact marker
-    legend."""
-    add_phase_bands(fig, r)
-    legend = _add_markers(fig, r, compact=compact)
-    age_axis(fig, r.ages, r.months, compact=compact)
-    return legend
 
 
 def _row_share(per_row: int | None) -> dict[str, object]:
@@ -455,7 +543,6 @@ def shared(names: Sequence[str], per_row: int) -> int | None:
 
 
 def legend_below(
-    fig: go.Figure,
     entries: int,
     markers: int = 0,
     top: int = 100,
@@ -463,7 +550,7 @@ def legend_below(
     *,
     per_row: int | None = None,
     plots: int = 1,
-) -> None:
+) -> Layout:
     """Compact: the legend of `entries` at the bottom above the marker legend of `markers`
     pixels, `per_row` in a row (`_row_share`: two short names fit on a phone; None for names
     of any length, which takes a row each on a phone), the top margin of `top` pixels and the
@@ -474,13 +561,13 @@ def legend_below(
     legend groups of the markers would put each entry in a row of its own."""
     rows = -(-entries // (per_row or 1))
     height = max(top + plots * PLOT + AXIS + ENTRY * rows + markers, 2 * markers + 1)
-    fig.update_layout(
-        height=height,
-        margin={"t": top},
-        legend={"orientation": "h", "x": 0, "yref": "container", "y": markers / height}
+    return {
+        "height": height,
+        "margin": {"t": top},
+        "legend": {"orientation": "h", "x": 0, "yref": "container", "y": markers / height}
         | {"yanchor": "bottom", "traceorder": order}
         | _row_share(per_row),
-    )
+    }
 
 
 def points(value: float) -> str:

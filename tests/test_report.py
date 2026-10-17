@@ -13,6 +13,7 @@ from typing import Any, get_args
 
 import numpy as np
 import plotly.graph_objects as go
+import plotly.io
 import pytest
 from builders import plan
 from dateutil.relativedelta import relativedelta
@@ -36,6 +37,7 @@ from dagobert.report import (
     charts,
     comparison_figure,
     console_table,
+    difference_figure,
     difference_table,
     flow_figure,
     lasting_figure,
@@ -373,7 +375,10 @@ def test_the_title_of_whether_the_money_lasts_rounds_the_age() -> None:
     r = _make_result("Vermietung", 1)
     r = dataclasses.replace(r, pay_ends=24, ages=r.ages + 0.9)
 
-    assert f"liquid net worth at {round(r.ages[24])}" in lasting_figure(r).layout.title.text
+    assert (
+        f"liquid net worth at {round(r.ages[24])}"
+        in lasting_figure(r).to_dict()["layout"]["title"]["text"]
+    )
 
 
 @pytest.mark.parametrize("mortality", [True, False], ids=["mortality", "no mortality"])
@@ -699,6 +704,23 @@ def test_comparison_figure_series() -> None:
         )
         assert total_trace["line"].get("dash") != "dot"
         assert liquid_trace["line"]["dash"] == "dot"
+
+
+@pytest.mark.parametrize("compact", [False, True])
+def test_a_figure_gives_the_same_bytes_from_its_json(compact: bool) -> None:
+    """The app keeps a figure as its JSON (`ui.figures`): a revisit sends the bytes of the first
+    draw, which the browser still holds, so it sends their hash only."""
+    a, b = _make_result("a", 1), _make_result("b", 2)
+    for fig in (
+        comparison_figure([a, b], compact=compact),
+        broke_probability_figure([a, b], compact=compact),
+        liquid_fan_figure(a, compact=compact),
+        lasting_figure(a, compact=compact),
+        flow_figure(a, compact=compact),
+        difference_figure(Difference.of(a, b), compact=compact),
+    ):
+        sent = plotly.io.to_json(fig.to_dict(), validate=False)  # as Streamlit sends it
+        assert plotly.io.to_json(plotly.io.from_json(fig.to_json()).to_dict()) == sent
 
 
 def test_write_html_rejects_empty_results(tmp_path: Path) -> None:

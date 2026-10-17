@@ -623,7 +623,7 @@ def _mtime(path: Path) -> float:
     return path.stat().st_mtime if path.exists() else 0.0
 
 
-type Stamp = tuple[float, int, float, float, float]  # `ui.Stamp` and three mtimes
+type Stamp = tuple[int, int, int, float, float, float]  # `ui.Stamp` and three mtimes
 
 
 def stamp(data_dir: Path) -> Stamp:

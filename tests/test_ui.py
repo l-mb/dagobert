@@ -476,26 +476,30 @@ def test_a_link_to_the_roll_forward_opens_the_overview_of_the_navigation(
 
 def test_the_runs_follow_what_they_read_only(data: Path) -> None:
     """The cache key of the runs: the plan and a fetched series count. `app.yaml` and the
-    manifest, which the other caches of the inputs follow, do not, nor does a file elsewhere."""
+    manifest, which the other caches of the inputs follow, do not, nor does a file elsewhere. An
+    edit counts also when it takes the time of another file, as a write right after another may."""
+    newest = max(p.stat().st_mtime_ns for p in data.rglob("*.yaml"))
 
-    def touched(path: str, offset: float) -> Stamp:
+    def touched(path: str, at: int = newest + 10**9) -> tuple[Stamp, Stamp]:
+        """The stamps of the runs and of the inputs after `path` takes the time `at`."""
         (data / path).parent.mkdir(parents=True, exist_ok=True)
         (data / path).touch()  # keeps an existing file
-        os.utime(data / path, (base + offset, base + offset))
-        return run_stamp(data)
+        os.utime(data / path, ns=(at, at))
+        return run_stamp(data), data_stamp(data)
 
-    before = run_stamp(data)
-    base = before[0]
-    assert touched("revisions/1/assets.yaml", 10) == before
-    assert touched("prices/IE00B4L5Y983.csv", 20) == before
-    for offset, path in enumerate(("app.yaml", "manifest.yaml"), 30):
-        assert touched(path, offset) == before
-        assert data_stamp(data)[0] == base + offset
-    assert touched("series/vpi.csv", 40) == (base + 40, before[1] + 1)
-    last = touched("scenarios/base.yaml", 50)
-    assert last[0] == base + 50
-    (data / "series/vpi.csv").unlink()  # removing a file that is not the newest counts
-    assert run_stamp(data) == (base + 50, last[1] - 1)
+    runs, inputs = run_stamp(data), data_stamp(data)
+    assert touched("revisions/1/assets.yaml") == (runs, inputs)
+    assert touched("prices/IE00B4L5Y983.csv") == (runs, inputs)
+    for path in ("app.yaml", "manifest.yaml"):
+        assert touched(path)[0] == runs
+        assert data_stamp(data) != inputs
+        inputs = data_stamp(data)
+    assert touched("series/vpi.csv")[0] != runs
+    runs = run_stamp(data)
+    assert touched("scenarios/base.yaml", newest + 10**9)[0] != runs  # the time of vpi.csv
+    runs = run_stamp(data)
+    (data / "series/vpi.csv").unlink()
+    assert run_stamp(data) != runs
 
 
 @pytest.mark.parametrize(

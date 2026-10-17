@@ -14,10 +14,10 @@ from dagobert.money import format_eur
 from dagobert.report.charts import (
     EUR_TICKS,
     GRAY,
-    add_phase_bands,
     age_axis,
-    layout,
+    figure,
     legend_below,
+    phase_bands,
     split_title,
     title_room,
 )
@@ -101,7 +101,6 @@ def flow_figure(r: RunResult, *, nominal: bool = False, compact: bool = False) -
     """Yearly bars, stacked up and down. A one-off such as a severance would set the axis, so
     the axis ends 10% beyond the usual stacks (`_usual_top`), and a cut stack shows its value."""
     yearly = _Yearly.of(r)
-    fig = go.Figure()
     bars = [
         (_(name), yearly.median_sum(r.euros(arr, nominal=nominal)), color)
         for name, arr, color in (
@@ -115,47 +114,48 @@ def flow_figure(r: RunResult, *, nominal: bool = False, compact: bool = False) -
     up, down = stacked.clip(min=0).sum(axis=0), stacked.clip(max=0).sum(axis=0)
     top, bottom = 1.1 * _usual_top(up), -1.1 * _usual_top(-down)
     labels = _cut_labels(yearly.centers, up, top) + _cut_labels(yearly.centers, down, bottom)
-    for name, values, color in bars:
-        fig.add_trace(
-            go.Bar(
-                x=yearly.centers,
-                y=values,
-                name=name,
-                width=0.8,
-                marker_color=color,
-                hovertext=yearly.hover(values),
-                hoverinfo="text",
-            )
-        )
     # the median of the net of each path, not the sum of the medians of the bars
     net = yearly.median_sum(
         r.euros(r.income + r.expenses + r.taxes + r.capital_taxes, nominal=nominal)
     )
-    fig.add_trace(
-        go.Scatter(
-            x=yearly.centers,
-            y=net,
-            name=_("net"),
-            mode="lines+markers",
-            line={"width": 2, "color": GRAY},
-            hovertext=yearly.hover(net),
-            hoverinfo="text",
-        )
-    )
-    add_phase_bands(fig, r)
-    age_axis(fig, yearly.centers, [date(y, 7, 1) for y in yearly.years], compact=compact)
     title = split_title(r.label, _("income, spending and taxes, median"), compact=compact)
-    fig.update_layout(
-        layout(),
-        title=title,
-        yaxis={
-            "title": r.unit(nominal=nominal, yearly=True),
-            "range": [bottom, top] if labels else None,
-            "tickformat": EUR_TICKS,
+    return figure(
+        [
+            *(
+                {
+                    "type": "bar",
+                    "x": yearly.centers,
+                    "y": values,
+                    "name": name,
+                    "width": 0.8,
+                    "marker": {"color": color},
+                    "hovertext": yearly.hover(values),
+                    "hoverinfo": "text",
+                }
+                for name, values, color in bars
+            ),
+            {
+                "type": "scatter",
+                "x": yearly.centers,
+                "y": net,
+                "name": _("net"),
+                "mode": "lines+markers",
+                "line": {"width": 2, "color": GRAY},
+                "hovertext": yearly.hover(net),
+                "hoverinfo": "text",
+            },
+        ],
+        phase_bands(r),
+        age_axis(yearly.centers, [date(y, 7, 1) for y in yearly.years], compact=compact),
+        {
+            "title": title,
+            "yaxis": {
+                "title": r.unit(nominal=nominal, yearly=True),
+                "range": [bottom, top] if labels else None,
+                "tickformat": EUR_TICKS,
+            },
+            "annotations": labels,
+            "barmode": "relative",
         },
-        annotations=labels,
-        barmode="relative",
+        legend_below(len(bars) + 1, top=100 + title_room(title), per_row=2) if compact else {},
     )
-    if compact:
-        legend_below(fig, len(bars) + 1, top=100 + title_room(title), per_row=2)
-    return fig

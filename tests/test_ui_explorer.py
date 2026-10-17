@@ -12,10 +12,12 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures.process import BrokenProcessPool
 from dataclasses import replace
 from datetime import date
+from functools import partial
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+import plotly.graph_objects as go
 import pytest
 from apps import EXPLORER, LEVERS, OVERVIEW, render
 from builders import fixed_run, plan
@@ -41,11 +43,13 @@ from dagobert.model.events import AddStreamEvent
 from dagobert.model.months import add_months
 from dagobert.model.plan import Feature, Scenario
 from dagobert.model.streams import Stream, StreamKind
+from dagobert.report.charts import figure
 from dagobert.report.summary import Shown
 from dagobert.result import RunResult
 from dagobert.runner import WORKERS_ENV, Options
 from dagobert.ui import explorer, fixed, knobs, mode, runs, seek, sliders, tables
 from dagobert.ui.explorer import Drawn
+from dagobert.ui.figures import kept
 
 
 def test_slider_bounds_widen_to_include_the_configured_value() -> None:
@@ -689,7 +693,11 @@ def test_the_explorer_keeps_its_runs_by_their_bytes_and_computes_each_once(
     """`nbytes` counts every array of a run, also those of its dicts. A session that asks for a
     run in the making waits for it, the least recently used run goes above `RUNS_BYTES`, and a
     run whose wait a move stopped lands in the cache all the same."""
-    opts, scenario, stamp = runs.options(data, paths=20), data / "scenarios" / "base.yaml", (0.0, 0)
+    opts, scenario, stamp = (
+        runs.options(data, paths=20),
+        data / "scenarios" / "base.yaml",
+        (0, 0, 0),
+    )
     run = opts.run_one(scenario)
     assert run is not None
     assert run.survival is not None
@@ -738,7 +746,11 @@ def test_a_run_kept_since_the_miss_of_a_session_is_not_made_again(
 ) -> None:
     """The run of another session lands in the cache between the miss of `cached_run` and its
     `submit`: the submit takes it from there."""
-    opts, scenario, stamp = runs.options(data, paths=20), data / "scenarios" / "base.yaml", (0.0, 0)
+    opts, scenario, stamp = (
+        runs.options(data, paths=20),
+        data / "scenarios" / "base.yaml",
+        (0, 0, 0),
+    )
     run = opts.run_one(scenario)
     found: dict[tuple[object, ...], RunResult | None] = {}
     monkeypatch.setattr(runs, "_runs", lambda: found)
@@ -749,6 +761,29 @@ def test_a_run_kept_since_the_miss_of_a_session_is_not_made_again(
     threads.shutdown()
     assert future.result(0) is run
     assert calls == []
+
+
+def test_a_figure_is_built_once_per_run_variant_and_language(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A revisit takes the kept figure, as it was drawn; another run, the phone variant or
+    another language builds its own."""
+    found: dict[tuple[object, ...], str] = {}
+    monkeypatch.setattr("dagobert.ui.figures._figures", lambda: found)
+    built: list[tuple[str, bool]] = []
+
+    def build(name: str, *, compact: bool) -> go.Figure:
+        built.append((name, compact))
+        return figure([{"type": "scatter", "x": [1, 2], "y": [3, 4], "name": name}])
+
+    first = kept(partial(build, "a", compact=False), "run a")
+    again = kept(partial(build, "a", compact=False), "run a")
+    kept(partial(build, "b", compact=False), "run b")
+    kept(partial(build, "a", compact=True), "run a")
+    with i18n.use("de"):
+        kept(partial(build, "a", compact=False), "run a")
+    assert built == [("a", False), ("b", False), ("a", True), ("a", False)]
+    assert again.to_json() == first.to_json()
 
 
 def test_a_pool_whose_worker_died_gives_way_to_a_new_one(
@@ -764,7 +799,7 @@ def test_a_pool_whose_worker_died_gives_way_to_a_new_one(
         with pytest.raises(BrokenProcessPool):
             broken.submit(os._exit, 1).result(60)
         opts, scenario = runs.options(data, paths=20), data / "scenarios" / "base.yaml"
-        assert runs.cached_run(opts, scenario, "{}", (0.0, 0)) is not None
+        assert runs.cached_run(opts, scenario, "{}", (0, 0, 0)) is not None
         assert runs.pool() is not broken
     finally:
         runs.pool().shutdown()

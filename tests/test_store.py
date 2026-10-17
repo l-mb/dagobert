@@ -20,6 +20,7 @@ from dagobert.overrides import own
 from dagobert.problems import InputError, Keys, RefusedError
 from dagobert.scenariofiles import (
     act,
+    concrete_scenarios,
     copied,
     created,
     listed,
@@ -332,6 +333,18 @@ def test_a_delete_is_refused_while_others_extend_it_and_for_the_last_that_runs(
         path.write_text(path.read_text() + "abstract: true\n")
     with pytest.raises(ValueError, match=refused):
         removed(data, stem)
+
+
+def test_the_scenarios_that_run_follow_each_edit_of_their_files(data: Path) -> None:
+    """`concrete_scenarios` keeps its answer by the texts of the scenario files: a page asks
+    several times a run, and an edit, also by hand, counts at once."""
+    _family(data)
+    assert list(concrete_scenarios(data)) == ["base", "child", "other"]
+    other = data / "scenarios" / "other.yaml"
+    other.write_text("name: other\nabstract: true\n")
+    assert list(concrete_scenarios(data)) == ["base", "child"]
+    other.write_text("name: other\n")
+    assert list(concrete_scenarios(data)) == ["base", "child", "other"]
 
 
 def test_a_delete_removes_the_file_and_its_entries_of_app_yaml(data: Path) -> None:

@@ -1,6 +1,11 @@
 # For a server started from the repository root, as the test server of the skill `app-check`.
 # `dagobert app` sets the same settings as STREAMLIT_* defaults (`cli.STREAMLIT_ENV`).
 
+# The browser keeps an element of 10 kB or more for ten runs after it last drew it: a revisit of the
+# Explorer within them gets its figures (2 MB) as their hashes. By default two runs.
+[global]
+maxCachedMessageAge = 10
+
 [client]
 toolbarMode = "viewer"
 
@@ -12,9 +17,11 @@ disconnectedSessionTTL = 3600
 maxUploadSize = 64
 
 # A rerun waits for the next Streamlit call of the running script, so the explorer's engine runs
-# of quick slider moves do not pile up in threads of their own.
+# of quick slider moves do not pile up in threads of their own. No full garbage collection after
+# a run: it took 60 ms of each, and the memory stays as bounded without it.
 [runner]
 fastReruns = false
+postScriptGC = false
 
 # A blue accent: the red of Streamlit marked a selected pill or a slider value like an error. Per
 # scheme, so the menu keeps Light and Dark: a bare [theme] makes one light theme.

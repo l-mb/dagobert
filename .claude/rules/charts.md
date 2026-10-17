@@ -17,8 +17,11 @@ app the skill `app-check`. `ui.chart` draws every chart of the app: rule `ui`.
   markers. The `go.Figure` builders (public, the app reuses them) are a module per theme: `fan.py`
   (the liquid fan, the difference), `comparison.py` (the scenarios by age), `balance.py` (the
   balance sheet, whether the money lasts: rule `balance`), `flows.py`, `sensitivity.py`,
-  `anatomy.py`, `tracker.py`. The builders of the explorer take `compact` (`ui.is_mobile()`, the
-  report never): the title breaks after the scenario and wraps a long one at 38 characters
+  `anatomy.py`, `tracker.py`. Those of the explorer build traces and layout as mappings, one figure
+  at the end (`figure`, `merged`, `Grid`, `hline`: a setter validates again, 0.33 s for 13 against
+  0.24 s), whose JSON gives it back byte for byte (`ui.figures`). The builders of the explorer take
+  `compact` (`ui.is_mobile()`, the report never): the title breaks after the scenario and wraps a
+  long one at 38 characters
   (`split_title(name, subject)`: a name with a colon stays whole; `title_room` grows the top margin
   by 42 px per line beyond two: plotly centers the first line of a title in the margin and lets the
   others flow below), the legend sits below the plot and the height grows by it (`legend_below`:
@@ -170,8 +173,7 @@ app the skill `app-check`. `ui.chart` draws every chart of the app: rule `ui`.
   of the bars) and ends its axis 10% beyond the tallest usual stack of a year (`_usual_top`, inside
   the Tukey fence; when over a tenth of the years lie outside it, the fence applies to those
   again: a short working life before a long retirement keeps its years), up and down. A severance
-  year does not set the axis then. A stack beyond
-  the edge shows its value there.
+  year does not set the axis then. A stack beyond the edge shows its value there.
 - The summary table shows the median taxes: income tax, Soli, SV and capital gains tax of the whole
   run, less refunds. Each path adds up its own deflated months, then the median follows. Of the
   shares of broke paths by age it keeps only `P(broke)@90`, the figure of the goal seek and the

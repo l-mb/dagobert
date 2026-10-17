@@ -29,12 +29,13 @@ from dagobert.report.charts import (
     PLUM,
     PURPLE,
     RED,
-    add_overlays,
+    Trace,
     age_axis,
+    figure,
     gapped,
     hover_text,
-    layout,
     legend_below,
+    overlays,
     percents,
     shared,
     split_title,
@@ -89,71 +90,71 @@ def balance_figure(
 
     Assets stack upwards, loans and the latent tax downwards. A class that is zero in every month,
     such as gold in a plan without it, takes no legend entry."""
-    fig = go.Figure()
     balance = r.nominal_balance if nominal else r.balance
     held = {key: style for key, style in _BALANCE_STYLE.items() if balance[key].any()}
-    for key, (label, color) in held.items():
-        values = balance[key]
-        fig.add_trace(
-            go.Scatter(
-                x=r.ages,
-                y=values,
-                name=_(label),
-                mode="lines",
-                stackgroup="owed" if key in ("loans", "latent_tax") else "owned",
-                line={"color": color, "width": 1},
-                # opaque: the translucent default blends with the surface, and neighbors such
-                # as fixed income and equity, or gold and property, then look alike
-                fillcolor=color,
-                hovertext=hover_text(r, values),
-                hoverinfo="text",
-            )
-        )
+    traces: list[Trace] = [
+        {
+            "type": "scatter",
+            "x": r.ages,
+            "y": balance[key],
+            "name": _(label),
+            "mode": "lines",
+            "stackgroup": "owed" if key in ("loans", "latent_tax") else "owned",
+            "line": {"color": color, "width": 1},
+            # opaque: the translucent default blends with the surface, and neighbors such as
+            # fixed income and equity, or gold and property, then look alike
+            "fillcolor": color,
+            "hovertext": hover_text(r, balance[key]),
+            "hoverinfo": "text",
+        }
+        for key, (label, color) in held.items()
+    ]
     total = r.percentiles(r.euros(r.total, nominal=nominal), (50,))[0]
-    fig.add_trace(
-        go.Scatter(
-            x=r.ages,
-            y=total,
-            name=_("net worth (median)"),
-            mode="lines",
-            line={"color": GRAY, "width": 2, "dash": "dot"},
-            hovertext=hover_text(r, total),
-            hoverinfo="text",
-        )
+    traces.append(
+        {
+            "type": "scatter",
+            "x": r.ages,
+            "y": total,
+            "name": _("net worth (median)"),
+            "mode": "lines",
+            "line": {"color": GRAY, "width": 2, "dash": "dot"},
+            "hovertext": hover_text(r, total),
+            "hoverinfo": "text",
+        }
     )
     actual = gapped(observed.at(r.months[0], nominal=nominal)) if observed else []
     if actual:
-        fig.add_trace(
-            go.Scatter(
-                x=[_age_at(r, day) for day, _value in actual],
-                y=[value for _day, value in actual],
-                name=_("net worth (observed)"),
-                mode="lines+markers",
-                line={"color": GRAY, "width": 2},
-                marker={"size": 8, "line": {"color": "#111418", "width": 2}},
-                hovertext=[
+        traces.append(
+            {
+                "type": "scatter",
+                "x": [_age_at(r, day) for day, _value in actual],
+                "y": [value for _day, value in actual],
+                "name": _("net worth (observed)"),
+                "mode": "lines+markers",
+                "line": {"color": GRAY, "width": 2},
+                "marker": {"size": 8, "line": {"color": "#111418", "width": 2}},
+                "hovertext": [
                     "" if value is None else f"{day:%Y-%m}<br>{format_eur(value)}"
                     for day, value in actual
                 ],
-                hoverinfo="text",
-            )
+                "hoverinfo": "text",
+            }
         )
-    if compact:
-        tap_lists_all(fig, EUR_HOVER)
-    markers = add_overlays(fig, r, compact=compact)
+    taps = tap_lists_all(traces, EUR_HOVER) if compact else {}
+    chrome = overlays(r, compact=compact)
     title = split_title(r.label, _("balance sheet"), compact=compact)
-    fig.update_layout(
-        layout(),
-        title=title,
-        yaxis={"title": r.unit(nominal=nominal), "tickformat": EUR_TICKS},
-    )
     entries = len(held) + 1 + bool(actual)
-    if compact:
-        # the stack top down, a row per entry: two of the long names do not fit in a row
-        legend_below(fig, entries, markers, 100 + title_room(title), "reversed", per_row=1)
-    else:  # a figure drawn in a hidden tab keeps the legend of its smaller plot: room for all
-        fig.update_layout(legend={"maxheight": ENTRY * entries + ENTRY})
-    return fig
+    return figure(
+        [*traces, *chrome.traces],
+        taps,
+        chrome.layout,
+        {"title": title, "yaxis": {"title": r.unit(nominal=nominal), "tickformat": EUR_TICKS}},
+        # compact the stack top down, a row per entry: two of the long names do not fit in a row
+        legend_below(entries, chrome.legend, 100 + title_room(title), "reversed", per_row=1)
+        if compact
+        # a figure drawn in a hidden tab keeps the legend of its smaller plot: room for all
+        else {"legend": {"maxheight": ENTRY * entries + ENTRY}},
+    )
 
 
 # The bands of `lasting_figure` from the bottom: run out (`RED`), the liquid net worth of a path
@@ -206,22 +207,7 @@ def lasting_figure(r: RunResult, *, nominal: bool = False, compact: bool = False
     """Will the money last: the share of the paths by age that ran out or hold a multiple of their
     liquid net worth at `RunResult.pay_ends`, with the survival the chance to have died on top,
     stacked to 100%. A legend click hides a band, the hover lists every band at its age."""
-    fig = go.Figure()
     shares = lasting_shares(r, nominal=nominal)
-    for key, values in shares.items():
-        fig.add_trace(
-            go.Scatter(
-                x=r.ages[r.pay_ends :],
-                y=values,
-                name=_(key),
-                mode="lines",
-                stackgroup="one",
-                line={"width": 0, "color": _COLORS[key]},
-                fillcolor=_COLORS[key],  # opaque, as in the balance sheet
-                customdata=percents(values),
-                hovertemplate=f"%{{fullData.name}}: {PCT_HOVER}<extra></extra>",
-            )
-        )
     title = split_title(
         r.label,
         _("Will the money last? 1× is the liquid net worth at {age}").format(
@@ -229,17 +215,33 @@ def lasting_figure(r: RunResult, *, nominal: bool = False, compact: bool = False
         ),
         compact=compact,
     )
-    fig.update_layout(
-        layout(),
-        title=title,
-        yaxis={"title": _("Share of paths"), "range": [0, 1]} | tick_format(".0%", [1.0]),
-        legend={"traceorder": "reversed"},  # top down as the stack
-    )
-    age_axis(fig, r.ages[r.pay_ends :], r.months[r.pay_ends :], compact=compact)
-    unified(fig)
-    if compact:
-        names = [_(key) for key in shares]
+    names = [_(key) for key in shares]
+    return figure(
+        (
+            {
+                "type": "scatter",
+                "x": r.ages[r.pay_ends :],
+                "y": values,
+                "name": name,
+                "mode": "lines",
+                "stackgroup": "one",
+                "line": {"width": 0, "color": _COLORS[key]},
+                "fillcolor": _COLORS[key],  # opaque, as in the balance sheet
+                "customdata": percents(values),
+                "hovertemplate": f"%{{fullData.name}}: {PCT_HOVER}<extra></extra>",
+            }
+            for (key, values), name in zip(shares.items(), names, strict=True)
+        ),
+        {
+            "title": title,
+            "yaxis": {"title": _("Share of paths"), "range": [0, 1]} | tick_format(".0%", [1.0]),
+            "legend": {"traceorder": "reversed"},  # top down as the stack
+        },
+        age_axis(r.ages[r.pay_ends :], r.months[r.pay_ends :], compact=compact),
+        unified(),
         legend_below(
-            fig, len(names), top=100 + title_room(title), order="reversed", per_row=shared(names, 2)
+            len(names), top=100 + title_room(title), order="reversed", per_row=shared(names, 2)
         )
-    return fig
+        if compact
+        else {},
+    )

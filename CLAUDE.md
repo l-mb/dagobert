@@ -163,12 +163,12 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   `tables.py`, `gridstate.py`, `gridcolumns.py` [grids], `guard.py`, `save.py`, `undo.py`
   [save-guard], `rename.py` [references], `summary.py` [tracking], `pricing.py`, `csvcolumns.py`
   [prices], `fields.py`, `widgets.py`, `forms.py`, `formguard.py` [forms]. `outlook.py` the plan of
-  the Overview, `runs.py` its runs, `sliders.py`, `knobs.py`, `seek.py` [overview, explorer,
-  explorer-runs]. Pages: `overview.py`, `snapshot.py` (`corrections.py`), `assets.py`
-  (`tradeform.py`, `tradeimport.py`) [grids, tracking], `cashflows.py` (`bars.py`, `refusals.py`),
-  `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode], `data.py`, `assumptions.py`,
-  `transfer.py`, `welcome.py`, `scenarios.py` (`fileactions.py`; tabs `phases.py`, `events.py`,
-  `scenario_overrides.py`, `overridegrids.py`; `lineage.py`).
+  the Overview, `runs.py` its runs, `figures.py` its figures, `sliders.py`, `knobs.py`, `seek.py`
+  [overview, explorer, explorer-runs]. Pages: `overview.py`, `snapshot.py` (`corrections.py`),
+  `assets.py` (`tradeform.py`, `tradeimport.py`) [grids, tracking], `cashflows.py` (`bars.py`,
+  `refusals.py`), `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode], `data.py`,
+  `assumptions.py`, `transfer.py`, `welcome.py`, `scenarios.py` (`fileactions.py`; tabs
+  `phases.py`, `events.py`, `scenario_overrides.py`, `overridegrids.py`; `lineage.py`).
 - `src/dagobert/data/`: shipped series, read only, see `SOURCES.md` there [series].
 - `data/`: personal inputs; `tmp/`: scratch files; both gitignored. In `data/`: `history.csv`
   [tracking], `actuals.csv` [spend], `prices/` [prices], `revisions/` [revisions], `series/`: the

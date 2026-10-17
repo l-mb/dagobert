@@ -24,6 +24,15 @@ and `plan`.
   `read_text` (`decoded` for bytes, also the import preview), a file that is not UTF-8 at the line
   of its first bad byte (`NOT_UTF8`), and parses it with `parsed` (PyYAML) or hands a ruamel.yaml
   error to `syntax`: every `YAMLError`, a control character (`ReaderError`) at its line too.
+  `parsed` parses a text once (`_parse`, 64 texts by their text, so an edit parses anew) and gives
+  each caller a deep copy, which it may change: a page read the inputs 75 to 160 times a rerun.
+  libyaml parses (`CSafeLoader`, a tenth of the time; the pure loader where a wheel lacks it), the
+  pure loader again on an error, so a problem keeps its message and line; both share the resolver
+  of YAML 1.1 (`test_the_inputs_parse_as_the_pure_loader_reads_them`: the examples and `on`, dates,
+  merges, the same types and order). A text with a tab parses by the pure loader alone: libyaml
+  takes a tab after or inside a plain scalar, which the pure loader and ruamel.yaml refuse, so the
+  file loaded and its save failed. libyaml also takes `?` inside a plain scalar of a flow
+  collection (`[a?b]`), as ruamel.yaml does: lenient, and a save keeps it.
 - `src/dagobert/origins.py`: where an error of `loader.load_plan` lies, one function per case
   (`label`: the name of an input; `source`: its keys with their lines). An override error names the
   source that `deep_merge` takes the value from (`override_sources`, of the `loader.Layer`s of the

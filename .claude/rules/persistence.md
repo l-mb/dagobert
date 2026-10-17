@@ -128,7 +128,8 @@ paths:
   the comments and the flow style inside `overrides`. The save writes the same changes by key path
   through `store.Edit`, which removes an emptied mapping too. `rows` and `from_rows` give the
   `shift`, `events` and `assets` overrides as rows (`ROWS`) and back; a row with an empty cell goes.
-- Elsewhere: the problems of the inputs and the readers of a YAML input (`problems.py`): rule
-  `problems`; who refers to what (`references.py`): rule `references`; the schema, its migrations
-  and the fixture of a model change: rule `migrations`; `store.py` and its YAML edits: rule `store`;
-  the revision store, the one writer of the inputs, and `files.py`: rule `revisions`.
+- Elsewhere: the problems of the inputs and the readers of a YAML input, their parse once per text
+  (`problems.py`): rule `problems`; who refers to what (`references.py`): rule `references`; the
+  schema, its migrations and the fixture of a model change: rule `migrations`; `store.py` and its
+  YAML edits: rule `store`; the revision store, the one writer of the inputs, and `files.py`: rule
+  `revisions`.

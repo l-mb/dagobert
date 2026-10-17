@@ -19,9 +19,12 @@ CI builds and scans the image: rule `tooling`.
   no usage statistics, toolbar `viewer`, the session lifetime, the upload limit
   `transfer.UPLOAD_MB`, no file watcher: its `Source file changed` banner covered Save in the
   header, no fast reruns: a rerun waits for the next Streamlit call of the running script, else each
-  quick slider move started a thread whose engine runs piled up, the accent of the theme, rule `ui`)
-  are `os.environ.setdefault`s (`cli.STREAMLIT_ENV`, the same but the watcher in
-  `.streamlit/config.toml` for a server started by hand, a test holds them equal), so a
+  quick slider move started a thread whose engine runs piled up, no garbage collection after each
+  run, `runner.postScriptGC`, 55 to 60 ms of every rerun (the memory below), the browser keeps an
+  element of 10 kB or more for 10 runs, `global.maxCachedMessageAge` (2 by default, hidden): a
+  revisit of the Explorer gets its figures as their hashes (rule `explorer-runs`), the accent of
+  the theme, rule `ui`) are `os.environ.setdefault`s (`cli.STREAMLIT_ENV`, the same but the
+  watcher in `.streamlit/config.toml` for a server started by hand, a test holds them equal), so a
   `STREAMLIT_*` variable of a deployment wins; only port and address are flags. The server refuses
   an upload above `server.maxUploadSize` whatever `st.file_uploader(max_upload_size=…)` says, so the
   setting must fit every export. Every other Streamlit setting is a plain `STREAMLIT_*` variable,
@@ -97,7 +100,12 @@ CI builds and scans the image: rule `tooling`.
   5 GB: 1.8 GB above two sessions that compute at the same time, for a longer plan (a run in the
   making and a worker grow with the months) or a third session; 3 GB hold the Explorer at 500 paths
   and the report. Above the limit (1.5 GB, 5000 paths) the container restarted, and the tab
-  reloaded at 500 paths without an error.
+  reloaded at 500 paths without an error. Without the garbage collection after each run
+  (2026-10-17, on the host with the `GLIBC_TUNABLES` of the image, the Explorer of `engineer`,
+  `All spending` moved over five positions and back, each move to its end): the main process at
+  500 paths 497 to 517 MB over 30 moves against 490 to 504 MB with it, at 5000 paths 1.26 to 1.28
+  GB over 15 against 1.25 to 1.26 GB, flat once the positions ran; 30 reruns of page switches the
+  same. Python collects the cycles still, by its own thresholds.
 - `docs/install/self-hosting.md`: the guide for a server (plain English). Its own compose file:
   the published image at a version tag (`ghcr.io/l-mb/dagobert:<version>`), a named
   volume on `/data` (it takes the owner 10001 of the image's `/data`, so no `user:`), no `ports`,

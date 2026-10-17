@@ -6,8 +6,10 @@ from datetime import date
 from pathlib import Path
 
 import pytest
+import yaml
 from builders import phases
 
+from dagobert import datadir
 from dagobert.loader import (
     NO_PATH,
     NOT_KEPT,
@@ -24,7 +26,7 @@ from dagobert.loader import (
 from dagobert.model.assets import EquityAsset, GoldAsset
 from dagobert.model.events import BuyPropertyEvent, SellEvent
 from dagobert.model.plan import Scenario
-from dagobert.problems import NOT_UTF8, InputError
+from dagobert.problems import NOT_UTF8, InputError, parsed
 
 ASSUMPTIONS = """
 person: {born: 1977-01-01}
@@ -358,6 +360,48 @@ def test_a_file_that_does_not_read_names_its_line(
     for the scenarios that the file breaks."""
     (data_dir / file).write_bytes(data)
     assert {str(p) for p in problems(data_dir)} == {expected}
+
+
+YAML_11 = """\
+base: &base {on: yes, off: no, at: 2026-10-01, rate: 1e3, big: 1_000, octal: 0o17, empty: ~}
+child:
+  <<: *base
+  text: |
+    two
+    lines
+  folded: >-
+    one
+    line
+"""
+
+
+@pytest.mark.parametrize(
+    ("file", "text"),
+    [
+        *(
+            (str(p.relative_to(datadir.EXAMPLES)), p.read_text(encoding="utf-8"))
+            for p in sorted(datadir.EXAMPLES.rglob("*.yaml"))
+        ),
+        ("yaml-1.1", YAML_11),
+    ],
+)
+def test_the_inputs_parse_as_the_pure_loader_reads_them(file: str, text: str) -> None:
+    """libyaml parses, the types and the order of the pure loader, which the inputs keep."""
+    assert repr(parsed(text, file)) == repr(yaml.safe_load(text))
+
+
+@pytest.mark.parametrize("text", ["name: Stress test\t\n", "note: >-\t\n  x\n", "a\t: 1\n"])
+def test_a_tab_that_the_writer_refuses_does_not_load(text: str) -> None:
+    """libyaml takes these, ruamel.yaml, the writer of the inputs, does not: a file that loads
+    and then fails its save."""
+    with pytest.raises(InputError):
+        parsed(text, "x.yaml")
+
+
+def test_a_change_of_a_parse_reaches_no_other_reader() -> None:
+    text = "a: {b: [1]}\n"
+    parsed(text, "x.yaml")["a"]["b"].append(2)
+    assert parsed(text, "x.yaml") == {"a": {"b": [1]}}
 
 
 def test_a_file_with_lone_cr_line_ends_names_its_line(data_dir: Path) -> None:

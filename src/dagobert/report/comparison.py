@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import plotly.graph_objects as go
+from typing import TYPE_CHECKING
 
 from dagobert.i18n import _
 from dagobert.money import format_percent
@@ -12,9 +12,10 @@ from dagobert.report.charts import (
     EUR_TICKS,
     PCT_HOVER,
     SCENARIO_PALETTE,
+    Trace,
     age_axis,
+    figure,
     hover_text,
-    layout,
     legend_below,
     percents,
     split_title,
@@ -23,6 +24,9 @@ from dagobert.report.charts import (
     title_room,
 )
 from dagobert.result import RunResult
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
 
 TWIN_OPACITY = 0.5  # a twin draws lighter: the runs of the sliders stand out; no legend entry
 
@@ -45,42 +49,43 @@ def _styles(results: list[RunResult], dash: str, twin_dash: str) -> list[dict[st
 
 
 def broke_probability_figure(results: list[RunResult], *, compact: bool = False) -> go.Figure:
-    fig = go.Figure()
     shares = [r.broke_share for r in results]
-    for r, share, style in zip(results, shares, _styles(results, "solid", "dash"), strict=True):
-        fig.add_trace(
-            go.Scatter(
-                x=r.ages,
-                y=share,
-                name=r.label,
-                showlegend=not r.twin,
-                mode="lines",
-                hovertext=hover_text(r, share, format_percent),
-                hoverinfo="text",
-                customdata=percents(share) if compact else None,  # `tap_lists_all`
-                **style,
-            )
-        )
+    traces: list[Trace] = [
+        {
+            "type": "scatter",
+            "x": r.ages,
+            "y": share,
+            "name": r.label,
+            "showlegend": not r.twin,
+            "mode": "lines",
+            "hovertext": hover_text(r, share, format_percent),
+            "hoverinfo": "text",
+            "customdata": percents(share) if compact else None,  # `tap_lists_all`
+            **style,
+        }
+        for r, share, style in zip(results, shares, _styles(results, "solid", "dash"), strict=True)
+    ]
     twins = sum(r.twin for r in results)
     top = 1.1 * max(*(float(share.max()) for share in shares), 0.05)
     title = split_title(_("Comparison"), _(BROKE_BY_AGE), compact=compact)
-    fig.update_layout(
-        layout(),
-        title=title,
+    taps = tap_lists_all(traces, PCT_HOVER) if compact else {}
+    return figure(
+        traces,
         # whole-percent ticks stay distinct
-        yaxis={"title": _("Share of paths"), "range": [0, top]} | tick_format(".0%", [top]),
+        {
+            "title": title,
+            "yaxis": {"title": _("Share of paths"), "range": [0, top]} | tick_format(".0%", [top]),
+        },
+        age_axis(results[0].ages, results[0].months, compact=compact),
+        taps,
+        legend_below(len(results) - twins, top=100 + title_room(title)) if compact else {},
     )
-    age_axis(fig, results[0].ages, results[0].months, compact=compact)
-    if compact:
-        tap_lists_all(fig, PCT_HOVER)
-        legend_below(fig, len(results) - twins, top=100 + title_room(title))
-    return fig
 
 
 def comparison_figure(
     results: list[RunResult], *, nominal: bool = False, compact: bool = False
 ) -> go.Figure:
-    fig = go.Figure()
+    traces: list[Trace] = []
     for r, *styles in zip(
         results,
         _styles(results, "solid", "dash"),
@@ -94,27 +99,29 @@ def comparison_figure(
             strict=True,
         ):
             median = r.percentiles(r.euros(values, nominal=nominal), (50,))[0]
-            fig.add_trace(
-                go.Scatter(
-                    x=r.ages,
-                    y=median,
-                    mode="lines",
-                    name=words.format(scenario=r.label),
-                    showlegend=not r.twin,
-                    hovertext=hover_text(r, median),
-                    hoverinfo="text",
+            traces.append(
+                {
+                    "type": "scatter",
+                    "x": r.ages,
+                    "y": median,
+                    "mode": "lines",
+                    "name": words.format(scenario=r.label),
+                    "showlegend": not r.twin,
+                    "hovertext": hover_text(r, median),
+                    "hoverinfo": "text",
                     **style,
-                )
+                }
             )
     twins = sum(r.twin for r in results)
     title = split_title(_("Comparison"), _("median net worth and liquid by age"), compact=compact)
-    fig.update_layout(
-        layout(),
-        title=title,
-        yaxis={"title": results[0].unit(nominal=nominal), "tickformat": EUR_TICKS},
+    taps = tap_lists_all(traces, EUR_HOVER) if compact else {}
+    return figure(
+        traces,
+        {
+            "title": title,
+            "yaxis": {"title": results[0].unit(nominal=nominal), "tickformat": EUR_TICKS},
+        },
+        age_axis(results[0].ages, results[0].months, compact=compact),
+        taps,
+        legend_below(2 * (len(results) - twins), top=100 + title_room(title)) if compact else {},
     )
-    age_axis(fig, results[0].ages, results[0].months, compact=compact)
-    if compact:
-        tap_lists_all(fig, EUR_HOVER)
-        legend_below(fig, 2 * (len(results) - twins), top=100 + title_room(title))
-    return fig

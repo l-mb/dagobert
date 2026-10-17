@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from copy import deepcopy
 from dataclasses import dataclass
+from functools import lru_cache
 from itertools import count
 from typing import TYPE_CHECKING, Any, NamedTuple
 
@@ -124,12 +126,32 @@ def read_text(path: Path, file: str) -> str:
 
 
 def parsed(text: str, file: str) -> Any:  # noqa: ANN401 parsed YAML
-    """The YAML `text` of the input `file` as PyYAML, the reader of the inputs, reads it. Text that
-    does not parse raises `InputError` (`syntax`)."""
+    """The YAML `text` of the input `file` as PyYAML, the reader of the inputs, reads it: a copy
+    of the one parse of the text (`_parse`), which no caller changes. Text that does not parse
+    raises `InputError` (`syntax`)."""
     try:
-        return yaml.safe_load(text)
+        return deepcopy(_parse(text))
     except yaml.YAMLError as err:
         raise syntax(file, err, text) from err
+
+
+# libyaml where the wheel has it: a page reads the inputs some 80 times a run
+_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
+
+@lru_cache(maxsize=64)
+def _parse(text: str) -> Any:  # noqa: ANN401 parsed YAML
+    """`text` parsed by libyaml, about ten times faster than the pure loader; on an error the pure
+    loader parses again, so a problem keeps its message and line. A text with a tab goes to the
+    pure loader alone: libyaml takes a tab after or inside a plain scalar, which the pure loader
+    and ruamel.yaml, the writer of the inputs (`store`), refuse, so such a file loaded and its
+    save failed."""
+    if "\t" in text:
+        return yaml.safe_load(text)
+    try:
+        return yaml.load(text, Loader=_LOADER)
+    except yaml.YAMLError:
+        return yaml.safe_load(text)
 
 
 def syntax(file: str, err: Exception, text: str) -> InputError:

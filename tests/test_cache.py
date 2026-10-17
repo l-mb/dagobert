@@ -126,14 +126,15 @@ def test_the_name_follows_the_contents_and_the_engine_never_the_words_or_the_pag
 
 
 def test_a_file_put_back_with_an_older_time_names_its_contents(data: Path) -> None:
-    """`cp -p` of an older copy keeps the latest time and the count of the inputs (`run_stamp`);
-    the name of an entry follows their contents, also in the same process."""
+    """`cp -p` of an older copy keeps the latest time and the count of the inputs; the name of an
+    entry follows their contents, also in the same process, and so does `run_stamp`, the sum of
+    their times."""
     path = data / "assumptions.yaml"
     os.utime(path, (1e9, 1e9))  # older than the other inputs
     stamp, first = run_stamp(data), name(data, "{}")
     path.write_text(path.read_text().replace("0.05", "0.06"))  # the same size
     os.utime(path, (1e9 - 60, 1e9 - 60))
-    assert run_stamp(data) == stamp
+    assert run_stamp(data) != stamp
     assert name(data, "{}") != first
 
 

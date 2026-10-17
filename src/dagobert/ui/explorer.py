@@ -73,6 +73,7 @@ from dagobert.ui import (
     scenario_note,
     source,
 )
+from dagobert.ui.figures import kept
 from dagobert.ui.gridcolumns import on_off
 from dagobert.ui.knobs import NO_SALARIES, STANDING, Salaries, classes, knobs, switches
 from dagobert.ui.runs import (
@@ -565,13 +566,13 @@ def pair(names: Sequence[str], parents: Mapping[str, str]) -> tuple[str, str]:
 
 
 def _difference(
-    results: list[RunResult], parents: Mapping[str, str], *, nominal: bool, compact: bool
+    ran: list[Ran], parents: Mapping[str, str], *, nominal: bool, compact: bool
 ) -> None:
     """Two of the runs path by path: a scenario and the one that it extends (`pair`) unless
     chosen. A select holds the id of a run, its scenario and whether it is a twin, and shows its
     label: the label of a twin is words."""
     st.subheader(_("Difference of two runs"))
-    labels = {(r.scenario, r.twin): r.label for r in results}
+    labels = {(r.run.scenario, r.run.twin): r.run.label for r in ran}
     ids = list(labels)
     by_label = {label: run for run, label in labels.items()}
     first = [by_label[label] for label in pair(list(labels.values()), parents)]
@@ -591,15 +592,16 @@ def _difference(
             column.selectbox(side, ids, format_func=labels.__getitem__, key=key, help=tip)
             or default
         )
-    a, b = (results[ids.index(run)] for run in picks)
+    a, b = (ran[ids.index(run)] for run in picks)
     try:
-        difference = Difference.of(a, b, nominal=nominal)
+        difference = Difference.of(a.run, b.run, nominal=nominal)
     except ValueError as err:
         st.warning(str(err))
         return
     st.caption(_("{b} less {a}").format(b=literal(difference.b), a=literal(difference.a)))
     _grid(report.difference_table(difference, compact=compact))
-    chart(report.difference_figure(difference, compact=compact), key="difference")
+    figure = partial(report.difference_figure, difference, compact=compact)
+    chart(kept(figure, a.key, b.key, nominal), key="difference")
     note(_(report.DIFFERENCE_NOTE))
 
 
@@ -862,60 +864,81 @@ def _fold(title: str, key: str, *, folded: bool, expanded: bool = False) -> Delt
 
 def _tab(
     i: int,
-    r: RunResult,
+    shown: Ran,
     observed: report.Observed,
     *,
     nominal: bool,
     compact: bool,
     folded: bool,
-    plan: bool,
 ) -> DeltaGenerator | None:
     """The charts of a scenario tab, compact on a phone, and the slot of its sensitivity when
-    `plan` (a run of the files has none) and its fold is open: a fold on a desktop too, as the
-    sensitivity takes most of a run."""
+    its run is the plan (a run of the files has none) and its fold is open: a fold on a desktop
+    too, as the sensitivity takes most of a run. A figure is kept by the key of its run
+    (`figures.kept`); the balance sheet also by the observed net worth, which no run holds."""
+    r, key = shown.run, shown.key
     scenario_note(r.note)
     if (
         box := _fold(_("Net worth"), f"{KEY}fold-worth-{i}", folded=folded, expanded=True)
     ) is not None:
         with box:
-            chart(report.liquid_fan_figure(r, nominal=nominal, compact=compact), key=f"fan-{i}")
-            chart(
-                report.balance_figure(r, observed, nominal=nominal, compact=compact),
-                key=f"balance-{i}",
-            )
+            fan = partial(report.liquid_fan_figure, r, nominal=nominal, compact=compact)
+            chart(kept(fan, key), key=f"fan-{i}")
+            balance = partial(report.balance_figure, r, observed, nominal=nominal, compact=compact)
+            chart(kept(balance, key, tuple(observed.totals)), key=f"balance-{i}")
     if (box := _fold(_("Will the money last?"), f"{KEY}fold-last-{i}", folded=folded)) is not None:
         with box:
-            chart(report.lasting_figure(r, nominal=nominal, compact=compact), key=f"lasting-{i}")
+            lasting = partial(report.lasting_figure, r, nominal=nominal, compact=compact)
+            chart(kept(lasting, key), key=f"lasting-{i}")
             st.caption(report.lasting_reading(r))
     if (
         box := _fold(_("Income, spending and taxes"), f"{KEY}fold-flow-{i}", folded=folded)
     ) is not None:
         with box:
-            chart(report.flow_figure(r, nominal=nominal, compact=compact), key=f"flow-{i}")
+            flow = partial(report.flow_figure, r, nominal=nominal, compact=compact)
+            chart(kept(flow, key), key=f"flow-{i}")
     why = anatomy.of(r)
     if (
         why is not None
         and (box := _fold(_("Why paths run out"), f"{KEY}fold-why-{i}", folded=folded)) is not None
     ):
         with box:
-            chart(report.anatomy_figure(why, compact=compact), key=f"anatomy-{i}")
+            chart(
+                kept(partial(report.anatomy_figure, why, compact=compact), key), key=f"anatomy-{i}"
+            )
             if compact:
                 st.caption(" ".join(reading(why)))
-    if not plan:
+    if r.twin:
         return None
     box = _fold(_("What moves the result"), f"{KEY}fold-levers-{i}", folded=True)
     return None if box is None else box.container()
 
 
+@dataclass(frozen=True)
+class Ran:
+    """A run of the page: its scenario file, the run as the page names it, and the key of the run
+    in `runs.cached_run`."""
+
+    path: Path
+    run: RunResult
+    made: tuple[object, ...]
+
+    @property
+    def key(self) -> tuple[object, ...]:
+        """The key of the run in its figures (`figures.kept`): the run, its name and whether it is
+        a twin, which its figures show."""
+        return (*self.made, self.run.scenario, self.run.twin)
+
+
 def _runs(
     opts: Options, chosen: Mapping[Path, str], overrides: dict[str, Any], stamp: Stamp
-) -> list[tuple[Path, RunResult]]:
+) -> list[Ran]:
     """The runs of the chosen scenarios but the abstract ones by their file, named as the select
     shows them: two scenarios of one name differ by their file."""
+    made = {p: (opts, p, json.dumps(overrides), stamp) for p in chosen}
     return [
-        (p, replace(r, scenario=chosen[p]))
+        Ran(p, replace(r, scenario=chosen[p]), made[p])
         for p in chosen
-        if (r := cached_run(opts, p, json.dumps(overrides), stamp)) is not None
+        if (r := cached_run(*made[p])) is not None
     ]
 
 
@@ -925,7 +948,7 @@ def _results(
     overrides: dict[str, Any],
     stamp: Stamp,
     status: Status,
-) -> list[tuple[Path, RunResult]]:
+) -> list[Ran]:
     """The runs with the sliders, then, with a slider moved, those of the files as twins: the same
     scenarios as the files define them, in the charts and tabs. The runs that the cache lacks
     start together in the pool, and `status` says `Simulating` while they run: a hit takes no time
@@ -953,7 +976,7 @@ def _results(
     except InputError as err:  # a range that a file value widened: a ceiling at the trigger
         status.refused(err)
         return []
-    return [*results, *((p, replace(r, twin=True)) for p, r in files)]
+    return [*results, *(replace(f, run=replace(f.run, twin=True)) for f in files)]
 
 
 def _fill_strip(
@@ -1015,7 +1038,7 @@ def page(data: Path) -> None:
     ran = _results(opts, chosen, overrides, stamp, status)
     if not ran:
         return
-    results = [r for _p, r in ran]
+    results = [r.run for r in ran]
     done = _("Up to date: {how}.").format(how=_how(opts, len(paths)))
     status.done(done)
     if results_box is not None:  # in portrait it stays at the top while the sliders scroll
@@ -1023,11 +1046,15 @@ def page(data: Path) -> None:
     _summary(results, nominal=nominal, compact=compact)
     _save_form(data, paths, overrides)
     goal_seek(side, chosen, stamp, results)
+    keys = tuple(r.key for r in ran)  # the palette goes by the order of the runs
     if len(results) > 1:  # the fan chart of the only tab shows the same medians
-        chart(report.comparison_figure(results, nominal=nominal, compact=compact), key="comparison")
-    chart(report.broke_probability_figure(results, compact=compact), key="broke")
+        comparison = partial(report.comparison_figure, results, nominal=nominal, compact=compact)
+        chart(kept(comparison, keys), key="comparison")
+    chart(
+        kept(partial(report.broke_probability_figure, results, compact=compact), keys), key="broke"
+    )
     if len(results) > 1:
-        _difference(results, extended(chosen), nominal=nominal, compact=compact)
+        _difference(ran, extended(chosen), nominal=nominal, compact=compact)
     observed = report.Observed(actual_totals(data), series.consumer_prices(data))
     labels = [r.label for r in results]
     # a phone draws and runs the open tab only: with `on_change` a tab knows whether it is open
@@ -1037,21 +1064,20 @@ def page(data: Path) -> None:
         else st.tabs(labels, key=f"{KEY}tab")
     )
     slots = []
-    for i, (tab, (p, r)) in enumerate(zip(tabs, ran, strict=True)):
+    for i, (tab, shown) in enumerate(zip(tabs, ran, strict=True)):
         if tab.open is False:
             continue
         with tab:
             slot = _tab(
                 i,
-                r,
+                shown,
                 observed,
                 nominal=nominal,
                 compact=compact,
                 folded=compact or not advanced,  # simple mode: the folds of a phone
-                plan=not r.twin,
             )
         if slot is not None:
-            slots.append((i, p, slot))
+            slots.append((i, shown.path, slot))
     for i, p, slot in slots:  # last: the page shows first
         with slot:
             job = sensitivity.Job(opts, p, overrides)

@@ -10,6 +10,7 @@ import re
 from collections.abc import Callable, Collection, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
+from functools import lru_cache
 from itertools import chain, count
 from pathlib import Path
 from typing import Any
@@ -30,8 +31,15 @@ def scenario_paths(data_dir: Path) -> list[Path]:
 
 
 def concrete_scenarios(data_dir: Path) -> dict[str, Path]:
-    """The scenario files that `run` simulates, by file stem. `abstract` templates are left out."""
-    return {p.stem: p for p in scenario_paths(data_dir) if not load_scenario(p).abstract}
+    """The scenario files that `run` simulates, by file stem. `abstract` templates are left out.
+    Kept by the texts of the scenario files, which alone decide it: a page asks several times a
+    run."""
+    return dict(_concrete(tuple((p, p.read_bytes()) for p in scenario_paths(data_dir))))
+
+
+@lru_cache(maxsize=8)
+def _concrete(files: tuple[tuple[Path, bytes], ...]) -> tuple[tuple[str, Path], ...]:
+    return tuple((p.stem, p) for p, _text in files if not load_scenario(p).abstract)
 
 
 def scenario_labels(names: Mapping[str, str]) -> dict[str, str]:

@@ -21,7 +21,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
 | `overview.py` | `overview` (the page), `whatifs` (its block `What-ifs`), `cashflows` (the plan changes of the attention table), `rollforward`, `tracking`, `i18n-track` |
 | `outlook.py` | `overview`, `explorer-runs`, `i18n-track` |
 | `explorer.py`, `knobs.py`, `sliders.py`, `seek.py`, `main.py` | `explorer` (the page), `explorer-sliders` (`knobs.py`, `sliders.py`: sliders, groups, switches), `explorer-runs` (its runs, caches and pool), `mode` (simple mode) |
-| `runs.py` | `explorer-runs` |
+| `runs.py`, `figures.py` | `explorer-runs` |
 | `snapshot.py`, `corrections.py`, `assets.py` | `tracking` (both pages), `grids`, `save-guard`, `i18n-track` |
 | `pricing.py` | `prices`, `save-guard`, `i18n-track` |
 | `csvcolumns.py` | `prices` (the column selects of a CSV import), `i18n-track` |
@@ -128,12 +128,12 @@ style of the pages (`ui/page.css`): rule `page-style`.
   chart in one of n columns: `DESKTOP_MONTHS` at 1,500 px with the sidebar open, `PHONE_MONTHS` on a
   phone) and `per_control` (`Amounts` with its help, its options the ids `month` and `year`, `PER`
   their words, English, and multiplier, wrap in a narrow column), `data_stamp` (a cache key of the
-  inputs: the latest mtime and count of `STAMPED`, the YAML files of `schema.INPUTS`,
-  `series/*.csv`; `run_stamp` that of the runs, `cache.RUN_INPUTS`: rule `explorer-runs`),
-  `timezone` (of the browser, `st.context.timezone`, UTC without one: a day of the revisions is a
-  local day) and `since` (the days with a revision of some files that have a revision before them,
-  each with the last revision before the day began: `Changes since` and the Flows comparison; a data
-  directory with only the baseline has none, so both are off).
+  inputs: the sums of the mtimes and the sizes and the count of `STAMPED`, the YAML of
+  `schema.INPUTS` and `series/*.csv`; `run_stamp` that of the runs, `cache.RUN_INPUTS`: rule
+  `explorer-runs`), `timezone` (of the browser, `st.context.timezone`, UTC without one: a day of the
+  revisions is a local day) and `since` (the days with a revision of some files that have a revision
+  before them, each with the last revision before the day began: `Changes since` and the Flows
+  comparison; a data directory with only the baseline has none, so both are off).
 - `fixed.py` holds the single-path `fixed` run of a scenario: `result` cached by `run_stamp`, on
   disk too (`cache.kept_run`), `options` also for the inputs of a revision (rule `explorer-runs`).
 

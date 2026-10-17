@@ -173,8 +173,8 @@ The age axis of the charts also shows the calendar year below each age.
 - `Comparison: median net worth and liquid by age`: the median net worth and the median liquid net
   worth of each scenario. When you moved a slider, the runs of your files show as lighter, dashed
   lines in the color of their scenario, named with `(as saved)`. Click (on a phone, tap) an entry
-  of the legend to hide its line or show it again. The next move of a slider shows all lines
-  again.
+  of the legend to hide its line or show it again. A hidden line stays hidden when you move a
+  slider, in every chart of the page. A switch of the language shows all lines again.
 - `Comparison: chance to have run out by age`: the share of the paths that ran out of money by each
   age, with the same lines as saved and the same legend.
 - `Difference of two runs`: with two or more runs, select A and B. At first, B is a scenario that

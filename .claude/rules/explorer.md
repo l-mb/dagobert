@@ -145,4 +145,5 @@ the features: rule `mode`.
 - `src/dagobert/ui/explorer.py` is the page, `sliders.py` a slider and a switch (`Unit`, `Knob`,
   `Switch`, `GROUPS`), `knobs.py` their catalog (`knobs`, `switches`, `classes`), `seek.py` its goal
   seek, `runs.py` its cached runs and process pool, which the Overview shares, `figures.py` its
-  figures, kept by the keys of their runs (`Ran.key`; rule `explorer-runs`).
+  figures, kept by the keys of their runs (`Ran.key`; rule `explorer-runs`), and the lines hidden in
+  their legends, which every chart of the page keeps over a move (`draw`, `keep_hidden`).

@@ -444,6 +444,10 @@
    runs (`explorer._levers`). */
 [class*="st-key-explorer-stale-"] {opacity: 0.4}
 
+/* Explorer: the script that keeps the lines hidden in the legends (`figures.keep_hidden`) takes no
+   room. */
+.st-key-explorer-hidden {display: none}
+
 /* Flows page. In a main area up to 860 px (portrait, landscape with the sidebar open, a narrow
    window) the outflow bars with their picker stand in for the Sankey diagram, whose labels need
    the width: the rules hide the layout wrapper, which would keep the gap of the tab. Up to

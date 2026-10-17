@@ -49,7 +49,7 @@ from dagobert.result import RunResult
 from dagobert.runner import WORKERS_ENV, Options
 from dagobert.ui import explorer, fixed, knobs, mode, runs, seek, sliders, tables
 from dagobert.ui.explorer import Drawn
-from dagobert.ui.figures import kept
+from dagobert.ui.figures import HIDDEN, kept
 
 
 def test_slider_bounds_widen_to_include_the_configured_value() -> None:
@@ -504,6 +504,22 @@ def test_a_slider_keeps_its_position_while_no_run_draws_it() -> None:
     assert at.run().slider(key=f"{sliders.KEY}x").value == 5
     at.button(key="reset").click().run()
     assert at.slider(key=f"{sliders.KEY}x").value == 0
+
+
+@pytest.mark.usefixtures("threads")
+def test_a_line_hidden_in_a_legend_stays_hidden_in_the_next_figure(data: Path) -> None:
+    """Streamlit 1.65 mounts a new chart for a new figure: the page draws the lines that the
+    browser reported hidden (`figures.HIDDEN`, the state of its script) hidden again, by chart."""
+
+    def shown(key: str) -> dict[str, object]:
+        [chart] = [c for c in at.get("plotly_chart") if key in (c.key or "")]
+        return {t["name"]: t.get("visible", True) for t in json.loads(chart.proto.spec)["data"]}
+
+    at = AppTest.from_string(EXPLORER.format(data=str(data)), default_timeout=60).run()
+    [name] = shown("broke")
+    at.session_state[HIDDEN] = {"hidden": {"broke": [name], "elsewhere": ["x"]}}
+    assert shown("broke") == {name: True}
+    assert at.run().get("plotly_chart") and shown("broke") == {name: "legendonly"}
 
 
 @pytest.mark.usefixtures("threads")

@@ -61,7 +61,6 @@ from dagobert.ui import (
     COMPARE,
     SCENARIO,
     Stamp,
-    chart,
     fixed,
     is_mobile,
     literal,
@@ -73,7 +72,7 @@ from dagobert.ui import (
     scenario_note,
     source,
 )
-from dagobert.ui.figures import kept
+from dagobert.ui.figures import draw, keep_hidden, kept
 from dagobert.ui.gridcolumns import on_off
 from dagobert.ui.knobs import NO_SALARIES, STANDING, Salaries, classes, knobs, switches
 from dagobert.ui.runs import (
@@ -229,7 +228,7 @@ class Levers:
                 compact=self.compact,
                 measure=measure,
             )
-            chart(figure, key=f"{key}-{self.i}-{mine}")
+            draw(figure, key=f"{key}-{self.i}-{mine}")
 
 
 def _levers(
@@ -601,7 +600,7 @@ def _difference(
     st.caption(_("{b} less {a}").format(b=literal(difference.b), a=literal(difference.a)))
     _grid(report.difference_table(difference, compact=compact))
     figure = partial(report.difference_figure, difference, compact=compact)
-    chart(kept(figure, a.key, b.key, nominal), key="difference")
+    draw(kept(figure, a.key, b.key, nominal), key="difference")
     note(_(report.DIFFERENCE_NOTE))
 
 
@@ -882,27 +881,27 @@ def _tab(
     ) is not None:
         with box:
             fan = partial(report.liquid_fan_figure, r, nominal=nominal, compact=compact)
-            chart(kept(fan, key), key=f"fan-{i}")
+            draw(kept(fan, key), key=f"fan-{i}")
             balance = partial(report.balance_figure, r, observed, nominal=nominal, compact=compact)
-            chart(kept(balance, key, tuple(observed.totals)), key=f"balance-{i}")
+            draw(kept(balance, key, tuple(observed.totals)), key=f"balance-{i}")
     if (box := _fold(_("Will the money last?"), f"{KEY}fold-last-{i}", folded=folded)) is not None:
         with box:
             lasting = partial(report.lasting_figure, r, nominal=nominal, compact=compact)
-            chart(kept(lasting, key), key=f"lasting-{i}")
+            draw(kept(lasting, key), key=f"lasting-{i}")
             st.caption(report.lasting_reading(r))
     if (
         box := _fold(_("Income, spending and taxes"), f"{KEY}fold-flow-{i}", folded=folded)
     ) is not None:
         with box:
             flow = partial(report.flow_figure, r, nominal=nominal, compact=compact)
-            chart(kept(flow, key), key=f"flow-{i}")
+            draw(kept(flow, key), key=f"flow-{i}")
     why = anatomy.of(r)
     if (
         why is not None
         and (box := _fold(_("Why paths run out"), f"{KEY}fold-why-{i}", folded=folded)) is not None
     ):
         with box:
-            chart(
+            draw(
                 kept(partial(report.anatomy_figure, why, compact=compact), key), key=f"anatomy-{i}"
             )
             if compact:
@@ -1006,6 +1005,7 @@ def _sidebar_buttons() -> None:
 
 def page(data: Path) -> None:
     st.title(_("Explorer"))
+    keep_hidden()
     compact = is_mobile()
     if compact:
         _sidebar_buttons()
@@ -1049,8 +1049,8 @@ def page(data: Path) -> None:
     keys = tuple(r.key for r in ran)  # the palette goes by the order of the runs
     if len(results) > 1:  # the fan chart of the only tab shows the same medians
         comparison = partial(report.comparison_figure, results, nominal=nominal, compact=compact)
-        chart(kept(comparison, keys), key="comparison")
-    chart(
+        draw(kept(comparison, keys), key="comparison")
+    draw(
         kept(partial(report.broke_probability_figure, results, compact=compact), keys), key="broke"
     )
     if len(results) > 1:

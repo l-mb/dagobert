@@ -148,8 +148,19 @@ container: rule `container`.
   the figure from its JSON (`plotly.io.from_json`, 5 ms a figure), a miss the figure that it built:
   a builder of `charts.figure` gives the same bytes from its JSON
   (`test_a_figure_gives_the_same_bytes_from_its_json`), so a revisit sends what the browser holds.
-  The browser keeps an element of 10 kB or more for `global.maxCachedMessageAge` runs after it last
-  drew it, and the server then sends its hash (rule `container`): 10, as the default of 2 lost the
+- The lines hidden in a legend stay hidden while the sliders move (owner 2026-10-17): Streamlit 1.65
+  mounts a new chart for each new figure (`plotly_chart` hashes the figure into its element id, also
+  with a key), so plotly forgot them, and its `uirevision` keeps nothing across a mount. The page
+  first mounts `figures.keep_hidden`, a components v2 script (registered in each run: each runtime,
+  also of an `AppTest`, has its own registry). It hooks every chart in a container `st-key-<key>`
+  and on its `plotly_restyle` (a click on the legend) sends the names of its hidden lines, by the
+  key of the chart, as the state `figures.HIDDEN`, which reruns the page. `figures.draw` (every
+  chart of the Explorer) hides them again in the next figure. By name: a language switch shows them
+  again. Its box takes no room (`ui/page.css`: `display: none`). The DOM and `_fullData` of
+  Streamlit 1.65 and plotly: check it after an upgrade
+  (`test_a_line_hidden_in_a_legend_stays_hidden_in_the_next_figure` holds the Python side). The
+  browser keeps an element of 10 kB or more for `global.maxCachedMessageAge` runs after it last drew
+  it, and the server then sends its hash (rule `container`): 10, as the default of 2 lost the
   figures after two other pages. `Difference.of` (22 ms), the table and the sliders run each rerun.
 - Reruns without an engine run, measured on 2026-10-17 (example `engineer`, two scenarios, 500
   paths; Chrome by Playwright cycling Cashflows, Explorer, Overview after two warm cycles, the

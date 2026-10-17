@@ -28,7 +28,7 @@ from dagobert.result import RunResult
 if TYPE_CHECKING:
     import plotly.graph_objects as go
 
-TWIN_OPACITY = 0.5  # a twin draws lighter: the runs of the sliders stand out; no legend entry
+TWIN_OPACITY = 0.5  # a twin draws lighter: the runs of the sliders stand out
 
 
 def _styles(results: list[RunResult], dash: str, twin_dash: str) -> list[dict[str, object]]:
@@ -56,7 +56,6 @@ def broke_probability_figure(results: list[RunResult], *, compact: bool = False)
             "x": r.ages,
             "y": share,
             "name": r.label,
-            "showlegend": not r.twin,
             "mode": "lines",
             "hovertext": hover_text(r, share, format_percent),
             "hoverinfo": "text",
@@ -65,7 +64,6 @@ def broke_probability_figure(results: list[RunResult], *, compact: bool = False)
         }
         for r, share, style in zip(results, shares, _styles(results, "solid", "dash"), strict=True)
     ]
-    twins = sum(r.twin for r in results)
     top = 1.1 * max(*(float(share.max()) for share in shares), 0.05)
     title = split_title(_("Comparison"), _(BROKE_BY_AGE), compact=compact)
     taps = tap_lists_all(traces, PCT_HOVER) if compact else {}
@@ -78,7 +76,7 @@ def broke_probability_figure(results: list[RunResult], *, compact: bool = False)
         },
         age_axis(results[0].ages, results[0].months, compact=compact),
         taps,
-        legend_below(len(results) - twins, top=100 + title_room(title)) if compact else {},
+        legend_below(len(results), top=100 + title_room(title)) if compact else {},
     )
 
 
@@ -106,13 +104,11 @@ def comparison_figure(
                     "y": median,
                     "mode": "lines",
                     "name": words.format(scenario=r.label),
-                    "showlegend": not r.twin,
                     "hovertext": hover_text(r, median),
                     "hoverinfo": "text",
                     **style,
                 }
             )
-    twins = sum(r.twin for r in results)
     title = split_title(_("Comparison"), _("median net worth and liquid by age"), compact=compact)
     taps = tap_lists_all(traces, EUR_HOVER) if compact else {}
     return figure(
@@ -123,5 +119,5 @@ def comparison_figure(
         },
         age_axis(results[0].ages, results[0].months, compact=compact),
         taps,
-        legend_below(2 * (len(results) - twins), top=100 + title_room(title)) if compact else {},
+        legend_below(2 * len(results), top=100 + title_room(title)) if compact else {},
     )

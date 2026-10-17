@@ -23,36 +23,36 @@ the features: rule `mode`.
   a run keeps the name), the help of the control the file and the first sentence of each note.
   Without a chosen scenario the page asks for one and `Set as default, the first as main` is off;
   its help says why, else it names the first chosen one, which becomes the main scenario (rule
-  `scenarios`). Above the table one line never goes (`Status`): `Simulating 2 scenarios, Monte
-  Carlo, 500 paths … A faded result below is the last one.` while the runs compute in the pool,
-  only when the cache lacks one (`runs.cached`; Streamlit fades the elements of the last run until
-  the new ones replace them), drawn once (the wait yields, rule `explorer-runs`), and the progress
-  of the sensitivity, at most once a second,
-  then `Up to date: …`, or `Not simulated: …` for positions that the model refuses (`InputError` of
-  the runs with the sliders: the runs of the files run first, so inputs that do not load still raise
-  to `main.py`): a warning below the moved sliders, on a phone also in the strip, names the problem
-  and ends the page, the sliders stay (Streamlit drops the faded results when a run ends;
+  `scenarios`). Above the table one line never goes (`Status`):
+  `Simulating 2 scenarios, Monte Carlo, 500 paths … A faded result below is the last one.` while the
+  runs compute in the pool, only when the cache lacks one (`runs.cached`; Streamlit fades the
+  elements of the last run until the new ones replace them), drawn once (the wait yields, rule
+  `explorer-runs`), and the progress of the sensitivity, at most once a second, then
+  `Up to date: …`, or `Not simulated: …` for positions that the model refuses (`InputError` of the
+  runs with the sliders: the runs of the files run first, so inputs that do not load still raise to
+  `main.py`): a warning below the moved sliders, on a phone also in the strip, names the problem and
+  ends the page, the sliders stay (Streamlit drops the faded results when a run ends;
   `Status.refused`). Below it a line that never goes either, so the table and the charts do not jump
-  at the first move: `Sliders moved: label from → to · …` or `The sliders stand at the values of the
-  files.`, with `Reset sliders` (off without a move). More than `MOVED_SHOWN` (3) moved sliders show
-  as a popover `N sliders moved` (key `sliders-moved`) with a line each (`Apply to sliders` of all
-  spending once moved every category into one long line; it sets the one slider now). The table
-  holds the runs of the sliders only (`compared`), the change against the run of the files in
-  brackets in every column of `report.COLUMNS` with a `change` (`changes`; `strip` takes
-  P(broke)@90 and Total@67): chances in points, money signed, `1 in 20 runs out at` in years, cuts
-  and raises in months; where one side is none (never, no shortfall) the files' value in words, `(as
-  saved: never)`; the runs of the files (`RunResult.twin`, named `(as saved)`) show in the charts
-  (lighter, no legend entry: the lines of a scenario would double it, rule `charts`), the tabs and
-  the difference. Its headers are `Shown.label` of `report.summary_columns`, the help `Shown.tip`
-  (the term first), the numbers right; the grid keeps the widths of its first data, so with brackets
-  money columns take 190 px, the others 150 (`CHANGED_WIDTHS`, desktop and phone), more where the
-  header in the language of the session is longer (`summary_widths(columns)`: `HEADER_PAD` and
-  `HEADER_CHAR` per character, for the German `Geld aus bei 1 von 20 (Alter)`; not checked in a
-  browser with a moved slider). On a desktop `Scenario` takes 24 px and 6.5 px per character of its
-  longest name, up to 400 px (`SCENARIO_WIDTH`, `CHAR_WIDTH`, `summary_widths`): 16 characters fit a
-  window of 1,500 px with the sidebar open, where a fixed 400 px scrolled sideways, and a longer
-  name scrolls rather than lose the end that tells variants apart. The caption names the unit and
-  says that a header explains its column on hover.
+  at the first move: `Sliders moved: label from → to · …` or
+  `The sliders stand at the values of the files.`, with `Reset sliders` (off without a move). More
+  than `MOVED_SHOWN` (3) moved sliders show as a popover `N sliders moved` (key `sliders-moved`)
+  with a line each (`Apply to sliders` of all spending once moved every category into one long line;
+  it sets the one slider now). The table holds the runs of the sliders only (`compared`), the change
+  against the run of the files in brackets in every column of `report.COLUMNS` with a `change`
+  (`changes`; `strip` takes P(broke)@90 and Total@67): chances in points, money signed,
+  `1 in 20 runs out at` in years, cuts and raises in months; where one side is none (never, no
+  shortfall) the files' value in words, `(as saved: never)`; the runs of the files
+  (`RunResult.twin`, named `(as saved)`) show in the charts (lighter, with a legend entry, rule
+  `charts`), the tabs and the difference. Its headers are `Shown.label` of `report.summary_columns`,
+  the help `Shown.tip` (the term first), the numbers right; the grid keeps the widths of its first
+  data, so with brackets money columns take 190 px, the others 150 (`CHANGED_WIDTHS`, desktop and
+  phone), more where the header in the language of the session is longer (`summary_widths(columns)`:
+  `HEADER_PAD` and `HEADER_CHAR` per character, for the German `Geld aus bei 1 von 20 (Alter)`; not
+  checked in a browser with a moved slider). On a desktop `Scenario` takes 24 px and 6.5 px per
+  character of its longest name, up to 400 px (`SCENARIO_WIDTH`, `CHAR_WIDTH`, `summary_widths`): 16
+  characters fit a window of 1,500 px with the sidebar open, where a fixed 400 px scrolled sideways,
+  and a longer name scrolls rather than lose the end that tells variants apart. The caption names
+  the unit and says that a header explains its column on hover.
 - The goal seek (`seek.goal_seek`: `Goal seek: the limit of one lever`, `Find the limit`, the target
   in the words of the Overview, `seek.Target` of the runs of the chosen scenarios, rule `goalseek`;
   the text field of the Overview, `seek.target_field`, its key `explorer-seek-target`, carried)

@@ -108,23 +108,22 @@ app the skill `app-check`. `ui.chart` draws every chart of the app: rule `ui`.
   `total`, `broke`), the terms of the report (`P(broke)@90`) stay in the help. Every age axis is one
   axis (`age_axis`): a tick at every fifth age, compact every tenth, each with its calendar year
   below, the title `Age and year`. A marker reads in words, written from its data (rule `engine`):
-  `charts.said` what it says (`Policy pays 5 € per month`, `85.9% with 40 years`, German `85,9 %`,
-  a full claim `100%` without its `.0`, the gain of a harvest `19.120 €`; `SAYS` of a kind that
-  always says the same: `alg1`, the end of the claim `alg1 used` and `alg1 expired` (§161, rule
-  `alg1`), why no Gründungszuschuss pays (`gz gap`, `gz days`, `gz salary`, rule `alg1`), the
-  law behind `exemption` and `gkv`, rule `gkv`, its paragraph `{law}` of `LAWS`
-  with no-break spaces, so a legend never parts `SGB` from `V`), `readable` its kind in words
-  before it (`MARKER_KINDS`, one entry per `result.MarkerKind`, a test holds them equal: a
-  `lump_sum` of `Car` is `One-off payment: Car`, `alg1` `ALG1: …`, an estate drawn per path
+  `charts.said` what it says (`Policy pays 5 € per month`, `85.9% with 40 years`, German `85,9 %`, a
+  full claim `100%` without its `.0`, the gain of a harvest `19.120 €`; `SAYS` of a kind that always
+  says the same: `alg1`, the end of the claim `alg1 used` and `alg1 expired` (§161, rule `alg1`),
+  why no Gründungszuschuss pays (`gz gap`, `gz days`, `gz salary`, rule `alg1`), the law behind
+  `exemption` and `gkv`, rule `gkv`, its paragraph `{law}` of `LAWS` with no-break spaces, so a
+  legend never parts `SGB` from `V`), `readable` its kind in words before it (`MARKER_KINDS`, one
+  entry per `result.MarkerKind`, a test holds them equal: a `lump_sum` of `Car` is
+  `One-off payment: Car`, `alg1` `ALG1: …`, an estate drawn per path
   `Inheritance: Mutter (half of the paths)`, a policy payout keeps only `<policy> pays …`). The
   bands of the phases take `PHASE_COLORS` by the order of the phases of the plan (`_phase_colors`,
   `RunResult.phase_labels`; a phase of the run that the plan lacks after them), no name: the markers
   name each change by its label. The legend of the markers wraps at 110 characters, compact at 34. A
-  run of the files (`RunResult.twin`, named `RunResult.label`: the scenario and `result.TWIN`; a
-  figure names a run by its label; the word is `(as saved)`) takes the color of its scenario, dashed
-  and at `TWIN_OPACITY` (`comparison._styles`) and has no legend entry in the comparison figures:
-  its lines would double the legend. The phase marker `Phase: Work` is translated (`Phase` is the
-  same word in German; the label is data).
+  run of the files (`RunResult.twin`, its label the scenario and `(as saved)`, `result.TWIN`) takes
+  the color of its scenario, dashed and at `TWIN_OPACITY` (`comparison._styles`), in the legend too
+  (owner 2026-10-17). The phase marker `Phase: Work` is translated (`Phase` is the same word in
+  German; the label is data).
 - The report (`write_html`) follows the color scheme of the browser (`prefers-color-scheme`: the CSS
   tokens `--bg`, `--fg`, `--muted`, `--line`, `--head`; the app follows its menu instead, rule `ui`)
   and fits a phone below `PHONE` (700) px: the media of the style element `phone`, which holds

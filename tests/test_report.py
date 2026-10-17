@@ -1036,6 +1036,6 @@ def test_a_twin_takes_the_color_of_its_scenario_dashed_and_lighter() -> None:
         assert [t["line"]["color"] for t in runs] == [t["line"]["color"] for t in twins]
         assert len({t["line"]["color"] for t in runs}) == 2
         assert all(t["opacity"] == 1 for t in runs) and all(t["opacity"] < 1 for t in twins)
-        assert [t["showlegend"] for t in traces] == [True] * len(runs) + [False] * len(twins)
+        assert all(t.get("showlegend", True) for t in traces)  # a twin can be hidden too
     lines = [t["line"] for t in comparison_figure(results).to_dict()["data"]]
     assert [line["dash"] for line in lines] == ["solid", "dot"] * 2 + ["dash", "dashdot"] * 2

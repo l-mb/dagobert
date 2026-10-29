@@ -33,6 +33,7 @@ from dagobert.returns import deflate
 from dagobert.store import RowFile
 from dagobert.ui import SECURITIES_ASSET, Stamp, arrived, data_stamp, fold, is_mobile, mode, summary
 from dagobert.ui.gridcolumns import ASSET_MODELS, HOLDING_KINDS, Row, columns
+from dagobert.ui.position import position_chart
 from dagobert.ui.tables import COLUMNS_MEAN, Ref, Table, edit_table, focus, focused, pin, unsaved
 from dagobert.ui.tradeform import (
     CODE,
@@ -220,7 +221,8 @@ HOLDINGS = N_(
     "expected gain that is taxed each year before a sale, booked in January for the year "
     "before. A sale takes the oldest units of the security first (FIFO). The yearly returns are "
     "money-weighted and before tax, the real ones in euros of the last price date by the "
-    "consumer prices."
+    "consumer prices. A lot counts from its purchase. Under a year they stay empty: a few months "
+    "would inflate them to a rate per year."
 )
 # the tax of a lot of gold or crypto, by its sale or by today: free after the holding period,
 # a private sale (§23 EStG) before, capital income (§20 EStG) for `tax: capital` and for crypto
@@ -229,11 +231,16 @@ FREE, PRIVATE_SALE, CAPITAL = N_("free"), N_("private sale"), N_("capital")
 TAX_FREE = N_(
     "tax-free units"
 )  # of a security of gold or crypto: those that a sale today pays none on
-YEARLY, REAL = N_("yearly return %"), N_("real yearly return %")  # of all trades of a security
+YEARLY, REAL = N_("yearly return %"), N_("real yearly return %")  # of a security or a lot
+YEAR = relativedelta(years=1)  # the shortest span with a yearly return (GIPS: none annualized)
+SOLD_SHOWN = relativedelta(months=3)  # a security sold in full stays listed this long (owner)
 VP = N_("Vorabpauschale per unit")  # of an open lot of a fund
 RETURNS = {  # the percentages of a security with their help
     "gain %": N_("The gain over the cost of the units held"),
-    YEARLY: N_("The money-weighted return per year of all trades (% p.a.), before tax"),
+    YEARLY: N_(
+        "The money-weighted return per year (% p.a.) up to the last price, before tax: of all "
+        "trades of a security, of the purchase of a lot. Empty under a year."
+    ),
     REAL: N_("The same after inflation, in euros of the last price date"),
 }
 # the columns of the securities tables by their ids, in words
@@ -359,13 +366,23 @@ def _table(rows: list[dict[str, Any]]) -> None:
 
 
 def securities(
-    data_dir: Path, asset: HoldingsAsset, cpi: Callable[[date], float], rules: Holding | None
+    data_dir: Path,
+    asset: HoldingsAsset,
+    cpi: Callable[[date], float],
+    rules: Holding | None,
+    today: date,
 ) -> list[dict[str, Any]]:
-    """One row per security ever held, the largest value first, then the whole asset: the open
-    units, their cost and their value at the last stored price, and the yearly return of all
-    trades with that value (money-weighted, before tax), in euros and in euros of today. Gold and
-    crypto (`rules`) add the units that a sale today takes free of tax."""
+    """One row per security held, or sold in full within `SOLD_SHOWN` before `today`, the
+    largest value first, then the whole asset with all its trades: the open units, their cost and
+    their value at the last stored price, and the yearly return of all trades with that value
+    (money-weighted, before tax), in euros and in euros of today. Gold and crypto (`rules`) add
+    the units that a sale today takes free of tax."""
     label = lots.names(asset.trades)
+    shown = {lot.security for lot in asset.book.open} | {
+        t.security
+        for t in asset.trades
+        if t.kind == lots.TradeKind.SELL and t.date + SOLD_SHOWN >= today
+    }
     rows = [
         _security(
             data_dir,
@@ -375,6 +392,7 @@ def securities(
             rules,
         )
         for code in dict.fromkeys(t.security for t in asset.trades)
+        if code in shown
     ]
     return [
         *sorted(rows, key=lambda row: -(row.get("value") or 0.0)),
@@ -405,23 +423,36 @@ def _security(
     priced = market_value(data_dir, open_lots)
     if not open_lots or priced is not None:
         value, day = priced or (0.0, None)
-        cash = lots.flows(trades) + ([(day, value)] if day is not None else [])
-        nominal, real = lots.irr(cash), lots.irr(deflate(cash, cpi, max(day for day, _ in cash)))
         row |= {
             "value": round(value, 2),
             "gain": round(value - cost, 2),
             "gain %": round(100 * (value / cost - 1), 1) if cost else None,
-            YEARLY: None if nominal is None else round(100 * nominal, 1),
-            REAL: None if real is None else round(100 * real, 1),
             "as of": day,
-        }
+        } | _yearly(lots.flows(trades) + ([(day, value)] if day is not None else []), cpi)
     return {k: row.get(k) for k in SECURITY_COLUMNS if rules is not None or k != TAX_FREE}
 
 
-def open_lots(data_dir: Path, asset: HoldingsAsset, rules: Holding | None) -> list[dict[str, Any]]:
-    """Each open lot at the last stored price. `price` is per unit with fees. A lot of gold or
-    crypto (`rules`) shows its tax if sold today and the day from which a sale is free, a lot of a
-    fund the Vorabpauschale charged on it."""
+def _yearly(cash: list[lots.Flow], cpi: Callable[[date], float]) -> dict[str, float | None]:
+    """The money-weighted return per year of the flows in percent, nominal and in euros of the
+    last flow. None over less than a `YEAR`: a few months would inflate it to a rate per year."""
+    days = [day for day, _ in cash]
+    if not days or min(days) + YEAR > max(days):
+        return dict.fromkeys((YEARLY, REAL))
+    return {
+        column: None if rate is None else round(100 * rate, 1)
+        for column, rate in (
+            (YEARLY, lots.irr(cash)),
+            (REAL, lots.irr(deflate(cash, cpi, max(days)))),
+        )
+    }
+
+
+def open_lots(
+    data_dir: Path, asset: HoldingsAsset, cpi: Callable[[date], float], rules: Holding | None
+) -> list[dict[str, Any]]:
+    """Each open lot at the last stored price, with the yearly return since its purchase. `price`
+    is per unit with fees. A lot of gold or crypto (`rules`) shows its tax if sold today and the
+    day from which a sale is free, a lot of a fund the Vorabpauschale charged on it."""
     return [
         {
             "security": lot.name,
@@ -430,6 +461,9 @@ def open_lots(data_dir: Path, asset: HoldingsAsset, rules: Holding | None) -> li
             "gain %": None
             if priced is None or not lot.cost
             else round(100 * (priced[0] / lot.cost - 1), 1),
+        }
+        | _yearly([] if priced is None else [(lot.bought, -lot.cost), (priced[1], priced[0])], cpi)
+        | {
             "units": lot.units,
             "price": lot.price,
         }
@@ -501,12 +535,15 @@ def securities_tab(file: RowFile) -> None:
     asset = {a.id: a for a in load_assets(file.data_dir) if isinstance(a, HoldingsAsset)}[depot]
     rules = holding(file.data_dir, asset)
     if asset.trades:
-        _table(securities(file.data_dir, asset, series.consumer_prices(file.data_dir), rules))
+        cpi = series.consumer_prices(file.data_dir)
+        rows = securities(file.data_dir, asset, cpi, rules, date.today())
+        _table(rows)
         with st.expander(_("Open lots"), key="securities-lots"):
-            _table(open_lots(file.data_dir, asset, rules))
+            _table(open_lots(file.data_dir, asset, cpi, rules))
         if asset.book.sales:
             with st.expander(_("Sales"), key="securities-sales"):
                 _table(sales(asset, rules))
+        position_chart(file.data_dir, asset, {row[CODE]: row["security"] for row in rows[:-1]}, cpi)
     else:
         st.info(no_trades(asset))
     fold(_(HOLDINGS), _("How to read the securities"))

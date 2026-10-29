@@ -22,7 +22,7 @@ style of the pages (`ui/page.css`): rule `page-style`.
 | `outlook.py` | `overview`, `explorer-runs`, `i18n-track` |
 | `explorer.py`, `knobs.py`, `sliders.py`, `seek.py`, `main.py` | `explorer` (the page), `explorer-sliders` (`knobs.py`, `sliders.py`: sliders, groups, switches), `explorer-runs` (its runs, caches and pool), `mode` (simple mode) |
 | `runs.py`, `figures.py` | `explorer-runs` |
-| `snapshot.py`, `corrections.py`, `assets.py` | `tracking` (both pages), `grids`, `save-guard`, `i18n-track` |
+| `snapshot.py`, `corrections.py`, `assets.py`, `position.py` | `tracking` (both pages), `position` (the chart of the securities tab), `grids`, `save-guard`, `i18n-track` |
 | `pricing.py` | `prices`, `save-guard`, `i18n-track` |
 | `csvcolumns.py` | `prices` (the column selects of a CSV import), `i18n-track` |
 | `tradeform.py`, `tradeimport.py` | `tracking` (the trade form and import of the Assets page), `tradeimport` (its code), `save-guard`, `i18n-track` |

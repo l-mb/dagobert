@@ -42,6 +42,7 @@ app the skill `app-check`. `ui.chart` draws every chart of the app: rule `ui`.
   pages, with text at 14 px: `sunburst_figure` (rings from `Slice` paths, the total in the hole,
   values in whole cents so that `branchvalues="total"` adds up exactly, a sector inherits the color
   of its parent, a label that does not fit at 14 px is hidden; `maxdepth` and `height` for a phone),
+  `position_figure` (a security over time: rule `position`),
   `bars_figure` (horizontal bars of `Slice`s, the largest on top, colored like the sectors; `signed`
   keeps the negative ones left of a zero line and puts a value inside a bar long enough for it, so
   it keeps clear of the labels; `below` puts the bars of some groups below the others; 30 px above

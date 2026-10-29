@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 
 from dagobert.i18n import N_, _
 from dagobert.model.months import months_between
-from dagobert.money import format_eur, format_percent
+from dagobert.money import format_eur, format_number, format_percent
 from dagobert.report.charts import AMBER, BLUE, EUR_TICKS, GRAY, RED, gapped, layout
 
 if TYPE_CHECKING:
@@ -348,6 +348,102 @@ def track_figure(
         hoverlabel={"namelength": -1},  # plotly cuts a name at 15 characters
         yaxis={"tickformat": EUR_TICKS, "ticksuffix": " €"},
         xaxis=_month_axis(band.months, labels, padded=True),
+        legend=LEGEND_ABOVE,
+    )
+    return fig
+
+
+@dataclass(frozen=True)
+class Traded:
+    """A buy or a sale of a security: its units and euros as traded, and the cost of the units
+    held after it, where its marker sits."""
+
+    day: date
+    sale: bool
+    units: float
+    amount: float
+    cost: float
+
+
+@dataclass(frozen=True)
+class Position:
+    """A security over time: the value of the units held on each day with a price, their cost on
+    each day with a price or a trade, and its trades."""
+
+    values: list[tuple[date, float]]
+    costs: list[tuple[date, float]]
+    trades: list[Traded]
+
+
+# a line of prices this sparse marks each price: a few typed prices read as points, not a curve
+SPARSE = 60
+
+
+# pixels above the plot of a compact `position_figure`: its legend takes two rows there, below
+# the Fullscreen button of the phone, which covered its last entry
+COMPACT_TOP = 80
+
+
+def position_figure(
+    position: Position, unit: str, *, labels: int, compact: bool = False
+) -> go.Figure:
+    """The value of the units held as a line and their cost as steps, each buy and sale a
+    triangle on the steps, the euros in `unit`, with at most `labels` month labels; `compact`
+    for a phone."""
+    values, costs = position.values, position.costs
+    fig = go.Figure(
+        [
+            go.Scatter(
+                x=[day for day, _value in costs],
+                y=[cost for _day, cost in costs],
+                name=_("cost"),
+                mode="lines",
+                line={"color": GRAY, "width": 2, "dash": "dot", "shape": "hv"},
+                hovertext=[format_eur(cost) for _day, cost in costs],
+                hoverinfo="text+name",
+            ),
+            go.Scatter(
+                x=[day for day, _value in values],
+                y=[value for _day, value in values],
+                name=_("value"),
+                legendrank=1,  # first in the legend, drawn over the cost
+                mode="lines+markers" if len(values) <= SPARSE else "lines",
+                line={"color": BLUE, "width": 2},
+                marker={"size": 8},
+                hovertext=[format_eur(value) for _day, value in values],
+                hoverinfo="text+name",
+            ),
+            *(
+                go.Scatter(
+                    x=[t.day for t in shown],
+                    y=[t.cost for t in shown],
+                    name=name,
+                    mode="markers",
+                    marker={"color": GRAY, "size": 11, "symbol": symbol},
+                    hovertext=[
+                        _("{units} units for {amount}").format(
+                            units=format_number(t.units), amount=format_eur(t.amount)
+                        )
+                        for t in shown
+                    ],
+                    hoverinfo="text+name",
+                )
+                for sale, name, symbol in (
+                    (False, _("purchase"), "triangle-up"),
+                    (True, _("sale"), "triangle-down"),
+                )
+                if (shown := [t for t in position.trades if t.sale == sale])
+            ),
+        ]
+    )
+    days = [day for day, _cost in costs]
+    fig.update_layout(
+        layout() | TRACKER,
+        height=420,
+        hovermode="x unified",
+        margin={"t": COMPACT_TOP if compact else 10},
+        yaxis={"tickformat": EUR_TICKS, "ticksuffix": " €", "title": unit, "rangemode": "tozero"},
+        xaxis=_month_axis(days[:1] + days[-1:], labels, padded=True) | {"hoverformat": "%Y-%m-%d"},
         legend=LEGEND_ABOVE,
     )
     return fig

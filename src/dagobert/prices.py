@@ -248,19 +248,32 @@ class Securities:
         return cls({i: names[i] for i in order}, dict(units), dict(trades))
 
 
-def series_price(data_dir: Path, security: str) -> Price | None:
-    """The last month of the series of a symbol of `BY_SYMBOL` in euros, dated on its last day:
+def series_prices(data_dir: Path, security: str) -> Prices:
+    """The months of the series of a symbol of `BY_SYMBOL` in euros, each dated on its last day:
     the close of that day (Bitcoin) or the average up to it (gold). A provisional month, whose
-    close or rate may still change, is dated on its first day: no later day is certain. None for
-    another security and for a series without months, such as Bitcoin before its first fetch."""
+    close or rate may still change, is dated on its first day: no later day is certain. Nothing
+    for another security and for a series without months, such as Bitcoin before its first
+    fetch."""
     symbol = BY_SYMBOL.get(security)
-    found = series.in_euros(series.SERIES[symbol.series], data_dir) if symbol else []
-    if not found:
-        return None
-    last = found[-1]
-    return (
-        last.month if last.provisional else add_months(last.month, 1) - timedelta(days=1),
-        last.value,
+    return [
+        (p.month if p.provisional else add_months(p.month, 1) - timedelta(days=1), p.value)
+        for p in (series.in_euros(series.SERIES[symbol.series], data_dir) if symbol else [])
+    ]
+
+
+def series_price(data_dir: Path, security: str) -> Price | None:
+    """The last month of `series_prices`, None without one."""
+    return found[-1] if (found := series_prices(data_dir, security)) else None
+
+
+def price_history(data_dir: Path, security: str) -> Prices:
+    """The stored prices and the months of its series (`series_prices`), sorted, the stored one
+    on the same day: the prices that `last_price` took over time."""
+    return sorted(
+        (
+            dict(series_prices(data_dir, security))
+            | dict(read_prices(price_file(data_dir, security)))
+        ).items()
     )
 
 

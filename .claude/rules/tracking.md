@@ -106,12 +106,18 @@ The price files, their import and the `Prices` expander: rule `prices`.
   (`gridcolumns.HOLDING_KINDS`): per security (`security` the name, `tradeform.CODE` the ISIN or
   symbol) the value, the gain and the yearly return of all its trades, nominal and real (`yearly
   return %`, `real yearly return %`, help in `assets.RETURNS`; the `Vorabpauschale per unit` of a
-  lot explains itself in its help), then the open units and their cost, then the open lots and the
-  sales, value and gain first there too, empty cells blank, units like those of the trades, `1
-  234.5678` (`assets.formats`, rule `money`). Gold and crypto (`assets.Holding`: the holding period
-  `private_sale_months` of the tax year, `tax: capital` or for crypto `tax.crypto_capital_from` of
-  `assumptions.yaml`; `assets.LOT_TAX` folded below the tables, beside `assets.HOLDINGS`, how to
-  read them) add `tax-free units` (sold today without tax), per open lot `tax` (`free`, `private
+  lot explains itself in its help), then the open units and their cost, then the open lots (with
+  the yearly returns of the purchase, at its cost with fees, not the basis) and the sales, value and
+  gain first there too. A yearly return over less than a year (`assets.YEAR`, from the first flow
+  to the price date) stays empty, a security, its total and a lot alike (owner 2026-10-29, the
+  GIPS rule: a few months would inflate it). A security without units leaves the table
+  `assets.SOLD_SHOWN` (3 months) after its last sale (owner 2026-10-29); the total keeps all
+  trades. Empty cells blank, units like those of the trades, `1 234.5678` (`assets.formats`, rule
+  `money`). Below the sales the chart `Value over time` (rule `position`). Gold and crypto
+  (`assets.Holding`: the holding period `private_sale_months` of the tax year, `tax: capital` or
+  for crypto `tax.crypto_capital_from` of `assumptions.yaml`; `assets.LOT_TAX` folded below the
+  tables, beside `assets.HOLDINGS`, how to read them) add `tax-free units` (sold today without
+  tax), per open lot `tax` (`free`, `private
   sale`, `capital`) and `free from` (the day after the purchase a year on, §188 BGB: the law counts
   days, the engine months) instead of the Vorabpauschale, and split a sale by the `tax` of the lots
   it took (`lots.Sale.taken`), each part with its share of the proceeds and the dates of the

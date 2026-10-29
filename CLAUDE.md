@@ -165,9 +165,9 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   [prices], `fields.py`, `widgets.py`, `forms.py`, `formguard.py` [forms]. `outlook.py` the plan of
   the Overview, `runs.py` its runs, `figures.py` its figures, `sliders.py`, `knobs.py`, `seek.py`
   [overview, explorer, explorer-runs]. Pages: `overview.py`, `snapshot.py` (`corrections.py`),
-  `assets.py` (`tradeform.py`, `tradeimport.py`) [grids, tracking], `cashflows.py` (`bars.py`,
-  `refusals.py`), `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode], `data.py`,
-  `assumptions.py`, `transfer.py`, `welcome.py`, `scenarios.py` (`fileactions.py`; tabs
+  `assets.py` (`tradeform.py`, `tradeimport.py`, `position.py`) [grids, tracking], `cashflows.py`
+  (`bars.py`, `refusals.py`), `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode],
+  `data.py`, `assumptions.py`, `transfer.py`, `welcome.py`, `scenarios.py` (`fileactions.py`; tabs
   `phases.py`, `events.py`, `scenario_overrides.py`, `overridegrids.py`; `lineage.py`).
 - `src/dagobert/data/`: shipped series, read only, see `SOURCES.md` there [series].
 - `data/`: personal inputs; `tmp/`: scratch files; both gitignored. In `data/`: `history.csv`

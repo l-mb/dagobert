@@ -51,12 +51,15 @@ The Snapshot page around the `Prices` expander: rule `tracking`.
   1 month, a slip of the unit only; the trade form and the trades grid of the Assets page warn with
   it, rule `tracking`), `GRAMS_PER_TROY_OUNCE` (31.1034768, exact: the unit of `XAU`), `last_price`
   (the newer of the last stored price, of the given rows or the price file, and `series_price`),
-  `market_value` of lots, `record` (the texts of `assets.yaml` and `history.csv` inside the write of
-  `save`, by `last_price` on its new price file; `corrected`: the replaced prices by security and
-  day), `fetch_series` (`series.update`, then `record` when the last price of a symbol of
-  `BY_SYMBOL` differs from the one before the fetch, as a revision of its `source`: `series/` is no
-  input; it records after every fetch, also one without news, so a record that failed after an
-  earlier fetch is made up; returns `Fetched`, the `Update` and the recorded values).
+  `series_prices` (the months of the series of a symbol, dated as `series_price` takes the last),
+  `price_history` (the stored prices over those months, the stored one on the same day: the chart
+  of the securities tab, rule `tracking`), `market_value` of lots, `record` (the texts of
+  `assets.yaml` and `history.csv` inside the write of `save`, by `last_price` on its new price
+  file; `corrected`: the replaced prices by security and day), `fetch_series` (`series.update`,
+  then `record` when the last price of a symbol of `BY_SYMBOL` differs from the one before the
+  fetch, as a revision of its `source`: `series/` is no input; it records after every fetch, also
+  one without news, so a record that failed after an earlier fetch is made up; returns `Fetched`,
+  the `Update` and the recorded values).
 - `src/dagobert/csvimport.py`: a downloaded table of dated values. `sniff` decodes UTF-8 (BOM or
   not) or cp1252 (a file in neither, a spreadsheet or a PDF, is `RefusedError`: `Not imported`, `Not
   read`, no traceback), takes the delimiter (`;`, tab, `,`) under which a header row is followed by

@@ -104,7 +104,8 @@ crypto. The asset with the most trades comes first. Select one. For each securit
 - its value, its gain, and its yearly return over all its trades (`yearly return %`), nominal
   and after inflation (`real yearly return %`)
 - the units that you still hold and what they cost
-- the open lots (the units of each purchase that you still hold) and the sales.
+- the open lots (the units of each purchase that you still hold), each with its yearly return
+  since the purchase, and the sales.
 
 The units show with a decimal point and a small space between the thousands, for example
 `1 234.5678`. The table of trades shows them the same way. A table always writes a decimal point,
@@ -112,7 +113,19 @@ also on a German page. A text, such as the preview of an import, writes the unit
 language: `1 234,5678` on a German page.
 
 The yearly return weighs each amount by how long it was invested. The value uses the last stored
-price (see [Snapshot](snapshot.md#prices)).
+price (see [Snapshot](snapshot.md#prices)). If less than a year lies between the first purchase
+and that price, the yearly return stays empty. A few months would give a misleading rate per year.
+The gain in percent still shows.
+
+A security that you sold in full stays in the table for 3 months after its last sale. Then the
+table leaves it out. The row `total` still counts all its trades.
+
+Under `Value over time`, select a security. The chart shows the value of the units that you held
+at each stored price, and what these units cost you with fees. A triangle marks each purchase and
+each sale. By default, the amounts are in euros of the last price date: the chart takes inflation
+out. Turn on `Nominal euros` to see the euros as they were. The chart can only use the prices that
+you stored. If you stored a few prices only, it shows a few points. Import a price history on the
+Snapshot page to see the whole curve.
 
 Below them, under `Trades`, is the table of trades. Enter each trade as your bank shows it, also
 of securities that you sold:

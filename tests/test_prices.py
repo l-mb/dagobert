@@ -210,6 +210,11 @@ def test_gold_and_bitcoin_take_their_series_when_it_is_newer(data: Path) -> None
     assert prices.last_price(data, "XAU") == (day, gold)
     _save(data, (day, 3800.0), security="XAU")
     assert prices.last_price(data, "XAU") == (day, 3800.0)
+    # the history: the months of the series and the stored prices, a stored one on the same day
+    history = prices.price_history(data, "XAU")
+    assert history == sorted(set(history))
+    assert {(day - timedelta(days=1), 3800.0), (day, 3800.0)} <= set(history)
+    assert len(history) == len(prices.series_prices(data, "XAU")) + 1
 
 
 def test_a_save_records_gold_at_its_series(data: Path) -> None:

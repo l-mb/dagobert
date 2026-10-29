@@ -4737,6 +4737,11 @@ msgstr "{low} bis {high}"
 msgid "plan median"
 msgstr "Plan (Median)"
 
+#: report/tracker.py
+#, python-brace-format
+msgid "{units} units for {amount}"
+msgstr "{units} Stück für {amount}"
+
 #: report/tracker.py ui/outlook.py ui/summary.py
 msgid "liquid"
 msgstr "liquide"
@@ -5377,7 +5382,8 @@ msgid ""
 "each year before a sale, booked in January for the year before. A sale "
 "takes the oldest units of the security first (FIFO). The yearly returns "
 "are money-weighted and before tax, the real ones in euros of the last "
-"price date by the consumer prices."
+"price date by the consumer prices. A lot counts from its purchase. Under a "
+"year they stay empty: a few months would inflate them to a rate per year."
 msgstr ""
 "Gib die Transaktionen so ein, wie die Bank sie auflistet, die Beträge in "
 "Euro: Der **Betrag** ist der Preis aller Stücke ohne Gebühren (der "
@@ -5386,7 +5392,9 @@ msgstr ""
 " im Januar für das Vorjahr. Ein Verkauf nimmt die ältesten Stücke des "
 "Wertpapiers zuerst (FIFO). Die Renditen pro Jahr sind geldgewichtet und "
 "vor Steuern, die realen, bereinigt um die Verbraucherpreise, in Euro mit "
-"der Kaufkraft des letzten Preisdatums."
+"der Kaufkraft des letzten Preisdatums. Eine Tranche zählt ab ihrem Kauf. "
+"Unter einem Jahr bleiben sie leer, denn aufs Jahr hochgerechnet würden "
+"wenige Monate übertreiben."
 
 #: ui/assets.py
 msgid "free"
@@ -5421,10 +5429,14 @@ msgid "The gain over the cost of the units held"
 msgstr "Der Gewinn gegenüber den Kosten der gehaltenen Stücke"
 
 #: ui/assets.py
-msgid "The money-weighted return per year of all trades (% p.a.), before tax"
+msgid ""
+"The money-weighted return per year (% p.a.) up to the last price, before "
+"tax: of all trades of a security, of the purchase of a lot. Empty under a "
+"year."
 msgstr ""
-"Die geldgewichtete Rendite pro Jahr aller Transaktionen (% p. a.), vor "
-"Steuern"
+"Die geldgewichtete Rendite pro Jahr (% p. a.) bis zum letzten Preis, vor "
+"Steuern: eines Wertpapiers über alle Transaktionen, einer Tranche ab ihrem "
+"Kauf. Leer unter einem Jahr."
 
 #: ui/assets.py
 msgid "The same after inflation, in euros of the last price date"
@@ -10945,6 +10957,26 @@ msgstr ""
 #: ui/phases.py ui/save.py
 msgid "Discard my edits"
 msgstr "Meine Änderungen verwerfen"
+
+#: ui/position.py
+msgid "Value over time"
+msgstr "Wert im Zeitverlauf"
+
+#: ui/position.py
+msgid "No stored price of this security: import its prices on the Snapshot page."
+msgstr ""
+"Kein gespeicherter Preis dieses Wertpapiers: Importiere seine Preise auf "
+"der Seite Snapshot."
+
+#: ui/position.py
+msgid ""
+"The value of the units held at each stored price, against their cost "
+"with fees. A few stored prices draw a few points: import a price history "
+"on the Snapshot page."
+msgstr ""
+"Der Wert der gehaltenen Stücke zu jedem gespeicherten Preis, verglichen "
+"mit ihren Kosten mit Gebühren. Wenige gespeicherte Preise ergeben wenige "
+"Punkte: Importiere eine Preishistorie auf der Seite Snapshot."
 
 #: ui/pricing.py
 msgid "last price"

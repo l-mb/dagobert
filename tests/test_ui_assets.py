@@ -31,6 +31,7 @@ from dagobert.ui import (
     assets,
     corrections,
     gridcolumns,
+    position,
     snapshot,
     summary,
     tradeform,
@@ -212,7 +213,8 @@ def test_securities_value_the_lots_and_return_all_trades(data: Path) -> None:
     _depot(data)
     [depot] = load_assets(data)
     assert isinstance(depot, EquityAsset)
-    world, sold, total = assets.securities(data, depot, lambda _: 100.0, None)  # largest first
+    # largest first
+    world, sold, total = assets.securities(data, depot, lambda _: 100.0, None, date(2022, 1, 1))
     # what a security is worth and earned first: on a phone the rest needs a swipe
     assert list(world)[:3] == ["security", "value", "gain"]
     assert world == {
@@ -238,8 +240,9 @@ def test_securities_value_the_lots_and_return_all_trades(data: Path) -> None:
     [sale] = assets.sales(depot, None)
     assert list(sale)[:3] == ["date", "security", "gain"]
     assert sale["gain"] == 5
-    [lot] = assets.open_lots(data, depot, None)
+    [lot] = assets.open_lots(data, depot, lambda _: 100.0, None)
     assert list(lot)[:4] == ["security", "bought", "value", "gain %"]
+    assert (lot[assets.YEARLY], lot[assets.REAL]) == (20.0, 20.0)  # held for a year
     assert assets.TAX_FREE not in world and "tax" not in sale  # gold and crypto only
 
 
@@ -252,9 +255,81 @@ def test_a_lot_of_cost_zero_shows_no_gain_percentage(data: Path) -> None:
     )
     [asset] = load_assets(data)
     assert isinstance(asset, HoldingsAsset)
-    gains = {lot["bought"]: lot["gain %"] for lot in assets.open_lots(data, asset, None)}
+    gains = {
+        lot["bought"]: lot["gain %"] for lot in assets.open_lots(data, asset, lambda _: 1.0, None)
+    }
     assert gains[date(2021, 6, 1)] is None
     assert gains[date(2021, 1, 1)] == 20.0
+
+
+@pytest.mark.parametrize(("today", "listed"), [(date(2022, 4, 1), True), (date(2022, 4, 2), False)])
+def test_a_security_sold_in_full_goes_three_months_after_its_last_sale(
+    data: Path, today: date, *, listed: bool
+) -> None:
+    """Owner 2026-10-29: a security without units leaves the table three months after its last
+    sale; the total keeps its trades, and the chart offers the securities listed."""
+    _depot(data)
+    [depot] = load_assets(data)
+    assert isinstance(depot, EquityAsset)
+    *rows, total = assets.securities(data, depot, lambda _: 1.0, None, today)
+    assert (SOLD in [row["ISIN or symbol"] for row in rows]) == listed
+    assert total[assets.YEARLY] == 16.7
+
+
+def test_the_position_values_the_units_held_at_each_price(data: Path) -> None:
+    """The value at each stored price against the cost of the units held, each trade on the
+    cost; real, an old cost counts in euros of the last price date."""
+    _depot(data)
+    (data / "prices" / f"{SOLD}.csv").write_text("date,close\n2021-06-01,10.5\n2022-06-01,13\n")
+    [depot] = load_assets(data)
+    assert isinstance(depot, EquityAsset)
+    world = position.position(data, depot.trades, WORLD, None)
+    assert world.values == [(date(2022, 1, 1), 120.0)]
+    assert world.costs == [(date(2021, 1, 1), 100.0), (date(2022, 1, 1), 100.0)]
+    [bought] = world.trades
+    assert (bought.day, bought.sale, bought.units, bought.amount) == (
+        date(2021, 1, 1),
+        False,
+        10,
+        100,
+    )
+    real = position.position(data, depot.trades, WORLD, _rising)
+    assert real.values == world.values  # at the last price date
+    assert real.costs[0][1] > world.costs[0][1]
+    # sold in full: no value after the sale, nor its price there
+    sold = position.position(data, depot.trades, SOLD, None)
+    assert sold.values == [(date(2021, 6, 1), 52.5)]
+    assert sold.costs == [
+        (date(2021, 1, 1), 50.0),
+        (date(2021, 6, 1), 50.0),
+        (date(2022, 1, 1), 0.0),
+    ]
+    assert [t.sale for t in sold.trades] == [False, True]
+
+
+def _rising(day: date) -> float:
+    """Consumer prices 10% higher a year after 2021-01-01."""
+    return 1 + (day - date(2021, 1, 1)).days / 3650
+
+
+@pytest.mark.parametrize(("bought", "shown"), [("2021-01-02", False), ("2021-01-01", True)])
+def test_a_return_per_year_needs_a_year(data: Path, bought: str, *, shown: bool) -> None:
+    """GIPS: a return over less than a year is not annualized, a few months would inflate it.
+    The price is of 2022-01-01."""
+    _depot(data)
+    (data / "assets.yaml").write_text(
+        yaml.safe_dump({"assets": [DEPOT | {"trades": [TRADES[0] | {"date": bought}]}]})
+    )
+    [asset] = load_assets(data)
+    assert isinstance(asset, HoldingsAsset)
+    [lot] = assets.open_lots(data, asset, _rising, None)
+    world, total = assets.securities(data, asset, _rising, None, date(2022, 1, 1))
+    assert lot["gain %"] == world["gain %"] == 20.0
+    for row in (lot, world, total):
+        if shown:
+            assert row[assets.REAL] < row[assets.YEARLY]
+        else:
+            assert (row[assets.YEARLY], row[assets.REAL]) == (None, None)
 
 
 def test_securities_group_units_by_a_space() -> None:
@@ -309,10 +384,10 @@ def test_a_sale_of_gold_lists_its_free_and_its_taxable_part(data: Path) -> None:
         (date(2026, 6, 2), assets.FREE, 0.5),
     ]:
         day = replace(rules, today=today)
-        [lot] = assets.open_lots(data, coins, day)
+        [lot] = assets.open_lots(data, coins, lambda _: 1.0, day)
         assert (lot["tax"], lot["free from"]) == (rule, date(2026, 6, 2))
         assert "Vorabpauschale per unit" not in lot
-        held, total = assets.securities(data, coins, lambda _: 100.0, day)
+        held, total = assets.securities(data, coins, lambda _: 100.0, day, today)
         assert (held["units"], held[assets.TAX_FREE], total[assets.TAX_FREE]) == (
             0.5,
             tax_free,
@@ -333,7 +408,7 @@ def test_capital_income_has_no_holding_period(data: Path) -> None:
         yaml.safe_dump({"assets": [COINS | {"tax": "capital"}, wallet]})
     )
     note, coins = (a for a in load_assets(data) if isinstance(a, LotAsset))
-    [lot] = assets.open_lots(data, note, assets.Holding.of(data, note))
+    [lot] = assets.open_lots(data, note, lambda _: 1.0, assets.Holding.of(data, note))
     assert (lot["tax"], lot["free from"]) == (assets.CAPITAL, None)
     # the lot of 2024 stays a private sale, held over a year
     taxes = [part["tax"] for part in assets.sales(coins, assets.Holding.of(data, coins))]
@@ -557,8 +632,10 @@ def test_securities_tab_and_snapshot_render(data: Path) -> None:
     snapshot = _grid(at, "asset")
     assert snapshot["estimate"].tolist() == [120.0]
     assert snapshot[["asset", "asof"]].values.tolist() == [["⚠ depot", "never"]]
-    # the securities with their total, the open lot, the sale and the trades editor
-    assert [len(_grid(at, *c)) for c in (("security", "value"), ("security", "bought"))] == [3, 1]
+    # the held security with the total (the one sold in 2022 left), the open lot, the sale and
+    # the trades editor; the chart of the held security
+    assert [len(_grid(at, *c)) for c in (("security", "value"), ("security", "bought"))] == [2, 1]
+    assert ["World"] in [s.options for s in at.selectbox if s.label == "Security"]
     assert [len(_grid(at, "date", c)) for c in ("security", "kind")] == [1, len(TRADES)]
     assert [b.disabled for b in at.button if b.label == "Record"] == [True]  # nothing entered
     [stored] = at.table  # the held securities under `Prices`, closed while each has a price

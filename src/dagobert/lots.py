@@ -6,6 +6,7 @@ the trades."""
 from __future__ import annotations
 
 import math
+from bisect import bisect_right
 from collections import defaultdict, deque
 from dataclasses import dataclass, field, replace
 from datetime import date
@@ -74,6 +75,14 @@ class Book:
 def names(trades: Iterable[Trade]) -> dict[str, str]:
     """The last name given per security. A security without one goes by its ISIN or symbol."""
     return {t.security: t.name for t in sorted(trades, key=lambda t: t.date) if t.name}
+
+
+def held(trades: Iterable[Trade], days: Sequence[date]) -> list[list[Lot]]:
+    """The open lots on each of `days`, after the trades up to it."""
+    ordered = sorted(trades, key=lambda t: t.date)
+    dates = [t.date for t in ordered]
+    books = {n: book(ordered[:n]).open for n in {bisect_right(dates, day) for day in days}}
+    return [books[bisect_right(dates, day)] for day in days]
 
 
 def book(trades: Iterable[Trade]) -> Book:

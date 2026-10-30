@@ -23,6 +23,7 @@ from dagobert import (
     cache,
     csvimport,
     datadir,
+    eodhd,
     files,
     history,
     i18n,
@@ -43,7 +44,8 @@ from dagobert.schema import SchemaError
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Mapping
 
-app = typer.Typer(add_completion=False, no_args_is_help=True)
+# no locals in a traceback: a frame may hold a key of `eodhd` or personal data
+app = typer.Typer(add_completion=False, no_args_is_help=True, pretty_exceptions_show_locals=False)
 console = Console()
 DataDir = Annotated[
     Path,
@@ -522,16 +524,62 @@ def import_prices(
             if slips and not force:
                 msg = "a price lies far off: look at --decimal, or save with --force"
                 raise RefusedError(msg)
-            saved = prices.save(data, security, points, source="prices import")
+            saved = prices.save(data, {security: points}, source="prices import")
         except (OSError, RefusedError) as err:
             console.print(f"[red]Not imported: {err}[/red]")
             raise typer.Exit(1) from None
         (first, _), (last, _) = points[0], points[-1]
         console.print(
             f"{security}: {len(points)} prices from {first} to {last}, "
-            f"{len(saved.replaced)} replaced"
+            f"{len(saved.replaced[security])} replaced"
         )
         _recorded(saved.recorded)
+
+
+@prices_app.command("fetch")
+def fetch_prices(
+    securities: Annotated[
+        list[str] | None, typer.Argument(help="ISINs. Default: every one held")
+    ] = None,
+    *,
+    data: DataDir = Path("data"),
+    force: Annotated[bool, typer.Option(help="Save a price far from a trade nearby")] = False,
+) -> None:
+    """Fetch from EODHD the daily closes of the held securities on Xetra in euros that their
+    price files lack, from the first trade, at most a year back (the free plan), with a key of
+    your own in EODHD_API_KEY or a file that EODHD_API_KEY_FILE names. Saves them in one
+    revision and records the values. A stored price stays; a price far from a trade nearby skips
+    its security unless `--force`."""
+    with _opened(data):
+        try:
+            if (secret := eodhd.key()) is None:
+                msg = f"no key: set {eodhd.KEY} or {eodhd.KEY_FILE} (a free one at eodhd.com)"
+                raise series.FetchError(msg)
+            fetched = eodhd.fetch(
+                data,
+                secret,
+                series.http_get,
+                today=date.today(),
+                source="prices fetch",
+                only=securities or (),
+                force=force,
+            )
+        except series.FetchError as err:
+            console.print(f"[red]Not fetched: {err}[/red]")
+            raise typer.Exit(1) from None
+        except (OSError, ValueError) as err:  # a record of the values that the inputs refuse
+            console.print(f"[red]Not saved: {err}[/red]")
+            raise typer.Exit(1) from None
+        for security, n in fetched.added.items():
+            console.print(f"{security}: {n} {'price' if n == 1 else 'prices'} added")
+        for security, why in fetched.refused.items():
+            console.print(f"[yellow]{security}: not fetched: {why}[/yellow]")
+        if fetched.stopped:
+            console.print(f"[red]Stopped: {fetched.stopped}[/red]")
+        console.print(f"{fetched.calls} calls to EODHD")
+        _recorded(fetched.recorded)
+        if fetched.refused or fetched.stopped:
+            raise typer.Exit(1)
 
 
 def _recorded(observed: list[history.Observation]) -> None:

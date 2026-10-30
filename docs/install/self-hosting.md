@@ -363,3 +363,17 @@ browser, and English if that is not German. To change the language, use the swit
 Language` at the end of the sidebar. A cookie in your browser keeps your choice, so each browser
 can have its own language. The [user guide](../manual/index.md#language) lists the text that stays
 in English.
+
+## Fetch the prices of securities
+
+The app can fetch the prices of your securities from EODHD with a key of your own (see
+[Snapshot](../manual/snapshot.md#prices)). In a container, keep the key in a file:
+
+1. Put the key into a file on the host, and make the file readable for you only (`chmod 600`).
+2. In the compose file, add this file as a secret of the service `dagobert`.
+3. Set the environment variable `EODHD_API_KEY_FILE` of the service to the path of the secret in
+   the container, for example `/run/secrets/eodhd`.
+4. Start the container again.
+
+The terms of EODHD allow a key for one person only. This fits the app, because one instance serves
+one person.

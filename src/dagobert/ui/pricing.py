@@ -13,10 +13,11 @@ from typing import TYPE_CHECKING
 
 import streamlit as st
 
-from dagobert import csvimport, prices
-from dagobert.i18n import N_, _
+from dagobert import csvimport, eodhd, prices, series
+from dagobert.i18n import N_, _, ngettext
 from dagobert.model.assets import SECURITY
 from dagobert.money import decimal_mark, format_eur, format_number
+from dagobert.series import FetchError
 from dagobert.ui import guard, keyboard, source, tell
 from dagobert.ui.csvcolumns import DECIMAL, ColumnPick, ends, refused, said, select
 from dagobert.ui.save import reason
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
     from dagobert.history import Observation
 
 OPEN, FORM, IMPORT = "prices-open", "prices-add", "prices-import"
+FETCH = "prices-fetch"  # session state: the outcome of the last fetch, `(ok, text)`
 CHOSEN = "prices-chosen"  # the security of the last added price
 # the columns of `stored` and of the preview by their ids, in words: messages of the catalogue
 HEADERS = {
@@ -141,6 +143,73 @@ def recorded(observed: list[Observation]) -> str:
     )
 
 
+def fetched(result: eodhd.Fetched, names: dict[str, str]) -> str:
+    """What a fetch did, a line each: the prices added, the securities refused (in English, as
+    the source said it), the stop, the calls and the recorded values."""
+    lines = [
+        *(
+            ngettext("{name}: {n} price added", "{name}: {n} prices added", n).format(
+                name=names.get(s, s), n=n
+            )
+            for s, n in result.added.items()
+        ),
+        *(
+            _("{name}: not fetched: {reason}").format(name=names.get(s, s), reason=why)
+            for s, why in result.refused.items()
+        ),
+        *([_("Stopped: {reason}").format(reason=result.stopped)] if result.stopped else []),
+        *([] if result.added or result.refused or result.stopped else [_("No new prices.")]),
+        ngettext("{n} call to EODHD", "{n} calls to EODHD", result.calls).format(n=result.calls),
+        recorded(result.recorded),
+    ]
+    return "  \n".join(line for line in lines if line)
+
+
+def _fetch(data_dir: Path, securities: prices.Securities) -> None:
+    """The button of the fetch from EODHD, with the key of the environment; without one how to
+    set it. The outcome shows below it after the rerun."""
+    try:
+        secret = eodhd.key()
+    except FetchError as err:
+        st.warning(str(err))
+        return
+    if secret is None:
+        st.caption(
+            _(
+                "To fetch prices, set {key} to a key of your own (free at eodhd.com), or {file} "
+                "to a file that holds it, then start the app again."
+            ).format(key=f"`{eodhd.KEY}`", file=f"`{eodhd.KEY_FILE}`")
+        )
+        return
+    st.caption(
+        _(
+            "The daily closes of the last year that the stored prices lack, of each held ISIN "
+            "on Xetra in euros: two calls per security of the 20 a day of the free plan. The "
+            "fetch sends the ISINs to EODHD; a stored price stays."
+        )
+    )
+    if st.button(_("Fetch prices"), key=f"{FETCH}-button"):
+        with st.spinner(_("Fetching prices…")):
+            try:
+                # the getter is looked up at the click: tests replace it
+                result = eodhd.fetch(
+                    data_dir, secret, series.http_get, today=date.today(), source=source()
+                )
+                outcome = (
+                    not (result.refused or result.stopped),
+                    fetched(result, securities.names),
+                )
+            except FetchError as err:
+                outcome = (False, str(err))
+            except (OSError, ValueError) as err:  # a record that the inputs refuse
+                outcome = (False, _("Not saved: {reason}").format(reason=reason(err)))
+        st.session_state[FETCH] = outcome
+        st.rerun()
+    if (shown := st.session_state.get(FETCH)) is not None:
+        ok, text = shown
+        (st.success if ok else st.warning)(text)
+
+
 def mapper(table: csvimport.Table, key: str, value: str = N_("Price")) -> csvimport.Mapping:
     """The column mapping of a CSV of dated values (`csvcolumns.select`), the guess preselected;
     `value` names the value column, a message of the catalogue. Raises ValueError for a table
@@ -213,12 +282,12 @@ def _add(data_dir: Path, securities: prices.Securities) -> None:
     try:
         typed = TypedPrice(security, day if isinstance(day, date) else None, text or "")
         security, point = typed.point(today)
-        saved = prices.save(data_dir, security, [point], source=source())
+        saved = prices.save(data_dir, {security: [point]}, source=source())
     except (OSError, ValueError) as err:
         st.error(_("Not added: {reason}").format(reason=reason(err)))
         return
     name = securities.names.get(security, security)
-    old = saved.replaced[0].old if saved.replaced else None
+    old = replaced[0].old if (replaced := saved.replaced[security]) else None
     change = guard.Change(f"{name} {point[0]}", old, point[1])
     warnings = [
         *([change.warning] if change.warning else []),
@@ -276,13 +345,13 @@ def _import(data_dir: Path, securities: prices.Securities) -> None:
     ):
         return
     try:
-        saved = prices.save(data_dir, security, parsed.points, source=source())
+        saved = prices.save(data_dir, {security: parsed.points}, source=source())
     except (OSError, ValueError) as err:
         st.error(_("Not imported: {reason}").format(reason=reason(err)))
         return
     st.session_state[IMPORT] = n + 1  # a new upload field, empty
     imported = _("Imported {n} prices of {name}: {new} new, {replaced} replaced").format(
-        n=count, name=name, new=len(rows) - len(old), replaced=len(saved.replaced)
+        n=count, name=name, new=len(rows) - len(old), replaced=len(saved.replaced[security])
     )
     tell("  \n".join(line for line in (imported, recorded(saved.recorded)) if line))
     st.rerun()
@@ -346,6 +415,8 @@ def section(
                 "prices, dated with the oldest of them."
             )
         )
+        st.markdown(f"**{_('Fetch prices')}**")
+        _fetch(data_dir, securities)
         st.markdown(f"**{_('Add a price')}**")
         _add(data_dir, securities)
         st.markdown(f"**{_('Import a price history')}**")

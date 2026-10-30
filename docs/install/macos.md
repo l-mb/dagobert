@@ -75,6 +75,10 @@ mkdir -p ~/Dagobert && chmod 700 ~/Dagobert
 Dagobert makes the folder when it starts a plan. Each command also takes `--data <folder>` for
 another data directory.
 
+To fetch the prices of your securities from EODHD, put your key into a file in your user folder.
+Then set the variable `EODHD_API_KEY_FILE` to that file in the same way. The
+[user guide](../manual/snapshot.md#prices) explains the fetch.
+
 ## Start the app
 
 1. Optional: start a plan from the simple example. Without this step, the app shows the page

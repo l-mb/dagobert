@@ -316,6 +316,10 @@ another computer, put a reverse proxy in front of it that authenticates every re
 `server` in `compose.yaml` starts it. Never publish the port of the app itself on all network
 interfaces.
 
+Dagobert sends none of your data to a server, except when you start a fetch. The button of a
+series on the Data page asks the source of that series, and `Fetch prices` on the Snapshot page
+sends the ISINs that you hold to EODHD.
+
 Dagobert does not make its files private. A new file gets the permissions that your umask allows.
 The umask is a setting of the system that removes permissions from new files, and on most systems
 it lets other users read them. If other people have an account on your computer, make the

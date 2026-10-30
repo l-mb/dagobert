@@ -125,25 +125,30 @@ def merge(old: Prices, new: Prices) -> tuple[Prices, list[Replaced]]:
 
 @dataclass(frozen=True)
 class Saved:
-    """What a save of prices changed: the stored prices that it replaced and the market values
-    that it recorded."""
+    """What a save of prices changed: the stored prices that it replaced by security and the
+    market values that it recorded."""
 
-    replaced: list[Replaced]
+    replaced: dict[str, list[Replaced]]
     recorded: list[Observation]
 
 
-def save(data_dir: Path, security: str, new: Prices, *, source: str) -> Saved:
-    """Merge `new` into the price file of `security`, the one writer of the price files, and
-    record the market values that the prices give (`record`), as one revision of `source`."""
-    path = price_file(data_dir, security)
+def save(data_dir: Path, new: Mapping[str, Prices], *, source: str) -> Saved:
+    """Merge the prices of each security of `new` into its price file, the one writer of the
+    price files, and record the market values that the prices give (`record`), as one revision
+    of `source`."""
+    paths = {security: price_file(data_dir, security) for security in new}
 
     def edit() -> tuple[dict[str, str | None], Saved]:
-        rows, replaced = merge(read_prices(path), new)
-        corrected = {(security, r.day) for r in replaced}
-        texts, observed = record(data_dir, {security: rows}, corrected)
-        # 12 digits: `g` alone keeps 6 and cut a price of 1234.5678 to 1234.57
-        text = "date,close\n" + "".join(f"{day},{price:.12g}\n" for day, price in rows)
-        return {path.relative_to(data_dir).as_posix(): text} | texts, Saved(replaced, observed)
+        merged = {s: merge(read_prices(paths[s]), points) for s, points in new.items()}
+        corrected = {(s, r.day) for s, (_rows, replaced) in merged.items() for r in replaced}
+        texts, observed = record(data_dir, {s: rows for s, (rows, _) in merged.items()}, corrected)
+        files = {
+            # 12 digits: `g` alone keeps 6 and cut a price of 1234.5678 to 1234.57
+            paths[s].relative_to(data_dir).as_posix(): "date,close\n"
+            + "".join(f"{day},{price:.12g}\n" for day, price in rows)
+            for s, (rows, _replaced) in merged.items()
+        }
+        return files | texts, Saved({s: replaced for s, (_, replaced) in merged.items()}, observed)
 
     return revisions.write_returning(data_dir, source, edit)
 

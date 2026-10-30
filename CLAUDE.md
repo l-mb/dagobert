@@ -52,9 +52,9 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
 
 - `uv run dagobert app` opens the Streamlit app in the browser [ui; options: container], never
   for a check (skill `app-check`). `export` and `import` move the inputs as a zip [transfer].
-- `uv run dagobert prices import SECURITY FILE` merges a downloaded price history into
-  `data/prices/<SECURITY>.csv` and records the market values [prices]; `trades import ASSET FILE`
-  adds the new buys and sales of a broker CSV to the trades of an asset [tradeimport].
+- `uv run dagobert prices import SECURITY FILE` merges a price history into `data/prices/`, `prices
+  fetch` the closes that the held ISINs lack from EODHD (`EODHD_API_KEY`); both record the market
+  values [prices]. `trades import ASSET FILE` adds the trades of a broker CSV [tradeimport].
 - `uv run dagobert series list|fetch [NAME...]|import msci-world FILE` lists the external
   series, fetches the months they lack (only on this command or the button of the Data page)
   and imports an equity history into `data/series/`; maintainers refresh the shipped series
@@ -149,8 +149,8 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   the failure anatomy, two runs path by path, the goal seek [analyses, goalseek, disability].
 - `src/dagobert/history.py`: `history.csv`, its corrections and the observed values per month,
   `lots.py` the lots and sales of `trades`, `tradeimport.py` broker CSVs [tracking, tradeimport].
-- `src/dagobert/prices.py`: the price files and the series of XAU and BTC, `market_value` of
-  lots, `record`. `csvimport.py`: a downloaded table of dated values [prices].
+- `src/dagobert/prices.py`: the price files and the series of XAU and BTC, `market_value` of lots,
+  `record`. `csvimport.py`: a downloaded table of dated values, `eodhd.py`: the fetch [prices].
 - `src/dagobert/actuals.py`: `actuals.csv` [spend].
 - `src/dagobert/cli.py`: the commands, the options of `dagobert app` [container, money];
   `runner.py`: `Options`, the runs that workers unpickle [money]; `cache.py` [explorer-runs].

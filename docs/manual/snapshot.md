@@ -84,12 +84,35 @@ correction and tells you when and where the month changed.
 
 ## Prices
 
-Dagobert does not download the prices of your securities. You add them in the section `Prices`
-below the table. It opens by itself while a security that you hold has no price, and a note above
-the table names that security. Its table shows each security that
+You add the prices of your securities in the section `Prices` below the table, or you fetch them
+from EODHD. The section opens by itself while a security that you hold has no price, and a note
+above the table names that security. Its table shows each security that
 you hold, with the date and the euros of its last price. Then it shows the securities that have
 prices but no trades yet, marked `(no trades)`. This happens when you import a price history before
 you enter the trades.
+
+To fetch the prices of your securities from EODHD:
+
+1. Make an account at eodhd.com. The free plan is enough. EODHD gives you a key for its API.
+2. Before you start the app, set the environment variable `EODHD_API_KEY` to this key. Instead,
+   you can put the key into a file and set `EODHD_API_KEY_FILE` to the path of that file.
+3. Under `Fetch prices`, press `Fetch prices`.
+
+For each ISIN that you hold, the app finds the listing on Xetra in euros. It adds the closing price
+of each trading day that has no stored price yet. It starts at your first purchase, but it goes
+back one year at most, because the free plan of EODHD has no older prices. For older prices, import
+a price history. A price that you stored stays. Gold and Bitcoin keep their series.
+
+Each security takes two calls. The free plan allows 20 calls a day, and once 500 more calls when
+you start. If the calls of the day are used up, the app stops and saves the prices that it has. The
+calls renew at midnight GMT.
+
+The fetch sends the ISINs that you hold to EODHD. The terms of EODHD allow a key for one person
+only. Do not share your key, and use it for your own instance only.
+
+On the command line, `dagobert prices fetch` does the same. Name ISINs after it to fetch only
+these. If a fetched price is far from the price of a trade nearby, the app does not save the
+prices of that security. The command saves them with `--force`.
 
 To add one price:
 

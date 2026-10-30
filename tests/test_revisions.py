@@ -379,7 +379,9 @@ WRITERS: dict[str, Callable[[Path], object]] = {
     "save_draft": lambda data: actuals.save_draft(
         data, date(2026, 9, 1), {"wohnen": (None, -500.0)}, source=SOURCE
     ),
-    "prices.save": lambda data: prices.save(data, ISIN, [(date(2026, 9, 17), 7.0)], source=SOURCE),
+    "prices.save": lambda data: prices.save(
+        data, {ISIN: [(date(2026, 9, 17), 7.0)]}, source=SOURCE
+    ),
     "rollforward.apply": lambda data: rollforward.apply(data, date(2026, 3, 1), source=SOURCE),
     "rename.apply": lambda data: rename.apply(
         data, rename.preview(data, rename.Rename(Kind.ASSET, "giro", "konto")), source=SOURCE

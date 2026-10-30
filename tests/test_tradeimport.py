@@ -207,7 +207,7 @@ def test_a_security_without_a_name_takes_the_name_of_its_first_row() -> None:
 
 
 def test_a_price_far_from_a_stored_one_is_a_slip(data: Path) -> None:
-    prices.save(data, WORLD, [(date(2026, 2, 2), 100.0)], source="test")
+    prices.save(data, {WORLD: [(date(2026, 2, 2), 100.0)]}, source="test")
     rows = [{"date": date(2026, 2, 2), "kind": "buy", "security": WORLD, "units": 1, "amount": 1}]
     assert tradeimport.slips(data, rows) == [
         "a stored price of 100,00 € on 2026-02-02, the buy of that day paid 1,00 € per unit"
@@ -245,7 +245,7 @@ def test_the_command_adds_the_new_trades_once(data: Path, tmp_path: Path) -> Non
 
 
 def test_the_command_stops_at_a_price_far_off_unless_forced(data: Path, tmp_path: Path) -> None:
-    prices.save(data, EM, [(date(2026, 1, 20), 1.0)], source="test")
+    prices.save(data, {EM: [(date(2026, 1, 20), 1.0)]}, source="test")
     args = ["trades", "import", "depot", _export(tmp_path), "--data", str(data)]
     result = CliRunner().invoke(app, args)
     assert result.exit_code == 1

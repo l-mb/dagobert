@@ -1,8 +1,8 @@
 ---
 paths:
-  - "src/dagobert/{prices,csvimport}.py"
+  - "src/dagobert/{prices,csvimport,eodhd}.py"
   - "src/dagobert/ui/{pricing,csvcolumns}.py"
-  - "tests/test_{prices,csvimport}.py"
+  - "tests/test_{prices,csvimport,eodhd}.py"
 ---
 
 # Prices
@@ -27,22 +27,24 @@ The Snapshot page around the `Prices` expander: rule `tracking`.
   nothing, unless the save replaced the last price of one of its securities: a corrected price of
   the day of `asof` records again (the last row of a day in `history.csv` counts). The Snapshot page
   imports and takes typed prices too (`Prices`). The Snapshot estimate, the asset sunburst and the
-  `securities` tab read these files. No price is fetched: the justETF terms forbid automated
-  queries. Gold (`XAU`, troy ounces) and Bitcoin (`BTC`) also take the last month of their series in
-  euros (`prices.BY_SYMBOL`, a `Symbol` each: `gold` ships, `bitcoin` after a fetch; rule `series`),
-  dated on its last day (the month-end close, or the monthly average of gold), a provisional month
-  on its first: no later day of it is certain, so a value recorded since keeps its place. The newer
-  of the last stored price and the series wins, the stored one on the same day: gold has no fetch
-  and nothing deletes a price file, so one typed price must not fix the value for good. A save of
-  any price records these assets too, and so does a fetch that changes the last price of a symbol: a
-  month of `bitcoin` or of the dollar rate `usd-eur` (`prices.fetch_series`, on the Data page and by
-  `series fetch`, a revision of its own; a new price of the same day, such as a provisional month
-  fetched again, is corrected). Both series are monthly: no price by day.
+  `securities` tab read these files. `prices fetch` fetches them from EODHD (below; justETF and
+  the other sources forbid automated queries). Gold (`XAU`, troy ounces) and Bitcoin (`BTC`) also
+  take the last month of their series in euros (`prices.BY_SYMBOL`, a `Symbol` each: `gold` ships,
+  `bitcoin` after a fetch; rule `series`), dated on its last day (the month-end close, or the
+  monthly average of gold), a provisional month on its first: no later day of it is certain, so a
+  value recorded since keeps its place. The newer of the last stored price and the series wins,
+  the stored one on the same day: gold has no fetch and nothing deletes a price file, so one typed
+  price must not fix the value for good. A save of any price records these assets too, and so does
+  a fetch that changes the last price of a symbol: a month of `bitcoin` or of the dollar rate
+  `usd-eur` (`prices.fetch_series`, on the Data page and by `series fetch`, a revision of its own;
+  a new price of the same day, such as a provisional month fetched again, is corrected). Both
+  series are monthly: no price by day.
 - `src/dagobert/prices.py`: the price files: `read_prices` (a line that does not read, edited by
   hand, raises `InputError` with `prices/<security>.csv` and its line, `files.read_csv`, as
   `revisions` does for its log: a command ends with it, exit 1, the app shows `The inputs do not
   load`), `save` (the one writer: merges by date and records the market values, one revision of its
-  `source`; returns `Saved`, the `Replaced` prices and the recorded values; `price_file` refuses a
+  `source`, of the prices of one security or several (a fetch); returns `Saved`, the `Replaced`
+  prices by security and the recorded values; `price_file` refuses a
   text that is no security, it names the file), `merge`, `Securities` (names by security, held
   first, then traded, then price files only; units held; trades), `off_trades`, `far_off` (the check
   of the CLI), `off_series` (a trade of `XAU` or `BTC` whose price per unit lies outside
@@ -86,3 +88,32 @@ The Snapshot page around the `Prices` expander: rule `tracking`.
   of a security that its series prices, and lists a price file without trades after the held
   securities, marked `(no trades)`: a history imported before its trades, which values no asset
   (`Securities.of` lists any CSV named like a security; one sold in full is left out).
+
+## Fetch from EODHD
+
+- `uv run dagobert prices fetch [ISIN...]` (owner 2026-10-29) and `Fetch prices` in the `Prices`
+  expander (`pricing._fetch`, the getter looked up at the click, the outcome `pricing.fetched` in
+  session state after a rerun; without a key a caption that names both variables) run
+  `eodhd.fetch`: per held ISIN (`Securities.units`, not `XAU` or `BTC`, which keep their series)
+  the search of EODHD (`search/<ISIN>?exchange=XETRA`) for its one listing on Xetra in euros (a
+  listing in another currency is refused, never converted; two in euros are refused with their
+  codes), then its daily `close` (as traded: `adjusted_close` changes with each distribution and
+  would disagree with the trades) from its first trade, at most `eodhd.HISTORY` (a year, what the
+  free plan serves) before today. It adds the days that the price file lacks and never replaces a
+  stored price (an import or a typed price stays), drops a security with a new price far from a
+  trade nearby (`far_off`, the CLI saves it with `--force`), and saves the rest in one revision
+  (`prices.save`, `prices fetch` or the page). Two calls per ISIN, one a search that fails, of the
+  20 a day of the free plan (500 more once, at the start); each call fetches the whole span. A 401
+  (the key), 402 (the calls of the day, renewed at midnight GMT) or 429 (the calls of a minute)
+  ends the calls (`eodhd.STOPS`) and the prices found before it are saved; another status or an
+  answer that does not read refuses its security only (`UnpricedError`). The command prints the
+  added prices, the refusals, the stop, the calls and the recorded values; it exits with 1 on a
+  refusal or a stop. Its errors are English, also on the page.
+- The key (owner 2026-10-29): `EODHD_API_KEY`, else the file that `EODHD_API_KEY_FILE` names (a
+  secret of a container), stripped; an empty file or one that does not read is a `FetchError`
+  that names the path. The terms let a person use their own account only ("Non-Professional
+  Users", eodhd.com/financial-apis/terms-conditions): one key per instance, as one person per
+  instance (rule `container`). It travels in the query of the URL: `eodhd._Client` replaces it in
+  any `FetchError` of the getter (`from None`, so the chain holds no copy), the CLI prints no locals
+  of a traceback (`pretty_exceptions_show_locals`), and no source, toast or test fixture holds it.
+  The fetch sends the ISINs held to EODHD: the manual says so (`snapshot.md`, the README).

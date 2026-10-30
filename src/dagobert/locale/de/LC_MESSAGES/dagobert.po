@@ -10976,11 +10976,68 @@ msgid ""
 msgstr ""
 "Der Wert der gehaltenen Stücke zu jedem gespeicherten Preis, verglichen "
 "mit ihren Kosten mit Gebühren. Wenige gespeicherte Preise ergeben wenige "
-"Punkte: Importiere eine Preishistorie auf der Seite Snapshot."
+"Punkte: Importiere einen Preisverlauf auf der Seite Snapshot."
 
 #: ui/pricing.py
 msgid "last price"
 msgstr "Letzter Preis"
+
+#: ui/pricing.py
+#, python-brace-format
+msgid "{name}: {n} price added"
+msgid_plural "{name}: {n} prices added"
+msgstr[0] "{name}: {n} Preis ergänzt"
+msgstr[1] "{name}: {n} Preise ergänzt"
+
+#: ui/pricing.py
+#, python-brace-format
+msgid "{name}: not fetched: {reason}"
+msgstr "{name}: nicht abgerufen: {reason}"
+
+#: ui/pricing.py
+#, python-brace-format
+msgid "Stopped: {reason}"
+msgstr "Abgebrochen: {reason}"
+
+#: ui/pricing.py
+msgid "No new prices."
+msgstr "Keine neuen Preise."
+
+#: ui/pricing.py
+#, python-brace-format
+msgid "{n} call to EODHD"
+msgid_plural "{n} calls to EODHD"
+msgstr[0] "{n} Abruf bei EODHD"
+msgstr[1] "{n} Abrufe bei EODHD"
+
+#: ui/pricing.py
+#, python-brace-format
+msgid ""
+"To fetch prices, set {key} to a key of your own (free at eodhd.com), or "
+"{file} to a file that holds it, then start the app again."
+msgstr ""
+"Um Preise abzurufen, setze {key} auf einen eigenen Schlüssel (kostenlos "
+"bei eodhd.com) oder {file} auf eine Datei, die ihn enthält, und starte die "
+"App neu."
+
+#: ui/pricing.py
+msgid ""
+"The daily closes of the last year that the stored prices lack, of each "
+"held ISIN on Xetra in euros: two calls per security of the 20 a day of the"
+" free plan. The fetch sends the ISINs to EODHD; a stored price stays."
+msgstr ""
+"Die Tagesschlusskurse des letzten Jahres, die den gespeicherten Preisen "
+"fehlen, für jede gehaltene ISIN an Xetra in Euro: zwei Abrufe pro "
+"Wertpapier von den 20 am Tag im kostenlosen Tarif. Der Abruf sendet die "
+"ISINs an EODHD, ein gespeicherter Preis bleibt."
+
+#: ui/pricing.py
+msgid "Fetch prices"
+msgstr "Preise abrufen"
+
+#: ui/pricing.py
+msgid "Fetching prices…"
+msgstr "Preise werden abgerufen…"
 
 #: ui/pricing.py
 msgid "prices"

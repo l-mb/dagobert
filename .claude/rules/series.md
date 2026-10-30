@@ -23,7 +23,8 @@ The sources and terms of each shipped file: `src/dagobert/data/SOURCES.md`.
   `prices import` (`cli.Columns`), or a file of `month,value[,provisional]` rows as it is
   (`series.month_values`: the `msci_world.csv` of an older data directory), and writes it through
   `series.month_ends` and `series.save`, which refuses a gap (exit 1); only a series with `imports`
-  takes one. Nothing else fetches: the app on the button of the Data page only.
+  takes one. Nothing else fetches but `prices fetch` (rule `prices`), in the app the buttons of the
+  Data page and of the `Prices` expander, never at a start or on a timer.
 - `uv run python scripts/refresh_shipped.py` (maintainers, before a release) downloads the
   shipped series again (`series`): every series with `delivered` byte for byte, whole (three
   Bundesbank files and the ECB file, 5 s apart: the Bundesbank refuses a burst), the newest

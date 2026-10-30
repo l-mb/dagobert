@@ -45,12 +45,12 @@ def test_merge_keeps_one_price_per_date_and_the_new_one_wins() -> None:
 
 
 def _save(data: Path, *points: prices.Price, security: str = ISIN) -> prices.Saved:
-    return prices.save(data, security, list(points), source="test")
+    return prices.save(data, {security: list(points)}, source="test")
 
 
 def test_save_writes_the_merged_file(data: Path) -> None:
     _save(data, (date(2026, 9, 17), 1234.5678))
-    assert _save(data, (date(2026, 9, 16), 9.0), (date(2026, 9, 17), 9.5)).replaced == [
+    assert _save(data, (date(2026, 9, 16), 9.0), (date(2026, 9, 17), 9.5)).replaced[ISIN] == [
         prices.Replaced(date(2026, 9, 17), 1234.5678, 9.5)
     ]
     _save(data, (date(2026, 9, 18), 1234.5678))

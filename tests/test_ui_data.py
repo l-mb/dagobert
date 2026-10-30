@@ -67,7 +67,7 @@ def test_the_data_page_names_the_optional_series_not_fetched_yet(data: Path) -> 
     at = AppTest.from_string(DATA.format(data=str(data)), default_timeout=30).run()
     assert any("hold BTC without a price of their own" in w.value for w in at.warning)
     assert any("Snapshot page" in w.value or "Assets page" in w.value for w in at.warning)
-    prices.save(data, "BTC", [(date(2026, 1, 2), 8000.0)], source="test")
+    prices.save(data, {"BTC": [(date(2026, 1, 2), 8000.0)]}, source="test")
     assert not data_page.needed(data)  # a price of its own values it
 
 

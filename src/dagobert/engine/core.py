@@ -313,6 +313,8 @@ class Core:
         self.oneoff_tax = np.zeros(self.paths)
         self.cash_mark = self.cash.copy()
         self.liquid_prev = np.zeros(self.paths)
+        self.kv_capped: tuple[int, FloatArray | float] = (-1, 1.0)
+        self.cap_marked = False
         phase = self.m.phase
         self.earns = (
             sum(
@@ -539,8 +541,35 @@ class Core:
         return s.earned_scale(m.phase, self.a) * growth
 
     def _nominal(self, s: StreamState) -> FloatArray:
-        """Nominal amount of one plain stream this month."""
-        return s.amount * s.factor(self.m.phase) * self._index(s)
+        """Nominal amount of one plain stream this month, a part of the KV premium of the PKV
+        within its cap (`_kv_cap`)."""
+        amount = s.amount * s.factor(self.m.phase) * self._index(s)
+        return amount * self._kv_cap() if s.spec.health == "kv" else amount
+
+    def _kv_cap(self) -> FloatArray | float:
+        """What the KV parts of the PKV premium pay of their amounts this month: from
+        `tax.pkv_cap_from` together at most the highest contribution of the GKV, the general rate
+        and the average Zusatzbeitrag on the KV-BBG (§152 Abs. 3 VAG), per path. The marker
+        `pkv cap` falls in the first month in which the cap lowers half of the paths."""
+        since = self.a.tax.pkv_cap_from
+        if since is None or self.m.month < since or not self.pkv:
+            return 1.0
+        if self.kv_capped[0] != self.m.i:
+            premium = -sum(
+                (
+                    s.amount * s.factor(self.m.phase) * self._index(s) / s.spec.every
+                    for s in self.streams
+                    if s.spec.health == "kv" and s.active(self.m.month, self.m.phase)
+                ),
+                np.zeros(self.paths),
+            )
+            cap = 2 * self.ty.kv_half * self.ty.kv_pv_bbg_month * self.deflator
+            share = cap / np.maximum(premium, cap)
+            self.kv_capped = (self.m.i, share)
+            if not self.cap_marked and np.median(share) < 1:
+                self.cap_marked = True
+                self._mark("pkv cap", form="half" if share.max() >= 1 else "")
+        return self.kv_capped[1]
 
     def _run_rate(self, kind: StreamKind, *, taxable: bool = False) -> FloatArray:
         """Nominal run rate of the streams of `kind` active this month, with `taxable` of the

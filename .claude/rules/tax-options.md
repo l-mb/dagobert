@@ -53,6 +53,21 @@ yearly work expenses (`werbungskosten`): rule `deductions`. The inputs:
   Before it the PKV, from it the GKV with its `health` streams ended: rule `gkv`. A scenario sets it
   in its overrides, no Explorer switch. The Tax tab: `Statutory health insurance from`, off while
   `pkv` is (rule `assumptions`); a month before `start` means the GKV for the whole run.
+- The cap of the PKV premium (`tax.pkv_cap_from`, a `Month`, with `pkv` only; issue #47; §152
+  VAG and §257 SGB V read at gesetze-im-internet.de on 2026-11-19): the Basistarif, or the
+  Standardtarif of §257 Abs. 2a SGB V as of 2008 (a contract from before 2009; its old text and
+  the access to either tariff, §204 VVG, not read: the model and the pages name no condition).
+  `Core._kv_cap`, once per month and
+  per path: the run rate of the active `health: kv` streams against `2 × kv_half × kv_pv_bbg_month`
+  at the deflator (§152 Abs. 3 VAG: the Höchstbeitrag of the GKV with the average Zusatzbeitrag),
+  and `Core._nominal` pays each such stream at that share, so `_premium`, `_basis`, the subsidies
+  and the deduction follow. The PV part stays (its own cap, the Höchstbeitrag of the SPV, is a
+  gap). Marker `pkv cap` in the first month in which the median path is capped (`half` unless all
+  are; `charts.SAYS`, `LAWS`). No refusal by age or income: the user sets the month. The
+  estimates of `cashplan` (the Cashflows sheet, Spend) show the premium without the cap, the rows
+  of the run with it. A `health` expense may have an amount above zero
+  (`Stream._signed`): a Beitragsentlastung, which lowers `_premium` (at least 0) and `_basis` by
+  its share. Tests: `test_income.py`.
 - Zusatzbeitrag (`tax.kv_zusatz`, the whole rate of the own Kasse, GKV only; `sv.kv_zusatz` gives
   it, else the average of the year, twice `kv_zusatz_half`, §242a SGB V): half of it on a salary
   (§249 Abs. 1) and on the pension (§247, §249a; a voluntary member pays all and the DRV half of it

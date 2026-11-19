@@ -380,10 +380,13 @@ class Stream(Strict):
 
     def _signed(self, amount: float) -> None:
         """The sign of the amount of its kind: money out of an expense, a savings plan and a
-        voluntary contribution (which pays something), the benefit of a BU policy not."""
+        voluntary contribution (which pays something), the benefit of a BU policy not. A part of
+        a `health` premium may be above zero: it lowers the premium."""
         kind = self.kind
         if kind == StreamKind.RV_VOLUNTARY and amount >= 0:
             message: LiteralString = "{name}: rv_voluntary needs a negative amount"
+        elif kind == StreamKind.EXPENSE and self.health is not None and amount > 0:
+            return  # what the insurer takes off the premium: a Beitragsentlastungstarif
         elif kind in (StreamKind.EXPENSE, StreamKind.SAVINGS) and amount > 0:
             message = "{name}: {kind} needs a non-positive amount"
         elif kind == StreamKind.BU and amount < 0:

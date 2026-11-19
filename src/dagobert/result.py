@@ -209,6 +209,7 @@ MarkerKind = Literal[
     "disability",
     "exemption",
     "gkv",
+    "pkv cap",
     "sell",
     "buy",
     "buy_property",

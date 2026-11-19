@@ -282,6 +282,15 @@ Overview moves it) and `scale` (the overrides of a scenario).
   - `pkv` (default true): privately insured. Then there is no statutory KV and PV, and the
     `health` streams take the subsidies and the deduction. With `gkv_from`, this is true only
     before that month.
+  - `pkv_cap_from` (a month, default empty, only with `pkv: true`): the first month in the
+    Standardtarif or the Basistarif of your private insurance. From this month the `health: kv`
+    streams together pay at most the highest contribution of the statutory insurance: the
+    general rate and the average Zusatzbeitrag on the contribution ceiling, 1,017.19 € a month in
+    2026 (§152 Abs. 3 VAG). The `health: pv` streams stay. The simulation marks the month in
+    which the cap first lowers the premium. The simulation does not check whether you can change:
+    the law and your contract decide it, and your insurer tells you. The Standardtarif is for
+    contracts from before 2009. Both tariffs cover about what the statutory insurance covers. Set
+    the month in a scenario to see what a premium that rises fast costs at most.
   - `gkv_from` (a month, default empty, only with `pkv: true`): the first month in the statutory
     health insurance (GKV). Before this month the rules of the PKV apply. From this month the
     rules of the GKV apply, and the `health` streams end by themselves. A salary, ALG1 or a
@@ -642,7 +651,11 @@ A list under `streams`. Fields:
   Pflegepflicht part as `pv`. The engine holds no premium parts. `deductible` (0 to 1) with
   `health` is the share of a part that is Basisabsicherung and a Sonderausgabe, from the
   certificate of the insurer. The default is all of `pv`, and `pkv_basis_share` of the tax year
-  for `kv`. A `health` stream ends in the month of `tax.gkv_from`.
+  for `kv`. A `health` stream ends in the month of `tax.gkv_from`. A `health` part can have an
+  amount above zero: it lowers the premium. Use it for a Beitragsentlastungstarif: one stream
+  with the extra premium and an `end` at the agreed age, and one with the agreed reduction as a
+  positive amount, `index: null` and a `start` at that age. The subsidies and the deduction take
+  the premium after the reduction.
 - `deduct` (an `expense` without `health` and without `property`, default none): what the expense
   is for the income tax. The cash flow stays an expense of its category.
   - `work`: work expenses (Werbungskosten, §9 EStG) at a date, for example a course that you pay

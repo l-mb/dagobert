@@ -204,6 +204,14 @@ class TaxOptions(Strict):
         "55 §6 Abs. 3a usually blocks the return. A scenario sets it to compare. Empty: the "
         "PKV for the whole run",
     )
+    pkv_cap_from: Month | None = Field(
+        default=None,
+        description="With `pkv`: the first month in the Basistarif or the Standardtarif of the "
+        "private insurance, whose premium is at most the highest contribution of the statutory "
+        "insurance (§152 Abs. 3 VAG). From it the `health: kv` premiums together pay at most "
+        "that. The law and your contract decide whether and when you can change. These tariffs "
+        "cover about what the GKV covers. Empty: no cap",
+    )
     kv_zusatz: Percent | None = Field(
         default=None,
         ge=0,
@@ -287,6 +295,9 @@ class TaxOptions(Strict):
     def _gkv_after_pkv(self) -> TaxOptions:
         if self.gkv_from is not None and not self.pkv:
             msg = "gkv_from needs pkv: it is the month in which the private insurance ends"
+            raise ValueError(msg)
+        if self.pkv_cap_from is not None and not self.pkv:
+            msg = "pkv_cap_from needs pkv: it caps the premium of the private insurance"
             raise ValueError(msg)
         return self
 

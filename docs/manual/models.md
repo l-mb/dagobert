@@ -341,6 +341,20 @@ A late change seldom reaches it, so set `person.kvdr` off then.
 To compare the two insurances, set `tax.gkv_from` in the `overrides` of one scenario, and keep a
 scenario without it. The Explorer has no switch for it.
 
+### The premium of a private insurance at old age
+
+The premium of a private insurance follows the index of its streams, and this index is your
+assumption. Two inputs limit what a fast rise costs:
+
+- `tax.pkv_cap_from` is the month of a change into the Standardtarif or the Basistarif. From
+  this month your health premiums together pay at most the highest contribution of the statutory
+  insurance. The care premium stays as it is. The marker `PKV premium capped` shows the month in
+  which the cap first lowers the premium of half of the paths. These tariffs cover less than a
+  usual private tariff. Use the cap to see the worst case, in a scenario of its own.
+- A Beitragsentlastungstarif is two streams: the extra premium until the agreed age, and the
+  reduction as a positive amount from that age
+  ([Input files](configuration.md#cashflowsyaml)).
+
 ## A business of your own
 
 A stream of the kind `self_employed` is the profit of a business: what is left of the revenue after

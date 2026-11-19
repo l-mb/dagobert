@@ -65,6 +65,7 @@ KV_ZUSATZ: KeyPath = ("tax", "kv_zusatz")
 RV: KeyPath = ("tax", "self_employed", "rv")
 PKV: KeyPath = ("tax", "pkv")
 GKV_FROM: KeyPath = ("tax", "gkv_from")
+PKV_CAP: KeyPath = ("tax", "pkv_cap_from")
 FIELDS = tuple(of(Assumptions))
 PHASES = "phases"  # defined in `assumptions.yaml` only, not in the overrides of a scenario
 RELATIVES: KeyPath = ("person", "relatives")
@@ -151,6 +152,7 @@ LABELS: dict[KeyPath, str] = {
     ("tax", "harvest"): N_("Realize gains each December within the tax-free room"),
     PKV: N_("Private health insurance (PKV)"),
     GKV_FROM: N_("Statutory health insurance from"),
+    PKV_CAP: N_("PKV premium capped from"),
     ("tax", "kv_zusatz"): N_("Health fund extra rate %"),
     ("tax", "church"): N_("Church tax"),
     ("tax", "land"): N_("Bundesland"),
@@ -176,6 +178,7 @@ TERMS: dict[KeyPath, str] = {
     ("tax", "harvest"): "Günstigerprüfung",
     PKV: "Private Krankenversicherung",
     GKV_FROM: "Gesetzliche Krankenversicherung",
+    PKV_CAP: "Standardtarif, Basistarif",
     ("tax", "kv_zusatz"): "Zusatzbeitrag",
     ("tax", "church"): "Kirchensteuer",
     ("tax", "loss_carryforward"): "Verlustvortrag",
@@ -249,6 +252,14 @@ HELPS: dict[KeyPath, str] = {
         "member (§5 SGB V); from 55 §6 Abs. 3a usually blocks the return. A scenario sets it to "
         "compare both. Empty: the private insurance for the whole run (default: none)"
     ),
+    PKV_CAP: N_(
+        "With private health insurance: the first month in the Basistarif or the Standardtarif, "
+        "whose premium is at most the highest contribution of the statutory insurance (§152 Abs. "
+        "3 VAG). From it your health premiums together pay at most that; the care premium stays. "
+        "The law and your contract decide whether and when you can change: ask your insurer. "
+        "These tariffs cover about what the statutory insurance covers. Empty: no cap (default: "
+        "none)"
+    ),
     ("tax", "self_employed", "founded"): N_(
         "The month in which your business was founded. With a fixed contribution the Regelbeitrag "
         "is half up to the end of the third calendar year after it. Empty: the first month in "
@@ -271,6 +282,7 @@ CHOICES: dict[KeyPath, dict[object, str]] = {
 # the fields that take effect only with a value of another
 WHEN: dict[KeyPath, When] = {
     GKV_FROM: When(PKV, (True,), N_("private insurance only")),
+    PKV_CAP: When(PKV, (True,), N_("private insurance only")),
     ("tax", "self_employed", "krankengeld"): When(
         PKV, (False,), N_("statutory insurance only"), unless=GKV_FROM
     ),

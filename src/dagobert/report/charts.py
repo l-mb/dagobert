@@ -313,6 +313,7 @@ MARKER_KINDS: dict[MarkerKind, str] = {
     "disability": N_("Unable to work"),
     "exemption": N_("ALG1 in the PKV"),
     "gkv": N_("Statutory health insurance"),
+    "pkv cap": N_("PKV premium capped"),
 }
 # what a marker of a kind always says
 SAYS: dict[MarkerKind, str] = {
@@ -327,6 +328,7 @@ SAYS: dict[MarkerKind, str] = {
         "irrevocable ({law})"
     ),
     "gkv": N_("at 55 or older {law} usually blocks the switch"),
+    "pkv cap": N_("at the highest contribution of the statutory insurance ({law})"),
 }
 # the law that a marker names, on one line of its legend
 LAWS: dict[MarkerKind, str] = {
@@ -336,6 +338,7 @@ LAWS: dict[MarkerKind, str] = {
     "gz salary": "§93 Abs. 1 SGB III",
     "exemption": "§8 Abs. 1 S. 1 Nr. 1a SGB V",
     "gkv": "§6 Abs. 3a SGB V",
+    "pkv cap": "§152 Abs. 3 VAG",
 }
 # how a policy pays, by `Marker.form`
 PAID = {

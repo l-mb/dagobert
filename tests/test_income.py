@@ -290,6 +290,61 @@ def test_health_premium_parts_are_streams() -> None:
     )
 
 
+def test_a_capped_pkv_premium_pays_the_highest_gkv_contribution_at_most() -> None:
+    """§152 Abs. 3 VAG, the Standardtarif or the Basistarif from `tax.pkv_cap_from`: the KV parts
+    together at the general rate and the average Zusatzbeitrag on the KV-BBG, the PV part as
+    before; the marker in the month of the cap. A premium below the cap stays."""
+    parts = [
+        Stream(name="kv", amount=-1300, health="kv", index=None),
+        Stream(name="extra", amount=-200, health="kv", index=None),
+        Stream(name="pv", amount=-70, health="pv", index=None),
+    ]
+    cap = 2 * TY.kv_half * TY.kv_pv_bbg_month
+    free = zero_run(plan(parts, [cash(100_000)]), 4)
+    capped = zero_run(plan(parts, [cash(100_000)], tax={"pkv_cap_from": date(2026, 3, 1)}), 4)
+    assert free.expenses[0].tolist() == pytest.approx([-1570] * 4)
+    assert capped.expenses[0].tolist() == pytest.approx([-1570, -1570, -cap - 70, -cap - 70])
+    assert [(m.kind, m.month) for m in capped.markers if m.kind == "pkv cap"] == [
+        ("pkv cap", date(2026, 3, 1))
+    ]
+    low = zero_run(plan(parts[1:], [cash(100_000)], tax={"pkv_cap_from": date(2026, 1, 1)}), 2)
+    assert low.expenses[0].tolist() == pytest.approx([-270, -270])
+    assert not [m for m in low.markers if m.kind == "pkv cap"]
+
+
+def test_a_reduction_of_the_pkv_premium_lowers_what_it_pays_and_deducts() -> None:
+    """A Beitragsentlastungstarif: the insurer takes a fixed amount off the premium from a month,
+    a `health` part above zero. The subsidy and the deduction take the premium after it."""
+
+    def run(*more: Stream) -> RunResult:
+        streams = [
+            Stream(name="salary", kind=StreamKind.SALARY, gross=5000),
+            Stream(name="kv", amount=-900, health="kv", index=None),
+            *more,
+        ]
+        return zero_run(plan(streams, [cash(100_000)]), 12)
+
+    relief = Stream(name="relief", amount=300, health="kv", index=None, start=date(2026, 7, 1))
+    plain, relieved = run(), run(relief)
+    lower = zero_run(
+        plan(
+            [
+                Stream(name="salary", kind=StreamKind.SALARY, gross=5000),
+                Stream(name="kv", amount=-900, health="kv", index=None, end=date(2026, 7, 1)),
+                Stream(name="kv2", amount=-600, health="kv", index=None, start=date(2026, 7, 1)),
+            ],
+            [cash(100_000)],
+        ),
+        12,
+    )
+    assert relieved.expenses[0, 6:].tolist() == pytest.approx([-600] * 6)
+    assert relieved.income[0].tolist() == pytest.approx(lower.income[0].tolist())  # the subsidy
+    assert relieved.taxes[0].sum() == pytest.approx(lower.taxes[0].sum())
+    assert relieved.taxes[0].sum() < plain.taxes[0].sum()  # more tax: less premium to deduct
+    with pytest.raises(ValueError, match="non-positive"):
+        Stream(name="rent", amount=300, index=None)
+
+
 def test_the_pkv_subsidy_follows_the_salary_and_alg1_not_the_phase() -> None:
     """§257 Abs. 2 SGB V: 8.75% of the month's contributory salary, a one-off within the BBG of
     the year included, at most half the premium, none in `work` without a salary. §174 SGB III:

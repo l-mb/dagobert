@@ -2528,6 +2528,31 @@ msgid "gkv_from"
 msgstr "GKV ab"
 
 #: model/assumptions.py model/plan.py model/taxes.py
+msgid ""
+"With `pkv`: the first month in the Basistarif or the Standardtarif of the"
+" private insurance, whose premium is at most the highest contribution of "
+"the statutory insurance (§152 Abs. 3 VAG). From it the `health: kv` "
+"premiums together pay at most that. The law and your contract decide "
+"whether and when you can change. These tariffs cover about what the GKV "
+"covers. Empty: no cap"
+msgstr ""
+"Mit `pkv`: der erste Monat im Basistarif oder Standardtarif der privaten "
+"Versicherung, dessen Beitrag höchstens der Höchstbeitrag der gesetzlichen"
+" Versicherung ist (§152 Abs. 3 VAG). Ab dann zahlen die Beiträge `health:"
+" kv` zusammen höchstens das. Ob und wann du wechseln kannst, entscheiden "
+"das Gesetz und dein Vertrag. Diese Tarife leisten etwa, was die GKV "
+"leistet. Leer: kein Deckel"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid "PKV cap from"
+msgstr "PKV-Beitrag gedeckelt ab"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgctxt "key"
+msgid "pkv_cap_from"
+msgstr "PKV-Deckel ab"
+
+#: model/assumptions.py model/plan.py model/taxes.py
 #, python-format
 msgid ""
 "The Zusatzbeitrag of your own Krankenkasse (§242 SGB V), the whole rate: "
@@ -4211,6 +4236,10 @@ msgid "Statutory health insurance"
 msgstr "Gesetzliche Krankenversicherung"
 
 #: report/charts.py
+msgid "PKV premium capped"
+msgstr "PKV-Beitrag gedeckelt"
+
+#: report/charts.py
 msgid "on the last salary, not on the self-employment"
 msgstr "bemessen nach dem letzten Gehalt, nicht nach der Selbstständigkeit"
 
@@ -4251,6 +4280,11 @@ msgstr ""
 #, python-brace-format
 msgid "at 55 or older {law} usually blocks the switch"
 msgstr "ab 55 versperrt {law} den Wechsel meist"
+
+#: report/charts.py
+#, python-brace-format
+msgid "at the highest contribution of the statutory insurance ({law})"
+msgstr "auf den Höchstbeitrag der gesetzlichen Versicherung ({law})"
 
 #: report/charts.py
 #, python-brace-format
@@ -5960,6 +5994,10 @@ msgid "Statutory health insurance from"
 msgstr "Gesetzlich versichert ab"
 
 #: ui/assumptions.py
+msgid "PKV premium capped from"
+msgstr "PKV-Beitrag gedeckelt ab"
+
+#: ui/assumptions.py
 msgid "Health fund extra rate %"
 msgstr "Zusatzbeitrag der Krankenkasse %"
 
@@ -6160,6 +6198,24 @@ msgstr ""
 "SGB V); ab 55 versperrt §6 Abs. 3a die Rückkehr meist. Ein Szenario setzt"
 " ihn, um beides zu vergleichen. Leer: die private Versicherung für die "
 "ganze Simulation (Standard: keiner)"
+
+#: ui/assumptions.py
+msgid ""
+"With private health insurance: the first month in the Basistarif or the "
+"Standardtarif, whose premium is at most the highest contribution of the "
+"statutory insurance (§152 Abs. 3 VAG). From it your health premiums "
+"together pay at most that; the care premium stays. The law and your "
+"contract decide whether and when you can change: ask your insurer. These "
+"tariffs cover about what the statutory insurance covers. Empty: no cap "
+"(default: none)"
+msgstr ""
+"Mit privater Krankenversicherung: der erste Monat im Basistarif oder "
+"Standardtarif, dessen Beitrag höchstens der Höchstbeitrag der "
+"gesetzlichen Versicherung ist (§152 Abs. 3 VAG). Ab dann zahlen deine "
+"Krankenversicherungsbeiträge zusammen höchstens das; der Pflegebeitrag "
+"bleibt. Ob und wann du wechseln kannst, entscheiden das Gesetz und dein "
+"Vertrag: Frag deinen Versicherer. Diese Tarife leisten etwa, was die "
+"gesetzliche Versicherung leistet. Leer: kein Deckel (Standard: keiner)"
 
 #: ui/assumptions.py
 msgid ""

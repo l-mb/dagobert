@@ -81,9 +81,16 @@ class Income(Health):
 
     def _premium(self, *parts: str) -> FloatArray:
         """Nominal PKV premium due this month for the `health` parts."""
-        return sum(
-            (-self._nominal(s) for s in self.streams if s.spec.health in parts and self._pays(s)),
-            np.zeros(self.paths),
+        return np.maximum(
+            sum(
+                (
+                    -self._nominal(s)
+                    for s in self.streams
+                    if s.spec.health in parts and self._pays(s)
+                ),
+                np.zeros(self.paths),
+            ),
+            0.0,
         )
 
     def _basis(self) -> FloatArray:

@@ -560,6 +560,34 @@ def _styled(new: Any, like: Any) -> Any:  # noqa: ANN401 ruamel nodes are untype
     return new
 
 
+def moved(
+    text: str,
+    name: str,
+    source: Way,
+    target: Way,
+    wrap: Callable[[Any], Row],
+    *,
+    required: bool = True,
+) -> str:
+    """The text of the file `name` with the row at `source` taken out of its list and added to
+    the list at `target` as `wrap(row)`: the comment lines inside the row go with it, those around
+    it stay (`drop`). A top-level list that loses its last row stays as `[]` when the model
+    requires it (`required`), else it goes. A `Where` that names no row raises `RefusedError`."""
+    doc = _document(text, name)
+    settle(doc)
+    keys = _found(doc, source)
+    rows = _at(doc, keys[:-1])
+    row = rows[keys[-1]]
+    if len(rows) == 1 and len(keys) == 2 and required:
+        emptied(doc, keys[0])
+    elif len(rows) == 1:
+        _clear(doc, keys[:-1])
+    else:
+        drop(rows, keys[-1])
+    _edit_rows(doc, _found(doc, target), RowEdits(added=[dict(wrap(row))]))
+    return dump(doc)
+
+
 def assets_file(data_dir: Path) -> RowFile:
     return RowFile(data_dir, "assets.yaml", ("assets",))
 

@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 
 from dagobert.history import observations, values_at, worth
 from dagobert.i18n import N_, _
-from dagobert.loader import load_assets, load_assumptions
+from dagobert.loader import load_assets, load_assumptions, load_closed
 from dagobert.model.assets import Asset, HoldingsAsset, TermDeposit
 from dagobert.model.events import SellEvent
 from dagobert.money import format_eur, format_number, format_percent
@@ -127,14 +127,18 @@ def totals(assets: list[Asset], day: date) -> tuple[dict[str, float], dict[str, 
 
 def change(data_dir: Path, assets: list[Asset], day: date, since: date) -> dict[str, float] | None:
     """Change by liquidity from `since` to `day`, over the assets observed by `since`: an asset
-    recorded later would show its entry as growth. None while no asset has a value by `since`:
+    recorded later would show its entry as growth, unless it `opened` after `since`, when it held
+    nothing. An asset closed since counts down to 0. None while no asset has a value by `since`:
     nothing to compare with, as in a new plan."""
-    if not (then := values_at(observations(data_dir, assets), since)):
+    closed = [c for c in load_closed(data_dir) if c.ended <= day]
+    if not (then := values_at(observations(data_dir, assets, closed), since)):
         return None
     delta: dict[str, float] = defaultdict(float)
     for asset in assets:
-        if asset.id in then:
-            delta[LIQUIDITY[asset.kind]] += worth(asset, day) - then[asset.id]
+        if asset.id in then or (asset.opened is not None and asset.opened > since):
+            delta[LIQUIDITY[asset.kind]] += worth(asset, day) - then.get(asset.id, 0.0)
+    for ended in closed:  # its money left it: what took the payout counts it
+        delta[LIQUIDITY[ended.asset.kind]] -= then.get(ended.asset.id, 0.0)
     return dict(delta)
 
 

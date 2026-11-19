@@ -7,7 +7,8 @@ paths:
 
 # Observed values and lots
 
-The price files, their import and the `Prices` expander: rule `prices`.
+The price files, their import and the `Prices` expander: rule `prices`. `Close` and `Reopen` of
+an asset, `closed` and `opened` in the records and the tiles: rule `closing`.
 
 ## Snapshot page
 

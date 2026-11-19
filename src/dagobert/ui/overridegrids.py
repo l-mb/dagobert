@@ -55,7 +55,7 @@ LEAVES = frozenset(
 )
 NOT_SET = {  # the fields that name or describe an item, which no override sets
     "events": frozenset({"type", "id", "note"}),
-    "assets": frozenset({"id", "name", "tags", "asof", "update_every"}),
+    "assets": frozenset({"id", "name", "tags", "asof", "update_every", "opened"}),
 }
 SUFFIX: dict[Unit | None, str] = {Unit.EUR: " €"}  # a percent takes `money.PERCENT`
 MONTHS = fields.Field(("months",), fields.Kind.INTEGER, unit=Unit.MONTHS)

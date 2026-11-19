@@ -316,6 +316,10 @@ msgid "Update every"
 msgstr "Aktualisieren alle (Monate)"
 
 #: model/assets.py
+msgid "Opened"
+msgstr "Eröffnet"
+
+#: model/assets.py
 msgid "Amount invested at `start`, without interest"
 msgstr "Bei `start` angelegter Betrag, ohne Zinsen"
 
@@ -479,6 +483,32 @@ msgstr "Jährliche Kosten als Anteil am Wert"
 #: model/assets.py
 msgid "Lump sum"
 msgstr "Einmalzahlung"
+
+#: model/assets.py
+msgid "The day the asset ended"
+msgstr "Der Tag, an dem der Vermögenswert endete"
+
+#: model/assets.py
+msgid "Ended"
+msgstr "Beendet"
+
+#: model/assets.py
+msgctxt "key"
+msgid "ended"
+msgstr "Beendet"
+
+#: model/assets.py
+msgid "What it paid out at its end"
+msgstr "Die Auszahlung an seinem Ende"
+
+#: model/assets.py
+msgid "Closed"
+msgstr "Geschlossen"
+
+#: model/assets.py
+msgctxt "key"
+msgid "closed"
+msgstr "Geschlossen"
 
 #: model/assets.py model/assumptions.py model/events.py model/plan.py
 msgid "Growth"
@@ -689,6 +719,11 @@ msgstr "Vorfälligkeitsentschädigung"
 msgid "Any day of the month; the day is ignored"
 msgstr "Ein beliebiger Tag des Monats; der Tag zählt nicht"
 
+#: model/assets.py model/events.py model/plan.py
+msgctxt "key"
+msgid "asset"
+msgstr "Vermögenswert"
+
 #: model/assets.py model/events.py model/plan.py model/streams.py
 msgctxt "key"
 msgid "name"
@@ -745,6 +780,10 @@ msgstr "Bis Alter"
 msgid "Kind"
 msgstr "Art"
 
+#: model/assets.py model/events.py ui/assets.py ui/closing.py ui/rename.py
+msgid "Asset"
+msgstr "Vermögenswert"
+
 #: model/assets.py model/plan.py
 msgid "The short name by which other inputs and the history name it"
 msgstr "Der Kurzname, mit dem andere Eingaben und der Verlauf auf ihn verweisen"
@@ -770,6 +809,21 @@ msgstr ""
 msgctxt "key"
 msgid "update_every"
 msgstr "Aktualisieren alle (Monate)"
+
+#: model/assets.py model/plan.py
+msgid ""
+"The day the account was opened with money of other assets. Before it the "
+"asset counts as 0 in the recorded net worth. Empty: it counts from its "
+"first value"
+msgstr ""
+"Der Tag, an dem das Konto mit Geld aus anderen Vermögenswerten eröffnet "
+"wurde. Davor zählt der Vermögenswert im erfassten Nettovermögen mit 0. "
+"Leer: Er zählt ab seinem ersten Wert"
+
+#: model/assets.py model/plan.py
+msgctxt "key"
+msgid "opened"
+msgstr "Eröffnet"
 
 #: model/assets.py model/plan.py
 msgctxt "key"
@@ -1059,7 +1113,7 @@ msgstr "Basisrente"
 msgid "Trades"
 msgstr "Transaktionen"
 
-#: model/assets.py ui/pricing.py ui/tradeform.py
+#: model/assets.py ui/position.py ui/pricing.py ui/tradeform.py
 msgid "Security"
 msgstr "Wertpapier"
 
@@ -2886,11 +2940,6 @@ msgstr "Vermögensschwelle"
 
 #: model/events.py model/plan.py
 msgctxt "key"
-msgid "asset"
-msgstr "Vermögenswert"
-
-#: model/events.py model/plan.py
-msgctxt "key"
 msgid "when"
 msgstr "Wann"
 
@@ -3573,10 +3622,6 @@ msgstr "Immobilie"
 #: model/events.py report/charts.py ui/bars.py ui/rename.py ui/scenarios.py
 msgid "Phase"
 msgstr "Phase"
-
-#: model/events.py ui/assets.py ui/rename.py
-msgid "Asset"
-msgstr "Vermögenswert"
 
 #: model/events.py ui/pricing.py
 msgid "Price"
@@ -4742,6 +4787,23 @@ msgstr "Plan (Median)"
 msgid "{units} units for {amount}"
 msgstr "{units} Stück für {amount}"
 
+#: report/tracker.py result.py
+msgid "purchase"
+msgstr "Kauf"
+
+#: report/tracker.py result.py
+msgid "sale"
+msgstr "Verkauf"
+
+#: report/tracker.py ui/assets.py
+msgid "cost"
+msgstr "Kosten"
+
+#: report/tracker.py ui/assets.py ui/assumptions.py ui/corrections.py
+#: ui/data.py ui/overridegrids.py ui/overview.py ui/snapshot.py
+msgid "value"
+msgstr "Wert"
+
 #: report/tracker.py ui/outlook.py ui/summary.py
 msgid "liquid"
 msgstr "liquide"
@@ -4844,14 +4906,6 @@ msgstr "Vertragsbeitrag"
 #: result.py
 msgid "policy payout"
 msgstr "Vertragsauszahlung"
-
-#: result.py
-msgid "sale"
-msgstr "Verkauf"
-
-#: result.py
-msgid "purchase"
-msgstr "Kauf"
 
 #: result.py
 msgid "repayment"
@@ -5311,6 +5365,10 @@ msgid "bought in"
 msgstr "Kaufmonat"
 
 #: ui/assets.py
+msgid "opened"
+msgstr "eröffnet"
+
+#: ui/assets.py
 msgid "financed property"
 msgstr "Finanzierte Immobilie"
 
@@ -5382,8 +5440,9 @@ msgid ""
 "each year before a sale, booked in January for the year before. A sale "
 "takes the oldest units of the security first (FIFO). The yearly returns "
 "are money-weighted and before tax, the real ones in euros of the last "
-"price date by the consumer prices. A lot counts from its purchase. Under a "
-"year they stay empty: a few months would inflate them to a rate per year."
+"price date by the consumer prices. A lot counts from its purchase. Under "
+"a year they stay empty: a few months would inflate them to a rate per "
+"year."
 msgstr ""
 "Gib die Transaktionen so ein, wie die Bank sie auflistet, die Beträge in "
 "Euro: Der **Betrag** ist der Preis aller Stücke ohne Gebühren (der "
@@ -5431,12 +5490,12 @@ msgstr "Der Gewinn gegenüber den Kosten der gehaltenen Stücke"
 #: ui/assets.py
 msgid ""
 "The money-weighted return per year (% p.a.) up to the last price, before "
-"tax: of all trades of a security, of the purchase of a lot. Empty under a "
-"year."
+"tax: of all trades of a security, of the purchase of a lot. Empty under a"
+" year."
 msgstr ""
 "Die geldgewichtete Rendite pro Jahr (% p. a.) bis zum letzten Preis, vor "
-"Steuern: eines Wertpapiers über alle Transaktionen, einer Tranche ab ihrem "
-"Kauf. Leer unter einem Jahr."
+"Steuern: eines Wertpapiers über alle Transaktionen, einer Tranche ab "
+"ihrem Kauf. Leer unter einem Jahr."
 
 #: ui/assets.py
 msgid "The same after inflation, in euros of the last price date"
@@ -5451,10 +5510,6 @@ msgstr "Gewinn"
 #: ui/assets.py
 msgid "gain %"
 msgstr "Gewinn %"
-
-#: ui/assets.py
-msgid "cost"
-msgstr "Kosten"
 
 #: ui/assets.py
 msgid "bought"
@@ -5545,11 +5600,6 @@ msgstr "Zu Gold und Krypto"
 #: ui/assets.py ui/assumptions.py
 msgid "Fund gains tax-free %"
 msgstr "Teilfreistellung %"
-
-#: ui/assets.py ui/assumptions.py ui/corrections.py ui/data.py
-#: ui/overridegrids.py ui/overview.py ui/snapshot.py
-msgid "value"
-msgstr "Wert"
 
 #: ui/assets.py ui/cashflows.py ui/corrections.py ui/overview.py ui/pricing.py
 #: ui/tradeimport.py
@@ -6904,6 +6954,123 @@ msgstr "Zahlung"
 msgid "category"
 msgstr "Kategorie"
 
+#: ui/closing.py
+msgid ""
+"For an asset that ended: a term deposit that paid out, an account that "
+"you closed, a loan that you paid off. It leaves the plan and the tables. "
+"The recorded net worth keeps its values up to that day and counts it as 0"
+" from then. Record the money where it went: the value of the account that"
+" took it, or a new asset with its **opened** day."
+msgstr ""
+"Für einen Vermögenswert, der beendet ist: ein ausgezahltes Festgeld, ein "
+"aufgelöstes Konto, ein getilgtes Darlehen. Er verlässt den Plan und die "
+"Tabellen. Das erfasste Nettovermögen behält seine Werte bis zu diesem Tag"
+" und zählt ihn ab dann mit 0. Erfasse das Geld dort, wohin es geflossen "
+"ist: als Wert des Kontos, das es aufgenommen hat, oder als neuen "
+"Vermögenswert mit seinem Tag unter **eröffnet**."
+
+#: ui/closing.py
+msgid "End an asset that paid out or that you closed. Its records stay."
+msgstr ""
+"Beende einen Vermögenswert, der ausgezahlt wurde oder den du aufgelöst "
+"hast. Seine erfassten Werte bleiben."
+
+#: ui/closing.py
+msgid "Save or discard the edits of the table first: a close removes a row."
+msgstr ""
+"Speichere oder verwirf zuerst die Änderungen der Tabelle: Das Schließen "
+"entfernt eine Zeile."
+
+#: ui/closing.py
+msgid "Closed assets"
+msgstr "Geschlossene Vermögenswerte"
+
+#: ui/closing.py
+msgid "ended"
+msgstr "beendet"
+
+#: ui/closing.py
+msgid "last value"
+msgstr "letzter Wert"
+
+#: ui/closing.py
+msgid "paid out"
+msgstr "ausgezahlt"
+
+#: ui/closing.py
+msgid "Close"
+msgstr "Schließen"
+
+#: ui/closing.py
+msgid "Close an asset"
+msgstr "Vermögenswert schließen"
+
+#: ui/closing.py
+msgid "Ended on"
+msgstr "Beendet am"
+
+#: ui/closing.py
+msgid "Paid out €"
+msgstr "Ausgezahlt €"
+
+#: ui/closing.py
+msgid "What you got at its end, after tax where the bank withheld it. 0 for none."
+msgstr ""
+"Was du am Ende bekommen hast, nach Steuern, wenn die Bank sie einbehalten"
+" hat. 0, wenn nichts floss."
+
+#: ui/closing.py
+msgid "type the amount in euros"
+msgstr "gib den Betrag in Euro ein"
+
+#: ui/closing.py
+#, python-brace-format
+msgid ""
+"**{name}** ends on {day}: last value {last}, paid out {payout}. From then"
+" it counts as 0."
+msgstr ""
+"**{name}** endet am {day}: letzter Wert {last}, ausgezahlt {payout}. Ab "
+"dann zählt der Vermögenswert mit 0."
+
+#: ui/closing.py
+#, python-brace-format
+msgid "Closed {name}"
+msgstr "{name} geschlossen"
+
+#: ui/closing.py
+msgid "Reopen"
+msgstr "Wieder öffnen"
+
+#: ui/closing.py
+msgid "Move the asset back into its table as it was, for a close by mistake."
+msgstr ""
+"Stellt den Vermögenswert unverändert in seine Tabelle zurück, falls du "
+"ihn versehentlich geschlossen hast."
+
+#: ui/closing.py
+#, python-brace-format
+msgid "Reopened {name}"
+msgstr "{name} wieder geöffnet"
+
+#: ui/closing.py ui/corrections.py ui/data.py ui/explorer.py ui/fileactions.py
+#: ui/pricing.py ui/rename.py ui/save.py ui/scenarios.py ui/spend.py
+#, python-brace-format
+msgid "Not saved: {reason}"
+msgstr "Nicht gespeichert: {reason}"
+
+#: ui/closing.py ui/corrections.py ui/snapshot.py
+msgid "asset"
+msgstr "Vermögenswert"
+
+#: ui/closing.py ui/fileactions.py ui/rename.py
+#, python-brace-format
+msgid "Refused: {reason}."
+msgstr "Abgelehnt: {reason}."
+
+#: ui/closing.py ui/snapshot.py ui/tradeform.py ui/tradeimport.py
+msgid "kind"
+msgstr "Art"
+
 #: ui/corrections.py
 msgid ""
 "Change or remove a value that you recorded by mistake. The charts of your"
@@ -6963,19 +7130,9 @@ msgstr "Nicht gespeichert: {changed}, seit diese Tabelle angezeigt wurde"
 msgid "Corrected {month}"
 msgstr "{month} korrigiert"
 
-#: ui/corrections.py ui/data.py ui/explorer.py ui/fileactions.py ui/rename.py
-#: ui/save.py ui/scenarios.py ui/spend.py
-#, python-brace-format
-msgid "Not saved: {reason}"
-msgstr "Nicht gespeichert: {reason}"
-
 #: ui/corrections.py ui/events.py ui/spend.py
 msgid "Month"
 msgstr "Monat"
-
-#: ui/corrections.py ui/snapshot.py
-msgid "asset"
-msgstr "Vermögenswert"
 
 #: ui/corrections.py ui/transfer.py
 msgid "remove"
@@ -7088,8 +7245,8 @@ msgid ""
 "serves an export zip."
 msgstr ""
 "Die App behält die Ergebnisse der Seiten Explorer und Übersicht nur im "
-"Speicher, bis sie beendet wird: Sie kann nicht in dieses "
-"Datenverzeichnis schreiben, oder sie arbeitet auf einer Export-Zip-Datei."
+"Speicher, bis sie beendet wird: Sie kann nicht in dieses Datenverzeichnis"
+" schreiben, oder sie arbeitet auf einer Export-Zip-Datei."
 
 #: ui/data.py
 #, python-brace-format
@@ -7818,10 +7975,6 @@ msgid "Paths"
 msgstr "Verläufe"
 
 #: ui/explorer.py
-msgid "Nominal euros"
-msgstr "Nominale Euro"
-
-#: ui/explorer.py
 msgid "Reset sliders"
 msgstr "Regler zurücksetzen"
 
@@ -8002,6 +8155,10 @@ msgstr "Dateiname"
 #: ui/explorer.py ui/main.py
 msgid "Explorer"
 msgstr "Explorer"
+
+#: ui/explorer.py ui/position.py
+msgid "Nominal euros"
+msgstr "Nominale Euro"
 
 #: ui/explorer.py ui/scenarios.py ui/tables.py ui/widgets.py
 msgid "All columns"
@@ -8283,11 +8440,6 @@ msgstr "Szenario löschen"
 #: ui/fileactions.py ui/overview.py ui/transfer.py
 msgid "file"
 msgstr "Datei"
-
-#: ui/fileactions.py ui/rename.py
-#, python-brace-format
-msgid "Refused: {reason}."
-msgstr "Abgelehnt: {reason}."
 
 #: ui/fileactions.py ui/rename.py
 #, python-brace-format
@@ -9984,6 +10136,11 @@ msgstr ""
 
 #: ui/outlook.py
 #, python-brace-format
+msgid "{seek}: round by round"
+msgstr "{seek}: Runde für Runde"
+
+#: ui/outlook.py
+#, python-brace-format
 msgid "not even at {age}"
 msgstr "nicht einmal mit {age}"
 
@@ -10028,11 +10185,6 @@ msgid ""
 msgstr ""
 "Die Risiken stammen aus {paths} simulierten Verläufen von Märkten und "
 "Preisen, die Beträge sind in Euro in Kaufkraft von {month}."
-
-#: ui/outlook.py
-#, python-brace-format
-msgid "{seek}: round by round"
-msgstr "{seek}: Runde für Runde"
 
 #: ui/outlook.py
 #, python-brace-format
@@ -10970,9 +11122,9 @@ msgstr ""
 
 #: ui/position.py
 msgid ""
-"The value of the units held at each stored price, against their cost "
-"with fees. A few stored prices draw a few points: import a price history "
-"on the Snapshot page."
+"The value of the units held at each stored price, against their cost with"
+" fees. A few stored prices draw a few points: import a price history on "
+"the Snapshot page."
 msgstr ""
 "Der Wert der gehaltenen Stücke zu jedem gespeicherten Preis, verglichen "
 "mit ihren Kosten mit Gebühren. Wenige gespeicherte Preise ergeben wenige "
@@ -10981,63 +11133,6 @@ msgstr ""
 #: ui/pricing.py
 msgid "last price"
 msgstr "Letzter Preis"
-
-#: ui/pricing.py
-#, python-brace-format
-msgid "{name}: {n} price added"
-msgid_plural "{name}: {n} prices added"
-msgstr[0] "{name}: {n} Preis ergänzt"
-msgstr[1] "{name}: {n} Preise ergänzt"
-
-#: ui/pricing.py
-#, python-brace-format
-msgid "{name}: not fetched: {reason}"
-msgstr "{name}: nicht abgerufen: {reason}"
-
-#: ui/pricing.py
-#, python-brace-format
-msgid "Stopped: {reason}"
-msgstr "Abgebrochen: {reason}"
-
-#: ui/pricing.py
-msgid "No new prices."
-msgstr "Keine neuen Preise."
-
-#: ui/pricing.py
-#, python-brace-format
-msgid "{n} call to EODHD"
-msgid_plural "{n} calls to EODHD"
-msgstr[0] "{n} Abruf bei EODHD"
-msgstr[1] "{n} Abrufe bei EODHD"
-
-#: ui/pricing.py
-#, python-brace-format
-msgid ""
-"To fetch prices, set {key} to a key of your own (free at eodhd.com), or "
-"{file} to a file that holds it, then start the app again."
-msgstr ""
-"Um Preise abzurufen, setze {key} auf einen eigenen Schlüssel (kostenlos "
-"bei eodhd.com) oder {file} auf eine Datei, die ihn enthält, und starte die "
-"App neu."
-
-#: ui/pricing.py
-msgid ""
-"The daily closes of the last year that the stored prices lack, of each "
-"held ISIN on Xetra in euros: two calls per security of the 20 a day of the"
-" free plan. The fetch sends the ISINs to EODHD; a stored price stays."
-msgstr ""
-"Die Tagesschlusskurse des letzten Jahres, die den gespeicherten Preisen "
-"fehlen, für jede gehaltene ISIN an Xetra in Euro: zwei Abrufe pro "
-"Wertpapier von den 20 am Tag im kostenlosen Tarif. Der Abruf sendet die "
-"ISINs an EODHD, ein gespeicherter Preis bleibt."
-
-#: ui/pricing.py
-msgid "Fetch prices"
-msgstr "Preise abrufen"
-
-#: ui/pricing.py
-msgid "Fetching prices…"
-msgstr "Preise werden abgerufen…"
 
 #: ui/pricing.py
 msgid "prices"
@@ -11094,6 +11189,63 @@ msgstr ""
 #, python-brace-format
 msgid "{asset} {value} as of {day}"
 msgstr "{asset} {value} zum {day}"
+
+#: ui/pricing.py
+#, python-brace-format
+msgid "{name}: {n} price added"
+msgid_plural "{name}: {n} prices added"
+msgstr[0] "{name}: {n} Preis ergänzt"
+msgstr[1] "{name}: {n} Preise ergänzt"
+
+#: ui/pricing.py
+#, python-brace-format
+msgid "{name}: not fetched: {reason}"
+msgstr "{name}: nicht abgerufen: {reason}"
+
+#: ui/pricing.py
+#, python-brace-format
+msgid "Stopped: {reason}"
+msgstr "Abgebrochen: {reason}"
+
+#: ui/pricing.py
+msgid "No new prices."
+msgstr "Keine neuen Preise."
+
+#: ui/pricing.py
+#, python-brace-format
+msgid "{n} call to EODHD"
+msgid_plural "{n} calls to EODHD"
+msgstr[0] "{n} Abruf bei EODHD"
+msgstr[1] "{n} Abrufe bei EODHD"
+
+#: ui/pricing.py
+#, python-brace-format
+msgid ""
+"To fetch prices, set {key} to a key of your own (free at eodhd.com), or "
+"{file} to a file that holds it, then start the app again."
+msgstr ""
+"Um Preise abzurufen, setze {key} auf einen eigenen Schlüssel (kostenlos "
+"bei eodhd.com) oder {file} auf eine Datei, die ihn enthält, und starte "
+"die App neu."
+
+#: ui/pricing.py
+msgid ""
+"The daily closes of the last year that the stored prices lack, of each "
+"held ISIN on Xetra in euros: two calls per security of the 20 a day of "
+"the free plan. The fetch sends the ISINs to EODHD; a stored price stays."
+msgstr ""
+"Die Tagesschlusskurse des letzten Jahres, die den gespeicherten Preisen "
+"fehlen, für jede gehaltene ISIN an Xetra in Euro: zwei Abrufe pro "
+"Wertpapier von den 20 am Tag im kostenlosen Tarif. Der Abruf sendet die "
+"ISINs an EODHD, ein gespeicherter Preis bleibt."
+
+#: ui/pricing.py
+msgid "Fetch prices"
+msgstr "Preise abrufen"
+
+#: ui/pricing.py
+msgid "Fetching prices…"
+msgstr "Preise werden abgerufen…"
 
 #: ui/pricing.py
 #, python-brace-format
@@ -12177,10 +12329,6 @@ msgstr[1] "{n} Änderungen erfassen"
 msgctxt "button"
 msgid "Record"
 msgstr "Erfassen"
-
-#: ui/snapshot.py ui/tradeform.py ui/tradeimport.py
-msgid "kind"
-msgstr "Art"
 
 #: ui/spend.py
 msgid "difference"
@@ -13717,10 +13865,10 @@ msgid ""
 msgstr ""
 "Ein neues Szenario, das auf {scenario} basiert: Ab dem Monat, den du "
 "eingibst, führst du statt deines Jobs einen Betrieb, bis die nächste "
-"Phase deines Plans beginnt, etwa der Ruhestand. In dieser Phase enden Gehalt und Sparplan, stattdessen "
-"kommt der Gewinn. Du zahlst seine Einkommensteuer und deine "
-"Krankenversicherung selbst und keine gesetzliche Rentenversicherung: Die "
-"Seite Annahmen ändert das."
+"Phase deines Plans beginnt, etwa der Ruhestand. In dieser Phase enden "
+"Gehalt und Sparplan, stattdessen kommt der Gewinn. Du zahlst seine "
+"Einkommensteuer und deine Krankenversicherung selbst und keine "
+"gesetzliche Rentenversicherung: Die Seite Annahmen ändert das."
 
 #: ui/whatifs.py
 msgid "Start the business in (month)"

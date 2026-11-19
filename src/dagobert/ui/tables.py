@@ -194,6 +194,8 @@ class Table:
     locked: tuple[str, ...] = ()  # columns that keep their value in a saved row, see `held`
     # the kind of the names of the `locked` columns: `Rename` beside the grid (`ui.rename`)
     rename: Kind | None = None
+    # one more button beside `Rename`, on the names of the `locked` columns (`Close` of an asset)
+    beside: Callable[..., None] | None = None
     num_rows: Literal["dynamic", "add"] = "dynamic"  # `add`: no row can go
     # warnings of no single cell about the edited and added rows, for the save guard: a trade of
     # gold whose price lies far from the gold series
@@ -893,6 +895,8 @@ def edit_table(
             ]
             held = _held(table, base)
             rename.button(file.data_dir, table.rename, locked, key=table.key, held=held)
+            if table.beside is not None:
+                table.beside(file.data_dir, locked, key=table.key, held=held)
     if changed is not None:
         save.warn(
             changed,

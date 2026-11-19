@@ -82,6 +82,40 @@ A share or a rate takes percent: type `2.5` for 2.5%. A loan balance is saved ne
 you type it without a minus. A new value of an asset also sets its date and adds a row to the
 history, as the [Snapshot](snapshot.md) page does.
 
+## Close an asset
+
+Close an asset when it ended: a term deposit paid out, you closed an account, or you paid off a
+loan. Do not delete its row. A deleted row also removes its values from the recorded net worth of
+the past.
+
+1. Open the tab of its kind and press `Close` above the table.
+2. Select the asset.
+3. Set `Ended on`. For a term deposit that matured, the app offers the day of its maturity.
+4. Type the amount that you got into `Paid out €`. If the bank withheld tax, type the amount after
+   tax.
+5. Read the line that tells what the close does. Then press `Close`.
+
+The asset leaves its table, the Snapshot page and the simulation. The recorded net worth keeps its
+values up to the day of its end. From that day, it counts as 0. The fold `Closed assets` below the
+tabs lists each closed asset with the day, its last value and the amount paid out. If you closed an
+asset by mistake, select it there and press `Reopen`. It then comes back into its table as it was.
+
+The app does not move the money for you. Record it where it went:
+
+- If an account that you track took the money, type the new value of that account.
+- If you opened a new account with it, add the account as a new row. Behind `All columns`, type the
+  day in `opened`.
+
+An asset with a day in `opened` counts as 0 before that day. The tiles then show the move as no
+change. Without `opened`, the tiles leave a new asset out of the change of the month, and the move
+looks like a loss. Leave `opened` empty for an old account that you add to the app late. Its first
+value is then no gain.
+
+The app refuses a close in two cases. The first case is a day before the date of the value. The
+second case is an asset that another input names, for example a savings plan that pays into it or
+a sale in a scenario. Change that input first. If the table holds edits that are not saved, `Close`
+stays off until you save or discard them.
+
 ## Open an asset from a link
 
 The [Overview](overview.md) and the [Snapshot](snapshot.md) page link to an asset that needs your
@@ -145,6 +179,10 @@ A sale takes the oldest units first. The tax law says so for funds and shares, a
 allows it for crypto. For gold, the app assumes it. Date a Vorabpauschale with its booking in
 January. It counts for the year before. The open lots give the cost of the depot for the tax on a
 sale. The trades do not change the value of the depot: record that on the Snapshot page.
+
+One case is different. If your trades sold every unit of an asset, the asset is worth 0. The
+estimate of the Snapshot page then shows 0, and the next save or fetch of a price records 0 for
+you. After that, you can close the asset (see [Close an asset](#close-an-asset)).
 
 On a phone, the form `Add a trade` above the table saves one trade at once. A message names the
 units, the price per unit and the euros, so that you see a typing error at once. For gold, the form

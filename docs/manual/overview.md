@@ -10,7 +10,9 @@ Four tiles show your net worth, the liquid and the illiquid part, and your debt.
 that you recorded on the [Snapshot](snapshot.md) page and the values in `assets.yaml`. Each tile
 shows the change since the end of the previous month. If the value did not change, the tile says `no
 change since` that day in gray. A new plan has no value from before the current month, so the
-tiles show no change yet.
+tiles show no change yet. The change leaves out an asset that you added in the month, unless the
+asset has a day in `opened`. An asset that you closed in the month counts down to 0 (see [Close an
+asset](assets.md#close-an-asset)).
 
 ## Outlook
 

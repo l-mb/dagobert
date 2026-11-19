@@ -379,6 +379,22 @@ start. The tables of the Assets page show readable headers for some keys
 every input that names it and in the rows of `history.csv`. The text of every other line stays,
 comments too. Trades and price files name a security, not the asset, so they do not change.
 
+`opened` (a date, optional, on every asset) is the day on which you opened the account with money
+from other assets. The recorded net worth and the tiles count the asset as 0 before that day.
+Without it, they count the asset from its first value and leave it out of the change of the month
+in which it appears. The simulation does not read `opened`.
+
+A second list, `closed`, holds the assets that ended. `Close` on the Assets page moves a row
+there, and `Reopen` moves it back. Each entry has three keys:
+
+- `ended`: the day on which the asset ended.
+- `payout`: the amount that it paid out.
+- `asset`: the row as it was in `assets`, with its trades.
+
+No simulation and no table of the open assets reads a closed asset. The records keep its values up
+to `ended` and count it as 0 from that day. A value in `history.csv` after that day does not count.
+An `id` stays unique over both lists. The list is optional: a file without it loads as before.
+
 - `cash`: `value`. Earns the `cash` return.
 - `fixed_income`: `value`, optional `trades`. Tagesgeld, Festgeld without maturity, bond and
   money-market funds. Earns the `fixed_income` return and belongs to the allocation bucket.

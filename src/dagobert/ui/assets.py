@@ -31,7 +31,17 @@ from dagobert.prices import market_value
 from dagobert.references import Kind
 from dagobert.returns import deflate
 from dagobert.store import RowFile
-from dagobert.ui import SECURITIES_ASSET, Stamp, arrived, data_stamp, fold, is_mobile, mode, summary
+from dagobert.ui import (
+    SECURITIES_ASSET,
+    Stamp,
+    arrived,
+    closing,
+    data_stamp,
+    fold,
+    is_mobile,
+    mode,
+    summary,
+)
 from dagobert.ui.gridcolumns import ASSET_MODELS, HOLDING_KINDS, Row, columns
 from dagobert.ui.position import position_chart
 from dagobert.ui.tables import COLUMNS_MEAN, Ref, Table, edit_table, focus, focused, pin, unsaved
@@ -81,6 +91,7 @@ TITLES = {
     "bought": N_("bought in"),
     "building_share": N_("building share"),
     "afa": N_("AfA rate"),
+    "opened": N_("opened"),
     "finances": N_("financed property"),
 }
 
@@ -152,6 +163,7 @@ TABLES = {
         },
         locked=("id",),
         rename=Kind.ASSET,
+        beside=closing.button,
         identity=("id",),
         titles=titles(model),
         help_label=COLUMNS_MEAN,
@@ -641,5 +653,6 @@ def page(file: RowFile) -> None:
     hidden = {mode.Item(mode.Sort.KIND, (k,)): summary.KINDS[k] for k in TABLES if k not in kinds}
     hidden |= {} if traded else {TRADES: N_("securities")}
     view.note({item: _(words) for item, words in hidden.items()}, held=mode.Held.KINDS)
+    closing.closed(file.data_dir)
     if opens:
         st.html(SHOW_TAB, unsafe_allow_javascript=True)

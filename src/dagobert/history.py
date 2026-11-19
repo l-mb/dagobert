@@ -11,8 +11,8 @@ from pathlib import Path
 from dateutil.relativedelta import relativedelta
 
 from dagobert.files import finite, read_csv
-from dagobert.loader import load_assets, load_assumptions
-from dagobert.model.assets import Asset, Loan, TermDeposit
+from dagobert.loader import load_assets, load_assumptions, load_closed
+from dagobert.model.assets import Asset, ClosedAsset, Loan, TermDeposit
 
 FILE = "history.csv"
 FIELDS = ("date", "asset", "value")
@@ -120,15 +120,26 @@ def worth(asset: Asset, day: date) -> float:
     return asset.balance if isinstance(asset, Loan) else asset.value
 
 
-def observations(data_dir: Path, assets: list[Asset]) -> list[Observation]:
+def observations(
+    data_dir: Path, assets: list[Asset], closed: Sequence[ClosedAsset] = ()
+) -> list[Observation]:
     """The observed values of `assets` by date: `history.csv` and the value in `assets.yaml`
-    at `asof` (the simulation start without one)."""
+    at `asof` (the simulation start without one). An asset of `closed` counts with its values
+    before its end and with 0 from that day, the last of its day."""
     start = load_assumptions(data_dir).start
     ids = {a.id for a in assets}
+    ended = {c.asset.id: c.ended for c in closed}
+    last = [(c.asset.asof or start, c.asset) for c in closed]
     return sorted(
         [
             *((a.asof or start, a.id, worth(a, a.asof or start)) for a in assets),
-            *(o for o in read_history(data_dir) if o[1] in ids),
+            *((day, a.id, worth(a, day)) for day, a in last if day < ended[a.id]),
+            *(
+                o
+                for o in read_history(data_dir)
+                if o[1] in ids or o[0] <= ended.get(o[1], date.min)
+            ),
+            *((day, asset, 0.0) for asset, day in ended.items()),
         ],
         key=lambda o: o[0],
     )
@@ -153,14 +164,16 @@ def actual_values(data_dir: Path) -> list[tuple[date, dict[str, float]]]:
     from the first month in which every asset is known, see `actual_totals`. A month between two
     snapshots holds none: it would repeat the last values, as if observed (owner, 2026-10-13:
     people record rarely). Nothing without an asset."""
-    assets = load_assets(data_dir)
+    assets, closed = load_assets(data_dir), load_closed(data_dir)
     if not assets:
         return []
-    observed = observations(data_dir, assets)
+    observed = observations(data_dir, assets, closed)
     first_seen: dict[str, date] = {}
     for day, asset, _ in observed:
         first_seen.setdefault(asset, day)
-    first = max(first_seen[a.id] for a in assets).replace(day=1)
+    # an asset with `opened` held nothing before: it is known as 0, so it delays no start
+    known = [a.id for a in (*assets, *(c.asset for c in closed)) if a.opened is None]
+    first = max((first_seen[i] for i in known), default=min(first_seen.values())).replace(day=1)
     months = sorted({day.replace(day=1) for day, _, _ in observed if day >= first})
     return [
         (month, values_at(observed, month + relativedelta(months=1, days=-1))) for month in months

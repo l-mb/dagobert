@@ -184,6 +184,22 @@ def test_a_history_row_counts_the_lots_held_on_its_date(data: Path) -> None:
     assert read_history(data) == [(date(2026, 9, 17), "d", 30.0)]  # 3 units, not 2 and 2 more
 
 
+def test_an_asset_sold_in_full_is_worth_nothing(data: Path) -> None:
+    """Its trades hold no unit: the next record sets 0, on the day of the last sale or on the
+    later day of its value, whose row it replaces. The Snapshot estimate is 0 too."""
+    sale = BUY | {"security": ISIN, "date": "2026-09-18", "kind": "sell", "amount": 33}
+    sold = DEPOT | {"trades": [BUY | {"security": ISIN}, sale]}
+    later = sold | {"id": "later", "value": 30.0, "asof": date(2026, 9, 20)}
+    (data / "assets.yaml").write_text(yaml.safe_dump({"assets": [sold, later]}))
+    assert snapshot.estimate(data, sold, date(2026, 9, 30), plan([], [])).value == 0
+
+    recorded = [(date(2026, 9, 18), "d", 0.0), (date(2026, 9, 20), "later", 0.0)]
+    assert _save(data, (date(2026, 9, 17), 10.0)).recorded == recorded
+    assert _save(data, (date(2026, 9, 21), 11.0)).recorded == []  # at 0 already
+    rows = yaml.safe_load((data / "assets.yaml").read_text())["assets"]
+    assert [(r["value"], r["asof"]) for r in rows] == [(0, d) for d, _, _ in recorded]
+
+
 def _dated(data_dir: Path, name: str) -> prices.Price:
     """The last month of a series in euros, on its last day, a provisional one on its first."""
     last = series.in_euros(series.SERIES[name], data_dir)[-1]

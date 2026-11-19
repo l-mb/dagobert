@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
-from dagobert.model.assets import Asset, Assets, LotAsset
+from dagobert.model.assets import Asset, Assets, ClosedAsset, LotAsset
 from dagobert.model.assumptions import Assumptions
 from dagobert.model.base import KeyPath
 from dagobert.model.events import EventBase, SellEvent, Shift
@@ -275,6 +275,11 @@ def flatten(mapping: Mapping[str, Any], depth: int | None = None) -> dict[KeyPat
 
 def load_assets(data_dir: Path) -> list[Asset]:
     return _load(Assets, data_dir / "assets.yaml").assets
+
+
+def load_closed(data_dir: Path) -> list[ClosedAsset]:
+    """The assets that ended (`closed` of `assets.yaml`), which only the records read."""
+    return _load(Assets, data_dir / "assets.yaml").closed
 
 
 def load_streams(data_dir: Path) -> list[Stream]:

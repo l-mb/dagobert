@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from dagobert import history, references, revisions
+from dagobert.loader import load_closed
 from dagobert.model.assumptions import phase_name, relative_name
 from dagobert.problems import Keys
 from dagobert.references import Kind, References
@@ -56,10 +57,12 @@ def _check(data_dir: Path, rename: Rename, refs: References) -> None:
     if kind is Kind.RELATIVE:
         relative_name(new)
     recorded = {a for _, a, _ in history.read_history(data_dir)} if kind is Kind.ASSET else set()
+    closed = {c.asset.id for c in load_closed(data_dir)} if kind is Kind.ASSET else set()
     for names, taken in (
         (refs.defined[kind], f"the {kind} {{}} exists"),
         (refs.used[kind], f"the inputs use the {kind} name {{}}"),
         (recorded, f"{history.FILE} holds values of {{}}"),
+        (closed, "the closed asset {} has the name"),
     ):
         if same := sorted(n for n in names if n != old and n.casefold() == new.casefold()):
             raise ValueError(taken.format(same[0]))

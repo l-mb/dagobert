@@ -130,7 +130,7 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   lock, one revision per write, the inputs at a time (Overview, Changes since, Flows) [revisions].
 - `src/dagobert/files.py`: `atomic_write` (synced temp file, `os.replace`) under `revisions.write`;
   `yaml()`, `dump()`: the YAML of the store; `read_csv`: the CSV inputs [revisions].
-- `src/dagobert/rollforward.py`: moves `start` to a later month [rollforward].
+- `src/dagobert/rollforward.py`: moves `start` [rollforward]; `closing.py` (`ui/` too) [closing].
 - `src/dagobert/engine/`: monthly path simulation [engine, tax, ledger, bav, harvest, spending,
   disability, children, pay-growth]: `simulation.py` month loop, `core.py` setup, helpers,
   `state.py`, `income.py` streams, `portfolio.py` holdings and sales, `events.py`, `settlement.py`

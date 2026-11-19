@@ -164,15 +164,14 @@ class Estimate(NamedTuple):
 
 def estimate(data_dir: Path, row: dict[str, Any], day: date, plan: Plan) -> Estimate:
     """Accrued deposit, the lots of the trades at the last price (`prices.last_price`: of gold
-    and Bitcoin also their series), or a value carried from its `asof` in the main scenario
-    `plan`: a scheduled loan balance, a pension policy with its `paid` or a depot
-    (`carry`)."""
+    and Bitcoin also their series; 0 once the trades sold every unit), or a value carried from
+    its `asof` in the main scenario `plan`: a scheduled loan balance, a pension policy with its
+    `paid` or a depot (`carry`)."""
     if row["kind"] == "term_deposit":
         return Estimate(round(TermDeposit.model_validate(dict(row)).value_at(day), 2))
     if row.get("trades"):
-        priced = prices.market_value(
-            data_dir, book(Trade.model_validate(t) for t in row["trades"]).open
-        )
+        held = book(Trade.model_validate(t) for t in row["trades"]).open
+        priced = prices.market_value(data_dir, held) if held else (0.0, day)  # sold in full
         return Estimate(None if priced is None else round(priced[0], 2))
     if row.get("asof") is None:
         return Estimate()

@@ -26,6 +26,11 @@ class AssetBase(Strict):
         description="Months after which the value needs an update, for example 12 for a yearly "
         "statement. Default by kind",
     )
+    opened: Day | None = Field(
+        default=None,
+        description="The day the account was opened with money of other assets. Before it the "
+        "asset counts as 0 in the recorded net worth. Empty: it counts from its first value",
+    )
 
     @property
     def label(self) -> str:
@@ -453,12 +458,24 @@ Asset = Annotated[
 ]
 
 
+class ClosedAsset(Strict):
+    """An asset that ended: a term deposit paid out, an account closed. No run and no table of
+    the open assets reads it. The records keep its values up to `ended` and count it as 0 from
+    then."""
+
+    ended: Day = Field(description="The day the asset ended")
+    payout: Euros = Field(description="What it paid out at its end")
+    asset: Asset
+
+
 class Assets(Strict):
     assets: list[Asset]
+    closed: list[ClosedAsset] = Field(default=[])
 
     @model_validator(mode="after")
     def _unique_ids(self) -> Assets:
-        if twice := sorted(i for i, n in Counter(a.id for a in self.assets).items() if n > 1):
+        ids = Counter(a.id for a in (*self.assets, *(c.asset for c in self.closed)))
+        if twice := sorted(i for i, n in ids.items() if n > 1):
             msg = f"asset ids must be unique: {', '.join(twice)} more than once"
             raise ValueError(msg)
         return self

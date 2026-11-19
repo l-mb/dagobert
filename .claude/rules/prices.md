@@ -22,8 +22,10 @@ The Snapshot page around the `Prices` expander: rule `tracking`.
   prices) in `assets.yaml`, and a row in `history.csv`. The row counts the lots held on its date
   (the trades up to it), each at its last price: a lot bought later (a price typed for a past day, a
   provisional month) does not count, a lot sold since does; a lot held then without a price records
-  nothing. The date comes from the lots held today, in one pass: the oldest price of a security sold
-  since may be older. An asset with a value of that date or later keeps it, so a past price records
+  nothing; an asset whose trades sold every unit records 0, on the day of its last trade or the
+  later day of its value (`_row`), and the Snapshot estimate is 0. The date comes from the lots
+  held today, in one pass: the oldest price of a security sold since may be older. An asset with
+  a value of that date or later keeps it, so a past price records
   nothing, unless the save replaced the last price of one of its securities: a corrected price of
   the day of `asof` records again (the last row of a day in `history.csv` counts). The Snapshot page
   imports and takes typed prices too (`Prices`). The Snapshot estimate, the asset sunburst and the

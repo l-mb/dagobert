@@ -315,10 +315,10 @@ def record(
 ) -> tuple[dict[str, str | None], list[Observation]]:
     """The texts of `assets.yaml` and `history.csv` with the market value of every asset whose
     open lots all have a price, dated with the oldest of those prices and counting the lots held
-    on that date (`_row`), and the values. `stored` holds the price files of a save as it will
-    write them. An asset recorded on that date or later keeps its value, unless the save replaced
-    the last price of one of its securities (`corrected`: security and day): a corrected price of
-    the day of `asof` records again."""
+    on that date (`_row`), 0 for an asset whose trades sold every unit, and the values. `stored`
+    holds the price files of a save as it will write them. An asset recorded on that date or
+    later keeps its value, unless the save replaced the last price of one of its securities
+    (`corrected`: security and day): a corrected price of the day of `asof` records again."""
 
     def last(security: str) -> Price | None:
         return last_price(data_dir, security, stored.get(security))
@@ -332,6 +332,7 @@ def record(
         if asset.asof is None
         or asset.asof < day
         or (asset.asof == day and _corrected(held, corrected, last))
+        or (not asset.book.open and asset.value)  # sold in full since its value was recorded
     ]
     if not observed:
         return {}, []
@@ -346,7 +347,11 @@ def _row(
     """The value of a history row of `asset`, its date and the lots it counts. The date is the
     oldest last price of the lots held today; the row counts the lots held on that date (the
     trades up to it), each at its last price: a lot bought later does not count, a lot sold since
-    does. None when a lot lacks a price or none was held then."""
+    does. None when a lot lacks a price or none was held then. An asset whose trades sold every
+    unit is worth 0 from its last trade, or from the later date of its value: the last row of a
+    day counts."""
+    if asset.trades and not asset.book.open:
+        return 0.0, max([*(t.date for t in asset.trades), *filter(None, [asset.asof])]), []
     if (today := _valued(asset.book.open, last)) is None:
         return None
     held = lots.book(t for t in asset.trades if t.date <= today[1]).open

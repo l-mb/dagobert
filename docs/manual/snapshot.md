@@ -48,8 +48,9 @@ loan is its balance after the scheduled payments. The estimate of a term deposit
 interest so far. The estimate of a company pension or an Altersvorsorgedepot adds the mean return of
 its class and the contributions since its date, as the simulation does at its start (see [How the
 simulation works](models.md#the-values-at-the-start)). The estimate of an asset with trades uses the
-last prices of its securities. For gold (`XAU`) and Bitcoin (`BTC`), the app takes the last month of
-their series when it is newer than your last price.
+last prices of its securities, and it is 0 when the trades sold every unit. For gold (`XAU`) and
+Bitcoin (`BTC`), the app takes the last month of their series when it is newer than your last
+price.
 
 A term deposit takes no new value: its contract gives the value. If you type one, the app does not
 save it and shows a warning.

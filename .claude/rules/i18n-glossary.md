@@ -42,6 +42,7 @@ text too (owner, issue #23: `auf der Seite Snapshot`), as do Explorer, Cashflows
 | Sonderausgaben / donation / childcare / household services / craftsman's labour / deductible as / own premium (`premium`) / Kinderzulage | Sonderausgaben / Spende / Kinderbetreuung / haushaltsnahe Dienstleistung / Handwerkerleistung / absetzbar als / Eigenbeitrag (eigener Beitrag pro Monat) / Kinderzulage | rule `deductions`; `deductible` stays „Absetzbar", one term, one word; never „Steuerabzug": that is the withholding |
 | loan / interest / principal / fixed for / repayment (a `repay` event) | Darlehen / Zinsen / Tilgung / Zinsbindung / Sondertilgung | |
 | term deposit / overnight | Festgeld / Tagesgeld | |
+| Close (an asset) / Closed assets / Reopen / Ended on / Paid out / opened | Schließen / Geschlossene Vermögenswerte / Wieder öffnen / Beendet am / Ausgezahlt / eröffnet | rule `closing`; an account that ended „aufgelöst", a deposit „ausgezahlt" |
 | equity / fixed income / gold / crypto | Aktien / Anleihen / Gold / Krypto | |
 | inflation / consumer prices | Inflation / Verbraucherpreise | |
 | euros of the start / nominal euros | Euro in Kaufkraft von 2026-10 / nominale Euro | axis „€, Kaufkraft 2026-10"; help „ohne Inflationsausgleich"; start-year euros „Euro in Kaufkraft des Startjahrs", not „Euro des Starts" |

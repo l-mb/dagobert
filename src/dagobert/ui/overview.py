@@ -15,7 +15,14 @@ import streamlit as st
 from dagobert import actuals, cashplan, report, revisions, rollforward
 from dagobert.history import actual_values
 from dagobert.i18n import N_, _, ngettext
-from dagobert.loader import load_assets, load_assumptions, load_plan, load_scenario, written
+from dagobert.loader import (
+    load_assets,
+    load_assumptions,
+    load_closed,
+    load_plan,
+    load_scenario,
+    written,
+)
 from dagobert.model.assets import Asset, Loan, TermDeposit
 from dagobert.model.events import BuyPropertyEvent, Event
 from dagobert.model.months import add_months, months_between
@@ -798,7 +805,10 @@ def page(streams: RowFile) -> None:
     _roll_forward(data_dir, view)
     undo.last(data_dir)
     loaded = load_assets(data_dir)
-    kinds = {asset.id: summary.LIQUIDITY[asset.kind] for asset in loaded}
+    kinds = {  # a closed asset too: the months before its end hold its values
+        asset.id: summary.LIQUIDITY[asset.kind]
+        for asset in (*loaded, *(c.asset for c in load_closed(data_dir)))
+    }
     months = [(month, _by_group(values, kinds)) for month, values in actual_values(data_dir)]
     # side by side once there is a history to chart: its info alone left half the row empty
     assets, recorded = st.columns(2, gap="large") if len(months) > 1 else (st.container(),) * 2

@@ -146,6 +146,7 @@ EXPERT = _items(
         f"assets.{c}"
         for c in (
             "update_every",
+            "opened",
             "tags",
             "growth",
             "cost",

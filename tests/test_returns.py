@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 
 from dagobert import series
 from dagobert.model.assets import CryptoAsset, GoldAsset, LotAsset
-from dagobert.model.assumptions import Assumptions, Index, Person, ReturnClass
+from dagobert.model.assumptions import Assumptions, Index, Inflation, Person, ReturnClass
 from dagobert.model.months import add_months, months_between
 from dagobert.returns import (
     FixedProvider,
@@ -335,3 +335,91 @@ def test_historical_draws_a_class_alone_when_equity_has_no_spread() -> None:
         return provider.sample(12).rates["bitcoin"]
 
     assert np.array_equal(bitcoin(0.9), bitcoin(0.0))
+
+
+def _following(months: int = 240, **changes: object) -> tuple[Returns, Returns]:
+    """A run of 20,000 paths and the same run with `changes` of the assumptions."""
+    base = Assumptions(
+        person=PERSON,
+        phases=PHASES,
+        start=date(2026, 1, 1),
+        inflation=Inflation(mean=0.02, stdev=0.015),
+        returns=_standard_returns() | {"cash": ReturnClass(mean=0.02, stdev=0.02)},
+        indices={"wages": Index(mean=0.03, stdev=0.02)},
+    )
+    changed = base.model_validate(base.model_dump() | changes)
+    apart, tied = (
+        MonteCarloProvider(a, paths=20000, seed=5).sample(months) for a in (base, changed)
+    )
+    return apart, tied
+
+
+def _yearly(monthly: np.ndarray) -> np.ndarray:
+    """The yearly log growth of monthly rates, one column per year."""
+    return np.log1p(monthly).reshape(len(monthly), -1, 12).sum(axis=2)
+
+
+def _correlation(a: np.ndarray, b: np.ndarray) -> float:
+    return float(np.corrcoef(a.ravel(), b.ravel())[0, 1])
+
+
+def test_a_persistent_inflation_keeps_its_spread_and_ties_each_year_to_the_one_before() -> None:
+    """The decade of high prices that draws apart make too rare: the prices after 20 years
+    spread wider, the rate of a single year as before."""
+    apart, tied = _following(inflation={"mean": 0.02, "stdev": 0.015, "persistence": 0.6})
+    years = _yearly(tied.inflation)
+    assert _correlation(years[:, 1:], years[:, :-1]) == pytest.approx(0.6, abs=0.02)
+    assert years.std() == pytest.approx(_yearly(apart.inflation).std(), rel=0.02)
+    assert years.sum(axis=1).std() > 1.5 * _yearly(apart.inflation).sum(axis=1).std()
+    assert all(np.array_equal(tied.rates[cls], apart.rates[cls]) for cls in apart.rates)
+
+
+def test_a_class_follows_the_inflation_of_its_year_and_keeps_its_spread() -> None:
+    """Cash whose interest follows the prices: its real return spreads less. The classes without
+    the correlation draw as before, so the runs pair up."""
+    cash = {"mean": 0.02, "stdev": 0.02, "inflation_correlation": 0.7}
+    apart, tied = _following(returns=_standard_returns() | {"cash": cash})
+    prices = _yearly(tied.inflation)
+    assert _correlation(_yearly(tied.rates["cash"]), prices) == pytest.approx(0.7, abs=0.02)
+    assert _correlation(_yearly(apart.rates["cash"]), prices) == pytest.approx(0.0, abs=0.02)
+    assert _yearly(tied.rates["cash"]).std() == pytest.approx(
+        _yearly(apart.rates["cash"]).std(), rel=0.02
+    )
+    assert tied.rates["cash"].std() == pytest.approx(apart.rates["cash"].std(), rel=0.02)
+    real = [_yearly(r.rates["cash"]) - _yearly(r.inflation) for r in (apart, tied)]
+    assert real[1].std() < 0.7 * real[0].std()
+    assert np.array_equal(tied.rates["equity"], apart.rates["equity"])
+    assert np.array_equal(tied.inflation, apart.inflation)
+
+
+def test_a_class_holds_both_correlations_when_equity_follows_the_inflation_too() -> None:
+    returns = _standard_returns() | {
+        "equity": {"mean": 0.08, "stdev": 0.18, "inflation_correlation": -0.3},
+        "cash": {"mean": 0.02, "stdev": 0.02, "inflation_correlation": 0.6},
+        "gold": {"mean": 0.03, "stdev": 0.15, "equity_correlation": 0.4},
+    }
+    _, tied = _following(returns=returns)
+    prices, equity = _yearly(tied.inflation), _yearly(tied.rates["equity"])
+    assert _correlation(equity, prices) == pytest.approx(-0.3, abs=0.02)
+    assert _correlation(_yearly(tied.rates["cash"]), prices) == pytest.approx(0.6, abs=0.02)
+    assert _correlation(_yearly(tied.rates["cash"]), equity) == pytest.approx(0.0, abs=0.02)
+    assert _correlation(_yearly(tied.rates["gold"]), equity) == pytest.approx(0.4, abs=0.02)
+    assert _correlation(_yearly(tied.rates["gold"]), prices) == pytest.approx(0.0, abs=0.02)
+    annual = np.prod(1 + tied.rates["equity"][:, :12], axis=1) - 1
+    assert (annual.mean(), annual.std()) == pytest.approx((0.08, 0.18), abs=0.01)
+
+
+def test_an_index_follows_the_inflation_of_its_year() -> None:
+    wages = {"mean": 0.03, "stdev": 0.02, "inflation_correlation": 0.8}
+    apart, tied = _following(indices={"wages": wages})
+    growth = [np.diff(np.log(r.indices["wages"][:, ::12]), axis=1) for r in (apart, tied)]
+    prices = _yearly(tied.inflation)[:, 1:]
+    assert _correlation(growth[1], prices) == pytest.approx(0.8, abs=0.02)
+    assert _correlation(growth[0], prices) == pytest.approx(0.0, abs=0.02)
+    assert growth[1].std() == pytest.approx(growth[0].std(), rel=0.02)
+
+
+def test_correlations_that_leave_a_class_no_spread_of_its_own_are_refused() -> None:
+    gold = ReturnClass(mean=0.03, stdev=0.15, equity_correlation=0.8, inflation_correlation=0.8)
+    with pytest.raises(ValueError, match="leave no spread of its own"):
+        _assumptions(**_standard_returns(), gold=gold)

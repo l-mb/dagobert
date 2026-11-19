@@ -74,6 +74,7 @@ RENAME = N_("Type the name back: `Rename` below the table changes it there too."
 # a grid column ends in its name, of a heading in its model. English, marked for the catalogue:
 # the forms say them in the language of the session.
 AVERAGE, SPREAD = N_("average"), N_("volatility")
+FOLLOWS = N_("correlation with inflation")
 LABELS: dict[KeyPath, str] = {
     ("person", "born"): N_("Date of birth"),
     ("person", "horizon_age"): N_("Plan up to age"),
@@ -96,10 +97,12 @@ LABELS: dict[KeyPath, str] = {
     (PHASES, "label"): N_("name on the pages"),
     ("inflation", "mean"): N_("Average per year %"),
     ("inflation", "stdev"): N_("Volatility %"),
+    ("inflation", "persistence"): N_("Persistence from year to year"),
     ("indices",): N_("Growth indices"),
     ("indices", "name"): N_("index"),
     ("indices", "mean"): AVERAGE,
     ("indices", "stdev"): SPREAD,
+    ("indices", "inflation_correlation"): FOLLOWS,
     ("indices", "floor"): N_("lowest"),
     ("indices", "cap"): N_("highest"),
     ("indices", "cumulative"): N_("compounds"),
@@ -108,6 +111,7 @@ LABELS: dict[KeyPath, str] = {
     ("returns", "mean"): AVERAGE,
     ("returns", "stdev"): SPREAD,
     ("returns", "equity_correlation"): N_("correlation with equity"),
+    ("returns", "inflation_correlation"): FOLLOWS,
     ("refinance_rate",): N_("Loan rate after the fixed period %"),
     ("pension_growth",): N_("Pension growth per year %"),
     ("cash_buffer_months",): N_("Cash buffer (months)"),

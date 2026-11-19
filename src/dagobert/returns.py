@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 
 from dagobert import series
 from dagobert.model.assets import LotAsset
-from dagobert.model.assumptions import Assumptions, Distribution, ReturnClass
+from dagobert.model.assumptions import Assumptions, Distribution, ReturnClass, mix
 from dagobert.model.plan import Plan
 from dagobert.result import FloatArray
 
@@ -50,18 +50,23 @@ def years_of(first_month: int, months: int) -> NDArray[np.int_]:
 
 
 def index_levels(
-    a: Assumptions, months: int, paths: int, seed: int | None
+    a: Assumptions, months: int, paths: int, seed: int | None, prices: FloatArray | None = None
 ) -> dict[str, FloatArray]:
     """Level of each named index per month, stepped every January.
 
     Cumulative indices start at 1.0 in the start year and compound the yearly growth.
     Non-cumulative indices are the clipped draw itself. Without `seed` (fixed and
-    historical modes) every year uses the mean."""
+    historical modes) every year uses the mean. `prices`: the standard shock of the inflation of
+    each year, which an index with an `inflation_correlation` mixes into its own."""
     year_of_month = years_of(a.start.month, months)
     n_years = int(year_of_month.max()) + 1
     levels = {}
     for name, spec in a.indices.items():
-        if seed is not None and spec.stdev:
+        rho = spec.inflation_correlation
+        if seed is not None and spec.stdev and rho and prices is not None:
+            own = generator(seed, f"indices.{name}").standard_normal((paths, n_years))
+            draw = spec.mean + spec.stdev * (rho * prices + np.sqrt(1 - rho**2) * own)
+        elif seed is not None and spec.stdev:
             draw = generator(seed, f"indices.{name}").normal(
                 spec.mean, spec.stdev, size=(paths, n_years)
             )
@@ -102,28 +107,46 @@ def median_growth(d: Distribution) -> float:
     return (1 + d.mean) / math.sqrt(1 + d.stdev**2 / (1 + d.mean) ** 2) - 1
 
 
-def _lognormal(
-    cls: str, d: ReturnClass, equity: FloatArray, seed: int, *, tied: bool = True
-) -> FloatArray:
-    """Lognormal monthly returns of a class, one per path and month of `equity`, the standard
-    normal shocks of equity. The class draws its own shocks e from `returns.<cls>` and mixes them
-    with those of equity, rho * z + sqrt(1 - rho**2) * e for rho = `equity_correlation`, which
-    keeps their spread at 1. Without a correlation, or not `tied` (equity without spread has no
-    shock to tie to), its draw is e alone, bit for bit, so runs pair up whatever the other
-    classes draw. A class without spread keeps its mean and draws nothing.
+@dataclass(frozen=True)
+class Shocks:
+    """The standard normal shocks that the classes share, one per path and month: those of
+    equity, and those of the inflation (`None`: no class follows it), with which those of
+    equity have the correlation `of_equity`."""
+
+    equity: FloatArray
+    prices: FloatArray | None = None
+    of_equity: float = 0.0
+    tied: bool = True  # False: equity without spread has no shock to tie to
+
+
+def _lognormal(cls: str, d: ReturnClass, shared: Shocks, seed: int) -> FloatArray:
+    """Lognormal monthly returns of a class, one per path and month of the `shared` shocks. The
+    class draws its own shocks e from `returns.<cls>` and mixes them with those of equity, rho * z
+    + sqrt(1 - rho**2) * e for rho = `equity_correlation`, which keeps their spread at 1. With an
+    `inflation_correlation`, its own or the one of equity, the shocks of the inflation join by the
+    weights of `mix`. Without a correlation, or not `tied`, its draw is e alone, bit for bit, so
+    runs pair up whatever the other classes draw. A class without spread keeps its mean and draws
+    nothing.
 
     `d.mean`/`d.stdev` are the annual arithmetic mean/stdev of the simple return. Converted to
     the lognormal's underlying annual mu/sigma, then to i.i.d. monthly log-return parameters
     (mu/12, sigma/sqrt(12)) so the compounded annual return matches both moments exactly."""
+    equity = shared.equity
     if d.stdev == 0:
         return np.full(equity.shape, monthly_rate(d.mean))
-    rho = d.equity_correlation if tied else 0.0
+    rho = d.equity_correlation if shared.tied else 0.0
     own = (
         equity
         if cls == "equity"
         else generator(seed, f"returns.{cls}").standard_normal(equity.shape)
     )
-    shocks = rho * equity + np.sqrt(1 - rho**2) * own if rho else own
+    if cls == "equity":
+        shocks = own
+    elif shared.prices is not None and (d.inflation_correlation or rho):
+        a, b, rest = mix(rho, d.inflation_correlation, shared.of_equity)
+        shocks = a * equity + b * shared.prices + np.sqrt(max(rest, 0.0)) * own
+    else:
+        shocks = rho * equity + np.sqrt(1 - rho**2) * own if rho else own
     sigma_y2 = np.log(1 + d.stdev**2 / (1 + d.mean) ** 2)
     mu_y = np.log(1 + d.mean) - sigma_y2 / 2
     draws: FloatArray = mu_y / 12 + np.sqrt(sigma_y2 / 12) * shocks
@@ -153,23 +176,53 @@ class MonteCarloProvider:
     name: str = "montecarlo"
 
     def sample(self, months: int) -> Returns:
+        a = self.assumptions
+        annual = self._sample_inflation(generator(self.seed, "inflation"), months)
+        d = a.inflation
+        prices = (annual - d.mean) / d.stdev if d.stdev else None
         equity = generator(self.seed, "returns.equity").standard_normal((self.paths, months))
-        rates = {
-            cls: _lognormal(cls, d, equity, self.seed)
-            for cls, d in self.assumptions.returns.items()
-        }
-        inflation = self._sample_inflation(generator(self.seed, "inflation"), months)
-        indices = index_levels(self.assumptions, months, self.paths, self.seed)
+        shared = Shocks(equity)
+        if prices is not None and any(c.inflation_correlation for c in a.returns.values()):
+            by_month = self._by_month(prices, months)
+            q = a.returns["equity"].inflation_correlation
+            shared = Shocks(
+                q * by_month + np.sqrt(1 - q**2) * equity if q else equity,
+                by_month,
+                q,
+            )
+        rates = {cls: _lognormal(cls, c, shared, self.seed) for cls, c in a.returns.items()}
+        year_of_month = years_of(a.start.month, months)
+        inflation = monthly_rate(np.clip(annual, INFLATION_FLOOR, None))[:, year_of_month]
+        indices = index_levels(a, months, self.paths, self.seed, prices)
         return Returns(rates=rates, inflation=inflation, indices=indices)
 
     def _sample_inflation(self, rng: np.random.Generator, months: int) -> FloatArray:
-        """One normal draw per calendar year, stepped each January like `index_levels`,
-        clipped at `INFLATION_FLOOR`."""
+        """One normal draw per calendar year, stepped each January like `index_levels`, before
+        the clip at `INFLATION_FLOOR`. With a `persistence` p the gap of a year to the mean is p
+        times the gap of the year before plus sqrt(1 - p**2) times its own draw, so every year
+        keeps the spread."""
         d = self.assumptions.inflation
+        n_years = int(years_of(self.assumptions.start.month, months).max()) + 1
+        if not d.persistence:
+            return rng.normal(d.mean, d.stdev, size=(self.paths, n_years))
+        gaps = rng.standard_normal((self.paths, n_years))
+        for year in range(1, n_years):
+            gaps[:, year] = (
+                d.persistence * gaps[:, year - 1] + math.sqrt(1 - d.persistence**2) * gaps[:, year]
+            )
+        return d.mean + d.stdev * gaps
+
+    def _by_month(self, prices: FloatArray, months: int) -> FloatArray:
+        """The yearly shocks of the inflation as monthly ones, each of spread 1 and apart from the
+        other months of its year, whose sum over the year is the yearly shock times the root of
+        its months: the yearly return of a class then has its correlation with the inflation of
+        the year, and its months keep their spread. Drawn from `inflation.months`."""
         year_of_month = years_of(self.assumptions.start.month, months)
-        n_years = int(year_of_month.max()) + 1
-        annual: FloatArray = rng.normal(d.mean, d.stdev, size=(self.paths, n_years))
-        return monthly_rate(np.clip(annual, INFLATION_FLOOR, None))[:, year_of_month]
+        own = generator(self.seed, "inflation.months").standard_normal((self.paths, months))
+        starts = np.flatnonzero(np.diff(year_of_month, prepend=-1))
+        count = np.bincount(year_of_month)
+        mean = np.add.reduceat(own, starts, axis=1) / count
+        return own + (prices / np.sqrt(count) - mean)[:, year_of_month]
 
 
 def _align(*series: MonthlySeries) -> tuple[list[date], list[FloatArray]]:
@@ -194,7 +247,7 @@ class HistoricalProvider:
     series) align month by month. A class of `drawn` that no series replays draws as in Monte
     Carlo, with the log return of the replayed equity month, standardized over the whole series,
     as the equity shock; a series without spread gives none, so the class draws its own alone.
-    Every other class keeps its mean."""
+    Every other class keeps its mean. No class follows the inflation here."""
 
     assumptions: Assumptions
     equity_series: MonthlySeries
@@ -229,7 +282,7 @@ class HistoricalProvider:
         for cls, d in self.assumptions.returns.items():
             if cls not in rates:
                 rates[cls] = (
-                    _lognormal(cls, d, shocks, self.seed, tied=bool(spread))
+                    _lognormal(cls, d, Shocks(shocks, tied=bool(spread)), self.seed)
                     if cls in self.drawn
                     else np.full((n - 1, months), monthly_rate(d.mean))
                 )

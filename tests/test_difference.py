@@ -12,7 +12,7 @@ from dagobert import report
 from dagobert.difference import Difference
 from dagobert.engine.simulation import simulate
 from dagobert.model.assets import EquityAsset, PropertyAsset
-from dagobert.model.assumptions import Distribution, ReturnClass
+from dagobert.model.assumptions import Inflation, ReturnClass
 from dagobert.model.events import SellEvent
 from dagobert.model.plan import Scenario
 from dagobert.model.streams import Stream
@@ -43,7 +43,7 @@ def _run(sale: date, paths: int = 300) -> RunResult:
             events=[SellEvent(at=sale, type="sell", asset="h", price_stdev=0.1)],
         ),
         care=CARE,
-        inflation=Distribution(mean=0.02, stdev=0.01),
+        inflation=Inflation(mean=0.02, stdev=0.01),
         returns={
             "equity": ReturnClass(mean=0.06, stdev=0.16),
             "fixed_income": ReturnClass(mean=0.03, stdev=0.02),

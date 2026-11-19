@@ -129,19 +129,32 @@ Overview moves it) and `scale` (the overrides of a scenario).
   which it does not pay. A scenario cannot override `phases`. The Assumptions page keeps the name
   of a phase that an input uses. Its `Rename` changes the name in every input that names it. The
   label can change at any time.
-- `inflation`: `{mean, stdev}` per year, default `{mean: 0.02, stdev: 0.01}`. Monte Carlo
-  draws one rate per calendar year, clipped at -2%.
-- `indices`: named growth indices, `{mean, stdev, floor, cap, cumulative}` (`stdev` default 0,
-  `floor` and `cap` optional, `cumulative` default true). The draw is yearly and steps each
+- `inflation`: `{mean, stdev, persistence}` per year, default `{mean: 0.02, stdev: 0.01}`. Monte
+  Carlo draws one rate per calendar year, clipped at -2%. `persistence` (0 to 0.95, default 0)
+  is the part of the gap between the rate of a year and the mean that stays in the next year.
+  Each year keeps the spread `stdev`. At 0 each year draws apart, and ten years of high inflation
+  in a row almost never occur. The German consumer prices of 1963 to 2025 had 0.67 (0.44 since
+  1995).
+- `indices`: named growth indices, `{mean, stdev, inflation_correlation, floor, cap, cumulative}`
+  (`stdev` default 0, `floor` and `cap` optional, `cumulative` default true).
+  `inflation_correlation` (-1 to 1, default 0) ties the Monte Carlo draw of a year to the
+  inflation of that year, for example for wages or an insurance premium. The draw is yearly and steps each
   January. A cumulative index compounds the draw as growth. With `cumulative: false` the clipped
   draw is the level itself, for example a bonus payout ratio. The `fixed` and `historical` models
   use the clipped mean (`Index.at_mean`). `floor` is at most `cap`. The name `cpi` is reserved.
-- `returns` (required): `{mean, stdev, equity_correlation}` per class, `stdev` default 0.
+- `returns` (required): `{mean, stdev, equity_correlation, inflation_correlation}` per class,
+  `stdev` default 0.
   `equity`, `fixed_income`, `cash` and `property` are required. Extra names serve as `growth` of a
   property, a policy, an
   Altersvorsorgedepot, gold (default `gold`) or crypto (default `bitcoin`). No values ship for
   them, and an asset whose class `returns` lacks is an error. `equity_correlation` (-1 to 1,
   default 0, not on `equity` itself) ties the Monte Carlo draw of a class to the one of equity.
+  `inflation_correlation` (-1 to 1, default 0, on `equity` too) is the correlation of the yearly
+  return of a class with the inflation of that year. It needs a `stdev` of the class and of the
+  inflation. Over 1963 to 2025 the yield of German bonds had 0.5 with the German inflation, and
+  world equity in euros -0.1. A class takes both correlations only when they leave it a spread of
+  its own, else the file does not load. The `historical` model ignores the field: it replays
+  the consumer prices.
   The `historical` model replays equity, fixed income and the class `gold` when a gold or crypto
   asset grows with it (the World Bank prices in euros from 1960). It draws every other class of a
   gold or crypto asset as Monte Carlo does (`bitcoin`: its prices from 2010 are no sample of the

@@ -1126,6 +1126,10 @@ msgid "Units"
 msgstr "Stück"
 
 #: model/assumptions.py
+msgid "Inflation correlation"
+msgstr "Korrelation mit der Inflation"
+
+#: model/assumptions.py
 msgid "Equity correlation"
 msgstr "Korrelation mit Aktien"
 
@@ -1359,6 +1363,45 @@ msgstr "Schwankung"
 msgctxt "key"
 msgid "stdev"
 msgstr "Schwankung"
+
+#: model/assumptions.py model/plan.py
+msgid ""
+"How much of the gap between the inflation of a year and its mean stays in"
+" the next year, in Monte Carlo. 0 draws each year apart, so a decade of "
+"high inflation is too rare. The German consumer prices of 1963 to 2025 "
+"had 0.67"
+msgstr ""
+"Welcher Teil des Abstands zwischen der Inflation eines Jahres und ihrem "
+"Mittelwert im nächsten Jahr bleibt, bei Monte Carlo. 0 zieht jedes Jahr "
+"unabhängig; ein Jahrzehnt hoher Inflation ist dann zu selten. Die "
+"deutschen Verbraucherpreise von 1963 bis 2025 hatten 0,67"
+
+#: model/assumptions.py model/plan.py
+msgid "Persistence"
+msgstr "Beharrung"
+
+#: model/assumptions.py model/plan.py
+msgctxt "key"
+msgid "persistence"
+msgstr "Beharrung"
+
+#: model/assumptions.py model/plan.py
+msgid ""
+"Correlation of the yearly return with the inflation of its year, in Monte"
+" Carlo. 0 draws it apart from the prices, which understates the risk of "
+"years in which prices rise and the interest does not follow. Over 1963 to"
+" 2025 the yield of German bonds had 0.5, world equity -0.1"
+msgstr ""
+"Korrelation der Jahresrendite mit der Inflation ihres Jahres, bei Monte "
+"Carlo. 0 zieht sie unabhängig von den Preisen und unterschätzt das Risiko"
+" von Jahren, in denen die Preise steigen und die Zinsen nicht folgen. Von"
+" 1963 bis 2025 hatte die Rendite deutscher Anleihen 0,5, Aktien weltweit "
+"-0,1"
+
+#: model/assumptions.py model/plan.py
+msgctxt "key"
+msgid "inflation_correlation"
+msgstr "Korrelation mit Inflation"
 
 #: model/assumptions.py model/plan.py
 msgid ""
@@ -2076,6 +2119,16 @@ msgstr "Sparpläne"
 msgctxt "key"
 msgid "savings"
 msgstr "Sparpläne"
+
+#: model/assumptions.py model/plan.py
+msgid ""
+"Correlation of the yearly draw with the inflation of its year, in Monte "
+"Carlo. 0 draws it apart from the prices, so wages or a premium do not "
+"rise more in a year of high inflation"
+msgstr ""
+"Korrelation des jährlichen Werts mit der Inflation seines Jahres, bei "
+"Monte Carlo. 0 zieht ihn unabhängig von den Preisen; Gehälter oder ein "
+"Beitrag steigen dann in einem Jahr hoher Inflation nicht stärker"
 
 #: model/assumptions.py model/plan.py
 msgid "Lowest draw"
@@ -5675,6 +5728,10 @@ msgid "volatility"
 msgstr "Schwankung"
 
 #: ui/assumptions.py
+msgid "correlation with inflation"
+msgstr "Korrelation mit Inflation"
+
+#: ui/assumptions.py
 msgid "Plan up to age"
 msgstr "Plan bis zum Alter"
 
@@ -5741,6 +5798,10 @@ msgstr "Mittelwert pro Jahr %"
 #: ui/assumptions.py
 msgid "Volatility %"
 msgstr "Schwankung %"
+
+#: ui/assumptions.py
+msgid "Persistence from year to year"
+msgstr "Beharrung von Jahr zu Jahr"
 
 #: ui/assumptions.py
 msgid "Growth indices"

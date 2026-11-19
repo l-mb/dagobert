@@ -62,8 +62,8 @@ simplifications): change it with the behaviour.
   `raised` of the spending rule `(paths,)`. The Monte Carlo run must stay in the seconds range: 5000
   paths × about 650 months × 3 scenarios takes about 6 s. Keep new per-month work vectorized.
 - Every random draw has a generator of its own purpose (`returns.generator`): `returns.<class>`,
-  `inflation`, `indices.<name>`, `care`, `disability` (rule `disability`), `sale.<asset>` (a renamed
-  asset draws other prices) and `inheritance.<relative>`, the month of death of a relative (rule
+  `inflation`, `inflation.months` (rule `returns`), `indices.<name>`, `care`, `disability` (rule
+  `disability`), `sale.<asset>` (a renamed asset draws other prices) and `inheritance.<relative>`, the month of death of a relative (rule
   `estates`). Two runs with the same seeds then draw the same numbers for a purpose, whatever else
   they draw. Their paths pair up, and the explorer's difference and the sensitivity run rely on
   that. A sale draws one number per path and asset, so a moved or conditional sale keeps its price:

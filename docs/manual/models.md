@@ -725,7 +725,12 @@ A model decides how the returns of the markets and the inflation move:
   nothing at random, and it has no care episodes. The Cashflows sheet and the Flows page use it,
   because their numbers must add up month by month.
 - `montecarlo`: many random paths (500 in the Explorer, 5000 on the command line). Each month draws
-  random returns around your means with your spreads. Each year draws an inflation rate. The model
+  random returns around your means with your spreads. Each year draws an inflation rate. With
+  the `persistence` of the inflation, a year of high inflation makes the next one likely high
+  too. A class or an index with a `correlation with inflation` moves with the inflation of its
+  year: cash whose interest follows the prices loses less buying power in such years, and cash
+  without it loses more. Without both fields, each year and each class draws apart, and long
+  times of high inflation are rarer than in history. The model
   also draws care episodes, the loss of the ability to work, the growth of your indices and the
   prices of sales. A sale price
   varies around the price of the event by its spread, and it never falls below zero. This is the

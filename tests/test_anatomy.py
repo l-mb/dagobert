@@ -12,7 +12,7 @@ from dagobert import anatomy, i18n, report
 from dagobert.anatomy import Driver, Key
 from dagobert.engine.simulation import simulate
 from dagobert.model.assets import CryptoAsset, EquityAsset
-from dagobert.model.assumptions import Distribution, Person, ReturnClass
+from dagobert.model.assumptions import Inflation, Person, ReturnClass
 from dagobert.model.streams import Stream
 from dagobert.report.anatomy import READING, TIED, bin_label, reading
 from dagobert.result import RunResult
@@ -36,7 +36,7 @@ def _run(equity: float, paths: int = 1000, wallet: float = 0.0, spread: float = 
             *([CryptoAsset(id="w", kind="crypto", value=wallet)] if wallet else []),
         ],
         person=Person(born=date(1946, 1, 1)),
-        inflation=Distribution(mean=0.02, stdev=0.01),
+        inflation=Inflation(mean=0.02, stdev=0.01),
         returns={
             "equity": ReturnClass(mean=equity, stdev=0.16),
             "bitcoin": ReturnClass(mean=0.1, stdev=spread, equity_correlation=0.4),

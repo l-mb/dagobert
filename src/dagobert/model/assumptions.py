@@ -9,7 +9,7 @@ import unicodedata
 from collections import Counter
 from collections.abc import Collection, Iterable
 from datetime import date
-from typing import Annotated, Literal, LiteralString, overload
+from typing import Annotated, Any, Literal, LiteralString, overload
 
 import numpy as np
 from pydantic import AfterValidator, Field, ValidationError, field_validator, model_validator
@@ -52,9 +52,38 @@ class Distribution(Strict):
     )
 
 
+def _with_prices(what: str, risk: str) -> Any:  # noqa: ANN401
+    return Field(
+        default=0.0,
+        ge=-1,
+        le=1,
+        description=f"Correlation of {what} with the inflation of its year, in Monte Carlo. 0 "
+        f"draws it apart from the prices, {risk}",
+    )
+
+
+class Inflation(Distribution):
+    """The consumer prices per year. `persistence` ties the rate of a year to the one before."""
+
+    persistence: Number = Field(
+        default=0.0,
+        ge=0,
+        le=0.95,
+        description="How much of the gap between the inflation of a year and its mean stays in "
+        "the next year, in Monte Carlo. 0 draws each year apart, so a decade of high inflation "
+        "is too rare. The German consumer prices of 1963 to 2025 had 0.67",
+    )
+
+
 class ReturnClass(Distribution):
     """The yearly return of an asset class. Monte Carlo ties its monthly draw to the one of equity
-    by `equity_correlation`."""
+    by `equity_correlation` and to the inflation by `inflation_correlation`."""
+
+    inflation_correlation: Number = _with_prices(
+        "the yearly return",
+        "which understates the risk of years in which prices rise and the interest does not "
+        "follow. Over 1963 to 2025 the yield of German bonds had 0.5, world equity -0.1",
+    )
 
     equity_correlation: Number = Field(
         default=0.0,
@@ -63,6 +92,14 @@ class ReturnClass(Distribution):
         description="Correlation of the monthly draws with equity. 0 assumes none, which "
         "understates the risk of a class that falls with shares, such as Bitcoin",
     )
+
+
+def mix(equity: float, prices: float, q: float) -> tuple[float, float, float]:
+    """The weights of the equity shock and the inflation shock in the shock of a class with these
+    two correlations, and the square of the weight of its own shock: below 0 no such class
+    exists. `q`: the correlation of the equity shock with the inflation shock."""
+    a, b = (equity - prices * q) / (1 - q**2), (prices - equity * q) / (1 - q**2)
+    return a, b, 1 - a * equity - b * prices
 
 
 class Duration(Strict):
@@ -647,6 +684,10 @@ class Index(Distribution):
     Cumulative (default): the draw is annual growth and the level compounds.
     Non-cumulative: the draw itself is the level, for example a bonus payout ratio."""
 
+    inflation_correlation: Number = _with_prices(
+        "the yearly draw",
+        "so wages or a premium do not rise more in a year of high inflation",
+    )
     floor: Percent | None = Field(default=None, description="Lowest draw")
     cap: Percent | None = Field(default=None, description="Highest draw")
     cumulative: bool = Field(
@@ -728,8 +769,8 @@ class Assumptions(Strict):
         "and _; a `label` names the phase on the pages, with capitals and umlauts. A phase that "
         "an input names keeps its name. Defined here only, not in a scenario",
     )
-    inflation: Distribution = Field(
-        default=Distribution(mean=0.02, stdev=0.01),
+    inflation: Inflation = Field(
+        default=Inflation(mean=0.02, stdev=0.01),
         description="Consumer prices per year. Every stream with the default `index: cpi` grows "
         "with them. Monte Carlo draws one rate per calendar year, at least -2%",
     )
@@ -882,6 +923,20 @@ class Assumptions(Strict):
         if returns["equity"].equity_correlation:
             msg = "equity: equity_correlation belongs to another class"
             raise ValueError(msg)
+        for name, d in returns.items():
+            if (
+                mix(
+                    d.equity_correlation,
+                    d.inflation_correlation,
+                    returns["equity"].inflation_correlation,
+                )[2]
+                < 0
+            ):
+                msg = (
+                    f"{name}: the correlations with equity and the inflation leave no spread of "
+                    "its own"
+                )
+                raise ValueError(msg)
         return returns
 
     @field_validator("indices")

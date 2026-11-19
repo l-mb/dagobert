@@ -17,7 +17,7 @@ from dagobert import actuals, datadir, files, revisions, schema
 from dagobert.engine.core import year_levels
 from dagobert.engine.simulation import simulate
 from dagobert.model.assets import CashAsset, GoldAsset
-from dagobert.model.assumptions import Assumptions, Distribution, Person, PhaseSpec, ReturnClass
+from dagobert.model.assumptions import Assumptions, Inflation, Person, PhaseSpec, ReturnClass
 from dagobert.model.events import PhaseChange
 from dagobert.model.plan import Plan, Scenario
 from dagobert.model.streams import Stream
@@ -109,7 +109,7 @@ def assumptions(**kw: object) -> Assumptions:
         "person": Person(born=date(1977, 1, 1)),
         "start": date(2026, 1, 1),
         "phases": PHASES,
-        "inflation": Distribution(mean=0.0),
+        "inflation": Inflation(mean=0.0),
         "returns": {name: ReturnClass(mean=0.0) for name in CLASSES},
         "cash_buffer_months": 1000,
     }

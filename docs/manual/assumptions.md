@@ -80,8 +80,10 @@ fields that it hides, and a note below the tabs names the fields of a hidden tab
 A feature that is off on the [Features](features.md) page hides its fields in both modes, for
 example `Single parent (Entlastungsbetrag)` when `Children` is off.
 
-The table of returns shows the column `correlation with equity` only when a class has a value there.
-To see it, turn on `All columns` below the table.
+The table of returns shows the columns `correlation with equity` and `correlation with inflation`
+only when a class has a value there. `Persistence from year to year` of the inflation and the two
+correlations change only the model Monte Carlo. The help of each field names a value from history.
+To see the columns, turn on `All columns` below the table.
 
 A hidden field keeps its value: a save of a tab changes only the fields that you edited. If you type
 a value and then switch to simple mode, the field stays on the page until you save or discard it.

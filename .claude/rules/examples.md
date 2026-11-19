@@ -60,6 +60,7 @@ A start from an example, the quick start and the start page: rule `first-run`.
   paths harvest 32 € of `stress` in 2026 only, as the Vorabpauschale takes the Pauschbetrag, the
   sabbatical takes salary in both of its years and the let flat carries a loss; Monte Carlo paths
   harvest after a falling year, P(broke)@90 stays), `severance` (a severance with a bAV part at 53,
+  the PKV of two years paid in advance with it,
   `end_streams`, ALG1, a new job by `add_stream` in `new-job`), `sabbatical` (`alt` at 45 with
   voluntary contributions, a gift of 25,000 € from the mother in 2028-02; a second child born
   2031-06-12 by `overrides.person`, which repeats the first row: its child-raising years, rule

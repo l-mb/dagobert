@@ -14,6 +14,7 @@ There is one tab for each type of event. Each tab names its type in words:
 | Pay into a policy | `fund_policy` |
 | One-off payment | `lump_sum` |
 | Write off shares | `write_off` |
+| Prepay the health premium | `prepay_health` |
 | End streams | `end_streams` |
 | Change a stream | `set_stream` |
 | Add a stream | `add_stream` |

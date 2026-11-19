@@ -125,6 +125,7 @@ RV, AV, KV, PV = "RV", "AV", "KV", "PV"
 # label
 LUMP_SUM, SEVERANCE, SETTLEMENT = N_("lump sum"), N_("severance"), N_("settlement")
 PREMIUM, PAYOUT = N_("policy premium"), N_("policy payout")
+PREPAID = N_("health premium in advance")  # a group of `SPENDING`, also its item
 SALE, PURCHASE, LOAN = N_("sale"), N_("purchase"), N_("loan")
 REPAYMENT, WRITE_OFF = N_("repayment"), N_("write-off")
 # The items of the growth of the pools (`NONCASH`, the kind of the asset as the group)
@@ -218,6 +219,7 @@ MarkerKind = Literal[
     "fund_policy",
     "lump_sum",
     "write_off",
+    "prepay_health",
     "end_streams",
     "set_stream",
     "add_stream",

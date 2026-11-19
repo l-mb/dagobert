@@ -68,6 +68,24 @@ yearly work expenses (`werbungskosten`): rule `deductions`. The inputs:
   of the run with it. A `health` expense may have an amount above zero
   (`Stream._signed`): a Beitragsentlastung, which lowers `_premium` (at least 0) and `_basis` by
   its share. Tests: `test_income.py`.
+- PKV premiums in advance (issue #48; `PrepayHealthEvent`, `prepay_health`, `months` 1 to 36; §10
+  Abs. 1 Nr. 3 S. 5, Abs. 4, 4b EStG read at gesetze-im-internet.de on 2026-11-19: the Dreifache).
+  `Plan` refuses one
+  in a month of the GKV (`_prepaid_in_the_pkv`, at its `at`). `Events._prepay_health`: the run
+  rate of the active `health` streams (`Income._premium_rate`, after the cap) times `months` out
+  of the cash, its Basis share into `YearAcc.health_deductible` of the year; `Core.prepaid`
+  (`state.Prepaid`: the months after the event through `until`, the nominal rate per path; a
+  second event replaces the first). `Income._credit_prepaid`, each month in `_pay_salaries`: the
+  cash gets back the premium that the streams paid times min(1, prepaid rate / run rate now), and
+  the Basis part of that leaves the deduction, after the monthly `tax.health_deductible`, which
+  floors at 0: a tax-free subsidy of a covered month makes the month negative and raises the zvE
+  of its year (§10 Abs. 4b S. 3; `test_income`: at one tax rate the prepayment then gains
+  nothing). The withholding keeps the premium (the settlement corrects it). Ledger: `spending`,
+  group `PREPAID`, the payment above zero and each month's credit below (the streams book their
+  rows in full), so a year adds up and the Flows page shows the cash. Gaps: the limit of §10 Abs.
+  4 for other insurance in a covered year; the 3× limit against a year of fewer than 12 premiums;
+  a discount; the months after a switch to the GKV lose their credit (an insurer pays it back).
+  `rich_plan`: 12 months in 2028-12; `engineer` `severance`: 24 months with the severance.
 - Zusatzbeitrag (`tax.kv_zusatz`, the whole rate of the own Kasse, GKV only; `sv.kv_zusatz` gives
   it, else the average of the year, twice `kv_zusatz_half`, §242a SGB V): half of it on a salary
   (§249 Abs. 1) and on the pension (§247, §249a; a voluntary member pays all and the DRV half of it

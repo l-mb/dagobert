@@ -341,6 +341,24 @@ A late change seldom reaches it, so set `person.kvdr` off then.
 To compare the two insurances, set `tax.gkv_from` in the `overrides` of one scenario, and keep a
 scenario without it. The Explorer has no switch for it.
 
+### Pay the premium of a private insurance in advance
+
+The premium of a private insurance lowers your income tax in the year in which you pay it. The law
+lets you pay up to three years in advance (§10 Abs. 1 Nr. 3 S. 5 EStG). This helps when a year
+with a high tax rate comes before years with a low one: the last year of full pay, or the year of
+a severance, before a break or an early retirement. The event `prepay_health` pays the premiums of
+the next months in the month of the event. The year of the event deducts them. The months after
+it pay only a rise of the premium, and they deduct nothing for the part paid in advance.
+
+In the example `engineer`, the scenario `Job loss at 53` pays two years in advance in the month of
+the severance. This lowers the taxes of 2039 to 2042 by about 3,100 € in euros of the start. The
+cash leaves your account up to two years earlier, so it earns no return in that time. The Explorer
+difference of a scenario with the event and one without it shows both effects.
+
+The simulation leaves out the limit for other insurance (§10 Abs. 4 EStG, 1,900 € or 2,800 € a
+year), which is free in a year without a premium of its own. It also leaves out a discount of the
+insurer for a payment in advance.
+
 ### The premium of a private insurance at old age
 
 The premium of a private insurance follows the index of its streams, and this index is your

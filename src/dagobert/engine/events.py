@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from dagobert import tax
 from dagobert.engine.income import Income
 from dagobert.engine.portfolio import Portfolio
-from dagobert.engine.state import Acquisition, LoanState, PolicyState
+from dagobert.engine.state import Acquisition, LoanState, PolicyState, Prepaid
 from dagobert.model.assets import EquityAsset, PropertyAsset
 from dagobert.model.events import (
     Acquired,
@@ -21,6 +21,7 @@ from dagobert.model.events import (
     InheritanceEvent,
     LumpSumEvent,
     PolicyFunding,
+    PrepayHealthEvent,
     RepayAction,
     RepayEvent,
     SellEvent,
@@ -44,10 +45,12 @@ from dagobert.result import (
     ONEOFF_OUT,
     ONEOFF_TAX,
     PREMIUM,
+    PREPAID,
     PURCHASE,
     PURCHASE_COSTS,
     SALE,
     SEVERANCE,
+    SPENDING,
     TRANSFER_TAX,
     WRITE_OFF,
     BoolArray,
@@ -84,6 +87,13 @@ class Events(Income, Portfolio):
                 self._lump_sum(ev)
             case WriteOffEvent():
                 self._write_off(ev)
+            case PrepayHealthEvent():
+                self._prepay_health(ev)
+            case EndStreamsEvent() | SetStreamEvent() | AddStreamEvent():
+                self._change_streams(ev)
+
+    def _change_streams(self, ev: EndStreamsEvent | SetStreamEvent | AddStreamEvent) -> None:
+        match ev:
             case EndStreamsEvent():
                 self._end_streams(ev)
             case SetStreamEvent():
@@ -190,6 +200,17 @@ class Events(Income, Portfolio):
         if ev.taxable:
             self.acc.other_taxable += ev.amount / self.deflator
             self.acc.kv_oneoff += ev.amount / self.deflator
+
+    def _prepay_health(self, ev: PrepayHealthEvent) -> None:
+        """The PKV premium of the next `months` months out of the cash, at the run rate of this
+        month; its Basis share is a Sonderausgabe of this year (§10 Abs. 1 Nr. 3 S. 5 EStG: up to
+        three times the contribution of the year, which 36 months at this rate are).
+        `Income._credit_prepaid` gives it back month by month."""
+        rate = self._premium_rate()
+        self.prepaid = Prepaid(self.m.i, self.m.i + ev.months, rate)
+        self._spend(-ev.months * rate)
+        self._note(SPENDING, PREPAID, ev.note or PREPAID, ev.months * rate)
+        self.acc.health_deductible += ev.months * self._premium_rate(basis=True) / self.deflator
 
     def _set_stream(self, ev: SetStreamEvent) -> None:
         named = [s for s in self.streams if s.spec.name == ev.name]

@@ -933,6 +933,15 @@ source can still change. Only the [Data](data.md) page (a fetch or an import) an
     relative draws the death before the gift, the gift joins that inheritance on that path. A gift
     before a new start does not refuse the roll forward: the roll moves it into `given` of its
     relative.
+  - `prepay_health`: `months` (1 to 36). Only with a private health insurance in its month. The
+    cash pays the `health` premiums of the months after the event at once, at the amounts of the
+    month of the event. The part of them that the tax takes (`deductible`) lowers the income of
+    the year of the event (§10 Abs. 1 Nr. 3 S. 5 EStG: up to three times the contribution of
+    the year). In the months that it covers, the cash pays only what the premium rose since, and
+    the premium paid in advance lowers no tax again. A subsidy of the employer or of the pension
+    insurance in such a month raises the income of its year, because the premium that it pays
+    for lowered the tax already. Ask your insurer whether it takes a payment in advance, and for
+    how many months.
   - `write_off`: `asset`, an equity asset that leaves the depot without proceeds and without
     tax, for example a share plan forfeited without payment. The depot is one pool, so the engine
     takes out the start value of the asset at the equity index of the date, and its basis, each

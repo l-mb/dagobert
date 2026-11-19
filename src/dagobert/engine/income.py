@@ -40,6 +40,7 @@ from dagobert.result import (
     OWN_PREMIUM,
     PAYOUT,
     PKV_SUBSIDY,
+    PREPAID,
     PROFIT,
     PV,
     RV,
@@ -103,6 +104,33 @@ class Income(Health):
             ),
             np.zeros(self.paths),
         )
+
+    def _premium_rate(self, *, basis: bool = False) -> FloatArray:
+        """Nominal run rate of the PKV premium this month, with `basis` of its Basis share: a
+        part paid every n months counts 1/n."""
+        return sum(
+            (
+                -self._nominal(s) / s.spec.every * (self._deductible_share(s.spec) if basis else 1)
+                for s in self.streams
+                if s.spec.health and s.active(self.m.month, self.m.phase)
+            ),
+            np.zeros(self.paths),
+        )
+
+    def _credit_prepaid(self, premium: FloatArray) -> None:
+        """A month whose PKV premium a `prepay_health` paid: the cash gets back what the streams
+        paid of it, the share that the prepaid rate is of the run rate of now (a rise since is
+        paid here), and the Basis part of that leaves the deduction of the year: its year of
+        payment took it. So a tax-free subsidy of such a month lowers the deduction below zero,
+        which raises the income (§10 Abs. 4b S. 3 EStG)."""
+        paid = self.prepaid
+        if paid is None or not paid.since < self.m.i <= paid.until or not self.pkv:
+            return
+        now = self._premium_rate()
+        share = np.where(now > 0, np.minimum(paid.rate / np.where(now > 0, now, 1.0), 1.0), 0.0)
+        self._spend(premium * share)
+        self._note(SPENDING, PREPAID, PREPAID, -premium * share)
+        self.acc.health_deductible -= self._basis() * share / self.deflator
 
     def _deductible_share(self, spec: Stream) -> float:
         """The share of a PKV premium or of an expense with `deduct` that counts for the tax."""
@@ -340,6 +368,7 @@ class Income(Health):
         self._spend(-converted_real * d)
         self._note(SOURCE, "", PKV_SUBSIDY, subsidy)
         self.acc.health_deductible += deductible / d
+        self._credit_prepaid(premium)
         return bases[1], deductible
 
     def _record_earned(self) -> None:

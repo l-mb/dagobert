@@ -351,6 +351,20 @@ class WriteOffEvent(DatedEvent):
         return self.note or self.asset
 
 
+class PrepayHealthEvent(DatedEvent):
+    """The premium of the private health insurance of the next months, paid in advance: its
+    Basis share lowers the income tax of the year that pays it (§10 Abs. 1 Nr. 3 S. 5 EStG)."""
+
+    type: Literal["prepay_health"]
+    months: Annotated[int, unit(Unit.MONTHS)] = Field(
+        ge=1,
+        le=36,
+        description="The months after the event whose `health` premiums it pays, at the amounts "
+        "of its month, at most 36: the law takes up to three times the contribution of the year. "
+        "A later rise of the premium is paid in its month",
+    )
+
+
 def _listed(value: object) -> object:
     """One name reads as a list of one."""
     return [value] if isinstance(value, str) else value
@@ -506,6 +520,7 @@ Event = Annotated[
     | FundPolicyEvent
     | LumpSumEvent
     | WriteOffEvent
+    | PrepayHealthEvent
     | EndStreamsEvent
     | SetStreamEvent
     | AddStreamEvent

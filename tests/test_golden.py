@@ -147,6 +147,7 @@ EVENTS: list[dict[str, Any]] = [
     {"when": {"age": 51.5}, "type": "sell", "asset": "btc", "share": 0.8},  # free, then §20
     {"at": date(2028, 9, 1), "type": "sell", "asset": "gold", "costs": 0.01}  # aged: free
     | {"then": [{"invest": "portfolio"}]},
+    {"at": date(2028, 12, 1), "type": "prepay_health", "months": 12},  # the PKV of 2029
     {"at": date(2029, 1, 1), "type": "write_off", "asset": "rsu"},
     {"at": date(2029, 1, 1), "type": "severance", "gross": 150_000}
     | {"bav": {"policy": "bav", "amount": 20_000}},

@@ -54,6 +54,7 @@ text too (owner, issue #23: `auf der Seite Snapshot`), as do Explorer, Cashflows
 | self-employment / profit / business | Selbstständigkeit / Gewinn / Betrieb | |
 | income tax / Soli / capital gains tax / SV | Einkommensteuer / Soli / Abgeltungsteuer / Sozialversicherung (SV) | |
 | Vorabpauschale, Teilfreistellung, Sparer-Pauschbetrag, Grunderwerbsteuer, Fünftelregelung, Gewerbesteuer, Hebesatz, Vorsorgepauschale, Basisrente, Altersvorsorgedepot, Hausgeld, ALG1, Rentenpunkte, Krankengeld, PKV, GKV, KVdR, Bundesland | as is | the English UI uses them; PKV, GKV spelled out once in help |
+| Prepay the health premium (`prepay_health`) / health premium in advance (ledger) | PKV vorauszahlen / Krankenversicherung im Voraus | the marker „Krankenversicherung vorausgezahlt" |
 | PKV premium capped (from) | PKV-Beitrag gedeckelt (ab) | the key `pkv_cap_from` „PKV-Deckel ab"; Standardtarif, Basistarif as is |
 | Statutory health insurance from (`tax.gkv_from`) / private insurance only / statutory insurance only / switch, change (of the insurance) / exemption / ALG1 in the PKV (a marker) | Gesetzlich versichert ab / nur privat versichert / nur gesetzlich versichert / Wechsel / Befreiung / ALG1 in der PKV | the key `gkv_from` „GKV ab"; the marker `gkv` „Gesetzliche Krankenversicherung" |
 | Sperrzeit / course, training (`training`) / claim (to ALG1) / used up | Sperrzeit / Weiterbildung / Anspruch / verbraucht | rule `alg1`; the key `sperrzeit` „Sperrzeit", `training` „Weiterbildung" |

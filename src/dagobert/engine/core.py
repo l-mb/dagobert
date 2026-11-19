@@ -24,6 +24,7 @@ from dagobert.engine.state import (
     MonthState,
     PensionState,
     PolicyState,
+    Prepaid,
     PropertyState,
     Received,
     SickPay,
@@ -314,6 +315,7 @@ class Core:
         self.cash_mark = self.cash.copy()
         self.liquid_prev = np.zeros(self.paths)
         self.kv_capped: tuple[int, FloatArray | float] = (-1, 1.0)
+        self.prepaid: Prepaid | None = None
         self.cap_marked = False
         phase = self.m.phase
         self.earns = (

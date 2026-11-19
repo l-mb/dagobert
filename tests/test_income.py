@@ -12,11 +12,14 @@ from dagobert.engine.simulation import horizon_months, simulate
 from dagobert.model.assets import AvDepot, PensionPolicy, PropertyAsset
 from dagobert.model.assumptions import Child, Person
 from dagobert.model.events import (
+    Event,
     FundPolicyEvent,
     LumpSumEvent,
     PolicyFunding,
+    PrepayHealthEvent,
     SaleTrigger,
     SellEvent,
+    SetStreamEvent,
     SeveranceEvent,
 )
 from dagobert.model.months import months_between
@@ -343,6 +346,62 @@ def test_a_reduction_of_the_pkv_premium_lowers_what_it_pays_and_deducts() -> Non
     assert relieved.taxes[0].sum() < plain.taxes[0].sum()  # more tax: less premium to deduct
     with pytest.raises(ValueError, match="non-positive"):
         Stream(name="rent", amount=300, index=None)
+
+
+def test_a_premium_paid_in_advance_deducts_in_its_year_and_pays_no_more_after() -> None:
+    """§10 Abs. 1 Nr. 3 S. 5 EStG: the premiums of the next twelve months out of the cash in
+    December, their Basis share off the income of that year; the months after pay nothing and
+    deduct nothing. The same premiums in all, less tax in the year of the salary, the same tax
+    in the year without income, where the deduction saved nothing."""
+
+    def run(*events: PrepayHealthEvent) -> RunResult:
+        streams = [
+            Stream(name="salary", kind=StreamKind.SALARY, gross=8000, end=date(2027, 1, 1)),
+            Stream(name="kv", amount=-600, health="kv", index=None, deductible=0.8),
+            Stream(name="pv", amount=-100, health="pv", index=None),
+        ]
+        return zero_run(plan(streams, [cash(200_000)], Scenario(name="s", events=list(events))), 36)
+
+    plain = run()
+    ahead = run(PrepayHealthEvent(at=date(2026, 12, 1), type="prepay_health", months=12))
+    assert ahead.expenses[0, 11] == pytest.approx(plain.expenses[0, 11] - 12 * 700)
+    assert ahead.expenses[0, 12:24].tolist() == pytest.approx([0.0] * 12)
+    assert ahead.expenses[0, 24:].tolist() == pytest.approx(plain.expenses[0, 24:].tolist())
+    assert ahead.expenses[0].sum() == pytest.approx(plain.expenses[0].sum())
+    saved = ahead.taxes[0, :12].sum() - plain.taxes[0, :12].sum()
+    assert saved > 0.3 * 12 * (480 + 100)  # the Basis share of a year at a rate above 30%
+    assert ahead.taxes[0, 12:].sum() == pytest.approx(plain.taxes[0, 12:].sum())
+    assert [m.kind for m in ahead.markers if m.kind == "prepay_health"] == ["prepay_health"]
+
+
+def test_a_premium_paid_in_advance_pays_its_rise_and_keeps_the_subsidy_taxed() -> None:
+    """A premium that rose since pays the difference in its month. A subsidy of the employer in
+    a month paid in advance is tax-free money for a premium that deducted in full already: it
+    comes off the deduction of its year, so the tax of that year rises."""
+    ahead = PrepayHealthEvent(at=date(2026, 12, 1), type="prepay_health", months=12)
+    raised = SetStreamEvent(at=date(2027, 7, 1), type="set_stream", name="kv", amount=-700)
+
+    def run(*events: Event, until: date | None = None) -> RunResult:
+        streams = [
+            Stream(name="salary", kind=StreamKind.SALARY, gross=8000, end=until),
+            Stream(name="kv", amount=-600, health="kv", index=None),
+        ]
+        return zero_run(plan(streams, [cash(200_000)], Scenario(name="s", events=list(events))), 24)
+
+    rise = run(ahead, raised, until=date(2027, 1, 1))
+    assert rise.expenses[0, 12:].tolist() == pytest.approx([0.0] * 6 + [-100.0] * 6)
+    plain, paid = run(), run(ahead)
+    assert paid.income[0].tolist() == pytest.approx(plain.income[0].tolist())  # the subsidy stays
+    assert paid.taxes[0, 12:].sum() < plain.taxes[0, 12:].sum()  # more tax in the year after
+    assert paid.taxes[0].sum() == pytest.approx(plain.taxes[0].sum(), abs=1.0)  # same rate: no gain
+
+
+def test_a_premium_in_advance_needs_the_private_insurance() -> None:
+    event = PrepayHealthEvent(at=date(2026, 12, 1), type="prepay_health", months=12)
+    with pytest.raises(ValueError, match="statutory insurance"):
+        plan([], [cash()], Scenario(name="s", events=[event]), tax={"pkv": False})
+    with pytest.raises(ValueError, match="less than or equal to 36"):
+        PrepayHealthEvent(at=date(2026, 12, 1), type="prepay_health", months=37)
 
 
 def test_the_pkv_subsidy_follows_the_salary_and_alg1_not_the_phase() -> None:

@@ -189,6 +189,16 @@ class PensionState:
 
 
 @dataclass
+class Prepaid:
+    """PKV premiums paid in advance (`prepay_health`): after the month index `since` through
+    `until` the nominal premium `rate` a month of each path is paid already."""
+
+    since: int
+    until: int
+    rate: FloatArray
+
+
+@dataclass
 class SickPay:
     """The Krankengeld of a path, fixed in its first month: nominal per month before the member's
     shares, and those shares of RV, ALV and PV; 0 without one."""

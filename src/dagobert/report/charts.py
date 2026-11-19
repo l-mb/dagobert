@@ -295,6 +295,7 @@ MARKER_KINDS: dict[MarkerKind, str] = {
     "fund_policy": N_("Payment into a policy"),
     "lump_sum": N_("One-off payment"),
     "write_off": N_("Write-off"),
+    "prepay_health": N_("Health premium paid in advance"),
     "end_streams": N_("Payments end"),
     "set_stream": N_("Payment changes"),
     "add_stream": N_("New payment"),

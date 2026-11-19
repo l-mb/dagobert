@@ -15,6 +15,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
+#: budget.py ui/flows.py
+msgid "one-offs"
+msgstr "Einmalposten"
+
 #: budget.py
 msgid "taxes & SV"
 msgstr "Steuern & SV"
@@ -40,6 +44,10 @@ msgstr "Ausgaben"
 msgid "surplus"
 msgstr "Überschuss"
 
+#: budget.py cashplan.py ui/cashflows.py
+msgid "income"
+msgstr "Einnahmen"
+
 #: budget.py
 msgid "into assets"
 msgstr "in Vermögenswerte"
@@ -52,14 +60,6 @@ msgstr "unbare Einnahmen"
 msgid "wealth built"
 msgstr "Vermögenszuwachs"
 
-#: budget.py cashplan.py ui/cashflows.py
-msgid "income"
-msgstr "Einnahmen"
-
-#: budget.py ui/flows.py
-msgid "one-offs"
-msgstr "Einmalposten"
-
 #: cashplan.py
 msgid "starts"
 msgstr "beginnt"
@@ -67,6 +67,10 @@ msgstr "beginnt"
 #: cashplan.py
 msgid "ends"
 msgstr "endet"
+
+#: cashplan.py report/flows.py ui/cashflows.py
+msgid "expenses"
+msgstr "Ausgaben"
 
 #: cashplan.py
 msgid "continues"
@@ -98,15 +102,6 @@ msgstr "endet: {why}"
 msgid "starts: after the {why}"
 msgstr "beginnt: nach dem {why}"
 
-#: cashplan.py
-#, python-brace-format
-msgid "follows {base}"
-msgstr "folgt {base}"
-
-#: cashplan.py report/flows.py ui/cashflows.py
-msgid "expenses"
-msgstr "Ausgaben"
-
 #: cashplan.py ui/transfer.py
 msgid "added"
 msgstr "hinzugefügt"
@@ -114,6 +109,11 @@ msgstr "hinzugefügt"
 #: cashplan.py ui/transfer.py
 msgid "removed"
 msgstr "entfernt"
+
+#: cashplan.py
+#, python-brace-format
+msgid "follows {base}"
+msgstr "folgt {base}"
 
 #: datadir.py
 #, python-brace-format
@@ -147,6 +147,10 @@ msgstr "{a} und {b} unterscheiden sich in ihren Monaten oder Verläufen"
 msgid "Stop working"
 msgstr "Arbeitsende"
 
+#: goalseek.py ui/knobs.py ui/scenario_overrides.py
+msgid "All spending"
+msgstr "Alle Ausgaben"
+
 #: goalseek.py
 msgid "Spending floor"
 msgstr "Untergrenze der Ausgaben"
@@ -178,6 +182,11 @@ msgstr ""
 "Datum, geht der Monat nicht darüber hinaus. Die Suche beginnt beim "
 "spätesten Monat und hält beim ersten, der das Ziel verfehlt. Ein noch "
 "früherer Monat kann das Ziel wieder erreichen."
+
+#: goalseek.py ui/__init__.py
+#, python-brace-format
+msgid "{month} (age {age})"
+msgstr "{month} (Alter {age})"
 
 #: goalseek.py
 msgid "no effect in the range"
@@ -297,15 +306,6 @@ msgid ""
 msgstr ""
 "Arbeitsende **{month}** für höchstens {target} Risiko, dass dein Geld vor"
 " {age} ausgeht: dort {p}. Der Plan sieht {plan} vor."
-
-#: goalseek.py ui/__init__.py
-#, python-brace-format
-msgid "{month} (age {age})"
-msgstr "{month} (Alter {age})"
-
-#: goalseek.py ui/knobs.py ui/scenario_overrides.py
-msgid "All spending"
-msgstr "Alle Ausgaben"
 
 #: model/assets.py
 msgid "Asof"
@@ -2809,13 +2809,13 @@ msgctxt "key"
 msgid "founded"
 msgstr "Gegründet"
 
-#: model/assumptions.py model/plan.py ui/assumptions.py
-msgid "Disability"
-msgstr "Erwerbsminderung"
-
 #: model/assumptions.py model/plan.py ui/assumptions.py ui/welcome.py
 msgid "Date of birth"
 msgstr "Geburtsdatum"
+
+#: model/assumptions.py model/plan.py ui/assumptions.py
+msgid "Disability"
+msgstr "Erwerbsminderung"
 
 #: model/assumptions.py model/plan.py ui/events.py
 msgid "Relatives"
@@ -2951,6 +2951,10 @@ msgstr "bAV"
 #: model/events.py
 msgid "Signed: below zero pays out"
 msgstr "Mit Vorzeichen: Ein Betrag unter null ist eine Auszahlung"
+
+#: model/events.py
+msgid "Months"
+msgstr "Monate"
 
 #: model/events.py
 msgid "Cash"
@@ -3160,6 +3164,23 @@ msgstr "bAV"
 #: model/events.py model/plan.py
 msgid "Id of a `bav` asset with `basisrente`"
 msgstr "ID eines Vermögenswerts der Art `bav` mit `basisrente`"
+
+#: model/events.py model/plan.py
+msgid ""
+"The months after the event whose `health` premiums it pays, at the "
+"amounts of its month, at most 36: the law takes up to three times the "
+"contribution of the year. A later rise of the premium is paid in its "
+"month"
+msgstr ""
+"Die Monate nach dem Ereignis, deren Beiträge `health` es zahlt, in der "
+"Höhe seines Monats, höchstens 36: Das Gesetz erkennt bis zum Dreifachen "
+"des Jahresbeitrags an. Eine spätere Erhöhung des Beitrags wird in ihrem "
+"Monat gezahlt"
+
+#: model/events.py model/plan.py
+msgctxt "key"
+msgid "months"
+msgstr "Monate"
 
 #: model/events.py model/plan.py
 msgid ""
@@ -4041,6 +4062,18 @@ msgstr "Geld vor {age} ausgegangen: {p} von {paths} Verläufen"
 msgid "fixed income & deposits"
 msgstr "Anleihen & Festgeld"
 
+#: report/balance.py ui/summary.py
+msgid "gold"
+msgstr "Gold"
+
+#: report/balance.py ui/summary.py
+msgid "crypto"
+msgstr "Krypto"
+
+#: report/balance.py ui/summary.py
+msgid "property"
+msgstr "Immobilie"
+
 #: report/balance.py
 msgid "pension policies"
 msgstr "Rentenverträge"
@@ -4124,26 +4157,6 @@ msgstr "Reicht das Geld? 1× ist das liquide Vermögen mit {age}"
 msgid "Share of paths"
 msgstr "Anteil der Verläufe"
 
-#: report/balance.py result.py ui/events.py ui/summary.py
-msgid "cash"
-msgstr "Bargeld"
-
-#: report/balance.py result.py ui/summary.py
-msgid "equity"
-msgstr "Aktien"
-
-#: report/balance.py ui/summary.py
-msgid "gold"
-msgstr "Gold"
-
-#: report/balance.py ui/summary.py
-msgid "crypto"
-msgstr "Krypto"
-
-#: report/balance.py ui/summary.py
-msgid "property"
-msgstr "Immobilie"
-
 #: report/charts.py
 msgid "chance to have run out by age"
 msgstr "Risiko, dass dein Geld ausgegangen ist, nach Alter"
@@ -4183,6 +4196,19 @@ msgctxt "class"
 msgid "Bitcoin"
 msgstr "Bitcoin"
 
+#: report/charts.py ui/lineage.py ui/outlook.py
+#, python-brace-format
+msgid "age {age}"
+msgstr "Alter {age}"
+
+#: report/charts.py ui/cashflows.py
+msgid "Gründungszuschuss"
+msgstr "Gründungszuschuss"
+
+#: report/charts.py ui/events.py
+msgid "Sale"
+msgstr "Verkauf"
+
 #: report/charts.py
 msgid "Purchase"
 msgstr "Kauf"
@@ -4199,9 +4225,17 @@ msgstr "Abfindung"
 msgid "Payment into a policy"
 msgstr "Einzahlung in einen Vertrag"
 
+#: report/charts.py ui/lineage.py
+msgid "One-off payment"
+msgstr "Einmalzahlung"
+
 #: report/charts.py
 msgid "Write-off"
 msgstr "Ausbuchung"
+
+#: report/charts.py
+msgid "Health premium paid in advance"
+msgstr "Krankenversicherung vorausgezahlt"
 
 #: report/charts.py
 msgid "Payments end"
@@ -4214,6 +4248,14 @@ msgstr "Zahlungsänderung"
 #: report/charts.py
 msgid "New payment"
 msgstr "Neue Zahlung"
+
+#: report/charts.py ui/lineage.py
+msgid "Inheritance"
+msgstr "Erbschaft"
+
+#: report/charts.py ui/lineage.py
+msgid "Gift"
+msgstr "Schenkung"
 
 #: report/charts.py
 msgid "ALG1"
@@ -4321,6 +4363,11 @@ msgstr "{plan} ausgesetzt"
 msgid "{item} (half of the paths)"
 msgstr "{item} (in der Hälfte der Verläufe)"
 
+#: report/charts.py report/fan.py
+#, python-brace-format
+msgid "{month}, age {age}"
+msgstr "{month}, Alter {age}"
+
 #: report/charts.py
 msgid "Age and year"
 msgstr "Alter und Jahr"
@@ -4330,35 +4377,9 @@ msgstr "Alter und Jahr"
 msgid "{value} pt"
 msgstr "{value} Pp."
 
-#: report/charts.py report/fan.py
-#, python-brace-format
-msgid "{month}, age {age}"
-msgstr "{month}, Alter {age}"
-
-#: report/charts.py ui/cashflows.py
-msgid "Gründungszuschuss"
-msgstr "Gründungszuschuss"
-
-#: report/charts.py ui/events.py
-msgid "Sale"
-msgstr "Verkauf"
-
-#: report/charts.py ui/lineage.py
-msgid "One-off payment"
-msgstr "Einmalzahlung"
-
-#: report/charts.py ui/lineage.py
-msgid "Inheritance"
-msgstr "Erbschaft"
-
-#: report/charts.py ui/lineage.py
-msgid "Gift"
-msgstr "Schenkung"
-
-#: report/charts.py ui/lineage.py ui/outlook.py
-#, python-brace-format
-msgid "age {age}"
-msgstr "Alter {age}"
+#: report/comparison.py report/page.py
+msgid "Comparison"
+msgstr "Vergleich"
 
 #: report/comparison.py
 #, python-brace-format
@@ -4373,10 +4394,6 @@ msgstr "{scenario}: liquides Vermögen"
 #: report/comparison.py
 msgid "median net worth and liquid by age"
 msgstr "Nettovermögen und liquides Vermögen im Median, nach Alter"
-
-#: report/comparison.py report/page.py
-msgid "Comparison"
-msgstr "Vergleich"
 
 #: report/fan.py
 #, python-format
@@ -4429,6 +4446,10 @@ msgstr "Liquides Vermögen"
 msgid "middle 90% of runs"
 msgstr "mittlere 90 % der Simulationen"
 
+#: report/fan.py report/summary.py
+msgid "median"
+msgstr "Median"
+
 #: report/fan.py
 #, python-brace-format
 msgid "median {value}"
@@ -4443,10 +4464,6 @@ msgstr "mittlere 90 %: {low} bis {high}"
 #, python-brace-format
 msgid "{b} less {a}, path by path"
 msgstr "{b} minus {a}, Verlauf für Verlauf"
-
-#: report/fan.py report/summary.py
-msgid "median"
-msgstr "Median"
 
 #: report/flows.py
 #, python-brace-format
@@ -4468,6 +4485,10 @@ msgstr "Einnahmen, Ausgaben und Steuern, Median"
 msgid "net"
 msgstr "netto"
 
+#: report/page.py ui/tables.py
+msgid "What the columns mean"
+msgstr "Was die Spalten bedeuten"
+
 #: report/page.py
 msgctxt "heading"
 msgid "Liquid"
@@ -4477,15 +4498,28 @@ msgstr "Liquides Vermögen"
 msgid "Balance sheet"
 msgstr "Bilanz"
 
+#: report/page.py ui/explorer.py
+msgid "Will the money last?"
+msgstr "Reicht das Geld?"
+
 #: report/page.py
 msgctxt "heading"
 msgid "Flows"
 msgstr "Einnahmen, Ausgaben und Steuern"
 
+#: report/page.py ui/explorer.py
+msgid "Why paths run out"
+msgstr "Warum das Geld ausgeht"
+
 #: report/page.py
 #, python-brace-format
 msgid "Difference from {scenario}"
 msgstr "Unterschied zu {scenario}"
+
+#: report/page.py ui/explorer.py
+#, python-brace-format
+msgid "{b} less {a}"
+msgstr "{b} minus {a}"
 
 #: report/page.py
 #, python-brace-format
@@ -4496,30 +4530,13 @@ msgstr "Jedes Szenario minus das erste, {scenario}, Verlauf für Verlauf."
 msgid "Views"
 msgstr "Ansichten"
 
-#: report/page.py
-msgid "Chance to have run out by age"
-msgstr "Risiko, dass dein Geld ausgegangen ist, nach Alter"
-
-#: report/page.py ui/explorer.py
-msgid "Will the money last?"
-msgstr "Reicht das Geld?"
-
-#: report/page.py ui/explorer.py
-msgid "Why paths run out"
-msgstr "Warum das Geld ausgeht"
-
-#: report/page.py ui/explorer.py
-#, python-brace-format
-msgid "{b} less {a}"
-msgstr "{b} minus {a}"
-
 #: report/page.py ui/explorer.py
 msgid "Net worth"
 msgstr "Nettovermögen"
 
-#: report/page.py ui/tables.py
-msgid "What the columns mean"
-msgstr "Was die Spalten bedeuten"
+#: report/page.py
+msgid "Chance to have run out by age"
+msgstr "Risiko, dass dein Geld ausgegangen ist, nach Alter"
 
 #: report/sensitivity.py
 msgid "better"
@@ -4528,6 +4545,10 @@ msgstr "besser"
 #: report/sensitivity.py
 msgid "worse"
 msgstr "schlechter"
+
+#: report/sensitivity.py ui/data.py
+msgid "no change"
+msgstr "keine Änderung"
 
 #: report/sensitivity.py
 msgid "one step down"
@@ -4549,10 +4570,6 @@ msgstr "ein Schritt je Teil des Plans"
 #: report/sensitivity.py
 msgid "one step of each assumption"
 msgstr "ein Schritt je Annahme"
-
-#: report/sensitivity.py ui/data.py
-msgid "no change"
-msgstr "keine Änderung"
 
 #: report/summary.py
 msgid ""
@@ -4591,6 +4608,10 @@ msgstr ""
 #, python-brace-format
 msgid "as saved: {value}"
 msgstr "wie gespeichert: {value}"
+
+#: report/summary.py ui/cashflows.py ui/pricing.py ui/tradeimport.py
+msgid "none"
+msgstr "keine"
 
 #: report/summary.py
 #, python-brace-format
@@ -4646,6 +4667,11 @@ msgstr ""
 "Eine Simulation ohne Sterbetafel (`--no-mortality`) zählt jeden Verlauf "
 "voll, als würdest du bis {end} leben."
 
+#: report/summary.py ui/explorer.py
+#, python-brace-format
+msgid "Net worth at {age}"
+msgstr "Nettovermögen mit {age}"
+
 #: report/summary.py
 #, python-brace-format
 msgid ""
@@ -4655,6 +4681,10 @@ msgstr ""
 "Was du mit {median} im mittleren Verlauf besitzt, nach Abzug der "
 "Schulden: liquides Vermögen plus Immobilien und Rentenverträge minus "
 "Darlehen, {money}."
+
+#: report/summary.py ui/cashflows.py ui/flows.py
+msgid "Scenario"
+msgstr "Szenario"
 
 #: report/summary.py
 msgid "The name of the scenario."
@@ -4702,6 +4732,10 @@ msgstr ""
 "Bargeld, Festgeld, Anleihen und Aktien, nach der Steuer auf nicht "
 "realisierte Gewinne, {money}."
 
+#: report/summary.py ui/sliders.py
+msgid "Taxes"
+msgstr "Steuern"
+
 #: report/summary.py
 #, python-brace-format
 msgid ""
@@ -4726,6 +4760,10 @@ msgstr ""
 "Das erste Alter, in dem in einem von zwanzig Verläufen das Geld "
 "ausgegangen ist: Das 5. Perzentil des liquiden Vermögens fällt unter "
 "null. `nie`, wenn das nicht geschieht."
+
+#: report/summary.py ui/lineage.py ui/overview.py ui/snapshot.py
+msgid "never"
+msgstr "nie"
 
 #: report/summary.py
 msgid "Months of cuts"
@@ -4834,26 +4872,29 @@ msgstr "Bis dahin gezahlte Steuern, Median"
 msgid "Measure ({unit})"
 msgstr "Kennzahl ({unit})"
 
-#: report/summary.py ui/cashflows.py ui/flows.py
-msgid "Scenario"
-msgstr "Szenario"
+#: report/tracker.py ui/outlook.py ui/summary.py
+msgid "liquid"
+msgstr "liquide"
 
-#: report/summary.py ui/cashflows.py ui/pricing.py ui/tradeimport.py
-msgid "none"
-msgstr "keine"
+#: report/tracker.py ui/summary.py
+msgid "illiquid"
+msgstr "gebunden"
 
-#: report/summary.py ui/explorer.py
-#, python-brace-format
-msgid "Net worth at {age}"
-msgstr "Nettovermögen mit {age}"
+#: report/tracker.py ui/summary.py
+msgid "debt"
+msgstr "Schulden"
 
-#: report/summary.py ui/lineage.py ui/overview.py ui/snapshot.py
-msgid "never"
-msgstr "nie"
+#: report/tracker.py ui/spend.py
+msgid "actual"
+msgstr "Ist"
 
-#: report/summary.py ui/sliders.py
-msgid "Taxes"
-msgstr "Steuern"
+#: report/tracker.py ui/spend.py
+msgid "plan"
+msgstr "Plan"
+
+#: report/tracker.py ui/outlook.py ui/summary.py
+msgid "net worth"
+msgstr "Nettovermögen"
 
 #: report/tracker.py
 #, python-format
@@ -4869,19 +4910,6 @@ msgstr "{low} bis {high}"
 msgid "plan median"
 msgstr "Plan (Median)"
 
-#: report/tracker.py
-#, python-brace-format
-msgid "{units} units for {amount}"
-msgstr "{units} Stück für {amount}"
-
-#: report/tracker.py result.py
-msgid "purchase"
-msgstr "Kauf"
-
-#: report/tracker.py result.py
-msgid "sale"
-msgstr "Verkauf"
-
 #: report/tracker.py ui/assets.py
 msgid "cost"
 msgstr "Kosten"
@@ -4891,29 +4919,10 @@ msgstr "Kosten"
 msgid "value"
 msgstr "Wert"
 
-#: report/tracker.py ui/outlook.py ui/summary.py
-msgid "liquid"
-msgstr "liquide"
-
-#: report/tracker.py ui/outlook.py ui/summary.py
-msgid "net worth"
-msgstr "Nettovermögen"
-
-#: report/tracker.py ui/spend.py
-msgid "actual"
-msgstr "Ist"
-
-#: report/tracker.py ui/spend.py
-msgid "plan"
-msgstr "Plan"
-
-#: report/tracker.py ui/summary.py
-msgid "illiquid"
-msgstr "gebunden"
-
-#: report/tracker.py ui/summary.py
-msgid "debt"
-msgstr "Schulden"
+#: report/tracker.py
+#, python-brace-format
+msgid "{units} units for {amount}"
+msgstr "{units} Stück für {amount}"
 
 #: result.py
 #, python-brace-format
@@ -4942,6 +4951,10 @@ msgstr "€ pro Jahr, nominal"
 msgid "tax on one-offs"
 msgstr "Steuer auf Einmalposten"
 
+#: result.py ui/events.py
+msgid "purchase costs"
+msgstr "Kaufnebenkosten"
+
 #: result.py
 msgid "loan interest"
 msgstr "Darlehenszinsen"
@@ -4957,6 +4970,10 @@ msgstr "Pflege"
 #: result.py
 msgid "property upkeep"
 msgstr "Instandhaltung"
+
+#: result.py ui/assets.py
+msgid "salary conversion"
+msgstr "Entgeltumwandlung"
 
 #: result.py
 msgid "PKV subsidy"
@@ -4986,6 +5003,10 @@ msgstr "Abfindung"
 msgid "settlement"
 msgstr "Steuerabrechnung"
 
+#: result.py ui/assets.py
+msgid "lump sum"
+msgstr "Einmalzahlung"
+
 #: result.py
 msgid "policy premium"
 msgstr "Vertragsbeitrag"
@@ -4995,12 +5016,40 @@ msgid "policy payout"
 msgstr "Vertragsauszahlung"
 
 #: result.py
+msgid "health premium in advance"
+msgstr "Krankenversicherung im Voraus"
+
+#: report/tracker.py result.py
+msgid "purchase"
+msgstr "Kauf"
+
+#: report/tracker.py result.py
+msgid "sale"
+msgstr "Verkauf"
+
+#: result.py ui/summary.py
+msgid "loan"
+msgstr "Darlehen"
+
+#: result.py
 msgid "repayment"
 msgstr "Sondertilgung"
 
 #: result.py
 msgid "write-off"
 msgstr "Ausbuchung"
+
+#: report/balance.py result.py ui/events.py ui/summary.py
+msgid "cash"
+msgstr "Bargeld"
+
+#: report/balance.py result.py ui/summary.py
+msgid "equity"
+msgstr "Aktien"
+
+#: result.py ui/summary.py
+msgid "fixed income"
+msgstr "Anleihen"
 
 #: result.py
 msgid "employer"
@@ -5026,6 +5075,10 @@ msgstr "Grunderwerbsteuer"
 msgid "gift"
 msgstr "Schenkung"
 
+#: result.py ui/lineage.py
+msgid "inheritance"
+msgstr "Erbschaft"
+
 #: result.py
 msgid "inheritance tax"
 msgstr "Erbschaftsteuer"
@@ -5033,30 +5086,6 @@ msgstr "Erbschaftsteuer"
 #: result.py
 msgid "gift tax"
 msgstr "Schenkungsteuer"
-
-#: result.py ui/assets.py
-msgid "salary conversion"
-msgstr "Entgeltumwandlung"
-
-#: result.py ui/assets.py
-msgid "lump sum"
-msgstr "Einmalzahlung"
-
-#: result.py ui/events.py
-msgid "purchase costs"
-msgstr "Kaufnebenkosten"
-
-#: result.py ui/lineage.py
-msgid "inheritance"
-msgstr "Erbschaft"
-
-#: result.py ui/summary.py
-msgid "loan"
-msgstr "Darlehen"
-
-#: result.py ui/summary.py
-msgid "fixed income"
-msgstr "Anleihen"
 
 #: rollforward.py
 #, python-brace-format
@@ -5328,6 +5357,10 @@ msgstr ""
 msgid "per year"
 msgstr "pro Jahr"
 
+#: ui/__init__.py ui/cashflows.py
+msgid "per month"
+msgstr "pro Monat"
+
 #: ui/__init__.py
 msgid "Previous month"
 msgstr "Vorheriger Monat"
@@ -5387,13 +5420,13 @@ msgstr "Beträge"
 msgid "Every amount per month, or 12 times that per year."
 msgstr "Jeder Betrag pro Monat oder das 12-Fache pro Jahr."
 
-#: ui/__init__.py ui/cashflows.py
-msgid "per month"
-msgstr "pro Monat"
-
 #: ui/assets.py
 msgid "ID"
 msgstr "ID"
+
+#: ui/assets.py ui/snapshot.py
+msgid "as of"
+msgstr "Stand"
 
 #: ui/assets.py
 msgid "check every (months)"
@@ -5402,6 +5435,10 @@ msgstr "Aktualisieren alle (Monate)"
 #: ui/assets.py
 msgid "m²"
 msgstr "m²"
+
+#: ui/assets.py ui/snapshot.py
+msgid "price per m²"
+msgstr "Preis pro m²"
 
 #: ui/assets.py
 msgid "fixed rate until"
@@ -5443,6 +5480,14 @@ msgstr "Arbeitgeberzuschuss"
 msgid "bought for"
 msgstr "Kaufpreis"
 
+#: ui/assets.py ui/snapshot.py
+msgid "cost basis"
+msgstr "Anschaffungskosten"
+
+#: ui/assets.py ui/assumptions.py
+msgid "Fund gains tax-free %"
+msgstr "Teilfreistellung %"
+
 #: ui/assets.py
 msgid "prepayment penalty"
 msgstr "Vorfälligkeitsentschädigung"
@@ -5450,6 +5495,14 @@ msgstr "Vorfälligkeitsentschädigung"
 #: ui/assets.py
 msgid "bought in"
 msgstr "Kaufmonat"
+
+#: ui/assets.py ui/events.py
+msgid "building share"
+msgstr "Gebäudeanteil"
+
+#: ui/assets.py ui/events.py
+msgid "AfA rate"
+msgstr "AfA-Satz"
 
 #: ui/assets.py
 msgid "opened"
@@ -5590,6 +5643,10 @@ msgstr ""
 "Dieselbe inflationsbereinigt, in Euro mit der Kaufkraft des letzten "
 "Preisdatums"
 
+#: ui/assets.py ui/pricing.py ui/tradeimport.py
+msgid "security"
+msgstr "Wertpapier"
+
 #: ui/assets.py
 msgid "gain"
 msgstr "Gewinn"
@@ -5598,13 +5655,30 @@ msgstr "Gewinn"
 msgid "gain %"
 msgstr "Gewinn %"
 
+#: ui/assets.py ui/tradeform.py ui/tradeimport.py
+msgid "units"
+msgstr "Stück"
+
 #: ui/assets.py
 msgid "bought"
 msgstr "Gekauft"
 
+#: ui/assets.py ui/pricing.py ui/tradeimport.py
+msgid "price"
+msgstr "Preis"
+
+#: ui/assets.py ui/overview.py
+msgid "tax"
+msgstr "Steuer"
+
 #: ui/assets.py
 msgid "free from"
 msgstr "Steuerfrei ab"
+
+#: ui/assets.py ui/cashflows.py ui/corrections.py ui/overview.py ui/pricing.py
+#: ui/tradeimport.py
+msgid "date"
+msgstr "Datum"
 
 #: ui/assets.py
 msgid "proceeds"
@@ -5622,6 +5696,15 @@ msgstr ""
 "Vorabpauschale: der Teil des erwarteten Gewinns eines Fonds, der schon "
 "vor einem Verkauf jedes Jahr versteuert wird. Sie erhöht die "
 "Anschaffungskosten der Tranche."
+
+#: ui/assets.py ui/cashflows.py ui/spend.py
+msgid "total"
+msgstr "Summe"
+
+#: ui/assets.py ui/data.py
+#, python-brace-format
+msgid "{first} to {last}"
+msgstr "{first} bis {last}"
 
 #: ui/assets.py
 msgid "No equity, fixed-income, gold or crypto asset: only these hold securities."
@@ -5644,6 +5727,11 @@ msgstr "So liest du die Wertpapiere"
 #: ui/assets.py
 msgid "How the tax of a sale works"
 msgstr "So wird ein Verkauf besteuert"
+
+#: ui/assets.py ui/pricing.py
+#, python-brace-format
+msgid "{name} (no trades)"
+msgstr "{name} (keine Transaktionen)"
 
 #: ui/assets.py
 #, python-brace-format
@@ -5680,72 +5768,13 @@ msgstr ""
 "Konto ohne Wertpapiere, etwa Tagesgeld, braucht keine: Sein Wert genügt. "
 "Um Wertpapiere darin zu verfolgen, füge unten den ersten Kauf hinzu."
 
-#: ui/assets.py
-msgid "About gold and crypto"
-msgstr "Zu Gold und Krypto"
-
-#: ui/assets.py ui/assumptions.py
-msgid "Fund gains tax-free %"
-msgstr "Teilfreistellung %"
-
-#: ui/assets.py ui/cashflows.py ui/corrections.py ui/overview.py ui/pricing.py
-#: ui/tradeimport.py
-msgid "date"
-msgstr "Datum"
-
-#: ui/assets.py ui/cashflows.py ui/spend.py
-msgid "total"
-msgstr "Summe"
-
-#: ui/assets.py ui/data.py
-#, python-brace-format
-msgid "{first} to {last}"
-msgstr "{first} bis {last}"
-
-#: ui/assets.py ui/events.py
-msgid "building share"
-msgstr "Gebäudeanteil"
-
-#: ui/assets.py ui/events.py
-msgid "AfA rate"
-msgstr "AfA-Satz"
-
 #: ui/assets.py ui/events.py
 msgid "securities"
 msgstr "Wertpapiere"
 
-#: ui/assets.py ui/overview.py
-msgid "tax"
-msgstr "Steuer"
-
-#: ui/assets.py ui/pricing.py
-#, python-brace-format
-msgid "{name} (no trades)"
-msgstr "{name} (keine Transaktionen)"
-
-#: ui/assets.py ui/pricing.py ui/tradeimport.py
-msgid "security"
-msgstr "Wertpapier"
-
-#: ui/assets.py ui/pricing.py ui/tradeimport.py
-msgid "price"
-msgstr "Preis"
-
-#: ui/assets.py ui/snapshot.py
-msgid "as of"
-msgstr "Stand"
-
-#: ui/assets.py ui/snapshot.py
-msgid "price per m²"
-msgstr "Preis pro m²"
-
-#: ui/assets.py ui/snapshot.py
-msgid "cost basis"
-msgstr "Anschaffungskosten"
-
-#: ui/assets.py ui/tradeform.py ui/tradeimport.py
-msgid "units"
-msgstr "Stück"
+#: ui/assets.py
+msgid "About gold and crypto"
+msgstr "Zu Gold und Krypto"
 
 #: ui/assumptions.py
 msgid "Type the name back: `Rename` below the table changes it there too."
@@ -5893,6 +5922,10 @@ msgstr "Neu aufteilen alle (Monate)"
 msgid "Skip after a loss (months)"
 msgstr "Aussetzen nach einem Verlust (Monate)"
 
+#: ui/assumptions.py ui/sliders.py
+msgid "Spending rule"
+msgstr "Ausgabenregel"
+
 #: ui/assumptions.py
 msgid "Reference wealth from"
 msgstr "Bezugsvermögen ab"
@@ -5937,9 +5970,17 @@ msgstr "Variable Entnahme (VPW)"
 msgid "Growth trend, real % per year"
 msgstr "Wachstumstrend, real % pro Jahr"
 
+#: ui/assumptions.py ui/knobs.py
+msgid "Spend down to age"
+msgstr "Aufbrauchen bis Alter"
+
 #: ui/assumptions.py
 msgid "Floor of the flexible spending € per month"
 msgstr "Untergrenze der flexiblen Ausgaben € pro Monat"
+
+#: ui/assumptions.py ui/mode.py
+msgid "Long-term care"
+msgstr "Pflege"
 
 #: ui/assumptions.py
 msgid "Yearly chance of care by age"
@@ -5989,6 +6030,10 @@ msgstr "Werbungskosten pro Jahr €"
 msgid "Realize gains each December within the tax-free room"
 msgstr "Gewinne jedes Jahr im Dezember im steuerfreien Rahmen realisieren"
 
+#: ui/assumptions.py ui/welcome.py
+msgid "Private health insurance (PKV)"
+msgstr "Private Krankenversicherung (PKV)"
+
 #: ui/assumptions.py
 msgid "Statutory health insurance from"
 msgstr "Gesetzlich versichert ab"
@@ -6004,6 +6049,10 @@ msgstr "Zusatzbeitrag der Krankenkasse %"
 #: ui/assumptions.py
 msgid "Church tax"
 msgstr "Kirchensteuer"
+
+#: ui/assumptions.py ui/events.py
+msgid "Bundesland"
+msgstr "Bundesland"
 
 #: ui/assumptions.py
 msgid "Crypto taxed like shares from"
@@ -6025,6 +6074,10 @@ msgstr "Kapitalverlustvortrag €"
 msgid "Single parent (Entlastungsbetrag)"
 msgstr "Alleinerziehend (Entlastungsbetrag)"
 
+#: ui/assumptions.py ui/mode.py
+msgid "Self-employment"
+msgstr "Selbstständigkeit"
+
 #: ui/assumptions.py
 msgid "Pension insurance of a business"
 msgstr "Rentenversicherung in der Selbstständigkeit"
@@ -6036,6 +6089,10 @@ msgstr "Krankengeld in der GKV"
 #: ui/assumptions.py
 msgid "Business founded"
 msgstr "Gründung des Betriebs"
+
+#: ui/assumptions.py ui/events.py ui/knobs.py
+msgid "Invest the rest"
+msgstr "Rest anlegen"
 
 #: ui/assumptions.py
 msgid "Random seed"
@@ -6319,6 +6376,10 @@ msgstr "Steuerjahr {year}"
 msgid "Person"
 msgstr "Person"
 
+#: ui/assumptions.py ui/sliders.py
+msgid "Markets"
+msgstr "Märkte"
+
 #: ui/assumptions.py
 msgid "Rules"
 msgstr "Regeln"
@@ -6386,6 +6447,10 @@ msgstr ""
 msgid "tax paid"
 msgstr "gezahlte Steuer"
 
+#: ui/assumptions.py ui/data.py ui/events.py ui/lineage.py ui/overview.py
+msgid "month"
+msgstr "Monat"
+
 #: ui/assumptions.py
 msgid "Gifts received before the start"
 msgstr "Schenkungen vor dem Start"
@@ -6398,58 +6463,22 @@ msgstr "Über Schenkungen vor dem Start"
 msgid "Add a relative above first, and save it."
 msgstr "Lege zuerst oben einen Angehörigen an und speichere ihn."
 
+#: ui/assumptions.py ui/rename.py
+msgid "Relative"
+msgstr "Angehöriger"
+
 #: ui/assumptions.py
 msgid "Save gifts"
 msgstr "Schenkungen speichern"
-
-#: ui/assumptions.py ui/data.py ui/events.py ui/lineage.py ui/overview.py
-msgid "month"
-msgstr "Monat"
-
-#: ui/assumptions.py ui/events.py
-msgid "Bundesland"
-msgstr "Bundesland"
 
 #: ui/assumptions.py ui/events.py ui/features.py ui/forms.py ui/tables.py
 #, python-brace-format
 msgid "Saved {files}"
 msgstr "{files} gespeichert"
 
-#: ui/assumptions.py ui/events.py ui/knobs.py
-msgid "Invest the rest"
-msgstr "Rest anlegen"
-
-#: ui/assumptions.py ui/knobs.py
-msgid "Spend down to age"
-msgstr "Aufbrauchen bis Alter"
-
 #: ui/assumptions.py ui/main.py
 msgid "Assumptions"
 msgstr "Annahmen"
-
-#: ui/assumptions.py ui/mode.py
-msgid "Long-term care"
-msgstr "Pflege"
-
-#: ui/assumptions.py ui/mode.py
-msgid "Self-employment"
-msgstr "Selbstständigkeit"
-
-#: ui/assumptions.py ui/rename.py
-msgid "Relative"
-msgstr "Angehöriger"
-
-#: ui/assumptions.py ui/sliders.py
-msgid "Spending rule"
-msgstr "Ausgabenregel"
-
-#: ui/assumptions.py ui/sliders.py
-msgid "Markets"
-msgstr "Märkte"
-
-#: ui/assumptions.py ui/welcome.py
-msgid "Private health insurance (PKV)"
-msgstr "Private Krankenversicherung (PKV)"
 
 #: ui/bars.py
 msgid "from the run"
@@ -6522,6 +6551,11 @@ msgstr "Keine Einnahmen in dieser Phase."
 msgid "All income in `{phase}`: **{total}** {unit}"
 msgstr "Alle Einnahmen in `{phase}`: **{total}** {unit}"
 
+#: ui/bars.py ui/flows.py
+#, python-brace-format
+msgid "in `{phase}`"
+msgstr "in `{phase}`"
+
 #: ui/bars.py
 #, python-brace-format
 msgid "No outflows {scope}."
@@ -6544,11 +6578,6 @@ msgstr "Klicke auf einen Balken der Abflüsse, um seine Zahlungen zu sehen."
 #, python-brace-format
 msgid "**{group}** {scope}: **{total}** {unit}"
 msgstr "**{group}** {scope}: **{total}** {unit}"
-
-#: ui/bars.py ui/flows.py
-#, python-brace-format
-msgid "in `{phase}`"
-msgstr "in `{phase}`"
 
 #: ui/cashflows.py
 msgid ""
@@ -6805,6 +6834,14 @@ msgstr "Keine."
 msgid "change"
 msgstr "Änderung"
 
+#: ui/cashflows.py ui/overview.py
+msgid "stream"
+msgstr "Zahlung"
+
+#: ui/cashflows.py ui/lineage.py
+msgid "on condition"
+msgstr "unter Bedingung"
+
 #: ui/cashflows.py
 msgid "Changes since"
 msgstr "Änderungen seit"
@@ -6828,6 +6865,10 @@ msgstr ""
 msgid "The streams before {day} do not read: {error}"
 msgstr "Die Zahlungen vor dem {day} lassen sich nicht lesen: {error}"
 
+#: ui/cashflows.py ui/scenario_overrides.py ui/spend.py
+msgid "category"
+msgstr "Kategorie"
+
 #: ui/cashflows.py
 #, python-brace-format
 msgid "`{phase}` {first} to {last}"
@@ -6844,6 +6885,10 @@ msgstr "Balken"
 #: ui/cashflows.py
 msgid "Changes"
 msgstr "Änderungen"
+
+#: ui/cashflows.py ui/main.py
+msgid "Cashflows"
+msgstr "Cashflows"
 
 #: ui/cashflows.py
 #, python-brace-format
@@ -7055,22 +7100,6 @@ msgstr "So funktionieren Sparpläne"
 msgid "How a disability insurance works"
 msgstr "Wie eine Berufsunfähigkeitsversicherung wirkt"
 
-#: ui/cashflows.py ui/lineage.py
-msgid "on condition"
-msgstr "unter Bedingung"
-
-#: ui/cashflows.py ui/main.py
-msgid "Cashflows"
-msgstr "Cashflows"
-
-#: ui/cashflows.py ui/overview.py
-msgid "stream"
-msgstr "Zahlung"
-
-#: ui/cashflows.py ui/scenario_overrides.py ui/spend.py
-msgid "category"
-msgstr "Kategorie"
-
 #: ui/closing.py
 msgid ""
 "For an asset that ended: a term deposit that paid out, an account that "
@@ -7101,6 +7130,14 @@ msgstr ""
 #: ui/closing.py
 msgid "Closed assets"
 msgstr "Geschlossene Vermögenswerte"
+
+#: ui/closing.py ui/corrections.py ui/snapshot.py
+msgid "asset"
+msgstr "Vermögenswert"
+
+#: ui/closing.py ui/snapshot.py ui/tradeform.py ui/tradeimport.py
+msgid "kind"
+msgstr "Art"
 
 #: ui/closing.py
 msgid "ended"
@@ -7140,6 +7177,11 @@ msgstr ""
 msgid "type the amount in euros"
 msgstr "gib den Betrag in Euro ein"
 
+#: ui/closing.py ui/fileactions.py ui/rename.py
+#, python-brace-format
+msgid "Refused: {reason}."
+msgstr "Abgelehnt: {reason}."
+
 #: ui/closing.py
 #, python-brace-format
 msgid ""
@@ -7148,6 +7190,12 @@ msgid ""
 msgstr ""
 "**{name}** endet am {day}: letzter Wert {last}, ausgezahlt {payout}. Ab "
 "dann zählt der Vermögenswert mit 0."
+
+#: ui/closing.py ui/corrections.py ui/data.py ui/explorer.py ui/fileactions.py
+#: ui/pricing.py ui/rename.py ui/save.py ui/scenarios.py ui/spend.py
+#, python-brace-format
+msgid "Not saved: {reason}"
+msgstr "Nicht gespeichert: {reason}"
 
 #: ui/closing.py
 #, python-brace-format
@@ -7168,25 +7216,6 @@ msgstr ""
 #, python-brace-format
 msgid "Reopened {name}"
 msgstr "{name} wieder geöffnet"
-
-#: ui/closing.py ui/corrections.py ui/data.py ui/explorer.py ui/fileactions.py
-#: ui/pricing.py ui/rename.py ui/save.py ui/scenarios.py ui/spend.py
-#, python-brace-format
-msgid "Not saved: {reason}"
-msgstr "Nicht gespeichert: {reason}"
-
-#: ui/closing.py ui/corrections.py ui/snapshot.py
-msgid "asset"
-msgstr "Vermögenswert"
-
-#: ui/closing.py ui/fileactions.py ui/rename.py
-#, python-brace-format
-msgid "Refused: {reason}."
-msgstr "Abgelehnt: {reason}."
-
-#: ui/closing.py ui/snapshot.py ui/tradeform.py ui/tradeimport.py
-msgid "kind"
-msgstr "Art"
 
 #: ui/corrections.py
 msgid ""
@@ -7209,6 +7238,10 @@ msgstr ""
 msgid "Correct a recorded month"
 msgstr "Einen erfassten Monat korrigieren"
 
+#: ui/corrections.py ui/events.py ui/spend.py
+msgid "Month"
+msgstr "Monat"
+
 #: ui/corrections.py
 #, python-brace-format
 msgid ""
@@ -7221,6 +7254,10 @@ msgstr ""
 #: ui/corrections.py
 msgid "Removes the recorded value"
 msgstr "Entfernt den erfassten Wert"
+
+#: ui/corrections.py ui/transfer.py
+msgid "remove"
+msgstr "entfernen"
 
 #: ui/corrections.py
 #, python-brace-format
@@ -7246,14 +7283,6 @@ msgstr "Nicht gespeichert: {changed}, seit diese Tabelle angezeigt wurde"
 #, python-brace-format
 msgid "Corrected {month}"
 msgstr "{month} korrigiert"
-
-#: ui/corrections.py ui/events.py ui/spend.py
-msgid "Month"
-msgstr "Monat"
-
-#: ui/corrections.py ui/transfer.py
-msgid "remove"
-msgstr "entfernen"
 
 #: ui/csvcolumns.py
 msgid "Look at the decimal mark"
@@ -7535,6 +7564,11 @@ msgstr ""
 msgid "History (CSV)"
 msgstr "Verlauf (CSV)"
 
+#: ui/data.py ui/pricing.py ui/tradeimport.py
+#, python-brace-format
+msgid "Not read: {reason}"
+msgstr "Nicht gelesen: {reason}"
+
 #: ui/data.py
 #, python-brace-format
 msgid "Import {n} month"
@@ -7697,11 +7731,6 @@ msgstr "Abbrechen"
 #: ui/data.py ui/main.py
 msgid "Data"
 msgstr "Daten"
-
-#: ui/data.py ui/pricing.py ui/tradeimport.py
-#, python-brace-format
-msgid "Not read: {reason}"
-msgstr "Nicht gelesen: {reason}"
 
 #: ui/events.py
 msgid "or at age"
@@ -8091,6 +8120,10 @@ msgstr "Daten: Reihe holen oder importieren"
 msgid "Paths"
 msgstr "Verläufe"
 
+#: ui/explorer.py ui/position.py
+msgid "Nominal euros"
+msgstr "Nominale Euro"
+
 #: ui/explorer.py
 msgid "Reset sliders"
 msgstr "Regler zurücksetzen"
@@ -8102,6 +8135,10 @@ msgstr "Ergebnisse zeigen"
 #: ui/explorer.py
 msgid "Save the sliders as a scenario"
 msgstr "Regler als Szenario speichern"
+
+#: ui/explorer.py ui/fileactions.py
+msgid "File name"
+msgstr "Dateiname"
 
 #: ui/explorer.py
 msgid "Write scenario"
@@ -8163,6 +8200,10 @@ msgstr ""
 #: ui/explorer.py
 msgid "Choose a scenario."
 msgstr "Wähle ein Szenario."
+
+#: ui/explorer.py ui/scenarios.py ui/tables.py ui/widgets.py
+msgid "All columns"
+msgstr "Alle Spalten"
 
 #: ui/explorer.py
 #, python-brace-format
@@ -8260,26 +8301,14 @@ msgstr "{broke} · {worth}, in {unit}."
 msgid "Move the sliders"
 msgstr "Regler bewegen"
 
-#: ui/explorer.py
-#, python-brace-format
-msgid "Up to date: {how}."
-msgstr "Aktuell: {how}."
-
-#: ui/explorer.py ui/fileactions.py
-msgid "File name"
-msgstr "Dateiname"
-
 #: ui/explorer.py ui/main.py
 msgid "Explorer"
 msgstr "Explorer"
 
-#: ui/explorer.py ui/position.py
-msgid "Nominal euros"
-msgstr "Nominale Euro"
-
-#: ui/explorer.py ui/scenarios.py ui/tables.py ui/widgets.py
-msgid "All columns"
-msgstr "Alle Spalten"
+#: ui/explorer.py
+#, python-brace-format
+msgid "Up to date: {how}."
+msgstr "Aktuell: {how}."
 
 #: ui/features.py
 msgid ""
@@ -8317,21 +8346,21 @@ msgstr "In Gebrauch: {where}"
 msgid "Switched off in `app.yaml`, but in use: it shows anyway."
 msgstr "In `app.yaml` abgeschaltet, aber in Gebrauch: Es wird trotzdem gezeigt."
 
+#: ui/features.py ui/main.py ui/mode.py
+msgid "Features"
+msgstr "Funktionen"
+
 #: ui/features.py
 msgid "How the switches work"
 msgstr "Wie die Schalter wirken"
-
-#: ui/features.py ui/forms.py
-msgid "No changes to save"
-msgstr "Keine Änderungen zu speichern"
 
 #: ui/features.py ui/forms.py ui/scenarios.py ui/spend.py ui/tables.py
 msgid "Save"
 msgstr "Speichern"
 
-#: ui/features.py ui/main.py ui/mode.py
-msgid "Features"
-msgstr "Funktionen"
+#: ui/features.py ui/forms.py
+msgid "No changes to save"
+msgstr "Keine Änderungen zu speichern"
 
 #: ui/fields.py
 msgid "A month: 2027-05 or 05.2027, any day counts as the first."
@@ -8357,6 +8386,10 @@ msgstr "eines von {options}"
 #: ui/fields.py
 msgid "type euros, such as 1.234,56 or 1234.56"
 msgstr "gib Euro ein, etwa 1.234,56 oder 1234.56"
+
+#: ui/fields.py ui/seek.py
+msgid "type a number, such as 2.5"
+msgstr "gib eine Zahl ein, etwa 2,5"
 
 #: ui/fields.py
 msgid "type a whole number"
@@ -8400,10 +8433,6 @@ msgstr "{value} (Standard)"
 msgid "{value} from {source}"
 msgstr "{value} aus {source}"
 
-#: ui/fields.py ui/seek.py
-msgid "type a number, such as 2.5"
-msgstr "gib eine Zahl ein, etwa 2,5"
-
 #: ui/fileactions.py
 msgid "none: a scenario of its own"
 msgstr "keinem: ein eigenständiges Szenario"
@@ -8428,6 +8457,10 @@ msgstr ""
 "Der Name in den Ergebnissen, den Tabs und der Zusammenfassung. Zwei "
 "Szenarien können nicht denselben Namen tragen."
 
+#: ui/fileactions.py ui/overview.py ui/transfer.py
+msgid "file"
+msgstr "Datei"
+
 #: ui/fileactions.py
 #, python-brace-format
 msgid "copy of {file}"
@@ -8437,6 +8470,13 @@ msgstr "Kopie von {file}"
 #, python-brace-format
 msgid "{phase} from {month}"
 msgstr "{phase} ab {month}"
+
+#: ui/fileactions.py ui/rename.py
+#, python-brace-format
+msgid "Not saved: {changed} since this list. Look at it again."
+msgstr ""
+"Nicht gespeichert: {changed}, seit diese Liste angezeigt wurde. Sieh sie "
+"dir noch einmal an."
 
 #: ui/fileactions.py
 msgid "The scenario whose phases, events and overrides it starts from."
@@ -8553,17 +8593,6 @@ msgstr "Datei umbenennen"
 #: ui/fileactions.py
 msgid "Delete the scenario"
 msgstr "Szenario löschen"
-
-#: ui/fileactions.py ui/overview.py ui/transfer.py
-msgid "file"
-msgstr "Datei"
-
-#: ui/fileactions.py ui/rename.py
-#, python-brace-format
-msgid "Not saved: {changed} since this list. Look at it again."
-msgstr ""
-"Nicht gespeichert: {changed}, seit diese Liste angezeigt wurde. Sieh sie "
-"dir noch einmal an."
 
 #: ui/flows.py
 msgid "budget"
@@ -8835,6 +8864,10 @@ msgstr "Diagramm trotzdem zeigen"
 msgid "in {year}"
 msgstr "im Jahr {year}"
 
+#: ui/flows.py ui/main.py
+msgid "Flows"
+msgstr "Flows"
+
 #: ui/flows.py
 msgid "This scenario is abstract and has no run."
 msgstr "Dieses Szenario ist eine Vorlage und hat keine Simulation."
@@ -8915,10 +8948,6 @@ msgstr ""
 " Bargeld abziehen. Einmalposten fehlen, solange du sie nicht "
 "einschaltest."
 
-#: ui/flows.py ui/main.py
-msgid "Flows"
-msgstr "Flows"
-
 #: ui/formguard.py ui/gridcolumns.py
 msgid "on"
 msgstr "an"
@@ -8934,6 +8963,10 @@ msgstr "erforderlich"
 #: ui/forms.py
 msgid "the name"
 msgstr "dem Namen"
+
+#: ui/forms.py ui/pricing.py ui/spend.py ui/tradeform.py
+msgid "Add"
+msgstr "Hinzufügen"
 
 #: ui/forms.py
 msgid "What changed there"
@@ -8957,10 +8990,6 @@ msgstr "„{button}“ bleibt gesperrt, bis das Modell diese Werte annimmt:"
 #: ui/forms.py
 msgid "The file does not load already, Save stays on:"
 msgstr "Die Datei lässt sich schon jetzt nicht laden, „Speichern“ bleibt aktiv:"
-
-#: ui/forms.py ui/pricing.py ui/spend.py ui/tradeform.py
-msgid "Add"
-msgstr "Hinzufügen"
 
 #: ui/gridcolumns.py
 #, python-format
@@ -8996,6 +9025,10 @@ msgstr "auf null gesetzt"
 #: ui/guard.py
 msgid "the sign changed"
 msgstr "das Vorzeichen hat sich geändert"
+
+#: ui/guard.py ui/spend.py ui/tables.py
+msgid "empty"
+msgstr "leer"
 
 #: ui/guard.py
 #, python-brace-format
@@ -9037,10 +9070,6 @@ msgstr "{name} entfernt"
 #: ui/guard.py
 msgid "To save"
 msgstr "Zu speichern"
-
-#: ui/guard.py ui/spend.py ui/tables.py
-msgid "empty"
-msgstr "leer"
 
 #: ui/knobs.py
 msgid ""
@@ -9304,6 +9333,11 @@ msgstr ""
 "Faktoren der Phasen: {streams}. Die Ausgabenkürzung und die Alterskurve "
 "kommen dazu."
 
+#: ui/knobs.py ui/scenario_overrides.py
+#, python-brace-format
+msgid "Salary and profit in {phase}"
+msgstr "Gehalt oder Gewinn in {phase}"
+
 #: ui/knobs.py
 #, python-brace-format
 msgid ""
@@ -9323,6 +9357,11 @@ msgstr ""
 "jede Gehaltszahlung und jeden Gewinn der Phase, sodass sich ein Bonus und"
 " die anderen Szenarien im selben Verhältnis ändern. Steuer, SV, "
 "Rentenpunkte und ein späteres ALG1 folgen dem neuen Brutto."
+
+#: ui/knobs.py ui/scenario_overrides.py
+#, python-brace-format
+msgid "Raises in {phase}"
+msgstr "Gehaltssteigerung in {phase}"
 
 #: ui/knobs.py
 #, python-brace-format
@@ -9508,16 +9547,6 @@ msgstr "Wachstumstrend der VPW"
 msgid "Realize gains"
 msgstr "Gewinne realisieren"
 
-#: ui/knobs.py ui/scenario_overrides.py
-#, python-brace-format
-msgid "Salary and profit in {phase}"
-msgstr "Gehalt oder Gewinn in {phase}"
-
-#: ui/knobs.py ui/scenario_overrides.py
-#, python-brace-format
-msgid "Raises in {phase}"
-msgstr "Gehaltssteigerung in {phase}"
-
 #: ui/lineage.py
 msgid "Sell an asset"
 msgstr "Vermögenswert verkaufen"
@@ -9539,6 +9568,10 @@ msgid "Write off shares"
 msgstr "Aktien ausbuchen"
 
 #: ui/lineage.py
+msgid "Prepay the health premium"
+msgstr "PKV vorauszahlen"
+
+#: ui/lineage.py
 msgid "End streams"
 msgstr "Zahlungen beenden"
 
@@ -9553,6 +9586,10 @@ msgstr "Zahlung hinzufügen"
 #: ui/lineage.py
 msgid "Buy gold or crypto"
 msgstr "Gold oder Krypto kaufen"
+
+#: ui/lineage.py ui/whatifs.py
+msgid "Buy a property"
+msgstr "Immobilie kaufen"
 
 #: ui/lineage.py
 msgid "sell an asset"
@@ -9577,6 +9614,10 @@ msgstr "Einmalzahlung"
 #: ui/lineage.py
 msgid "write off shares"
 msgstr "Aktien ausbuchen"
+
+#: ui/lineage.py
+msgid "prepay the health premium"
+msgstr "PKV vorauszahlen"
 
 #: ui/lineage.py
 msgid "end streams"
@@ -9622,6 +9663,10 @@ msgstr "Festgelegt in"
 msgid "this scenario"
 msgstr "dieses Szenario"
 
+#: ui/lineage.py ui/overview.py
+msgid "item"
+msgstr "Eintrag"
+
 #: ui/lineage.py
 msgid "detail"
 msgstr "Detail"
@@ -9629,6 +9674,10 @@ msgstr "Detail"
 #: ui/lineage.py
 msgid "event"
 msgstr "Ereignis"
+
+#: ui/lineage.py ui/overview.py
+msgid "what"
+msgstr "Was"
 
 #: ui/lineage.py
 msgid "from"
@@ -9747,38 +9796,9 @@ msgstr "{event} {when}: {what} ({file})"
 msgid "{event} {when} ({file})"
 msgstr "{event} {when} ({file})"
 
-#: ui/lineage.py ui/overview.py
-msgid "item"
-msgstr "Eintrag"
-
-#: ui/lineage.py ui/overview.py
-msgid "what"
-msgstr "Was"
-
-#: ui/lineage.py ui/whatifs.py
-msgid "Buy a property"
-msgstr "Immobilie kaufen"
-
 #: ui/main.py
 msgid "Track"
 msgstr "Verfolgen"
-
-#: ui/main.py
-msgctxt "navigation"
-msgid "Plan"
-msgstr "Planen"
-
-#: ui/main.py
-msgid "Setup"
-msgstr "Einrichten"
-
-#: ui/main.py
-msgid "The inputs do not load:"
-msgstr "Die Eingaben lassen sich nicht laden:"
-
-#: ui/main.py
-msgid "Another save is running: reload the page."
-msgstr "Gerade wird etwas anderes gespeichert: lade die Seite neu."
 
 #: ui/main.py ui/overview.py
 msgid "Overview"
@@ -9792,9 +9812,26 @@ msgstr "Snapshot"
 msgid "Spend"
 msgstr "Ausgaben"
 
+#: ui/main.py
+msgctxt "navigation"
+msgid "Plan"
+msgstr "Planen"
+
+#: ui/main.py
+msgid "Setup"
+msgstr "Einrichten"
+
 #: ui/main.py ui/transfer.py
 msgid "Export and import"
 msgstr "Export und Import"
+
+#: ui/main.py
+msgid "The inputs do not load:"
+msgstr "Die Eingaben lassen sich nicht laden:"
+
+#: ui/main.py
+msgid "Another save is running: reload the page."
+msgstr "Gerade wird etwas anderes gespeichert: lade die Seite neu."
 
 #: ui/mode.py
 msgid "Simple"
@@ -9832,6 +9869,10 @@ msgstr ""
 "Aus blendet die Seiten Snapshot und Ausgaben aus, die Transaktionen und "
 "Kurse der Wertpapiere, die Spalte `update_every` und was die Übersicht zu"
 " deinen Aufzeichnungen sagt."
+
+#: ui/mode.py ui/sliders.py
+msgid "Gold and crypto"
+msgstr "Gold und Krypto"
 
 #: ui/mode.py
 msgctxt "inline"
@@ -10077,10 +10118,6 @@ msgstr[1] ""
 "{n} Teile der App sind abgeschaltet: Die Seite Funktionen schaltet sie "
 "ein."
 
-#: ui/mode.py ui/sliders.py
-msgid "Gold and crypto"
-msgstr "Gold und Krypto"
-
 #: ui/outlook.py
 msgid "Find the spending limit"
 msgstr "Ausgabengrenze finden"
@@ -10290,6 +10327,15 @@ msgstr "Der Plan hört im Monat {month} auf zu arbeiten (Alter {age})."
 msgid "Explorer: try less spending or more saving"
 msgstr "Explorer: weniger ausgeben, mehr sparen"
 
+#: ui/outlook.py ui/overview.py
+msgid "Simulating the plan …"
+msgstr "Der Plan wird simuliert …"
+
+#: ui/outlook.py ui/scenarios.py
+#, python-brace-format
+msgid "Main scenario: {scenario}"
+msgstr "Hauptszenario: {scenario}"
+
 #: ui/outlook.py
 msgid "Change the main scenario"
 msgstr "Hauptszenario ändern"
@@ -10383,15 +10429,6 @@ msgstr ""
 "eingegeben hast: **Schätzungen übernehmen** auf der Seite Snapshot "
 "aktualisiert sie."
 
-#: ui/outlook.py ui/overview.py
-msgid "Simulating the plan …"
-msgstr "Der Plan wird simuliert …"
-
-#: ui/outlook.py ui/scenarios.py
-#, python-brace-format
-msgid "Main scenario: {scenario}"
-msgstr "Hauptszenario: {scenario}"
-
 #: ui/outlook.py ui/spend.py
 msgid "How to read the comparison"
 msgstr "So liest du den Vergleich"
@@ -10444,6 +10481,10 @@ msgstr ""
 #: ui/overridegrids.py
 msgid "field"
 msgstr "Feld"
+
+#: ui/overridegrids.py ui/spend.py
+msgid "months"
+msgstr "Monate"
 
 #: ui/overridegrids.py
 msgid ""
@@ -10506,10 +10547,6 @@ msgstr ""
 "{changed}, seit diese Tabellen angezeigt wurden. Deine Änderungen "
 "bleiben, aber Speichern lehnt sie ab: Verwirf sie, um die Datei zu sehen,"
 " wie sie jetzt ist."
-
-#: ui/overridegrids.py ui/spend.py
-msgid "months"
-msgstr "Monate"
 
 #: ui/overview.py
 msgid "Explore your plan on the Explorer page and compare its scenarios."
@@ -10975,6 +11012,10 @@ msgstr ""
 msgid "old"
 msgstr "Alt"
 
+#: ui/overview.py ui/snapshot.py
+msgid "new"
+msgstr "Neu"
+
 #: ui/overview.py
 msgid "scenarios"
 msgstr "Szenarien"
@@ -11117,10 +11158,6 @@ msgstr ""
 msgid "How to read the recorded net worth"
 msgstr "So liest du das erfasste Nettovermögen"
 
-#: ui/overview.py ui/snapshot.py
-msgid "new"
-msgstr "Neu"
-
 #: ui/phases.py
 msgid "The Assumptions page defines them."
 msgstr "Die Seite Annahmen legt sie fest."
@@ -11186,6 +11223,10 @@ msgstr ""
 "{id} verschiebt sich nur als Ganzes: Auch {phase} ab {month} verschiebt "
 "sich auf {then}"
 
+#: ui/phases.py ui/save.py
+msgid "Discard my edits"
+msgstr "Meine Änderungen verwerfen"
+
 #: ui/phases.py
 #, python-brace-format
 msgid "move {item}"
@@ -11222,10 +11263,6 @@ msgid "Saves a move of the inherited change and leaves out the new row."
 msgstr ""
 "Speichert eine Verschiebung des geerbten Wechsels und lässt die neue "
 "Zeile weg."
-
-#: ui/phases.py ui/save.py
-msgid "Discard my edits"
-msgstr "Meine Änderungen verwerfen"
 
 #: ui/position.py
 msgid "Value over time"
@@ -11302,6 +11339,11 @@ msgstr ""
 "{name} zu {price} pro Stück am {day} hinzugefügt, anstelle von {old}: die"
 " {units} gehaltenen Stück sind {value} wert"
 
+#: ui/pricing.py ui/snapshot.py
+#, python-brace-format
+msgid "Recorded {values}"
+msgstr "Erfasst: {values}"
+
 #: ui/pricing.py
 #, python-brace-format
 msgid "{asset} {value} as of {day}"
@@ -11364,6 +11406,22 @@ msgstr "Preise abrufen"
 msgid "Fetching prices…"
 msgstr "Preise werden abgerufen…"
 
+#: ui/pricing.py ui/tradeimport.py
+msgid "Currency"
+msgstr "Währung"
+
+#: ui/pricing.py ui/tradeimport.py
+msgid "none: read as EUR"
+msgstr "keine: als EUR lesen"
+
+#: ui/pricing.py ui/tradeform.py
+msgid "Choose or type an ISIN or symbol"
+msgstr "Wähle oder tippe eine ISIN oder ein Symbol"
+
+#: ui/pricing.py ui/whatifs.py
+msgid "Price €"
+msgstr "Preis €"
+
 #: ui/pricing.py
 #, python-brace-format
 msgid ""
@@ -11373,6 +11431,11 @@ msgstr ""
 "Der Preis eines Stücks an einem Tag, auch einem vergangenen, sofort "
 "gespeichert. Ohne Tausenderpunkte: 5432, oder {fraction} mit "
 "Nachkommastellen."
+
+#: ui/pricing.py ui/spend.py ui/tradeform.py
+#, python-brace-format
+msgid "Not added: {reason}"
+msgstr "Nicht hinzugefügt: {reason}"
 
 #: ui/pricing.py
 #, python-brace-format
@@ -11402,6 +11465,11 @@ msgstr "{n} weitere ersetzte Preise zwischen der Hälfte und dem Doppelten."
 #, python-brace-format
 msgid "Import {n} prices"
 msgstr "{n} Preise importieren"
+
+#: ui/pricing.py ui/tradeimport.py ui/transfer.py
+#, python-brace-format
+msgid "Not imported: {reason}"
+msgstr "Nicht importiert: {reason}"
 
 #: ui/pricing.py
 #, python-brace-format
@@ -11472,37 +11540,6 @@ msgstr ""
 "Eine CSV mit Daten und Preisen eines Wertpapiers, zum Beispiel der "
 "Download einer Börse oder einer Bank. Nur Euro: Eine Zeile mit einer "
 "anderen Währung in der Währungsspalte wird abgelehnt."
-
-#: ui/pricing.py ui/snapshot.py
-#, python-brace-format
-msgid "Recorded {values}"
-msgstr "Erfasst: {values}"
-
-#: ui/pricing.py ui/spend.py ui/tradeform.py
-#, python-brace-format
-msgid "Not added: {reason}"
-msgstr "Nicht hinzugefügt: {reason}"
-
-#: ui/pricing.py ui/tradeform.py
-msgid "Choose or type an ISIN or symbol"
-msgstr "Wähle oder tippe eine ISIN oder ein Symbol"
-
-#: ui/pricing.py ui/tradeimport.py
-msgid "Currency"
-msgstr "Währung"
-
-#: ui/pricing.py ui/tradeimport.py
-msgid "none: read as EUR"
-msgstr "keine: als EUR lesen"
-
-#: ui/pricing.py ui/tradeimport.py ui/transfer.py
-#, python-brace-format
-msgid "Not imported: {reason}"
-msgstr "Nicht importiert: {reason}"
-
-#: ui/pricing.py ui/whatifs.py
-msgid "Price €"
-msgstr "Preis €"
 
 #: ui/refusals.py
 #, python-brace-format
@@ -11841,6 +11878,14 @@ msgstr ""
 msgid "Scale"
 msgstr "Skalierung"
 
+#: ui/scenario_overrides.py ui/sliders.py
+msgid "Spending by category"
+msgstr "Ausgaben nach Kategorie"
+
+#: ui/scenario_overrides.py ui/sliders.py
+msgid "Savings plans"
+msgstr "Sparpläne"
+
 #: ui/scenario_overrides.py
 msgid "savings plan"
 msgstr "Sparplan"
@@ -11977,14 +12022,6 @@ msgstr ""
 "Abweichender Start: {month}, aus {source}. Dieser Tab bearbeitet ihn "
 "nicht, und Start vorrücken auf der Übersicht verschiebt nur den Start von"
 " `assumptions.yaml`."
-
-#: ui/scenario_overrides.py ui/sliders.py
-msgid "Spending by category"
-msgstr "Ausgaben nach Kategorie"
-
-#: ui/scenario_overrides.py ui/sliders.py
-msgid "Savings plans"
-msgstr "Sparpläne"
 
 #: ui/scenarios.py
 msgid "Timeline"
@@ -12805,6 +12842,14 @@ msgstr "gib den Betrag in Euro ein"
 msgid "enter the number of units and the amount in euros"
 msgstr "gib die Stückzahl und den Betrag in Euro ein"
 
+#: ui/tradeform.py ui/tradeimport.py
+msgid "amount"
+msgstr "Betrag"
+
+#: ui/tradeform.py ui/tradeimport.py
+msgid "fees"
+msgstr "Gebühren"
+
 #: ui/tradeform.py
 msgid ""
 "choose a security or type its ISIN, such as IE00B4L5Y983, or the symbol "
@@ -12844,6 +12889,14 @@ msgstr "wähle ein Datum"
 #, python-brace-format
 msgid "{fields}: type a number, for example {number}"
 msgstr "{fields}: tippe eine Zahl, zum Beispiel {number}"
+
+#: ui/tradeform.py ui/tradeimport.py
+msgid "Amount €"
+msgstr "Betrag €"
+
+#: ui/tradeform.py ui/tradeimport.py
+msgid "Fees €"
+msgstr "Gebühren €"
 
 #: ui/tradeform.py
 msgid "of a new security"
@@ -12899,22 +12952,6 @@ msgstr "Transaktion hinzufügen"
 #, python-brace-format
 msgid "Check: {warning}"
 msgstr "Prüfe: {warning}"
-
-#: ui/tradeform.py ui/tradeimport.py
-msgid "amount"
-msgstr "Betrag"
-
-#: ui/tradeform.py ui/tradeimport.py
-msgid "fees"
-msgstr "Gebühren"
-
-#: ui/tradeform.py ui/tradeimport.py
-msgid "Amount €"
-msgstr "Betrag €"
-
-#: ui/tradeform.py ui/tradeimport.py
-msgid "Fees €"
-msgstr "Gebühren €"
 
 #: ui/tradeimport.py
 msgid "none (minus = sale)"
@@ -13654,6 +13691,10 @@ msgstr "Sparplan pro Monat €"
 msgid "Goes into the depot each month until you stop working."
 msgstr "Fließt jeden Monat ins Depot, bis du aufhörst zu arbeiten."
 
+#: ui/welcome.py ui/whatifs.py
+msgid "Stop working at age"
+msgstr "Arbeitsende im Alter von"
+
 #: ui/welcome.py
 msgid ""
 "The age at which the salary and the savings plan stop. Empty: 67. The "
@@ -13810,10 +13851,6 @@ msgstr "Ein Export"
 #, python-brace-format
 msgid "Data directory: {path}"
 msgstr "Datenverzeichnis: {path}"
-
-#: ui/welcome.py ui/whatifs.py
-msgid "Stop working at age"
-msgstr "Arbeitsende im Alter von"
 
 #: ui/whatifs.py
 msgid "Check a what-if"
@@ -14106,11 +14143,6 @@ msgstr "Weiterbildung machen"
 msgid "Start a business"
 msgstr "Selbstständig machen"
 
-#: ui/whatifs.py whatifs.py
-msgctxt "phase"
-msgid "Unemployed"
-msgstr "Arbeitslos"
-
 #: ui/widgets.py
 msgid "YYYY-MM or MM.YYYY"
 msgstr "JJJJ-MM oder MM.JJJJ"
@@ -14217,6 +14249,11 @@ msgstr ""
 #, python-brace-format
 msgid "type at most the amount of {stream}, {amount} a month"
 msgstr "gib höchstens den Betrag von {stream} ein, {amount} im Monat"
+
+#: ui/whatifs.py whatifs.py
+msgctxt "phase"
+msgid "Unemployed"
+msgstr "Arbeitslos"
 
 #: whatifs.py
 msgctxt "data"

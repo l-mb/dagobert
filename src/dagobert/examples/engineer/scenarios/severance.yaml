@@ -14,6 +14,13 @@ events:
     bav: {policy: bav, amount: 30000}
     note: Severance, a part into the company pension
     id: job-loss
+  # The premiums of the two years after it, off the income of the year of the severance (§10 Abs.
+  # 1 Nr. 3 S. 5 EStG)
+  - at: 2039-05-01
+    type: prepay_health
+    months: 24
+    note: Health premium of two years in advance
+    id: job-loss
   - at: 2039-06-01
     type: end_streams
     names: [Salary, Bonus, Employer savings benefit (VL)]

@@ -7,6 +7,7 @@
     "2028-06 sell: wohnung",
     "2028-07 sell: btc",
     "2028-09 sell: gold",
+    "2028-12 prepay_health",
     "2029-01 phase: Unemployed",
     "2029-01 write_off: rsu",
     "2029-01 severance",
@@ -17,7 +18,7 @@
     "2031-07 buy_property: Haus statt Miete",
     "2031-07 end_streams",
     "2031-07 add_stream",
-    "2031-12 harvest: 6.054 €",
+    "2031-12 harvest: 6.077 €",
     "2032-01 phase: Selbständig",
     "2032-01 gz gap: not paid, no ALG1 up to a month before the business (§93 Abs. 2 Nr. 1 SGB III)",
     "2035-01 phase: Teilzeit",
@@ -107,7 +108,7 @@
     },
     "2028": {
       "capital_taxes": -2816,
-      "expenses": -46572,
+      "expenses": -56374,
       "income": 108296,
       "ledger": {
         "move in: sale": 340572,
@@ -128,50 +129,52 @@
         "source: ": 10727,
         "source: salary": 93364,
         "spending: base": 9688,
+        "spending: health premium in advance": 9421,
         "spending: loan interest": 526,
         "spending: loan principal": 2525,
         "spending: property upkeep": 1229,
         "spending: salary conversion": 2307,
         "spending: versicherung": 10636,
         "spending: wohnen": 17853,
-        "tax: ": 68754
+        "tax: ": 65047
       },
-      "liquid": 632935,
+      "liquid": 626989,
       "phases": [
         "work"
       ],
-      "taxes": -68715,
-      "total": 665116
+      "taxes": -64859,
+      "total": 659171
     },
     "2029": {
-      "capital_taxes": -4074,
-      "expenses": -38986,
+      "capital_taxes": -4173,
+      "expenses": -29271,
       "income": 167409,
       "ledger": {
-        "move out: savings plan": 13108,
-        "moved: savings plan": 13108,
+        "move out: savings plan": 18762,
+        "moved: savings plan": 18762,
         "moved: write-off": -6545,
         "non-cash: av_depot": 251,
         "non-cash: bav": 1926,
         "non-cash: contribution": 840,
         "non-cash: crypto": 760,
-        "non-cash: equity": 25810,
-        "non-cash: fixed_income": 4265,
+        "non-cash: equity": 25725,
+        "non-cash: fixed_income": 4222,
         "non-cash: one-off contribution": 18846,
         "one-off in: severance": 122502,
-        "one-off out: tax on one-offs": 24480,
+        "one-off out: tax on one-offs": 27056,
         "source: ": 35251,
-        "spending: base": 9688,
+        "spending: base": 9769,
+        "spending: health premium in advance": -9236,
         "spending: versicherung": 10702,
         "spending: wohnen": 16348,
-        "tax: ": 3839
+        "tax: ": 3932
       },
-      "liquid": 753594,
+      "liquid": 754524,
       "phases": [
         "unemployed"
       ],
-      "taxes": -25978,
-      "total": 810887
+      "taxes": -28712,
+      "total": 811817
     },
     "2030": {
       "capital_taxes": 0,
@@ -185,8 +188,8 @@
         "non-cash: bav": 1974,
         "non-cash: contribution": 840,
         "non-cash: crypto": 820,
-        "non-cash: equity": 31442,
-        "non-cash: fixed_income": 5495,
+        "non-cash: equity": 31465,
+        "non-cash: fixed_income": 5500,
         "non-cash: one-off contribution": 2772,
         "one-off in: gift": 277154,
         "one-off out: tax on one-offs": 3233,
@@ -197,13 +200,13 @@
         "spending: versicherung": 10769,
         "spending: wohnen": 16348
       },
-      "liquid": 1025586,
+      "liquid": 1026573,
       "phases": [
         "alt",
         "unemployed"
       ],
       "taxes": -3500,
-      "total": 1090988
+      "total": 1091975
     },
     "2031": {
       "capital_taxes": 0,
@@ -218,8 +221,8 @@
         "non-cash: av_depot": 517,
         "non-cash: bav": 2024,
         "non-cash: crypto": 884,
-        "non-cash: equity": 35564,
-        "non-cash: fixed_income": 4804,
+        "non-cash: equity": 35593,
+        "non-cash: fixed_income": 4810,
         "non-cash: property": 8947,
         "one-off out: purchase costs": 7246,
         "one-off out: tax on one-offs": 19926,
@@ -231,17 +234,17 @@
         "spending: property upkeep": 919,
         "spending: versicherung": 10837,
         "spending: wohnen": 11176,
-        "tax: ": -4159
+        "tax: ": -4484
       },
-      "liquid": 900348,
+      "liquid": 901720,
       "phases": [
         "alt"
       ],
-      "taxes": -17409,
-      "total": 1081779
+      "taxes": -17050,
+      "total": 1083151
     },
     "2032": {
-      "capital_taxes": -8248,
+      "capital_taxes": -8226,
       "expenses": -51406,
       "income": 140436,
       "ledger": {
@@ -252,8 +255,8 @@
         "non-cash: bav": 2076,
         "non-cash: contribution": 840,
         "non-cash: crypto": 953,
-        "non-cash: equity": 31077,
-        "non-cash: fixed_income": 5850,
+        "non-cash: equity": 31117,
+        "non-cash: fixed_income": 5858,
         "non-cash: property": 18198,
         "source: ": 3374,
         "source: profit": 121329,
@@ -263,17 +266,17 @@
         "spending: property upkeep": 1869,
         "spending: versicherung": 10907,
         "spending: wohnen": 6055,
-        "tax: ": 46568
+        "tax: ": 46548
       },
-      "liquid": 977205,
+      "liquid": 978619,
       "phases": [
         "freelance"
       ],
       "taxes": -44195,
-      "total": 1193710
+      "total": 1195124
     },
     "2033": {
-      "capital_taxes": -5422,
+      "capital_taxes": -5428,
       "expenses": -52102,
       "income": 144242,
       "ledger": {
@@ -284,8 +287,8 @@
         "non-cash: bav": 2128,
         "non-cash: contribution": 840,
         "non-cash: crypto": 1028,
-        "non-cash: equity": 32194,
-        "non-cash: fixed_income": 6777,
+        "non-cash: equity": 32237,
+        "non-cash: fixed_income": 6785,
         "non-cash: property": 18733,
         "source: ": 3369,
         "source: profit": 122202,
@@ -295,17 +298,17 @@
         "spending: property upkeep": 1924,
         "spending: versicherung": 10977,
         "spending: wohnen": 6055,
-        "tax: ": 44544
+        "tax: ": 44549
       },
-      "liquid": 1058123,
+      "liquid": 1059582,
       "phases": [
         "freelance"
       ],
       "taxes": -45745,
-      "total": 1311382
+      "total": 1312841
     },
     "2034": {
-      "capital_taxes": -6009,
+      "capital_taxes": -6015,
       "expenses": -52911,
       "income": 148154,
       "ledger": {
@@ -316,8 +319,8 @@
         "non-cash: bav": 2182,
         "non-cash: contribution": 840,
         "non-cash: crypto": 1109,
-        "non-cash: equity": 33728,
-        "non-cash: fixed_income": 7471,
+        "non-cash: equity": 33771,
+        "non-cash: fixed_income": 7480,
         "non-cash: property": 19284,
         "source: ": 3364,
         "source: profit": 123084,
@@ -327,17 +330,17 @@
         "spending: property upkeep": 1980,
         "spending: versicherung": 11049,
         "spending: wohnen": 6055,
-        "tax: ": 47630
+        "tax: ": 47635
       },
-      "liquid": 1140882,
+      "liquid": 1142388,
       "phases": [
         "freelance"
       ],
       "taxes": -49797,
-      "total": 1432656
+      "total": 1434162
     },
     "2035": {
-      "capital_taxes": -6556,
+      "capital_taxes": -6563,
       "expenses": -44168,
       "income": 79775,
       "ledger": {
@@ -349,8 +352,8 @@
         "non-cash: bav": 2306,
         "non-cash: contribution": 2145,
         "non-cash: crypto": 1196,
-        "non-cash: equity": 35006,
-        "non-cash: fixed_income": 8150,
+        "non-cash: equity": 35049,
+        "non-cash: fixed_income": 8160,
         "non-cash: property": 19851,
         "one-off in: lump sum": 8368,
         "source: ": 3359,
@@ -362,17 +365,17 @@
         "spending: salary conversion": 2008,
         "spending: versicherung": 1103,
         "spending: wohnen": 6055,
-        "tax: ": 23623
+        "tax: ": 23629
       },
-      "liquid": 1194760,
+      "liquid": 1196315,
       "phases": [
         "part-time"
       ],
       "taxes": -21676,
-      "total": 1530937
+      "total": 1532491
     },
     "2036": {
-      "capital_taxes": -8116,
+      "capital_taxes": -8117,
       "expenses": -44674,
       "income": 73177,
       "ledger": {
@@ -386,8 +389,8 @@
         "non-cash: bav": 2513,
         "non-cash: contribution": 2120,
         "non-cash: crypto": 1289,
-        "non-cash: equity": 33953,
-        "non-cash: fixed_income": 8311,
+        "non-cash: equity": 33996,
+        "non-cash: fixed_income": 8321,
         "non-cash: property": 20435,
         "source: ": 3354,
         "source: salary": 56676,
@@ -398,17 +401,17 @@
         "spending: salary conversion": 1969,
         "spending: versicherung": 1088,
         "spending: wohnen": 6055,
-        "tax: ": 25552
+        "tax: ": 25553
       },
-      "liquid": 1189666,
+      "liquid": 1191271,
       "phases": [
         "part-time"
       ],
       "taxes": -23032,
-      "total": 1624141
+      "total": 1625745
     },
     "2037": {
-      "capital_taxes": -7129,
+      "capital_taxes": -7137,
       "expenses": -45193,
       "income": 76748,
       "ledger": {
@@ -420,8 +423,8 @@
         "non-cash: bav": 2723,
         "non-cash: contribution": 2095,
         "non-cash: crypto": 1391,
-        "non-cash: equity": 34060,
-        "non-cash: fixed_income": 8736,
+        "non-cash: equity": 34103,
+        "non-cash: fixed_income": 8747,
         "non-cash: property": 21036,
         "source: ": 3349,
         "source: salary": 58377,
@@ -432,17 +435,17 @@
         "spending: salary conversion": 1930,
         "spending: versicherung": 1072,
         "spending: wohnen": 6055,
-        "tax: ": 25464
+        "tax: ": 25470
       },
-      "liquid": 1238000,
+      "liquid": 1239658,
       "phases": [
         "part-time"
       ],
       "taxes": -24532,
-      "total": 1723053
+      "total": 1724710
     },
     "2038": {
-      "capital_taxes": -10375,
+      "capital_taxes": -10383,
       "expenses": -51353,
       "income": 80498,
       "ledger": {
@@ -456,8 +459,8 @@
         "non-cash: bav": 2935,
         "non-cash: contribution": 2070,
         "non-cash: crypto": 1500,
-        "non-cash: equity": 47386,
-        "non-cash: fixed_income": 12755,
+        "non-cash: equity": 47429,
+        "non-cash: fixed_income": 12767,
         "source: ": 3345,
         "source: salary": 60128,
         "spending: base": 9688,
@@ -466,17 +469,17 @@
         "spending: salary conversion": 1892,
         "spending: versicherung": 1057,
         "spending: wohnen": 12715,
-        "tax: ": 65762
+        "tax: ": 65769
       },
-      "liquid": 1786413,
+      "liquid": 1788124,
       "phases": [
         "part-time"
       ],
       "taxes": -73028,
-      "total": 1747692
+      "total": 1749403
     },
     "2039": {
-      "capital_taxes": -13784,
+      "capital_taxes": -13790,
       "expenses": -51928,
       "income": 324436,
       "ledger": {
@@ -488,8 +491,8 @@
         "non-cash: bav": 3149,
         "non-cash: contribution": 2046,
         "non-cash: crypto": 1617,
-        "non-cash: equity": 59793,
-        "non-cash: fixed_income": 14505,
+        "non-cash: equity": 59837,
+        "non-cash: fixed_income": 14517,
         "non-cash: one-off contribution": 175633,
         "one-off in: inheritance": 185528,
         "one-off out: tax on one-offs": 38122,
@@ -501,17 +504,17 @@
         "spending: salary conversion": 1855,
         "spending: versicherung": 1042,
         "spending: wohnen": 12715,
-        "tax: ": 31153
+        "tax: ": 31157
       },
-      "liquid": 2250894,
+      "liquid": 2252660,
       "phases": [
         "part-time"
       ],
       "taxes": -75830,
-      "total": 2238803
+      "total": 2240569
     },
     "2040": {
-      "capital_taxes": -18966,
+      "capital_taxes": -18970,
       "expenses": -50116,
       "income": 179994,
       "ledger": {
@@ -523,8 +526,8 @@
         "non-cash: bav": 270,
         "non-cash: contribution": 540,
         "non-cash: crypto": 1744,
-        "non-cash: equity": 60244,
-        "non-cash: fixed_income": 17596,
+        "non-cash: equity": 60288,
+        "non-cash: fixed_income": 17609,
         "one-off in: severance": 72396,
         "one-off out: tax on one-offs": 28982,
         "source: ": 227,
@@ -534,17 +537,17 @@
         "spending: loan principal": 10542,
         "spending: versicherung": 1028,
         "spending: wohnen": 12715,
-        "tax: ": 37570
+        "tax: ": 37573
       },
-      "liquid": 2392292,
+      "liquid": 2394116,
       "phases": [
         "part-time"
       ],
       "taxes": -68849,
-      "total": 2304039
+      "total": 2305864
     },
     "2041": {
-      "capital_taxes": -15926,
+      "capital_taxes": -15936,
       "expenses": -50715,
       "income": 44576,
       "ledger": {
@@ -553,8 +556,8 @@
         "moved: policy payout": -12000,
         "non-cash: av_depot": 1353,
         "non-cash: crypto": 1881,
-        "non-cash: equity": 60420,
-        "non-cash: fixed_income": 18424,
+        "non-cash: equity": 60464,
+        "non-cash: fixed_income": 18437,
         "one-off in: policy payout": 12000,
         "source: ": 21120,
         "spending: base": 9688,
@@ -562,17 +565,17 @@
         "spending: loan principal": 10496,
         "spending: versicherung": 1013,
         "spending: wohnen": 12715,
-        "tax: ": 25187
+        "tax: ": 25194
       },
-      "liquid": 2453704,
+      "liquid": 2455589,
       "phases": [
         "retired"
       ],
       "taxes": -17971,
-      "total": 2363115
+      "total": 2364999
     },
     "2042": {
-      "capital_taxes": -16277,
+      "capital_taxes": -16289,
       "expenses": -50366,
       "income": 29039,
       "ledger": {
@@ -580,25 +583,25 @@
         "draw: bav": -219,
         "non-cash: av_depot": 1277,
         "non-cash: crypto": 2028,
-        "non-cash: equity": 59732,
-        "non-cash: fixed_income": 18884,
+        "non-cash: equity": 59776,
+        "non-cash: fixed_income": 18898,
         "source: ": 21153,
         "spending: base": 9688,
         "spending: loan interest": 3583,
         "spending: loan principal": 10404,
         "spending: versicherung": 300,
         "spending: wohnen": 12715,
-        "tax: ": 24606
+        "tax: ": 24615
       },
-      "liquid": 2503570,
+      "liquid": 2505514,
       "phases": [
         "retired"
       ],
       "taxes": -17503,
-      "total": 2426794
+      "total": 2428737
     },
     "2043": {
-      "capital_taxes": -17257,
+      "capital_taxes": -17271,
       "expenses": -50989,
       "income": 29667,
       "ledger": {
@@ -606,25 +609,25 @@
         "draw: bav": -214,
         "non-cash: av_depot": 1245,
         "non-cash: crypto": 2188,
-        "non-cash: equity": 58862,
-        "non-cash: fixed_income": 19453,
+        "non-cash: equity": 58906,
+        "non-cash: fixed_income": 19468,
         "source: ": 21187,
         "spending: base": 9688,
         "spending: loan interest": 3097,
         "spending: loan principal": 10615,
         "spending: versicherung": 300,
         "spending: wohnen": 12715,
-        "tax: ": 25073
+        "tax: ": 25083
       },
-      "liquid": 2554387,
+      "liquid": 2556390,
       "phases": [
         "retired"
       ],
       "taxes": -17851,
-      "total": 2491904
+      "total": 2493907
     },
     "2044": {
-      "capital_taxes": -18026,
+      "capital_taxes": -18040,
       "expenses": -51625,
       "income": 30311,
       "ledger": {
@@ -632,25 +635,25 @@
         "draw: bav": -210,
         "non-cash: av_depot": 1210,
         "non-cash: crypto": 2359,
-        "non-cash: equity": 57973,
-        "non-cash: fixed_income": 20023,
+        "non-cash: equity": 58017,
+        "non-cash: fixed_income": 20038,
         "source: ": 21222,
         "spending: base": 9688,
         "spending: loan interest": 2612,
         "spending: loan principal": 10831,
         "spending: versicherung": 300,
         "spending: wohnen": 12715,
-        "tax: ": 25369
+        "tax: ": 25379
       },
-      "liquid": 2606245,
+      "liquid": 2608310,
       "phases": [
         "retired"
       ],
       "taxes": -18207,
-      "total": 2558549
+      "total": 2560614
     },
     "2045": {
-      "capital_taxes": -18799,
+      "capital_taxes": -18816,
       "expenses": -51392,
       "income": 30970,
       "ledger": {
@@ -658,25 +661,25 @@
         "draw: bav": -206,
         "non-cash: av_depot": 1172,
         "non-cash: crypto": 2544,
-        "non-cash: equity": 57075,
-        "non-cash: fixed_income": 20597,
+        "non-cash: equity": 57119,
+        "non-cash: fixed_income": 20613,
         "source: ": 21259,
         "spending: base": 9082,
         "spending: loan interest": 2128,
         "spending: loan principal": 11051,
         "spending: versicherung": 300,
         "spending: wohnen": 12715,
-        "tax: ": 25651
+        "tax: ": 25663
       },
-      "liquid": 2660052,
+      "liquid": 2662179,
       "phases": [
         "retired"
       ],
       "taxes": -18570,
-      "total": 2627652
+      "total": 2629779
     },
     "2046": {
-      "capital_taxes": -19538,
+      "capital_taxes": -19556,
       "expenses": -52035,
       "income": 31645,
       "ledger": {
@@ -684,47 +687,47 @@
         "draw: bav": -135,
         "non-cash: av_depot": 1131,
         "non-cash: crypto": 2744,
-        "non-cash: equity": 56183,
-        "non-cash: fixed_income": 21168,
+        "non-cash: equity": 56227,
+        "non-cash: fixed_income": 21184,
         "source: ": 21296,
         "spending: base": 9082,
         "spending: loan interest": 1645,
         "spending: loan principal": 11276,
         "spending: versicherung": 300,
         "spending: wohnen": 12715,
-        "tax: ": 25895
+        "tax: ": 25907
       },
-      "liquid": 2714995,
+      "liquid": 2717186,
       "phases": [
         "retired"
       ],
       "taxes": -18941,
-      "total": 2698515
+      "total": 2700706
     },
     "2047": {
-      "capital_taxes": -20332,
+      "capital_taxes": -20351,
       "expenses": -52692,
       "income": 32336,
       "ledger": {
         "draw: av_depot": -1602,
         "non-cash: av_depot": 1088,
         "non-cash: crypto": 2959,
-        "non-cash: equity": 55282,
-        "non-cash: fixed_income": 21735,
+        "non-cash: equity": 55326,
+        "non-cash: fixed_income": 21752,
         "source: ": 21335,
         "spending: base": 9082,
         "spending: loan interest": 1162,
         "spending: loan principal": 11505,
         "spending: versicherung": 300,
         "spending: wohnen": 12715,
-        "tax: ": 26160
+        "tax: ": 26173
       },
-      "liquid": 2771082,
+      "liquid": 2773338,
       "phases": [
         "retired"
       ],
       "taxes": -19318,
-      "total": 2771260
+      "total": 2773516
     }
   }
 }

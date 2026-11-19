@@ -36,6 +36,7 @@ from dagobert.model.events import (
     FundPolicyEvent,
     PhaseChange,
     PolicyFunding,
+    PrepayHealthEvent,
     RepayAction,
     RepayEvent,
     SellEvent,
@@ -282,6 +283,10 @@ LET: LiteralString = (
 )
 LATE: LiteralString = (
     "{id} is bought after the start {start}: a later purchase is a buy_property event"
+)
+PREPAY: LiteralString = (
+    "prepay_health pays the premium of the private insurance: in this month the plan is in the "
+    "statutory insurance"
 )
 # what a policy refuses: money free of tax that a Basisrente would pay out at its share, a premium
 # of your own into a company pension, whose payout is taxed in full
@@ -773,6 +778,21 @@ class Plan(Strict):
             for i, e in enumerate(self.scenario.events)
             for keys, kind, policy, wanted in _fundings(e)
             if basisrente.get(policy, wanted) != wanted
+        ]
+        refuse_all(self, found)
+        return self
+
+    @model_validator(mode="after")
+    def _prepaid_in_the_pkv(self) -> Plan:
+        """A `prepay_health` lies in a month of the PKV. The error is at its month."""
+        found = [
+            InitErrorDetails(
+                type=PydanticCustomError("prepay", PREPAY, {}),
+                loc=("scenario", "events", i, "at"),
+                input=e.at,
+            )
+            for i, e in enumerate(self.scenario.events)
+            if isinstance(e, PrepayHealthEvent) and not self.assumptions.tax.pkv_in(e.at)
         ]
         refuse_all(self, found)
         return self

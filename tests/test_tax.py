@@ -198,7 +198,7 @@ def test_the_losses_carried_offset_the_income_before_the_sonderausgaben(
     """§10d Abs. 2 EStG, §2 Abs. 3, 4: 5,000 € carried from earlier years."""
     settled = year_settlement(replace(income, loss_carried=5000.0), TY, church=0.0)
     expected = fuenftelregelung(zve, income.severance, TY)
-    assert (settled.tax, settled.loss_left) == pytest.approx((expected, left))
+    assert (float(settled.tax), settled.loss_left) == pytest.approx((float(expected), left))
 
 
 def test_sonderausgaben_alone_carry_no_loss() -> None:
@@ -244,7 +244,7 @@ def test_a_loss_carried_back_comes_off_as_one_carried_forward(income: YearIncome
     forward do, and carries nothing on. Its room is what the losses carried forward leave."""
     back = year_settlement(replace(income, loss_back=5000.0), TY, church=0.0)
     forward = year_settlement(replace(income, loss_carried=5000.0), TY, church=0.0)
-    assert (back.tax, back.loss_left) == pytest.approx((forward.tax, 0.0))
+    assert (float(back.tax), back.loss_left) == pytest.approx((float(forward.tax), 0.0))
     gde = zve_of(income, TY).room
     both = replace(income, loss_carried=3000.0, loss_back=1000.0)
     assert zve_of(both, TY).room == pytest.approx(gde - 4000.0)

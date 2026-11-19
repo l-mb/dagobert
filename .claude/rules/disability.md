@@ -74,7 +74,11 @@ the ledger: rule `ledger`. The inputs: `docs/manual/configuration.md`, in plain 
   gross into `YearAcc.lohnersatz` (§32b Abs. 1 S. 1 Nr. 1 b: the gross, hkk), RV into `rv_paid`, PV
   into `health_deductible`. No points (the EM points stand). An employee's month is compulsory and
   free of KV (`_pay_gkv(sick=)`, §192 Abs. 1 Nr. 2, §224); a business's stays voluntary, the
-  Krankengeld outside its base. PKV: none (the Krankentagegeld of a tariff is left out).
+  Krankengeld outside its base. PKV (issue #49): `Income._pay_sick_private`, the `sick_pay` of
+  each `health` stream active in the month (`Stream.sick_pay`, `TAKES` of an expense, refused
+  without `health`), times its index, in the months of `_pay_sick`: a source `<name>: benefit`,
+  tax-free and outside `lohnersatz` (§3 Nr. 1 a EStG; §32b Abs. 1 S. 1 Nr. 1 b names the
+  statutory Krankengeld), also of a business; the premium runs on by its phases.
 - EM-Rente (`_claim_em` in m0 + `em_start_months`, before an old-age claim): `PensionState.em` on
   the path, `em_factor` (`sv.em_factor`, §77 Abs. 2: 0.3% a month before 65, counted from 62), its
   year in `start_year`. `_pension_paid` pays the carrier on such a path whatever its phases, at the
@@ -112,7 +116,8 @@ years), the Anrechnungszeiten of §§71, 72 (out of the months of the Zurechnung
 Grundrentenzuschlag, points after the onset for the Altersrente alone, the PV on Krankengeld of a
 business (§57 Abs. 2 SGB XI), an onset during ALG1 (§146 SGB III, §47b SGB V: nothing paid), the
 waiting time of a business's Krankengeld (§46 S. 3: its profit pays the two months), the
-Krankentagegeld of the PKV, the BU premium as a Sonderausgabe, the 102 € of §9a S. 1 Nr. 3 on a BU
+Karenzzeit and the end of a Krankentagegeld by its tariff (always the months of the Krankengeld),
+the BU premium as a Sonderausgabe, the 102 € of §9a S. 1 Nr. 3 on a BU
 benefit without a GRV pension, a BU without an EM (Berufsunfähigkeit only: the one hazard
 understates the benefit), a BU of a bAV (§3 Nr. 63: taxed in full, §22 Nr. 5, and a
 Versorgungsbezug), the Karenzzeit and the Nachversicherung of a tariff, the higher mortality of

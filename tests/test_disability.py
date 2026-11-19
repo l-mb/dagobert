@@ -50,6 +50,7 @@ PENSION = Stream(
 )
 SHOP = Stream(name="Laden", kind=StreamKind.SELF_EMPLOYED, amount=4000, index=None, phases=["work"])
 BU = Stream(name="BU", kind=StreamKind.BU, cat="insurance", amount=2000, premium=-95)
+KTG_PLAIN = Stream(name="KTG", amount=-40, health="kv", index=None)
 POINT_MONTH = 6000 / TY.durchschnittsentgelt  # the points of a month of the salary
 
 
@@ -146,6 +147,24 @@ def test_krankengeld_pays_a_member_of_the_gkv_until_the_em_rente(
     assert booked(r, AV)[months] == pytest.approx(float(expected.alv))
     assert booked(r, PV)[months] == pytest.approx(float(expected.pv))
     assert not booked(r, KV)[months].any()  # compulsory and free (§224 SGB V)
+
+
+def test_the_krankentagegeld_of_a_pkv_tariff_pays_until_the_em_rente() -> None:
+    """A `health` premium with `sick_pay`: its benefit in the five months between the pay of the
+    employer and the EM-Rente, free of tax (§3 Nr. 1 a EStG) and of the Progressionsvorbehalt, so
+    the taxes stay; none without the onset, none of a tariff that ended, none in the GKV."""
+    ktg = Stream(name="KTG", amount=-40, health="kv", index=None, sick_pay=3000)
+    with_it, without = run([SALARY_ROW, PENSION, ktg]), run([SALARY_ROW, PENSION, KTG_PLAIN])
+    paid = booked(with_it, "KTG: benefit", SOURCE)
+    assert paid[M0 + 2 : M0 + 7] == pytest.approx(3000.0)
+    assert paid.sum() == pytest.approx(5 * 3000)
+    assert with_it.taxes[0] == pytest.approx(without.taxes[0])
+    assert with_it.liquid[0, M0 + 7] == pytest.approx(without.liquid[0, M0 + 7] + 15_000)
+    assert not booked(run([SALARY_ROW, PENSION, ktg], at=None), "KTG: benefit", SOURCE).any()
+    ended = ktg.model_copy(update={"end": add_months(ONSET, 1)})
+    assert not booked(run([SALARY_ROW, PENSION, ended]), "KTG: benefit", SOURCE).any()
+    with pytest.raises(ValueError, match="belongs to a `health` premium"):
+        Stream(name="x", amount=-40, index=None, sick_pay=3000)
 
 
 @pytest.mark.parametrize("krankengeld", [True, False])

@@ -21,6 +21,7 @@ SAID = {
     "deductible": N_(
         "{deductible} needs {health} or {deduct}: fill one of them, or empty {deductible}"
     ),
+    "sick_pay": N_("{sick_pay} needs {health}: fill it, or empty {sick_pay}"),
     "deduct": N_("{deduct} takes no {health} and no {property}: empty one of them"),
     "repays": N_("{repays} needs null in {index}"),
     "let_health": N_(

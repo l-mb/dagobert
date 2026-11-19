@@ -255,6 +255,7 @@ STREAM_FIELDS = (
 )
 STREAM_MORE = (
     *("part", "of", "share", "points", "point_value", "health", "deduct", "deductible"),
+    "sick_pay",
     *("repays", "after_sale_of", "property", "taxable", "into", "hebesatz"),
     *("gruendungszuschuss", "gz_extension", "sperrzeit", "training"),
 )

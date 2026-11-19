@@ -166,6 +166,7 @@ streams:
     amount: -35
     health: kv
     deductible: 0.0
+    sick_pay: 3600  # 120 € a day, in the months before a disability pension
     phases: [work, new-job]
     index: insurance
   # The statutory surcharge ends at 60

@@ -590,8 +590,10 @@ After the month in which you lose the ability to work, the plan does this:
    off it, about 12.4% (13.0% without children). The sick pay is free of income tax, but it raises
    the tax rate on your other income of the year (Progressionsvorbehalt). A business pays sick pay
    only with the option `Sick pay in the GKV`, 70% of the profit. Private health insurance pays no
-   Krankengeld. The plan leaves out a daily sick pay of a private tariff (Krankentagegeld): these
-   five months come out of your savings.
+   Krankengeld. A private tariff with a daily sick pay (Krankentagegeld) pays in these five
+   months instead: enter its monthly benefit in the column `sick_pay` of its premium on the
+   Cashflows page. It is free of income tax and does not raise your tax rate. Without such a
+   tariff, these five months come out of your savings.
 3. From the seventh month, the pension insurance pays the disability pension (EM-Rente). It needs
    five years of insurance and three years of compulsory contributions in the last five years. It
    uses the pension stream from points on the Cashflows page, whatever its phases say. Its amount

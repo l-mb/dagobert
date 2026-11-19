@@ -177,6 +177,7 @@ EXPERT = _items(
             "property",
             "deduct",
             "deductible",
+            "sick_pay",
             "health",
             "taxable",
             "of",

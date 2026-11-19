@@ -655,7 +655,11 @@ A list under `streams`. Fields:
   amount above zero: it lowers the premium. Use it for a Beitragsentlastungstarif: one stream
   with the extra premium and an `end` at the agreed age, and one with the agreed reduction as a
   positive amount, `index: null` and a `start` at that age. The subsidies and the deduction take
-  the premium after the reduction.
+  the premium after the reduction. `sick_pay` (euros a month, with `health` only) is the
+  Krankentagegeld of the tariff: in a plan with the section `disability`, it pays in the months
+  after the six weeks of pay of the employer and before the disability pension, while the
+  stream is active. It is free of income tax and follows the `index` of the stream. Enter 30
+  times the benefit per day.
 - `deduct` (an `expense` without `health` and without `property`, default none): what the expense
   is for the income tax. The cash flow stays an expense of its category.
   - `work`: work expenses (Werbungskosten, §9 EStG) at a date, for example a course that you pay

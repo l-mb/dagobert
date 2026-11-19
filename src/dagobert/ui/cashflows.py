@@ -159,6 +159,7 @@ EXPENSES = Table(
         "health",
         "deduct",
         "deductible",
+        "sick_pay",
         "after_sale_of",
         "property",
     ),

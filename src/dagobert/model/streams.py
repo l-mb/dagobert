@@ -87,7 +87,9 @@ def stream_index(row: dict[str, Any]) -> str | None:
 
 # the fields of a stream that only some kinds take, by kind: a category is no field of a plan
 TAKES: dict[StreamKind, frozenset[str]] = {
-    StreamKind.EXPENSE: frozenset({"cat", "amount", "health", "deduct", "deductible", "property"}),
+    StreamKind.EXPENSE: frozenset(
+        {"cat", "amount", "health", "deduct", "deductible", "sick_pay", "property"}
+    ),
     StreamKind.SALARY: frozenset({"cat", "gross", "of", "share", "part"}),
     StreamKind.ALG1: frozenset({"cat", "sperrzeit", "training"}),
     StreamKind.PENSION: frozenset({"cat", "gross", "points", "point_value"}),
@@ -188,6 +190,14 @@ class Stream(Strict):
         "`pv` part, `pkv_basis_share` of the tax year for a `kv` part. Of a `deduct` expense the "
         "share that counts, such as the labour part of a bill or the donations among the gifts: "
         "default all of it",
+    )
+    sick_pay: Euros | None = Field(
+        default=None,
+        ge=0,
+        description="Of a `health` premium: the Krankentagegeld of this tariff per month, which "
+        "it pays while you cannot work, after the six weeks of pay of the employer and until the "
+        "disability pension starts. Free of income tax. It follows the `index` of the row. Only "
+        "a plan with the section `disability` uses it",
     )
     repays: str | None = Field(
         default=None, description="Loan id that receives this income directly, bypassing cash"
@@ -301,6 +311,11 @@ class Stream(Strict):
                 self.deductible is not None and self.health is None and self.deduct is None,
                 "deductible",
                 "{name}: `deductible` belongs to a `health` premium or a `deduct` expense",
+            ),
+            (
+                self.sick_pay is not None and self.health is None,
+                "sick_pay",
+                "{name}: `sick_pay` belongs to a `health` premium",
             ),
             # a deduction is an expense of the person: no premium of the health insurance, no
             # cost of a let property, which the rent deducts and §35a Abs. 5 S. 1 EStG excludes

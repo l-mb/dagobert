@@ -174,6 +174,7 @@ class Income(Health):
         self._mark_onset()
         self._pay_kindergeld()
         sick = self._pay_sick()
+        self._pay_sick_private()
         kv_base_real, deductible = self._pay_salaries(pay)
         monthly = self._av_flows()
         premium = self._policy_flows()
@@ -257,6 +258,26 @@ class Income(Health):
         if rv.any():
             p.counts_now = p.compulsory_now = True
         return np.asarray(now & sick.employed)
+
+    def _pay_sick_private(self) -> None:
+        """The Krankentagegeld of the PKV tariffs in force (`Stream.sick_pay` of a `health`
+        premium that is active this month) on the paths and in the months in which a member of
+        the GKV gets Krankengeld (`_pay_sick`): tax-free and outside the Progressionsvorbehalt
+        (§3 Nr. 1 a EStG; §32b names the statutory benefit only), no contribution on it."""
+        i, ty = self.m.i, self.ty
+        now = (
+            (self.pension.claimed is None)
+            & (self.onset >= 0)
+            & (i >= self.onset + ty.efzg_months)
+            & (i < self.onset + ty.em_start_months)
+        )
+        if not self.pkv or not now.any():
+            return
+        for s in self.streams:
+            if s.spec.sick_pay and s.active(self.m.month, self.m.phase):
+                paid = s.spec.sick_pay * self._index(s) * now
+                self._receive(paid)
+                self._note(SOURCE, "", f"{s.spec.name}: {BENEFIT}", paid)
 
     def _fix_sick_pay(self, pay: MonthPay) -> None:
         """In the last month of the Entgeltfortzahlung, the Krankengeld of a member of the GKV

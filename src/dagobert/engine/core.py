@@ -255,7 +255,9 @@ class Core:
         return mortality.death_months(curve, draw)
 
     def _init_bookkeeping(self) -> None:
-        self.acc = YearAcc.new(self.equity, np.ones(self.paths), self.a.tax.sparer_pauschbetrag)
+        self.acc = YearAcc.new(
+            self.equity, np.ones(self.paths), self.a.tax.pauschbetrag(self.start.year)
+        )
         self.flows = MonthFlows.new(self.paths)
         self._init_spending_rule()
         self.last_salary = np.zeros(self.paths)  # nominal contributory salary: the ALG1 base
@@ -541,6 +543,14 @@ class Core:
         m = self.m
         growth = (1 + self.a.scale.growth.get(m.phase, 0.0)) ** (m.month.year - m.since.year)
         return s.earned_scale(m.phase, self.a) * growth
+
+    def _change_law(self) -> None:
+        """From the year of `tax.law_change` its rate of the Abgeltungsteuer: the tax year with
+        it, and the flat rate of the run. Called in the first month and each January."""
+        change = self.a.tax.law_change
+        if change.holds(self.m.month.year) and change.abgeltungsteuer is not None:
+            self.ty = self.ty.model_copy(update={"abgeltungsteuer_rate": change.abgeltungsteuer})
+            self.flat_rate = tax.flat_rate(self.church, self.ty)
 
     def _nominal(self, s: StreamState) -> FloatArray:
         """Nominal amount of one plain stream this month, a part of the KV premium of the PKV

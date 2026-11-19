@@ -155,6 +155,40 @@ class SelfEmployed(Strict):
     )
 
 
+class LawChange(Strict):
+    """A change of the tax law of capital income from a year: an assumption to test a plan
+    against, no forecast. The rules of one tax year apply to the whole run otherwise."""
+
+    since: Month | None = Field(
+        default=None,
+        description="The change applies from the January of the year of this month. Empty: no "
+        "change of the law",
+    )
+    abgeltungsteuer: Percent | None = Field(
+        default=None,
+        ge=0,
+        le=0.6,
+        description="The rate of the Abgeltungsteuer from then, 25% today, before the Soli and "
+        "the church tax. Empty: as today",
+    )
+    sparer_pauschbetrag: Euros | None = Field(
+        default=None,
+        ge=0,
+        description="The capital income free of tax per year from then, in euros of the start. "
+        "Empty: as before",
+    )
+
+    @model_validator(mode="after")
+    def _dated(self) -> LawChange:
+        if self.since is None and (self.abgeltungsteuer, self.sparer_pauschbetrag) != (None, None):
+            msg = "a change of the law needs `since`, the year from which it applies"
+            raise ValueError(msg)
+        return self
+
+    def holds(self, year: int) -> bool:
+        return self.since is not None and year >= self.since.year
+
+
 class TaxOptions(Strict):
     year: Annotated[int, Field(json_schema_extra={"enum": list(TAX_YEARS)})] | None = Field(
         default=None,
@@ -279,6 +313,17 @@ class TaxOptions(Strict):
         default=SelfEmployed(),
         description="The pension and the health insurance in a month with a business of your own",
     )
+    law_change: LawChange = Field(
+        default=LawChange(),
+        description="A change of the tax law of capital income from a year, as a stress test",
+    )
+
+    def pauschbetrag(self, year: int) -> float:
+        """The Sparer-Pauschbetrag of a calendar year: the one of `law_change` from its year."""
+        change = self.law_change
+        if change.holds(year) and change.sparer_pauschbetrag is not None:
+            return change.sparer_pauschbetrag
+        return self.sparer_pauschbetrag
 
     def pkv_in(self, month: date) -> bool:
         """Privately insured in `month`: `pkv`, before `gkv_from`."""

@@ -86,6 +86,15 @@ yearly work expenses (`werbungskosten`): rule `deductions`. The inputs:
   4 for other insurance in a covered year; the 3× limit against a year of fewer than 12 premiums;
   a discount; the months after a switch to the GKV lose their credit (an insurer pays it back).
   `rich_plan`: 12 months in 2028-12; `engineer` `severance`: 24 months with the severance.
+- A change of the law (`tax.law_change`, `model.taxes.LawChange`; issue #50, a stress test, no
+  law): `since` (a `Month`, its year counts), `abgeltungsteuer`, `sparer_pauschbetrag`, a value
+  without `since` refused. `Core._change_law`, in the first month and each January
+  (`Engine.run`): from that year `Core.ty` is a copy with the rate, and `Core.flat_rate` follows
+  (the gross-up, the latent tax, the Günstigerprüfung); `TaxOptions.pauschbetrag(year)` gives the
+  Pauschbetrag of each `YearAcc`. The latent tax before the year counts at the old rate. Not
+  changed: the Teilfreistellung, the tariff, a wealth tax, the KV on capital income (open in
+  the issue), no Explorer lever. The Tax tab: `A change of the law (stress test)`, `mode.EXPERT`.
+  Test: `test_portfolio.py`.
 - Zusatzbeitrag (`tax.kv_zusatz`, the whole rate of the own Kasse, GKV only; `sv.kv_zusatz` gives
   it, else the average of the year, twice `kv_zusatz_half`, §242a SGB V): half of it on a salary
   (§249 Abs. 1) and on the pension (§247, §249a; a voluntary member pays all and the DRV half of it

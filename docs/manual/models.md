@@ -371,7 +371,7 @@ assumption. Two inputs limit what a fast rise costs:
   usual private tariff. Use the cap to see the worst case, in a scenario of its own.
 - A Beitragsentlastungstarif is two streams: the extra premium until the agreed age, and the
   reduction as a positive amount from that age
-  ([Input files](configuration.md#cashflowsyaml)).
+  ([Input files](configuration.md#datacashflowsyaml)).
 
 ## A business of your own
 
@@ -835,6 +835,8 @@ Dagobert is approximate by design. These are the main simplifications:
 - It computes one person, assessed alone. No joint assessment of a married couple.
 - The church tax has no cap (Kappung).
 - The rules of one tax year apply to the whole plan. Later changes of the law are unknown.
+  `tax.law_change` tests one: another rate of the Abgeltungsteuer or another Sparer-Pauschbetrag
+  from a year ([Input files](configuration.md#dataassumptionsyaml)).
 - Your work expenses are one number a year. The limit of 4,500 € for the commute without a car,
   meals away from home and a second home are not computed: enter them in the number. Yearly costs
   above the salary make no loss. Enter such costs as an expense with `deduct: work`.

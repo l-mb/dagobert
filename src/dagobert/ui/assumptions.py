@@ -165,6 +165,10 @@ LABELS: dict[KeyPath, str] = {
     ("tax", "self_employed", "rv"): N_("Pension insurance of a business"),
     ("tax", "self_employed", "krankengeld"): N_("Sick pay in the GKV"),
     ("tax", "self_employed", "founded"): N_("Business founded"),
+    ("tax", "law_change"): N_("A change of the law (stress test)"),
+    ("tax", "law_change", "since"): N_("Changed law from"),
+    ("tax", "law_change", "abgeltungsteuer"): N_("Abgeltungsteuer from then %"),
+    ("tax", "law_change", "sparer_pauschbetrag"): N_("Sparer-Pauschbetrag from then €"),
     ("invest_rest",): N_("Invest the rest"),
     ("seed",): N_("Random seed"),
 }

@@ -697,3 +697,32 @@ def test_a_conditional_sale_of_gold_fires_once() -> None:
     r = zero_run(p, 5)
     assert r.balance["gold"].tolist() == pytest.approx([10_000, 10_000, 5000, 5000, 5000])
     assert r.total[0].tolist() == pytest.approx([10_000] * 5)  # the proceeds are invested
+
+
+def test_a_change_of_the_law_taxes_capital_income_by_its_rate_from_its_year() -> None:
+    """`tax.law_change`, a stress test: the years before it pay as without, the years from it
+    the new rate of the Abgeltungsteuer, or more tax with a smaller Pauschbetrag."""
+
+    def run(**change: object) -> np.ndarray:
+        returns = zero_returns(48)
+        returns.rates["cash"][:] = 0.03 / 12
+        pay = Stream(name="pay", kind=StreamKind.SALARY, gross=9000, index=None)
+        law = {"law_change": change} if change else {}
+        p = plan([pay], [cash(1_000_000)], tax=law, invest_rest=False)
+        taxes: np.ndarray = -simulate(p, returns, "fixed").capital_taxes[0]
+        return taxes.reshape(4, 12).sum(axis=1)
+
+    plain = run()
+    higher = run(since=date(2028, 6, 1), abgeltungsteuer=0.35)
+    assert higher[:2] == pytest.approx(plain[:2])
+    old, new = (
+        flat_rate(0.0, TY),
+        flat_rate(0.0, TY.model_copy(update={"abgeltungsteuer_rate": 0.35})),
+    )
+    assert higher[2] == pytest.approx(plain[2] * new / old)
+    assert plain[2] > 5000
+    bare = run(since=date(2028, 1, 1), sparer_pauschbetrag=0)
+    assert bare[:2] == pytest.approx(plain[:2])
+    assert bare[2] == pytest.approx(plain[2] + 1000 * old)
+    with pytest.raises(ValueError, match="needs `since`"):
+        plan([], [cash()], tax={"law_change": {"abgeltungsteuer": 0.3}})

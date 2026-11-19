@@ -2809,6 +2809,53 @@ msgctxt "key"
 msgid "founded"
 msgstr "Gegründet"
 
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid ""
+"The change applies from the January of the year of this month. Empty: no "
+"change of the law"
+msgstr ""
+"Die Änderung gilt ab dem Januar des Jahres dieses Monats. Leer: keine "
+"Rechtsänderung"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid "Since"
+msgstr "Ab"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgctxt "key"
+msgid "law_change"
+msgstr "Rechtsänderung"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgctxt "key"
+msgid "since"
+msgstr "ab"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid ""
+"The rate of the Abgeltungsteuer from then, 25% today, before the Soli and"
+" the church tax. Empty: as today"
+msgstr ""
+"Der Satz der Abgeltungsteuer ab dann, heute 25 %, vor Soli und "
+"Kirchensteuer. Leer: wie heute"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid "Abgeltungsteuer"
+msgstr "Abgeltungsteuer"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgctxt "key"
+msgid "abgeltungsteuer"
+msgstr "Abgeltungsteuer"
+
+#: model/assumptions.py model/plan.py model/taxes.py
+msgid ""
+"The capital income free of tax per year from then, in euros of the start."
+" Empty: as before"
+msgstr ""
+"Die steuerfreien Kapitalerträge pro Jahr ab dann, in Euro in Kaufkraft "
+"des Startjahrs. Leer: wie zuvor"
+
 #: model/assumptions.py model/plan.py ui/assumptions.py
 msgid "Disability"
 msgstr "Erwerbsminderung"
@@ -3877,6 +3924,12 @@ msgid ""
 "The pension and the health insurance in a month with a business of your "
 "own"
 msgstr "Die Rente und die Krankenversicherung in einem Monat mit eigenem Betrieb"
+
+#: model/taxes.py
+msgid "A change of the tax law of capital income from a year, as a stress test"
+msgstr ""
+"Eine Änderung des Steuerrechts für Kapitalerträge ab einem Jahr, als "
+"Stresstest"
 
 #: prices.py
 #, python-brace-format
@@ -6088,6 +6141,22 @@ msgstr "Krankengeld in der GKV"
 #: ui/assumptions.py
 msgid "Business founded"
 msgstr "Gründung des Betriebs"
+
+#: ui/assumptions.py
+msgid "A change of the law (stress test)"
+msgstr "Eine Rechtsänderung (Stresstest)"
+
+#: ui/assumptions.py
+msgid "Changed law from"
+msgstr "Geändertes Recht ab"
+
+#: ui/assumptions.py
+msgid "Abgeltungsteuer from then %"
+msgstr "Abgeltungsteuer ab dann %"
+
+#: ui/assumptions.py
+msgid "Sparer-Pauschbetrag from then €"
+msgstr "Sparer-Pauschbetrag ab dann €"
 
 #: ui/assumptions.py
 msgid "Random seed"

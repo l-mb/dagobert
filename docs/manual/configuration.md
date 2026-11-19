@@ -348,6 +348,12 @@ Overview moves it) and `scale` (the overrides of a scenario).
     household. The Entlastungsbetrag (§24b EStG) of 4,260 € a year in 2026, and 240 € more for each
     further child, comes off the income in each month in which a child of `children_born` counts.
   - `self_employed`: the social insurance of a business, see below.
+  - `law_change`: a change of the tax law of capital income, as a stress test. `since` (a month):
+    the change applies from the January of its year. `abgeltungsteuer`: the rate of the
+    Abgeltungsteuer from then (25% today, before the Soli and the church tax).
+    `sparer_pauschbetrag`: the capital income free of tax from then, in euros of the start. An
+    empty field keeps the law of today. The values are your assumption: nobody knows a later
+    law. Set them in the `overrides` of a scenario, and compare it with the plan in the Explorer.
   - `crypto_capital_from` (a month, default none: the law of today). A crypto unit bought in or
     after that month is capital income (§20 EStG) without a holding period, as the BMF draft of
     2026-09-30 plans for coins bought from 2027 (`2027-01`). It is not law yet. Such a unit pays

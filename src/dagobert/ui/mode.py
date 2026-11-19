@@ -143,6 +143,7 @@ EXPERT = _items(
     "tax.capital_losses",
     "tax.alleinerziehend",
     "tax.self_employed",
+    "tax.law_change",
 ) | _items(
     Sort.COLUMN,
     *(

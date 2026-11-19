@@ -41,8 +41,10 @@ class Engine(Events, Settlement):
             if i and month.month == 1:
                 self.kv_last = self._kv_last()
                 self.acc = YearAcc.new(
-                    self.equity, self.eq_index[:, i - 1], self.a.tax.sparer_pauschbetrag
+                    self.equity, self.eq_index[:, i - 1], self.a.tax.pauschbetrag(month.year)
                 )
+            if not i or month.month == 1:
+                self._change_law()
             liquid_prev = liquid[:, i - 1] if i else liquid_of(self._balance())
             self._update_spending_rule(liquid_prev)
             self._check_triggers(liquid_prev)

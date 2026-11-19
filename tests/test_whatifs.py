@@ -149,7 +149,9 @@ def test_a_course_after_a_job_loss_pays_alg1_and_returns_to_work(quick: Path) ->
     assert "work" in regular_salary(free)
     course = next(e for e in load_plan(quick, quick / "scenarios" / "paid.yaml").scenario.events)
     assert course.type == "add_stream"
-    year = slice(i - LATER.month + 1, i - LATER.month + 13)  # the calendar year of the course
+    # the calendar years of the course: one that starts late in a year ends in the next, and
+    # the part of its costs in a year counts only above the Pauschbetrag
+    year = slice(i - LATER.month + 1, i - LATER.month + 25)
     assert paid.expenses[0, year].sum() < free.expenses[0, year].sum()
     assert paid.taxes[0, year].sum() > free.taxes[0, year].sum()  # less tax: the costs deduct
     assert Feature.DEDUCTIONS not in read_yaml(quick / APP)["features_off"]

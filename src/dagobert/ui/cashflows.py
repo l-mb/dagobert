@@ -797,6 +797,18 @@ def _scheduled(rows: list[cashplan.Row], day: date, plan: Plan, scenario: str) -
     )
 
 
+def _with_pension(table: Table) -> Table:
+    """The income table of a plan with a pension from points: `points` and `point_value`, the
+    main inputs of that row, in plain view after `gross`, not behind `All columns`."""
+    points = ("points", "point_value")
+    at = table.fields.index("gross") + 1
+    return replace(
+        table,
+        fields=(*table.fields[:at], *points, *table.fields[at:]),
+        more=tuple(m for m in table.more if m not in points),
+    )
+
+
 def _streams(file: RowFile, day: date, plan: Plan) -> None:
     """The editable streams in a tab per role, their columns and kinds by the mode and the
     features (`mode.View`), and below them the note of the kinds that these hide."""
@@ -831,7 +843,8 @@ def _streams(file: RowFile, day: date, plan: Plan) -> None:
         edit_table(file, checked(_with_totals(EXPENSES, day, plan)), view)
     with income:
         first = earned | {"kind": FIRST_INCOME}
-        edit_table(file, checked(replace(_with_totals(INCOME, day, plan), first=first)), view)
+        table = _with_pension(INCOME) if any(s.points is not None for s in plan.streams) else INCOME
+        edit_table(file, checked(replace(_with_totals(table, day, plan), first=first)), view)
     with savings:
         fold(_(SAVINGS_NOTE), _("How savings plans work"))
         table = replace(with_phases(SAVINGS, plan.assumptions.phase_labels), first=earned)

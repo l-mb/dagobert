@@ -106,6 +106,9 @@ rate as `amount`, the asset that the plan buys in `into` (empty: the equity of y
 months and phases, and the `index` (empty: nominal, as your broker runs the plan). The
 [simulation guide](models.md#savings-plans) explains how a plan runs.
 
+In the `income` tab, a plan with a statutory pension from points shows the columns `points` and
+`point_value` of your Renteninformation beside `gross`.
+
 The `health insurance` tab holds the premium of a private health insurance (PKV), with a row for
 each tariff: the health part, the care part, a Krankentagegeld, the statutory surcharge. It
 shows for a plan with a private insurance. The column `health or care` says which part a row is,

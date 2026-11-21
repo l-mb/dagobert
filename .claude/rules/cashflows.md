@@ -102,7 +102,9 @@ The rows of the run on the Cashflows sheet come from the ledger: rule `ledger`.
 - Simple mode and the features (rule `mode`): the four stream grids take `grid` `streams` and the
   `mode.View` of the page (rule `grids`): a column of `mode.EXPERT` or of a feature off that no row
   holds goes behind `All columns` (`tags` of the expenses, `of` and `share` of the income until a
-  salary exists, `mode.BRINGS`, `index` of the savings), and `kind` offers the stream kinds that
+  salary exists, `mode.BRINGS`, `index` of the savings; `points` and `point_value` of the income
+  come out of `more` into plain view while a pension from points exists, `_with_pension`, #51),
+  and `kind` offers the stream kinds that
   `View` shows and those that a row or an
   edit holds (a kind outside `CORE` hides until used: `alg1`, `self_employed`, `rv_voluntary`, a
   new kind too, no line here). The tab `disability insurance` shows while `View` shows the kind

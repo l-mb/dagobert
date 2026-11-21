@@ -463,15 +463,16 @@ def test_a_link_to_the_roll_forward_opens_the_overview_of_the_navigation(
     at = AppTest.from_string(ASSUMPTIONS.format(data=str(data)), default_timeout=60)
     at.session_state[PAGES] = pages
     at.run()
-    [link] = at.get("page_link")
+    link, premiums = at.get("page_link")  # the roll forward, then the tab `Health insurance`
     assert (link.proto.label, link.proto.page) == ("Roll forward on the Overview", "")
+    assert premiums.proto.page == "cashflows"
     assert link.proto.query_string == f"{overview.ROLL}={overview.OPEN}"  # opens the expander
     assert not AppTest.from_string(ASSUMPTIONS.format(data=str(data))).run().get("page_link")
     # while the start is current there is nothing to roll
     path = data / "assumptions.yaml"
     path.write_text(path.read_text().replace("2026-01-01", f"{date.today():%Y-%m}-01"))
     at.run()
-    assert not at.get("page_link")
+    assert [link.proto.page for link in at.get("page_link")] == ["cashflows"]
 
 
 def test_the_runs_follow_what_they_read_only(data: Path) -> None:

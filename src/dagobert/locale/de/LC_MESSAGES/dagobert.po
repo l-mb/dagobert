@@ -6351,6 +6351,18 @@ msgstr ""
 "trägt ihn ein, wenn vor dem neuen Start ein Betrieb läuft"
 
 #: ui/assumptions.py
+msgid "Your insurance"
+msgstr "Deine Versicherung"
+
+#: ui/assumptions.py
+msgid "As a pensioner"
+msgstr "Als Rentner"
+
+#: ui/assumptions.py
+msgid "With a business"
+msgstr "Mit einem Betrieb"
+
+#: ui/assumptions.py
 msgid "The start, always"
 msgstr "Dem Beginn, immer"
 
@@ -6449,6 +6461,10 @@ msgid "Spending and risks"
 msgstr "Ausgaben und Risiken"
 
 #: ui/assumptions.py
+msgid "Health insurance"
+msgstr "Krankenversicherung"
+
+#: ui/assumptions.py
 #, python-brace-format
 msgid "the phase {name} keeps its name while inputs name it: {uses}"
 msgstr ""
@@ -6484,6 +6500,10 @@ msgstr ""
 #: ui/assumptions.py
 msgid "Roll forward on the Overview"
 msgstr "Start vorrücken auf der Übersicht"
+
+#: ui/assumptions.py
+msgid "The premiums are on Cashflows"
+msgstr "Die Beiträge stehen auf Cashflows"
 
 #: ui/assumptions.py
 msgid "Rename a relative"

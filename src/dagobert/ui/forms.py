@@ -59,6 +59,43 @@ class When:
     unless: KeyPath | None = None
 
 
+def _picked(mapping: Mapping[str, Any], paths: Iterable[KeyPath]) -> dict[str, Any]:
+    """A copy of the nested `mapping` with the `paths` that it holds only."""
+    out: dict[str, Any] = {}
+    for path in paths:
+        if (value := lookup(mapping, path)) is ABSENT:
+            continue
+        at = out
+        for key in path[:-1]:
+            at = at.setdefault(str(key), {})
+        at[str(path[-1])] = copy.deepcopy(value)
+    return out
+
+
+def _dropped(mapping: Mapping[str, Any], paths: Iterable[KeyPath]) -> dict[str, Any]:
+    """A copy of the nested `mapping` without the `paths`."""
+    out = copy.deepcopy(dict(mapping))
+    for path in paths:
+        at: Any = out
+        for key in path[:-1]:
+            at = at.get(key) if isinstance(at, dict) else None
+        if isinstance(at, dict):
+            at.pop(path[-1], None)
+    return out
+
+
+def _merged(below: Mapping[str, Any], above: Mapping[str, Any]) -> dict[str, Any]:
+    """`above` over `below`, mapping by mapping."""
+    out = dict(below)
+    for key, value in above.items():
+        held = out.get(key)
+        if isinstance(held, Mapping) and isinstance(value, Mapping):
+            out[key] = _merged(held, value)
+        else:
+            out[key] = value
+    return out
+
+
 @dataclass(frozen=True)
 class Form:
     """The fields of a part of an input file that a tab edits: of the mapping at `keys` of `file`,
@@ -80,7 +117,10 @@ class Form:
     field takes from the others (the id of a purchase from its name), shown as its placeholder and
     written with the row. `plain`: a message of the model in plain words, by the end of its text.
     `parts`: the top keys of the part beyond those of `fields`, the keys of a tab whose fields the
-    mode or a feature hides (rule `mode`): the part keeps its shape whatever shows. `hides`: the
+    mode or a feature hides (rule `mode`): the part keeps its shape whatever shows. `only` and
+    `without`: key paths that narrow the part below its top keys, so two tabs share a top key (the
+    insurance fields of `tax`): the part holds the paths of `only` alone, or its top keys less
+    those of `without`. `hides`: the
     columns of a mapping by name, by its path, that the mode or a feature hides while no entry of
     the part holds them: they go behind `All columns`; of a list of rows they go (the `id` of a
     phase change in simple mode). `computed`: read-only columns of a list of rows by its path,
@@ -106,6 +146,8 @@ class Form:
     when: Mapping[KeyPath, When] = dataclasses.field(default_factory=dict)
     rows: Mapping[KeyPath, MapRows] = dataclasses.field(default_factory=dict)
     parts: tuple[str, ...] = ()
+    only: tuple[KeyPath, ...] = ()
+    without: tuple[KeyPath, ...] = ()
     hides: Mapping[KeyPath, frozenset[str]] = dataclasses.field(default_factory=dict)
     computed: Mapping[KeyPath, tuple[Computed, ...]] = dataclasses.field(default_factory=dict)
 
@@ -169,9 +211,19 @@ class Form:
 
     def part(self, doc: Mapping[str, Any]) -> dict[str, Any]:
         """What the form shows of the file: the keys of the mapping that its fields lie under, so
-        that two tabs of one file do not refuse each other."""
+        that two tabs of one file do not refuse each other; narrowed by `only` and `without`."""
         held = self.mapping(doc)
-        return {k: held[k] for k in self.tops if k in held}
+        if self.only:
+            return _picked(held, self.only)
+        return _dropped({k: held[k] for k in self.tops if k in held}, self.without)
+
+    def rest(self, doc: Mapping[str, Any]) -> dict[str, Any]:
+        """The mapping without the part of the form: what a check takes beside the candidate."""
+        held = self.mapping(doc)
+        if self.only:
+            return _dropped(held, self.only)
+        others = {k: v for k, v in held.items() if k not in self.tops}
+        return _merged(others, _picked(held, self.without))
 
     def leaves(self, data_dir: Path, candidate: Mapping[str, Any]) -> dict[KeyPath, Leaf]:
         """The fallback of each path that `candidate` lacks, a `derived` one too."""
@@ -226,7 +278,7 @@ class Form:
     ) -> list[Problem]:
         """What the model refuses of the mapping after the edits (`candidate` over what the file
         holds now), in an override of the assumptions that it merges into."""
-        whole = {k: v for k, v in self.mapping(doc).items() if k not in self.tops} | dict(candidate)
+        whole = _merged(self.rest(doc), candidate)
         if self.new is not None:  # the row it adds comes last
             rows = lookup(doc, self.keys)
             at = (*self.keys, len(rows) if isinstance(rows, list) else 0)

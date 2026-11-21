@@ -10,7 +10,7 @@ The forms, widgets and their Save: rule `forms`. The input file: `docs/manual/co
 The user guide: `docs/manual/assumptions.md`.
 
 - `src/dagobert/ui/assumptions.py`: the `Assumptions` page in the navigation section `Your plan`
-  (`/assumptions`) edits `assumptions.yaml` in five tabs (`TABS`), each one `forms.Form` of the top
+  (`/assumptions`) edits `assumptions.yaml` in six tabs (`TABS`), each one `forms.Form` of the top
   keys it shows (`Tab.tops`; `Tab.key` names its widgets, `Tab.title` is words): `Person` (`person`
   with the grid `Relatives you may inherit from` of `person.relatives`, then the `phases` grid, both
   `LabeledRows`: `name on the pages`, the label, first, an empty one shown as the name and a label
@@ -40,7 +40,14 @@ The user guide: `docs/manual/assumptions.md`.
   grid). Every field of `Assumptions` lies in one tab but `start` and `scale` (decision: scenario
   overrides only, which the explorer writes): a new field of the model joins a tab
   (`test_the_tabs_edit_every_assumption_but_start_and_scale`). Plain `st.tabs`: a closed tab keeps
-  its unsaved edits. The parts of the tabs do not overlap, so a save of one tab neither refuses nor
+  its unsaved edits. `Health insurance` (issue #51, before `Tax`; `Tab.only`, `INSURANCE`) picks
+  `tax.pkv`, `gkv_from`, `pkv_cap_from`, `kv_zusatz`, `person.kvdr` and
+  `tax.self_employed.krankengeld`; `Person` and `Tax` leave them out (`Tab.without`), and
+  `forms.Form.only` and `without` narrow the parts alike (rule `forms`). Its headings are
+  `PICKED` (`Your insurance`, `As a pensioner`, `With a business`: `AssumptionsForm.heading`), a
+  note names its hidden fields without the model (`Tab.named`), an empty `kv_zusatz` takes the
+  tax year of the file (`leaves`), and a link below the form goes to Cashflows, where the premiums
+  are (rule `cashflows`). The parts of the tabs do not overlap, so a save of one tab neither refuses nor
   drops the edits of another.
 - Each tab: the style of `tables.SAVE_IN_HEADER` first, `forms.show`, then `guard.review` with the
   sentence on the language of the browser only for a warning of a grid cell (`hint`: a text field

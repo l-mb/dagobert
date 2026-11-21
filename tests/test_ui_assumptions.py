@@ -16,7 +16,7 @@ from streamlit.testing.v1 import AppTest
 from streamlit.testing.v1.element_tree import Button
 
 from dagobert import datadir, i18n, references, revisions, store
-from dagobert.loader import flatten, load_assumptions
+from dagobert.loader import flatten, load_assumptions, read_yaml
 from dagobert.model.assumptions import Assumptions
 from dagobert.model.taxes import default_tax_year
 from dagobert.overrides import Leaf
@@ -164,7 +164,7 @@ def test_a_start_leaf_without_a_value_falls_back_to_the_start_of_the_file(
 ) -> None:
     """A merged `start` that holds None gives no year: the file's own start does."""
     monkeypatch.setattr(forms.Form, "leaves", lambda *_: {("start",): Leaf(None, "child")})
-    tax = next(t for t in assumptions_page.TABS if "tax" in t.tops)
+    tax = next(t for t in assumptions_page.TABS if t.key == "tax")
     found = tax.form().leaves(data, {})
     assert found[assumptions_page.TAX_YEAR].value == default_tax_year(load_assumptions(data).start)
 
@@ -330,17 +330,21 @@ def test_simple_mode_shows_the_fields_that_the_plan_uses(tmp_path: Path) -> None
     below the tabs of what is hidden. Advanced mode shows every field."""
     data = _starter(tmp_path)
     at = _page(data)
-    assert [t.label for t in at.tabs] == ["Person", "Markets", "Tax"]
+    assert [t.label for t in at.tabs] == ["Person", "Markets", "Health insurance", "Tax"]
     shown = _labels(at)
     held = [LABELS[p] for p in [("person", "rv_since"), ("inflation", "stdev"), ("indices",)]]
     hidden = [LABELS[p] for p in [("person", "horizon_age"), ("seed",), ("tax", "year")]]
     assert [label for label in held if label not in shown] == []
     assert [label for label in hidden if label in shown] == []
-    person, markets, tax, rules = _notes(at)
+    person, markets, insurance, tax, rules = _notes(at)
     assert person == (
-        "Hidden in simple mode (at their defaults): Plan up to age and Health insurance of "
-        "pensioners (KVdR). Switch to Advanced in the sidebar to change them. Off in Features: "
-        "children; inheritance and gifts. Turn them on there to use them."
+        "Hidden in simple mode (at their defaults): Plan up to age. Switch to Advanced in the "
+        "sidebar to change them. Off in Features: children; inheritance and gifts. Turn them on "
+        "there to use them."
+    )
+    assert insurance.startswith(
+        "Hidden in simple mode (at their defaults): Statutory health insurance from, PKV premium "
+        "capped from, Health fund extra rate, and Health insurance of pensioners (KVdR)."
     )
     assert "Off in Features: property, rental and loans." in markets
     assert "Off in Features: gold and crypto; self-employment; children." in tax
@@ -351,6 +355,7 @@ def test_simple_mode_shows_the_fields_that_the_plan_uses(tmp_path: Path) -> None
         "Markets",
         "Investing",
         "Spending and risks",
+        "Health insurance",
         "Tax",
     ]
     assert _notes(advanced) == []
@@ -414,7 +419,7 @@ def test_a_field_edited_in_advanced_mode_stays_in_simple_mode(tmp_path: Path, ra
         at.run()
     at.query_params["mode"] = "simple"
     at.run()
-    assert [t.label for t in at.tabs] == ["Person", "Markets", "Tax"]
+    assert [t.label for t in at.tabs] == ["Person", "Markets", "Health insurance", "Tax"]
     assert LABELS[("seed",)] in _labels(at)
     assert LABELS[("cash_buffer_months",)] not in _labels(at)
     _save(at, "markets").click().run()
@@ -451,3 +456,25 @@ def test_simple_mode_moves_a_column_that_no_class_holds_behind_all_columns(
     returns = next(d for d in at.dataframe if str(d.key).endswith("-returns"))
     assert ("equity_correlation" in returns.value.columns) == shown
     assert "stdev" in returns.value.columns  # every class of both holds one
+
+
+def test_the_tabs_that_share_a_top_key_hold_disjoint_parts_of_the_file() -> None:
+    """`Health insurance` picks fields out of `tax` and `person`: its part and those of `Tax` and
+    `Person` do not overlap, so a save of one neither refuses nor drops the edits of another, and
+    each checks its candidate beside all the rest of the file."""
+    doc = read_yaml(ENGINEER / "assumptions.yaml")
+    doc["tax"]["pkv"], doc["person"]["kvdr"] = True, False
+    forms_by_key = {tab.key: tab.form() for tab in assumptions_page.TABS}
+    insurance, taxes, person = (forms_by_key[k] for k in ("insurance", "tax", "person"))
+    assert insurance.part(doc) == {
+        "tax": {"pkv": doc["tax"]["pkv"]},
+        "person": {"kvdr": doc["person"]["kvdr"]},
+    }
+    assert "pkv" not in taxes.part(doc)["tax"]
+    assert "kvdr" not in person.part(doc)["person"]
+    assert taxes.part(doc)["tax"] | insurance.part(doc)["tax"] == doc["tax"]
+    for form in (insurance, taxes, person):
+        assert not form.problems(ENGINEER, doc, form.part(doc))  # the rest and the part: the file
+    changed = insurance.part(doc) | {"tax": {"pkv": False, "gkv_from": date(2030, 1, 1)}}
+    [problem] = insurance.problems(ENGINEER, doc, changed)
+    assert "gkv_from needs pkv" in problem.message

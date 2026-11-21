@@ -45,7 +45,7 @@ from dagobert.ui import (
     save,
     tables,
 )
-from dagobert.ui.fields import SYMBOL, Field, lookup, of
+from dagobert.ui.fields import ABSENT, SYMBOL, Field, lookup, of
 from dagobert.ui.fields import Kind as FieldKind
 from dagobert.ui.forms import Form, When, show
 from dagobert.ui.forms import save as save_tab
@@ -272,6 +272,12 @@ HELPS: dict[KeyPath, str] = {
         "start"
     ),
 }
+# the headings of the models in the tab `Health insurance`, which picks fields out of them
+PICKED: dict[KeyPath, str] = {
+    ("tax",): N_("Your insurance"),
+    ("person",): N_("As a pensioner"),
+    ("tax", "self_employed"): N_("With a business"),
+}
 # the words of the options of a choice
 CHOICES: dict[KeyPath, dict[object, str]] = {
     ("spending", "base"): {
@@ -324,6 +330,10 @@ class AssumptionsForm(Form):
     def leaves(self, data_dir: Path, candidate: Mapping[str, Any]) -> dict[KeyPath, Leaf]:
         found = super().leaves(data_dir, candidate)
         year = found.get(TAX_YEAR)
+        if year is None and not self.override and not any(f.path == TAX_YEAR for f in self.fields):
+            # a tab without the year (`Health insurance`) takes the one of the file
+            held = lookup(read_yaml(data_dir / FILE), TAX_YEAR)
+            year = None if held is ABSENT or held is None else Leaf(held, FILE)
         if year is None or year.value is None:
             start = found.get(("start",))
             if start is None or start.value is None:
@@ -339,6 +349,13 @@ class AssumptionsForm(Form):
             average = 2 * tax.for_year(year.value).kv_zusatz_half
             found[KV_ZUSATZ] = Leaf(average, _("tax year {year}").format(year=year.value))
         return found
+
+    def heading(self, parent: KeyPath) -> str:
+        """In a tab of picked fields (`only`) the heading by what they share there, not by the
+        model that holds them (`Tax` above the insurance)."""
+        if self.only and parent in PICKED:
+            return _(PICKED[parent])
+        return super().heading(parent)
 
     def _empty(self, found: Mapping[KeyPath, Leaf], path: KeyPath) -> bool:
         """The form shows `path`, and nothing gives it a value."""
@@ -390,10 +407,19 @@ class Tab:
     key: str
     title: str
     tops: tuple[str, ...]
+    only: tuple[KeyPath, ...] = ()  # the fields of its top keys that it holds: these alone
+    without: tuple[KeyPath, ...] = ()  # the fields of its top keys that another tab holds
 
     @property
     def fields(self) -> tuple[Field, ...]:
-        return tuple(f for top in self.tops for f in FIELDS if f.path[0] == top)
+        if self.only:
+            return tuple(f for path in self.only for f in FIELDS if f.path == path)
+        return tuple(
+            f
+            for top in self.tops
+            for f in FIELDS
+            if f.path[0] == top and f.path not in self.without
+        )
 
     def shown(
         self, *, override: bool, view: mode.View | None = None, kept: Collection[KeyPath] = ()
@@ -443,6 +469,8 @@ class Tab:
             when=WHEN,
             rows={(PHASES,): LabeledRows(), RELATIVES: LabeledRows()},
             parts=tuple(t for t in self.tops if not (override and t == PHASES)),
+            only=self.only,
+            without=self.without,
             hides={} if view is None else {f.path: c for f in shown if (c := _columns(f, view))},
         )
 
@@ -473,7 +501,8 @@ class Tab:
             return form.heading(path)
         name = form.label(field).removesuffix(f" {SYMBOL.get(field.unit)}")
         parent = path[:-1]
-        return name if parent in ((), (self.key,)) else f"{form.heading(parent)} · {name}"
+        own = self.only or parent in ((), (self.key,))  # a tab of picked fields names them alone
+        return name if own else f"{form.heading(parent)} · {name}"
 
 
 def _columns(field: Field, view: mode.View) -> frozenset[str]:
@@ -488,7 +517,16 @@ def _columns(field: Field, view: mode.View) -> frozenset[str]:
     )
 
 
-PERSON = Tab("person", N_("Person"), ("person", PHASES))
+# The health insurance of the person, out of `person` and `tax` (issue #51)
+INSURANCE: tuple[KeyPath, ...] = (
+    PKV,
+    GKV_FROM,
+    PKV_CAP,
+    KV_ZUSATZ,
+    ("person", "kvdr"),
+    ("tax", "self_employed", "krankengeld"),
+)
+PERSON = Tab("person", N_("Person"), ("person", PHASES), without=INSURANCE)
 TABS = (
     PERSON,
     Tab(
@@ -498,7 +536,8 @@ TABS = (
     ),
     Tab("investing", N_("Investing"), ("cash_buffer_months", "invest_rest", "allocation")),
     Tab("risks", N_("Spending and risks"), ("spending", "care", "disability")),
-    Tab("tax", N_("Tax"), ("tax",)),
+    Tab("insurance", N_("Health insurance"), ("tax", "person"), only=INSURANCE),
+    Tab("tax", N_("Tax"), ("tax",), without=INSURANCE),
 )
 
 
@@ -599,6 +638,8 @@ def _tab(here: Here, tab: Tab, form: Form) -> None:
     shown = show(data_dir, form, options=here.names)
     found = shown.changes()
     kept: list[str] = []
+    if tab.only:  # the insurance: its premiums are streams
+        page_link("Cashflows", _("The premiums are on Cashflows"))
     if tab is PERSON:
         held = bool(found or shown.typed.unread)
         relatives = references.relatives(data_dir)

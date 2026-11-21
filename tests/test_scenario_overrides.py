@@ -312,7 +312,7 @@ def test_simple_mode_shows_the_fields_that_a_scenario_or_the_plan_sets(plans: Pa
     at = _tab(plans, "child", mode="simple")
     assert not at.exception
     parts = [e.label for e in at.expander if not e.icon]
-    assert parts[:4] == ["Person", "Markets (1)", "Tax", "Scale"]
+    assert parts[:5] == ["Person", "Markets (1)", "Health insurance", "Tax", "Scale"]
     labels = {w.label for w in at.text_input}
     assert LABELS[("refinance_rate",)] in labels
     assert LABELS[("pension_growth",)] not in labels
@@ -333,6 +333,7 @@ def test_the_tab_renders_the_parts_and_pins_the_ids_on_a_phone(plans: Path, phon
         "Markets (1)",
         "Investing",
         "Spending and risks",
+        "Health insurance",
         "Tax",
         "Scale",
         "Dates",

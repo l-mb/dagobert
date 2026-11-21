@@ -32,17 +32,22 @@ The page has four tabs:
   and only your savings plans invest) and the allocation between equity and fixed income.
 - `Spending and risks`: the spending rule, the long-term care and the disability (the loss of
   the ability to work).
+- `Health insurance`: private health insurance (PKV) or statutory, the first month in the
+  statutory health insurance after the private one (`Statutory health insurance from`, empty for
+  the PKV in the whole run, `private insurance only` while the PKV is off, see [How the simulation
+  works](models.md#a-change-from-the-pkv-to-the-gkv)), the month from which the premium of the
+  private insurance has a cap (`PKV premium capped from`), the Zusatzbeitrag of your Krankenkasse
+  in the statutory health insurance (empty: the average of the year), the health insurance of
+  pensioners (KVdR), and the sick pay of a business in the statutory insurance. The premiums of a
+  private insurance are streams: a link goes to the tab `health insurance` of the
+  [Cashflows](cashflows.md) page.
 - `Tax`: the tax year, the capital income free of tax (the Sparer-Pauschbetrag), the share of the
   gains of an equity fund that is free of tax (the Teilfreistellung, `Fund gains tax-free`, the
   default of each depot without its own on the [Assets](assets.md) page), your work expenses of a
   year (the Werbungskosten, `Work expenses per year €`, as your tax notice lists them: they count
   when they are higher than the 1,230 € that the tax takes anyway), the switch `Realize gains each
   December within the tax-free room` (see [How the simulation works](models.md#realizing-gains)),
-  private health insurance (PKV), the first month in the statutory health insurance after the
-  private one (`Statutory health insurance from`, empty for the PKV in the whole run, `private
-  insurance only` while the PKV is off, see [How the simulation
-  works](models.md#a-change-from-the-pkv-to-the-gkv)), the Zusatzbeitrag of your Krankenkasse in the
-  statutory health insurance (empty: the average of the year), the church tax (`Church tax`) with the Land where you
+  the church tax (`Church tax`) with the Land where you
   live (`Bundesland`), and the first month in which a purchase of crypto counts as capital income
   (`Crypto taxed like shares from`), the losses of earlier years that your last tax notice
   carries forward (`Losses carried forward €`, the Verlustvortrag), whether a loss can go back into

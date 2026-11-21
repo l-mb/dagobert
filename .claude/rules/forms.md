@@ -153,7 +153,9 @@ The editors build their forms here; each page that uses them has its own rule. T
   the id of a phase change (rule `scenarios`). A `Shown` is not changed after `show`: a caller keeps
   Save off with `save(ready=False)`.
 - Save conflicts: a form keeps a `Base` per nonce in the session: the part that it showed first
-  (`Form.part`: the top keys of its fields, so two tabs of one file do not refuse each other; of an
+  (`Form.part`: the top keys of its fields, so two tabs of one file do not refuse each other;
+  narrowed by the key paths of `Form.only` or `without` where two tabs share a top key, and
+  `Form.rest` is the mapping without the part, which `problems` merges the candidate over; of an
   item of a list, so an insert before it is a change) and its `revisions.seen`, none for a new row.
   Each run checks it (`conflict`): a change on disk without edits starts a new generation; with
   edits a warning above the form names the time in the browser's time zone and the page of the

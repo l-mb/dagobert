@@ -307,8 +307,9 @@ Overview moves it) and `scale` (the overrides of a scenario).
     pay half of it on a salary and on the pension, and all of it on the other income that pays,
     such as a company pension or a profit.
   - `church` (default false): a member of a church that levies the church tax.
-  - `land` (a Land code such as `NW`, needed with `church`): `BW` and `BY` take 8% of the income
-    tax, the other Länder 9%.
+  - `land` (a Land code such as `NW`, needed with `church`): the Bundesland where you live. `BW`
+    and `BY` take 8% of the income tax as church tax, the other Länder 9%. A purchase of a
+    property that names no Land of its own takes its Grunderwerbsteuer from this Land.
   - `loss_carryforward` (default 0, at least 0): the Verlustvortrag of your last
     Feststellungsbescheid (§10d Abs. 4 EStG), in euros of `start`. These are losses of earlier
     years, for example of a let flat or a business. They offset the income of the first years
@@ -885,7 +886,9 @@ source can still change. Only the [Data](data.md) page (a fetch or an import) an
     - `price` (above 0): euros, nominal at the event date. The property is worth it on every path
       and grows from the month of the event. Its `bought_for` is the price with the tax and the
       costs.
-    - Exactly one of `land` and `transfer_tax`. `land` is the code of the Bundesland, `BW` to `TH`
+    - `land` or `transfer_tax`, not both. Without both, the purchase takes the Bundesland where
+      you live, `tax.land` of the assumptions, and a plan without it refuses the purchase. `land`
+      is the code of the Bundesland of the property, `BW` to `TH`
       (ISO 3166-2:DE without `DE-`): the Grunderwerbsteuer of that Land on the event date, from
       the dated table `src/dagobert/data/grunderwerbsteuer.yaml`. `transfer_tax` is a share
       instead, for example 0 for a purchase from a spouse, parents or children (§3 Nr. 4, 6

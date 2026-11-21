@@ -19,6 +19,7 @@ from dagobert.model.events import AddStreamEvent, BuyPropertyEvent, Event, Phase
 from dagobert.model.months import months_between
 from dagobert.model.plan import Scenario
 from dagobert.model.streams import Stream, StreamKind
+from dagobert.model.taxes import Land
 from dagobert.money import format_eur, format_percent
 from dagobert.report.charts import class_name
 from dagobert.returns import historical_draws, historical_replays, median_growth
@@ -535,7 +536,7 @@ def _event_knobs(scenario: Scenario, a: Assumptions, work: Sequence[goalseek.Dia
         for name_of in AMOUNT_FIELDS:
             values = [v for x in items if (v := getattr(x, name_of, None)) is not None]
             if values:
-                low = _least(items) if name_of == "price" else 0.0
+                low = _least(items, a.tax.land) if name_of == "price" else 0.0
                 out.append(
                     Knob(
                         EVENTS,
@@ -561,12 +562,12 @@ def _event_knobs(scenario: Scenario, a: Assumptions, work: Sequence[goalseek.Dia
     return out
 
 
-def _least(items: list[PhaseChange | Event]) -> float:
+def _least(items: list[PhaseChange | Event], home: Land | None) -> float:
     """The lowest price of the purchases among `items` that their loans allow (the model refuses
     a loan above the price with the Grunderwerbsteuer and the costs)."""
     return max(
         (
-            -e.loan.balance / (e.cost / e.price)
+            -e.loan.balance / (e.cost(home) / e.price)
             for e in items
             if isinstance(e, BuyPropertyEvent) and e.loan is not None
         ),

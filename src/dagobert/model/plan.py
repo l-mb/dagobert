@@ -783,6 +783,28 @@ class Plan(Strict):
         return self
 
     @model_validator(mode="after")
+    def _purchases_financed(self) -> Plan:
+        """A `buy_property` without `land` and `transfer_tax` takes the Bundesland of the
+        assumptions (`tax.land`): refused without one, and its loan against that cost. The error
+        is at the event."""
+        home, found = self.assumptions.tax.land, []
+        for i, e in enumerate(self.scenario.events):
+            if not isinstance(e, BuyPropertyEvent) or e.land or e.transfer_tax is not None:
+                continue
+            try:
+                e.financed(home)
+            except ValueError as err:
+                found.append(
+                    InitErrorDetails(
+                        type=PydanticCustomError("purchase", "{message}", {"message": str(err)}),
+                        loc=("scenario", "events", i, "land"),
+                        input=e.land,
+                    )
+                )
+        refuse_all(self, found)
+        return self
+
+    @model_validator(mode="after")
     def _prepaid_in_the_pkv(self) -> Plan:
         """A `prepay_health` lies in a month of the PKV. The error is at its month."""
         found = [

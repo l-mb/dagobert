@@ -126,8 +126,9 @@ sources, the tests).
   it `taxable` alone decides; `taxable` means "not own use" (S. 3: a home of its owner leaves it
   off). The basis less the AfA taken (Abs. 3 S. 4) and the penalty of a repayment: rule `rental`.
   Left out: a use that changes (BMF 2000-10-05, BStBl I S. 1383; BFH IX R 37/16). The
-  Grunderwerbsteuer (`model.taxes.transfer_tax_rate`, `BuyPropertyEvent.transfer_rate`): the rate of
-  `land` on the day of the purchase from `src/dagobert/data/grunderwerbsteuer.yaml` (per Land rows
+  Grunderwerbsteuer (`model.taxes.transfer_tax_rate`, `BuyPropertyEvent.transfer_rate(home)`): the
+  rate of `land`, without it and without `transfer_tax` of `tax.land`, the Bundesland of the person
+  (`home`; `Plan._purchases_financed` refuses a purchase with neither, #51), on the day of the purchase from `src/dagobert/data/grunderwerbsteuer.yaml` (per Land rows
   `since`, `rate`: 3.5% of §11 Abs. 1 GrEStG from 1997, then the Länder, Art. 105 Abs. 2a S. 2 GG;
   sources in its comments), not from the tax year: a Land changes it on any day. In `model/taxes.py`
   beside `TAX_YEARS`: the check of the loan needs it. `transfer_tax` replaces it (§3 Nr. 4, 6: 0

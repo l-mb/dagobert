@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from contextlib import AbstractContextManager, nullcontext
 from datetime import date
 
 import pytest
-from builders import PHASES, cash, started
+from builders import PHASES, cash, plan, started, zero_run
 from pydantic import BaseModel, ValidationError
 
 from dagobert.loader import adjust
@@ -383,8 +384,8 @@ LOAN = {"id": "home-loan", "balance": -300_000, "rate": 0.03, "annuity": 1500}
     ("change", "problem"),
     [
         ({}, None),
-        ({"transfer_tax": 0.0}, "needs exactly one of `land` and `transfer_tax`"),
-        ({"land": None}, "needs exactly one of `land` and `transfer_tax`"),
+        ({"transfer_tax": 0.0}, "takes one of `land` and `transfer_tax` only"),
+        ({"land": None}, None),  # the Bundesland of the plan: `Plan` checks it
         ({"land": None, "transfer_tax": 0.0, "loan": LOAN}, None),
         ({"loan": LOAN | {"balance": -315_001}}, "more than the price with tax and costs, 315.000"),
         ({"costs": 0.05, "loan": LOAN | {"balance": -330_000}}, None),
@@ -1015,3 +1016,22 @@ def test_one_relative_reads_as_a_list_of_one() -> None:
 )
 def test_vpw_rate_by_age(growth: float, age: float, rate: float) -> None:
     assert Vpw(growth=growth).rate_at(age) == pytest.approx(rate, abs=5e-5)
+
+
+def test_a_purchase_without_a_land_takes_the_bundesland_of_the_plan() -> None:
+    """`tax.land`, where the person lives, is the Land of a purchase that names none: the same
+    run as with it named; without either the plan refuses the purchase, and its loan counts
+    against the cost at that rate."""
+    bare = {k: v for k, v in PURCHASE.items() if k != "land"}
+
+    def bought(purchase: Mapping[str, object], **tax: object) -> Plan:
+        scenario = Scenario.model_validate({"name": "s", "events": [purchase]})
+        return plan([], [cash(500_000)], scenario, tax=tax)
+
+    named, home = bought(PURCHASE), bought(bare, land="NI")
+    assert zero_run(home, 36).liquid[0].tolist() == zero_run(named, 36).liquid[0].tolist()
+    assert zero_run(bought(bare, land="BY"), 36).liquid[0, -1] > zero_run(home, 36).liquid[0, -1]
+    with pytest.raises(ValueError, match=r"needs `land`, `transfer_tax` or the Bundesland"):
+        bought(bare)
+    with pytest.raises(ValueError, match=r"more than the price with tax and costs, 315\.000"):
+        bought(bare | {"loan": LOAN | {"balance": -315_001}}, land="NI")

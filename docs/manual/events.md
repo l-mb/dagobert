@@ -63,8 +63,9 @@ columns of a stream, as on the [Cashflows](cashflows.md) page. For a savings pla
 The table of `Buy a property` shows the month, the name of the property, the price, the
 `Bundesland` and the `loan amount`. The other columns of the property and of its loan, such as the
 ids and the rate, show when you switch on `All columns`. The loan amount shows without a minus: it
-is the amount that you borrow. The file keeps it below zero. Fill in either `Bundesland` or,
-behind `All columns`, `or transfer tax`. `Bundesland` shows the name of the Land, such as `Lower
+is the amount that you borrow. The file keeps it below zero. Fill in `Bundesland` or,
+behind `All columns`, `or transfer tax`, not both. With both empty, the purchase takes the
+Bundesland of the [Assumptions](assumptions.md) page (tab `Tax`). `Bundesland` shows the name of the Land, such as `Lower
 Saxony`, and the file keeps its code, `NI`. A new
 row makes the `property id` and the `loan id` from the names, as the form does. After the save, the
 ids stay: sales and repayments name them. To change one, press `Rename` beside `All columns`: it
@@ -74,7 +75,8 @@ fields.
 In the form `Add an event` of a purchase, you can leave the ids empty. The form then makes them
 from the names: `Own flat` gives `own-flat`, and the loan takes the name of its own, else
 `own-flat-loan`. An id that your files hold already gets a number, such as `own-flat-2`. Type the
-loan amount without a minus. Fill in one of `Bundesland` and `Transfer tax`, not both.
+loan amount without a minus. Fill in `Bundesland` or `Transfer tax`, not both. With both empty, the
+purchase takes the Bundesland of the Assumptions page.
 
 ## Inheritances and gifts
 

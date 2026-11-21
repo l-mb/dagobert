@@ -80,8 +80,8 @@ user guide of the tab: `docs/manual/events.md`.
   property id of its name (`ui.slug`, numbered where the inputs hold it: `own-flat-2`, `made`) and
   an empty loan id of the loan's name, else of the property (`own-flat-loan`); it takes the loan
   amount without a minus (`Form.negative`, `LOAN_BALANCE`), has helps in words (`HELPS`: no file
-  words), the model's either-or of `land` and `transfer_tax` in plain words (`PLAIN`) and that rule
-  as a caption above it (`EITHER`, of `CAPTIONS`, which also says that an inheritance without a
+  words), the model's refusal of both `land` and `transfer_tax` in plain words (`PLAIN`) and the rule
+  (one of them, or neither: the Bundesland of the plan, `tax.land`, issue #51) as a caption above it (`EITHER`, of `CAPTIONS`, which also says that an inheritance without a
   month falls at the death and that a gift joins such an estate). An inheritance and a gift: `from`,
   `cash`, the section `equity` (`Securities`: `value`, `cost_basis`), headed `relatives`, `cash`,
   `securities`, `their cost basis` (rule `estates`). `table` names a column by the key of the file

@@ -227,7 +227,7 @@ class BuyPropertyEvent(DatedEvent):
     land: Land | None = Field(
         default=None,
         description="The Bundesland of the property: its rate of the Grunderwerbsteuer at the "
-        "event date",
+        "event date. Empty: the Bundesland where you live, `tax.land` of the assumptions",
     )
     transfer_tax: Percent | None = Field(
         default=None,
@@ -249,15 +249,18 @@ class BuyPropertyEvent(DatedEvent):
     def detail(self) -> str:
         return self.note or self.property.label
 
-    @builtins.property
-    def transfer_rate(self) -> float:
-        """The Grunderwerbsteuer as a share of the price."""
+    def transfer_rate(self, home: Land | None) -> float:
+        """The Grunderwerbsteuer as a share of the price: `transfer_tax`, else the rate of `land`,
+        else of `home`, the Bundesland of the person (`tax.land`)."""
         if self.transfer_tax is not None:
             return self.transfer_tax
-        if self.land is None:
-            msg = f"buy_property {self.property.id}: needs `land`"
+        if (land := self.land or home) is None:
+            msg = (
+                f"buy_property {self.property.id}: needs `land`, `transfer_tax` or the Bundesland "
+                "of the assumptions (`tax.land`)"
+            )
             raise ValueError(msg)
-        return transfer_tax_rate(self.land, self.at)
+        return transfer_tax_rate(land, self.at)
 
     @builtins.property
     def ids(self) -> list[tuple[tuple[str, ...], str]]:
@@ -265,24 +268,28 @@ class BuyPropertyEvent(DatedEvent):
         loan = [(("loan", "id"), self.loan.id)] if self.loan else []
         return [(("property", "id"), self.property.id), *loan]
 
-    @builtins.property
-    def cost(self) -> float:
+    def cost(self, home: Land | None) -> float:
         """What the purchase costs with the Grunderwerbsteuer and the other costs, in euros."""
-        return self.price * (1 + self.transfer_rate + self.costs)
+        return self.price * (1 + self.transfer_rate(home) + self.costs)
 
     @model_validator(mode="after")
     def _fits(self) -> BuyPropertyEvent:
-        if not exactly_one(self.land is not None, self.transfer_tax is not None):
-            msg = f"buy_property {self.property.id}: needs exactly one of `land` and `transfer_tax`"
+        if self.land is not None and self.transfer_tax is not None:
+            msg = f"buy_property {self.property.id}: takes one of `land` and `transfer_tax` only"
             raise ValueError(msg)
-        cost = self.cost  # the Land has a rate in the month
+        if self.land is not None or self.transfer_tax is not None:
+            self.financed(None)  # with neither the plan checks it, by its Bundesland
+        return self
+
+    def financed(self, home: Land | None) -> None:
+        """Refuses a loan above what the purchase costs; the Land has a rate in the month."""
+        cost = self.cost(home)
         if self.loan is not None and -self.loan.balance > cost:
             msg = (
                 f"buy_property {self.property.id}: the loan of {format_eur(-self.loan.balance)} is "
                 f"more than the price with tax and costs, {format_eur(cost)}"
             )
             raise ValueError(msg)
-        return self
 
 
 class RepayEvent(DatedEvent):

@@ -263,8 +263,8 @@ class TaxOptions(Strict):
     )
     land: Land | None = Field(
         default=None,
-        description="The Land where you live: it sets the rate of the church tax. Needed with "
-        "`church`",
+        description="The Land where you live: it sets the rate of the church tax, and the "
+        "Grunderwerbsteuer of a purchase that names no Land of its own. Needed with `church`",
     )
     crypto_capital_from: Month | None = Field(
         default=None,

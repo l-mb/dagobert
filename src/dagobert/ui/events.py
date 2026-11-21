@@ -155,13 +155,14 @@ HELPS: dict[KeyPath, str] = {
 }
 # a check of the model in the words of the form, by the end of its message
 PLAIN = {
-    "needs exactly one of `land` and `transfer_tax`": N_(
-        "Choose a Bundesland or type a transfer tax, one of the two."
+    "takes one of `land` and `transfer_tax` only": N_(
+        "Choose a Bundesland or type a transfer tax, not both."
     )
 }
 EITHER = N_(  # above the form of a purchase: the model takes one of the two
-    "Fill in one of Bundesland and Transfer tax: the Bundesland sets the Grunderwerbsteuer of the "
-    "month, or type the rate, such as 0 for a purchase from a spouse, parents or children."
+    "The Bundesland sets the Grunderwerbsteuer of the month; empty, it is the Bundesland of the "
+    "Assumptions page. Or type the rate as Transfer tax, such as 0 for a purchase from a spouse, "
+    "parents or children."
 )
 # above the form of a type: what its fields take that the model leaves to the reader
 CAPTIONS = {

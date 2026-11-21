@@ -28,6 +28,7 @@ from dagobert.model.events import BuyPropertyEvent, Event
 from dagobert.model.months import add_months, months_between
 from dagobert.model.plan import Plan, Scenario
 from dagobert.model.streams import StreamKind
+from dagobert.model.taxes import Land
 from dagobert.money import format_eur, format_number, format_percent
 from dagobert.report.tracker import history_figure
 from dagobert.result import RunResult
@@ -285,26 +286,30 @@ def _plan_changes(data_dir: Path, scenario: str, plan: Plan, day: date) -> list[
         for c in changes
         if c.when is not None and months_between(day, c.when) <= PLAN_MONTHS
     ] + [
-        Notice(e.at, e.property.label, _purchase(e), fix=placed(chain, e))
+        Notice(
+            e.at, e.property.label, _purchase(e, plan.assumptions.tax.land), fix=placed(chain, e)
+        )
         for e in plan.bought
         if e.at is not None and e.at > day and months_between(day, e.at) <= PLAN_MONTHS
     ]
 
 
-def _purchase(ev: BuyPropertyEvent) -> str:
-    """What a purchase takes from the cash and the liquid assets, nominal at its date."""
+def _purchase(ev: BuyPropertyEvent, home: Land | None) -> str:
+    """What a purchase takes from the cash and the liquid assets, nominal at its date; `home`
+    the Bundesland of the plan, which a purchase without one takes."""
+    cost = ev.cost(home)
     if ev.loan is None:
         return _(
             "bought for {price}, {cost} with the transfer tax and the costs from cash and liquid "
             "assets"
-        ).format(price=format_eur(ev.price), cost=format_eur(ev.cost))
+        ).format(price=format_eur(ev.price), cost=format_eur(cost))
     return _(
         "bought for {price}, {cost} with the transfer tax and the costs: {paid} from cash and "
         "liquid assets"
     ).format(
         price=format_eur(ev.price),
-        cost=format_eur(ev.cost),
-        paid=format_eur(ev.cost + ev.loan.balance),
+        cost=format_eur(cost),
+        paid=format_eur(cost + ev.loan.balance),
     )
 
 

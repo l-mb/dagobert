@@ -274,7 +274,8 @@ class Events(Income, Portfolio):
         """The price, the Grunderwerbsteuer and the costs from cash, the loan into it. The
         property is worth the price on every path, its basis for §23 EStG is all it cost."""
         bought, at = ev.property, ev.at
-        transfer_tax, costs = ev.price * ev.transfer_rate, ev.price * ev.costs
+        cost = ev.cost(self.a.tax.land)
+        transfer_tax, costs = ev.price * ev.transfer_rate(self.a.tax.land), ev.price * ev.costs
         spec = PropertyAsset(  # one m² at the price
             kind="property",
             id=bought.id,
@@ -282,7 +283,7 @@ class Events(Income, Portfolio):
             tags=bought.tags,
             sqm=1,
             per_sqm=ev.price,
-            bought_for=ev.cost,
+            bought_for=cost,
             growth=bought.growth,
             upkeep=bought.upkeep,
             bought=at,
@@ -290,7 +291,7 @@ class Events(Income, Portfolio):
             afa=bought.afa,
         )
         self.properties[bought.id] = self._property(spec, np.full(self.paths, ev.price))
-        self.cash -= ev.cost
+        self.cash -= cost
         self.flows.taxes -= transfer_tax
         self.flows.expenses -= costs
         self._note_move(PURCHASE, spec.label, ev.price)

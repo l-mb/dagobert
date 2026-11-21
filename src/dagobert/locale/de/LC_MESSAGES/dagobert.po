@@ -2601,10 +2601,12 @@ msgstr "Kirchensteuer"
 
 #: model/assumptions.py model/plan.py model/taxes.py
 msgid ""
-"The Land where you live: it sets the rate of the church tax. Needed with "
-"`church`"
+"The Land where you live: it sets the rate of the church tax, and the "
+"Grunderwerbsteuer of a purchase that names no Land of its own. Needed "
+"with `church`"
 msgstr ""
-"Das Bundesland, in dem du wohnst: es bestimmt den Satz der Kirchensteuer."
+"Das Bundesland, in dem du wohnst: Es bestimmt den Satz der Kirchensteuer "
+"und die Grunderwerbsteuer eines Kaufs, der kein eigenes Bundesland nennt."
 " Nötig mit `church`"
 
 #: model/assumptions.py model/plan.py model/taxes.py
@@ -3167,10 +3169,12 @@ msgstr "Zinsbindung (Monate)"
 #: model/events.py model/plan.py
 msgid ""
 "The Bundesland of the property: its rate of the Grunderwerbsteuer at the "
-"event date"
+"event date. Empty: the Bundesland where you live, `tax.land` of the "
+"assumptions"
 msgstr ""
 "Das Bundesland der Immobilie: sein Satz der Grunderwerbsteuer zum Datum "
-"des Ereignisses"
+"des Ereignisses. Leer: das Bundesland, in dem du wohnst, `tax.land` der "
+"Annahmen"
 
 #: model/events.py model/plan.py
 msgid ""
@@ -8081,18 +8085,18 @@ msgstr ""
 "speichert eine Schuld als negativen Betrag."
 
 #: ui/events.py
-msgid "Choose a Bundesland or type a transfer tax, one of the two."
-msgstr "Wähle ein Bundesland oder gib eine Grunderwerbsteuer ein, eins von beiden."
+msgid "Choose a Bundesland or type a transfer tax, not both."
+msgstr "Wähle ein Bundesland oder gib eine Grunderwerbsteuer ein, nicht beides."
 
 #: ui/events.py
 msgid ""
-"Fill in one of Bundesland and Transfer tax: the Bundesland sets the "
-"Grunderwerbsteuer of the month, or type the rate, such as 0 for a "
-"purchase from a spouse, parents or children."
+"The Bundesland sets the Grunderwerbsteuer of the month; empty, it is the "
+"Bundesland of the Assumptions page. Or type the rate as Transfer tax, "
+"such as 0 for a purchase from a spouse, parents or children."
 msgstr ""
-"Fülle entweder Bundesland oder Grunderwerbsteuer aus: Das Bundesland legt"
-" die Grunderwerbsteuer des Monats fest, oder gib den Satz ein, etwa 0 für"
-" einen Kauf vom Ehepartner, von Eltern oder Kindern."
+"Das Bundesland bestimmt die Grunderwerbsteuer des Monats; leer gilt das "
+"Bundesland der Seite Annahmen. Oder gib den Satz als Grunderwerbsteuer "
+"ein, etwa 0 für einen Kauf vom Ehepartner, von den Eltern oder Kindern."
 
 #: ui/events.py
 msgid ""

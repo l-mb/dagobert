@@ -253,7 +253,7 @@ def test_a_purchase_borrows_what_the_own_funds_leave(quick: Path, own: float | N
     written(quick, step)
     plan = load_plan(quick, quick / "scenarios" / "home.yaml")
     bought = next(e for e in plan.scenario.events if isinstance(e, BuyPropertyEvent))
-    assert bought.cost == pytest.approx(step.cost)
+    assert bought.cost(None) == pytest.approx(step.cost)
     assert (bought.loan is not None) == bool(own)
     if bought.loan is not None:
         assert -bought.loan.balance == pytest.approx(cost - step.own)

@@ -114,11 +114,13 @@ Overview moves it) and `scale` (the overrides of a scenario).
   (`rollforward`). A stream paid every n months without `start` pays in the start month, so the
   roll writes the old start into it and its payment months stay.
 - `phases` (required, at least one): the phases of life that the scenarios switch between, as
-  `{<name>: {label: <text>}}`, in the order of the columns of the Cashflows sheet and of the colors
+  `{<name>: {label: <text>, growth: <rate>}}`, in the order of the columns of the Cashflows sheet and of the colors
   of the phase bands. The name is what the files write: small letters, digits, `-` and `_`, a letter
   first, at most 24 characters, and no word that YAML reads as yes, no or null (`on`, `off`,
   `null`). `label` (default: the name) names the phase on the pages, also with capitals and umlauts
-  (`Teilzeit`). Two phases cannot show alike. A new plan starts with `work: {label: Work}`,
+  (`Teilzeit`). `growth` (default 0) is the yearly raise of the salary and the profit in the
+  phase, on top of the index of their streams: see `scale.growth` below, which sets another one
+  in a scenario. Two phases cannot show alike. A new plan starts with `work: {label: Work}`,
   `unemployed: {label: Unemployed}`, `alt: {label: Career break}` and `retired: {label: Retired}`.
   The full example adds `new-job: {label: New job}` and `freelance: {label: Freelance}`. Schema 2
   named the four phases in the code, and the migration to schema 3 writes them after `start`. A
@@ -241,8 +243,8 @@ Overview moves it) and `scale` (the overrides of a scenario).
   it. A name without such a stream is rejected, and the sliders of the Explorer leave out a plan
   that a chosen scenario lacks. `salary` as `{<phase>: factor}` acts on every salary payment and
   every profit of a business in a phase of `phases`, also of streams that a scenario adds. A derived
-  stream (`of`) scales once. `growth` as `{<phase>: rate}` (a rate per year, default 0, also below
-  0) acts on the same payments, on top of their `index` and of `salary`. Over the default index,
+  stream (`of`) scales once. `growth` as `{<phase>: rate}` (a rate per year, also below 0; the
+  default is `growth` of the phase in `phases`, 0 without it) acts on the same payments, on top of their `index` and of `salary`. Over the default index,
   the consumer prices, it is the real growth. It adds one step each January: the first January
   after the phase starts is the first step, and a phase that starts before `start` counts from
   `start`. If the phase comes back later, it starts again at the amounts of its streams. A derived

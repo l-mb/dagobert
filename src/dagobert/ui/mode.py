@@ -123,6 +123,7 @@ EXPERT = _items(
     "refinance_rate",
     "pension_growth",
     "scale.growth",
+    "phases.*.growth",
     "cash_buffer_months",
     "invest_rest",
     "seed",

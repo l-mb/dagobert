@@ -6,11 +6,11 @@ from datetime import date
 
 import numpy as np
 import pytest
-from builders import cash, levels, phases, plan, zero_returns, zero_run
+from builders import PHASES, cash, levels, phases, plan, zero_returns, zero_run
 
 from dagobert.engine.simulation import horizon_months, simulate
 from dagobert.model.assets import AvDepot, PensionPolicy, PropertyAsset
-from dagobert.model.assumptions import Child, Person
+from dagobert.model.assumptions import Child, Person, PhaseSpec
 from dagobert.model.events import (
     Event,
     FundPolicyEvent,
@@ -74,6 +74,16 @@ def test_the_growth_of_a_phase_steps_each_january_from_each_of_its_starts(pay: S
     steps[12:24], steps[24:26], steps[48:] = 1.1, 1.21, 1.1  # 2027, 2028-01 to 02, 2030
     np.testing.assert_array_equal(run({"work": 0.0}).income[0], base)
     assert run({"work": 0.1}).income[0] == pytest.approx(base + 4000 * (steps - 1))
+    # the raises of the phase itself (`phases.work.growth`) do the same, and `scale` wins over them
+    grown = PHASES | {"work": PhaseSpec(label="Work", growth=0.1)}
+
+    def of_the_phase(**scale: object) -> FloatArray:
+        raised = plan([pay, other], [cash()], scenario, phases=grown, scale=scale)
+        income: FloatArray = zero_run(raised, 60).income[0]
+        return income
+
+    np.testing.assert_array_equal(of_the_phase(), run({"work": 0.1}).income[0])
+    np.testing.assert_array_equal(of_the_phase(growth={"work": 0.0}), base)
 
 
 def test_the_growth_stacks_on_the_index_and_the_scale_and_alg1_takes_the_grown_salary() -> None:

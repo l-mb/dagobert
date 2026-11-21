@@ -44,6 +44,7 @@ from dagobert.ui import (
     tables,
 )
 from dagobert.ui.assumptions import TABS, AssumptionsForm, Tab
+from dagobert.ui.fields import ABSENT, lookup
 from dagobert.ui.gridcolumns import number
 from dagobert.ui.overridegrids import KEY, OWN, Grids, Here, doc
 from dagobert.ui.tables import save_in_header
@@ -119,8 +120,15 @@ class ScaleForm(AssumptionsForm):
                 else Leaf(gross, STREAMS)
                 for phase, gross in self.gross.items()
             }
-            | dict.fromkeys(growth, Leaf(0.0, DEFAULT))
+            | {path: self._raises(data_dir, path[-1]) for path in growth}
         )
+
+    @staticmethod
+    def _raises(data_dir: Path, phase: object) -> Leaf:
+        """The growth of a phase without an override: the one of the phase, else 0."""
+        phases = loader.read_yaml(data_dir / ASSUMPTIONS).get("phases")
+        held = lookup(phases if isinstance(phases, Mapping) else {}, (str(phase), "growth"))
+        return Leaf(0.0, DEFAULT) if held in (ABSENT, None) else Leaf(held, ASSUMPTIONS)
 
     def problems(
         self, data_dir: Path, doc: Mapping[str, Any], candidate: Mapping[str, Any]

@@ -91,8 +91,9 @@ the start. `pension_growth` adds a real growth on top of that. So a path with hi
 the buying power of the pension.
 
 A salary and the profit of a business follow the index of their stream in the same way.
-`scale.growth` adds a real growth for each phase on top of that, for example 2% a year in a job
-with raises and 0% in a job without them. The first step comes in the first January after the
+The `raises per year` of a phase (`growth` of the phase, on the Assumptions page) add a real growth
+on top of that, for example 2% a year in a job with raises and 0% in a job without them. A scenario
+or a slider of the Explorer sets another growth for the phase (`scale.growth`). The first step comes in the first January after the
 phase starts. If the phase comes back later, it starts again at the amounts in `cashflows.yaml`. A
 bonus follows its salary, and the unemployment benefit after the phase takes the last salary with
 its growth. A pension and other income do not take it.

@@ -541,7 +541,7 @@ class Core:
         the growth of the phase (`scale.growth`), stepped each January from the start of its
         stretch (`MonthState.since`)."""
         m = self.m
-        growth = (1 + self.a.scale.growth.get(m.phase, 0.0)) ** (m.month.year - m.since.year)
+        growth = (1 + self.a.raises(m.phase)) ** (m.month.year - m.since.year)
         return s.earned_scale(m.phase, self.a) * growth
 
     def _change_law(self) -> None:

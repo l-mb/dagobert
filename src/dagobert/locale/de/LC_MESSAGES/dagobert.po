@@ -2165,6 +2165,20 @@ msgstr ""
 " break`. Leer: ihr Name"
 
 #: model/assumptions.py model/plan.py
+msgid ""
+"Raises: the growth per year of the salary and the profit of a business in"
+" the phase, on top of the index of their streams, so over the consumer "
+"prices the real growth. It steps each January from the start of the "
+"phase. A scenario or a slider of the Explorer sets another one "
+"(`scale.growth`)"
+msgstr ""
+"Gehaltssteigerung: die Steigerung pro Jahr von Gehalt und Gewinn eines "
+"Betriebs in der Phase, zusätzlich zum Index ihrer Zahlungen, über den "
+"Verbraucherpreisen also die reale Steigerung. Sie wirkt jeden Januar ab "
+"Beginn der Phase. Ein Szenario oder ein Regler des Explorers setzt eine "
+"andere (`scale.growth`)"
+
+#: model/assumptions.py model/plan.py
 msgctxt "key"
 msgid "person"
 msgstr "Person"
@@ -5933,6 +5947,10 @@ msgstr "Verwandtschaft"
 #: ui/assumptions.py
 msgid "Phases of life"
 msgstr "Lebensphasen"
+
+#: ui/assumptions.py
+msgid "raises per year"
+msgstr "Gehaltssteigerung pro Jahr"
 
 #: ui/assumptions.py
 msgid "Average per year %"

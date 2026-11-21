@@ -736,6 +736,14 @@ class PhaseSpec(Strict):
         description="How the pages name the phase, with capitals and umlauts: `Career break`. "
         "Empty: its name",
     )
+    growth: Percent = Field(
+        default=0.0,
+        gt=-1,
+        description="Raises: the growth per year of the salary and the profit of a business in "
+        "the phase, on top of the index of their streams, so over the consumer prices the real "
+        "growth. It steps each January from the start of the phase. A scenario or a slider of "
+        "the Explorer sets another one (`scale.growth`)",
+    )
 
 
 UNKNOWN_PHASE: LiteralString = (
@@ -837,6 +845,11 @@ class Assumptions(Strict):
         """`tax.year`, else `default_tax_year` of `start`: the engine applies the constants in
         euros of the start."""
         return self.tax.year or default_tax_year(self.start)
+
+    def raises(self, phase: str) -> float:
+        """The growth per year of the pay of `phase`: `scale.growth` of a scenario or a slider,
+        else the one of the phase."""
+        return self.scale.growth.get(phase, self.phases[phase].growth)
 
     @property
     def phase_labels(self) -> dict[str, str]:

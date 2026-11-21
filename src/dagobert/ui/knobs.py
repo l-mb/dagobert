@@ -444,7 +444,7 @@ def _growth_knob(a: Assumptions, phase: str, label: str) -> Knob:
         SALARY,
         _("Raises in {phase}").format(phase=label),
         ("scale", "growth", phase),
-        a.scale.growth.get(phase, 0.0),
+        a.raises(phase),
         RAISES,
         _(
             "Growth per year of the salary and the profit of a business in the phase `{phase}`, "

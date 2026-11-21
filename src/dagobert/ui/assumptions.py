@@ -97,6 +97,7 @@ LABELS: dict[KeyPath, str] = {
     (PHASES,): N_("Phases of life"),
     (PHASES, "name"): N_("short name in the files"),
     (PHASES, "label"): N_("name on the pages"),
+    (PHASES, "growth"): N_("raises per year"),
     ("inflation", "mean"): N_("Average per year %"),
     ("inflation", "stdev"): N_("Volatility %"),
     ("inflation", "persistence"): N_("Persistence from year to year"),

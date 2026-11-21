@@ -8,6 +8,12 @@ paths:
 
 # Growth of the pay of a phase
 
+`phases.<name>.growth` (`PhaseSpec.growth`, issue #51, owner 2026-11-21: the raises belong to the
+phase and show on the Assumptions page, column `raises per year` of `Phases of life`,
+`mode.EXPERT`) is the base; `scale.growth` of a scenario or a slider replaces it per phase
+(`Assumptions.raises`, which the engine and the slider read; the Overrides tab names it as the
+fallback, `ScaleForm._raises`). The rest of this rule holds for both.
+
 `scale.growth` (issue #11, owner 2026-10-16): a real growth per year of the salary and the profit of
 a phase on top of the index of their streams and of `scale.salary`, so two jobs grow apart without
 a second index. No migration: a plan that gives a phase an index of its own keeps working. The rest

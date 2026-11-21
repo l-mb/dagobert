@@ -829,6 +829,7 @@ def _streams(file: RowFile, day: date, plan: Plan) -> None:
         ),
         _("How to edit the streams"),
     )
+    page_link("Assumptions", _("Indices, pension growth and the insurance: Assumptions"))
     insured = view.shows(mode.Item(mode.Sort.STREAM, (StreamKind.BU.value,))) or unsaved(BU)
     private = plan.assumptions.tax.pkv or unsaved(HEALTH) or any(s.health for s in plan.streams)
     tabs = (

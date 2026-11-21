@@ -640,6 +640,8 @@ def _tab(here: Here, tab: Tab, form: Form) -> None:
     kept: list[str] = []
     if tab.only:  # the insurance: its premiums are streams
         page_link("Cashflows", _("The premiums are on Cashflows"))
+    if tab is PERSON:  # the phases are named here, their months are of a scenario
+        page_link("Scenarios", _("When a phase begins: Scenarios"))
     if tab is PERSON:
         held = bool(found or shown.typed.unread)
         relatives = references.relatives(data_dir)

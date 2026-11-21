@@ -47,7 +47,8 @@ The user guide: `docs/manual/assumptions.md`.
   `PICKED` (`Your insurance`, `As a pensioner`, `With a business`: `AssumptionsForm.heading`), a
   note names its hidden fields without the model (`Tab.named`), an empty `kv_zusatz` takes the
   tax year of the file (`leaves`), and a link below the form goes to Cashflows, where the premiums
-  are (rule `cashflows`). The parts of the tabs do not overlap, so a save of one tab neither refuses nor
+  are (rule `cashflows`); `Person` links to Scenarios, where the months of the phases are, and
+  the streams of Cashflows link back here (`ui.page_link`). The parts of the tabs do not overlap, so a save of one tab neither refuses nor
   drops the edits of another.
 - Each tab: the style of `tables.SAVE_IN_HEADER` first, `forms.show`, then `guard.review` with the
   sentence on the language of the browser only for a warning of a grid cell (`hint`: a text field

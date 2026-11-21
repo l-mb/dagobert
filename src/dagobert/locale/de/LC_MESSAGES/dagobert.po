@@ -6506,6 +6506,10 @@ msgid "The premiums are on Cashflows"
 msgstr "Die Beiträge stehen auf Cashflows"
 
 #: ui/assumptions.py
+msgid "When a phase begins: Scenarios"
+msgstr "Wann eine Phase beginnt: Szenarien"
+
+#: ui/assumptions.py
 msgid "Rename a relative"
 msgstr "Angehörigen umbenennen"
 
@@ -7227,6 +7231,10 @@ msgstr ""
 #: ui/cashflows.py
 msgid "How to edit the streams"
 msgstr "So bearbeitest du die Zahlungen"
+
+#: ui/cashflows.py
+msgid "Indices, pension growth and the insurance: Assumptions"
+msgstr "Indizes, Rentensteigerung und Versicherung: Annahmen"
 
 #: ui/cashflows.py
 msgid "savings"

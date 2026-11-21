@@ -95,7 +95,7 @@ an asset, `closed` and `opened` in the records and the tiles: rule `closing`.
   once per drawing: on a phone it lay out of view.
 - Editable tables (`grid` `assets`: rule `grids`), a tab per asset kind that `mode.View` shows, a
   link opens or whose grid holds edits (`View.note` names the rest), in words (`summary.KINDS`:
-  `pension policy`, `pension depot`; the id of a saved asset stays, `Rename` beside it, `growth`,
+  `bAV policy`, `pension depot`; the id of a saved asset stays, `Rename` beside it, `growth`,
   `tags` and the `salary` of a bAV conversion and the `finances` of a loan are selects; readable
   headers, `assets.titles`: `TITLES` such as `ID`, `as of`, `check every (months)`, a key with an
   underscore with spaces, else the key; `bought`, `building_share` and `afa` of a property (rule

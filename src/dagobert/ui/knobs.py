@@ -218,7 +218,7 @@ def _holding_knobs(name: str, d: ReturnClass, *, crypto: bool) -> list[Knob]:
         ),
         Knob(
             GOLD_CRYPTO,
-            _("{name} spread").format(name=label),
+            _("{name} volatility").format(name=label),
             ("returns", name, "stdev"),
             d.stdev,
             CRYPTO_SPREAD if crypto else SPREAD,
@@ -304,7 +304,7 @@ def _market_knobs(a: Assumptions, held: Mapping[str, bool], costs: Sequence[Knob
         equity,
         Knob(
             MARKETS,
-            _("{name} spread").format(name=class_name("equity")),
+            _("{name} volatility").format(name=class_name("equity")),
             ("returns", "equity", "stdev"),
             a.returns["equity"].stdev,
             SPREAD,
@@ -847,7 +847,7 @@ def _spread_knobs(a: Assumptions, held: Mapping[str, bool]) -> list[Knob]:
     return [
         Knob(
             SPREADS,
-            _("{name} spread").format(name=name),
+            _("{name} volatility").format(name=name),
             (*path, "stdev"),
             d.stdev,
             SPREAD,

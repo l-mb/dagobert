@@ -156,7 +156,7 @@ GROUPS = {
     SPENDING: N_("Spending rule"),
     CARE: N_("Care"),
     ALLOCATION: N_("Allocation"),
-    SPREADS: N_("Spread per year (Monte Carlo)"),
+    SPREADS: N_("Volatility per year (Monte Carlo)"),
     TAXES: N_("Taxes"),
 }
 MODELS: tuple[ModelName, ...] = get_args(ModelName)

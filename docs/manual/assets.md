@@ -37,7 +37,7 @@ off moves its columns there in both modes, for example `Basisrente`. See
   simulation pays it off by itself. Do not add the loan payments as an expense. `financed
   property` names the property that the loan paid for: while that property is let, the interest
   lowers the tax of its rent.
-- `pension policy`: a company pension (bAV) or a Basisrente. Mark a Basisrente in the column
+- `bAV policy`: a company pension (bAV) or a Basisrente. Mark a Basisrente in the column
   `Basisrente` and set its payout to `annuity`: a Basisrente pays no lump sum. In the statutory
   health insurance, a company pension pays health and care contributions, a Basisrente pays them
   only for a voluntary member. If you pay into a company pension from your salary

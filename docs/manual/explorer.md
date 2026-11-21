@@ -70,7 +70,7 @@ table sideways.
   (the contribution of an Altersvorsorgedepot), then the world: `Markets` (the inflation, then the
   growth of an index that only costs follow, such as `insurance`, then the returns), `Gold and
   crypto` (the return, spread and correlation of the gold and crypto that you hold), `Spending
-  rule`, `Care`, `Allocation`, and `Spread per year (Monte Carlo)`. Each slider has a help text.
+  rule`, `Care`, `Allocation`, and `Volatility per year (Monte Carlo)`. Each slider has a help text.
   `Raises in Work` adds a real growth per year to the salary and the profit of that phase
   only, on top of their index (see [How the simulation works](models.md#each-month)). The help of
   the growth slider of an index names the streams that follow that index: a stream follows it only
@@ -261,7 +261,7 @@ The simulation does not change.
 - `Model`, `Paths` and `Nominal euros` show only when they are not at their defaults: `Monte Carlo`,
   500 paths and off.
 - A slider shows when your files set its value, also when they set the default value. For example,
-  `Equity spread` shows when `assumptions.yaml` sets it. Simple mode hides the other sliders, and
+  `Equity volatility` shows when `assumptions.yaml` sets it. Simple mode hides the other sliders, and
   they keep their defaults.
 - The sliders of a return class show only when an asset of the first selected scenario grows with
   that class, for example `Property return` with a property. The sliders of equity and fixed income

@@ -52,7 +52,7 @@ KINDS = {
     "gold": N_("gold"),
     "crypto": N_("crypto"),
     "property": N_("property"),
-    "bav": N_("pension policy"),
+    "bav": N_("bAV policy"),
     "av_depot": N_("pension depot"),
     "loan": N_("loan"),
 }

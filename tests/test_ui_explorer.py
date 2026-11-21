@@ -1005,7 +1005,7 @@ def test_explorer_moves_the_classes_of_gold_and_crypto(data: Path) -> None:
     at = AppTest.from_string(EXPLORER.format(data=str(data)), default_timeout=60).run()
     assert not at.exception
     labels = [s.label for s in at.slider]
-    assert labels.index("Bitcoin correlation") == labels.index("Bitcoin spread") + 1
+    assert labels.index("Bitcoin correlation") == labels.index("Bitcoin volatility") + 1
     assert not at.slider[labels.index("Bitcoin correlation")].disabled
     at.slider[labels.index("Bitcoin correlation")].set_value(0.6).run()
     assert any(
@@ -1019,7 +1019,7 @@ def test_explorer_moves_the_classes_of_gold_and_crypto(data: Path) -> None:
     at.sidebar.selectbox[0].set_value("historical").run()
     assert not at.exception
     off = {s.label for s in at.slider if s.disabled}
-    assert {"Gold return", "Gold spread", "Equity return"} <= off  # replayed
+    assert {"Gold return", "Gold volatility", "Equity return"} <= off  # replayed
     assert not {"Bitcoin return", "Bitcoin correlation"} & off  # drawn
 
 
@@ -1219,9 +1219,9 @@ def test_simple_mode_draws_the_sliders_that_the_plan_sets_or_the_viewer_moved(da
     assert (_labels(drawn(advanced=True)), drawn(advanced=True).expert) == (every, [])
     simple = drawn(advanced=False)
     assert {"Wohnen", "Inflation", "Equity return", "Cash return"} <= _labels(simple)
-    hidden = ["Property return", "Equity spread", "Pension growth", "Realize gains"]
+    hidden = ["Property return", "Equity volatility", "Pension growth", "Realize gains"]
     assert not set(hidden) & _labels(simple)
-    assert {"Property return", "Equity spread", "Taxes"} <= set(simple.expert)
+    assert {"Property return", "Equity volatility", "Taxes"} <= set(simple.expert)
     growth = next(c for c in controls if c.path == ("pension_growth",))
     assert "Pension growth" in _labels(drawn(advanced=False, moved=growth.key))
     with (data / "assumptions.yaml").open("a") as fh:
@@ -1262,7 +1262,7 @@ def test_what_the_viewer_moved_stays_in_simple_mode(
     assert at.toggle(key=f"{sliders.KEY}nominal").value
     drawn = [s.label for s in at.slider]
     assert "Pension growth" in drawn
-    assert "Equity spread" not in drawn
+    assert "Equity volatility" not in drawn
     assert "Realize gains" in [t.label for t in at.toggle]
     assert "Paths" not in [s.label for s in at.select_slider]
     assert [tab.label for tab in at.tabs] == ["base", "base (as saved)"]  # the overrides hold
@@ -1270,7 +1270,9 @@ def test_what_the_viewer_moved_stays_in_simple_mode(
     assert "Pension growth 0.00% → 1.00%" in moved
     assert "Realize gains off → on" in moved
     assert any(
-        c.value.startswith("Hidden in simple mode (at the values as saved): Paths, Equity spread")
+        c.value.startswith(
+            "Hidden in simple mode (at the values as saved): Paths, Equity volatility"
+        )
         for c in at.caption
     )
     levers = at.selectbox(key=f"{sliders.KEY}seek-lever").options[len(seek.LEVERS) :]

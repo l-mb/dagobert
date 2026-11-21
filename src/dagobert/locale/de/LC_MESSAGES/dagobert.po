@@ -9334,7 +9334,7 @@ msgstr ""
 
 #: ui/knobs.py
 #, python-brace-format
-msgid "{name} spread"
+msgid "{name} volatility"
 msgstr "Schwankung {name}"
 
 #: ui/knobs.py
@@ -12374,7 +12374,7 @@ msgid "Total spending"
 msgstr "Gesamtausgaben"
 
 #: ui/sliders.py
-msgid "Spread per year (Monte Carlo)"
+msgid "Volatility per year (Monte Carlo)"
 msgstr "Schwankung pro Jahr (Monte Carlo)"
 
 #: ui/sliders.py
@@ -12802,8 +12802,8 @@ msgid "term deposit"
 msgstr "Festgeld"
 
 #: ui/summary.py
-msgid "pension policy"
-msgstr "Rentenvertrag"
+msgid "bAV policy"
+msgstr "bAV-Vertrag"
 
 #: ui/summary.py
 msgid "pension depot"

@@ -6441,8 +6441,12 @@ msgid "Person"
 msgstr "Person"
 
 #: ui/assumptions.py
-msgid "Rules"
-msgstr "Regeln"
+msgid "Investing"
+msgstr "Geldanlage"
+
+#: ui/assumptions.py
+msgid "Spending and risks"
+msgstr "Ausgaben und Risiken"
 
 #: ui/assumptions.py
 #, python-brace-format

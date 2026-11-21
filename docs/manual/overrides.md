@@ -29,7 +29,7 @@ field and save.
 
 ## The sections
 
-- `Person`, `Markets`, `Rules` and `Tax`: the fields of the [Assumptions](assumptions.md) page.
+- `Person`, `Markets`, `Investing`, `Spending and risks` and `Tax`: the fields of the [Assumptions](assumptions.md) page.
   Type shares and rates in percent: `2.5` for 2.5%. A table, such as the returns, has a switch
   `Override`. If the switch is off, the table of the parent shows below it. If it is on, the rows
   that you add apply in this scenario. A row of the parent stays.

@@ -25,11 +25,13 @@ The page has four tabs:
   indices that streams can follow, the interest rate of a loan after its fixed period, and the
   yearly growth of the pension on top of the consumer prices (`Pension growth per year`). The
   pension follows the consumer prices of each path, so 0 keeps its buying power. `average` is the
-  mean per year, `volatility` the standard deviation of the yearly draw.
-- `Rules`: the cash buffer, `Invest the rest` (off: the cash above the buffer stays in cash, and
-  only your savings plans invest), the random seed, the allocation between equity and fixed income,
-  the spending rule, the long-term care and the disability (the loss of the ability to work). The
-  seed sets the random draws of the care episodes, of the disability and of the sale prices.
+  mean per year, `volatility` the standard deviation of the yearly draw. The random seed is here
+  too: it sets the random draws of the markets, of the care episodes, of the disability and of
+  the sale prices.
+- `Investing`: the cash buffer, `Invest the rest` (off: the cash above the buffer stays in cash,
+  and only your savings plans invest) and the allocation between equity and fixed income.
+- `Spending and risks`: the spending rule, the long-term care and the disability (the loss of
+  the ability to work).
 - `Tax`: the tax year, the capital income free of tax (the Sparer-Pauschbetrag), the share of the
   gains of an equity fund that is free of tax (the Teilfreistellung, `Fund gains tax-free`, the
   default of each depot without its own on the [Assets](assets.md) page), your work expenses of a
@@ -74,7 +76,7 @@ In [simple mode](index.md#simple-and-advanced-mode-and-features) the page hides 
 experts that your plan does not use, for example the random seed or the tax year. A field shows when
 your file sets it to a value other than its default, or when a scenario sets it. A section that your
 plan uses shows with all of its fields, for example all fields of `Long-term care`. A tab without a
-field to show is not there: a new plan has no tab `Rules`. A note at the end of each tab names the
+field to show is not there: a new plan has no tab `Investing`. A note at the end of each tab names the
 fields that it hides, and a note below the tabs names the fields of a hidden tab.
 
 A feature that is off on the [Features](features.md) page hides its fields in both modes, for

@@ -52,7 +52,7 @@ Two scenarios show what the policy is worth to you:
 1. On the [Cashflows](cashflows.md) page, add the policy in the tab `disability insurance`: its
    monthly benefit, the premium 0 while the employer pays it, and the age at which the contract
    ends.
-2. On the [Assumptions](assumptions.md) page, turn on `Disability` in the tab `Rules`. Each
+2. On the [Assumptions](assumptions.md) page, turn on `Disability` in the tab `Spending and risks`. Each
    simulated future then draws whether and when you lose the ability to work.
 3. Open the scenario in which you leave the employer. In its tab `Events`, add an event `Change a
    stream` in the month of the leave. Give it the name of the policy and your own `premium`, below
@@ -140,7 +140,7 @@ revision.
   tax and social insurance. The field shows your gross salary first. From that month the scenario
   changes to the phase `self-employed`: the salary and the savings plan stop, and the profit pays
   until the next phase of the main scenario begins, usually your retirement. You pay the income
-  tax and your health insurance yourself and no statutory pension insurance. The tab `Rules` of
+  tax and your health insurance yourself and no statutory pension insurance. The tab `Tax` of
   the [Assumptions](assumptions.md) page changes this (`tax.self_employed`). The month must lie
   before the last phase of the main scenario begins. If the main scenario has a job loss before
   that month, the box `With the Gründungszuschuss` shows. The start-up grant of the employment

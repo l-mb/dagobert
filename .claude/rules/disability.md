@@ -106,7 +106,7 @@ the console summary: twelve columns leave the scenario no room in 120); `anatomy
 age at the onset, bins at 50 and 60 (`DISABLED_AGES`); the difference and the sensitivity pair up
 by the purpose. `cashplan.monthly` takes the premium of a `bu` row, the benefit nowhere; the
 Cashflows page has the tab `disability insurance` (`cashflows.BU`, the benefit `Monthly benefit €`).
-The Assumptions page: section `Disability` of `Rules`. The roll forward: `at` before the new start
+The Assumptions page: section `Disability` of `Spending and risks`. The roll forward: `at` before the new start
 blocks it (`rollforward.DISABILITY`), `rebase` scales `premium` of a `cpi` row.
 
 ## Gaps

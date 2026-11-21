@@ -564,7 +564,7 @@ the relative paid for them, so a later sale taxes their whole gain.
 
 ## When you cannot work
 
-The section `Disability` of the Assumptions page (tab `Rules`) adds the risk that you lose the
+The section `Disability` of the Assumptions page (tab `Spending and risks`) adds the risk that you lose the
 ability to work before the statutory pension age. The law calls this a full Erwerbsminderung: you
 can work less than three hours a day. Each path draws whether and in which month this happens.
 The model `fixed` draws nothing, but the field `Disabled from (what-if)` forces the month in every

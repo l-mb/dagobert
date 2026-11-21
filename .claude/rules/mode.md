@@ -25,8 +25,8 @@ section on the mode and the features) and `features.md`.
   crypto asset exists: `Uses` counts it used then, `SELLABLE`) and Explorer groups (all spending, by
   category, salary, savings, events, markets). A key path or a column is core unless `EXPERT` lists
   it or a path above it: a new field shows until a line hides it. A `DATA` item is never core.
-  `EXPERT` holds the whole `Rules` tab of the Assumptions page, `disability` too: `starter` shows no
-  `Rules` tab in simple mode.
+  `EXPERT` holds the whole tabs `Investing` and `Spending and risks` of the Assumptions page,
+  `disability` too: `starter` shows neither in simple mode.
 - `head(path)`: the item by which a field of a form shows, its key path up to the deepest path of
   `EXPERT` or of a feature above it (`care` of `care.duration.stdev`, `spending.vpw` of its
   fields): a section or a nested model that the inputs use shows whole, and a field below it that

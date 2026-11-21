@@ -10,7 +10,7 @@ The forms, widgets and their Save: rule `forms`. The input file: `docs/manual/co
 The user guide: `docs/manual/assumptions.md`.
 
 - `src/dagobert/ui/assumptions.py`: the `Assumptions` page in the navigation section `Your plan`
-  (`/assumptions`) edits `assumptions.yaml` in four tabs (`TABS`), each one `forms.Form` of the top
+  (`/assumptions`) edits `assumptions.yaml` in five tabs (`TABS`), each one `forms.Form` of the top
   keys it shows (`Tab.tops`; `Tab.key` names its widgets, `Tab.title` is words): `Person` (`person`
   with the grid `Relatives you may inherit from` of `person.relatives`, then the `phases` grid, both
   `LabeledRows`: `name on the pages`, the label, first, an empty one shown as the name and a label
@@ -22,12 +22,14 @@ The user guide: `docs/manual/assumptions.md`.
   a child until`, `Kindergeld paid to you`, `child allowance` (`half`, `full`) and `child-raising
   years credited to your pension`, all five shown: a list grid of a form has no `All columns`; its
   help in `HELPS`), `Markets` (`inflation`, the `returns` and `indices` grids by name,
-  `refinance_rate`, `pension_growth`), `Rules` (`cash_buffer_months`, `invest_rest`, labeled `Invest
-  the rest`, `seed`, `allocation`, `spending`, `care`, `disability` (`Disability`, its grid `Yearly
+  `refinance_rate`, `pension_growth`, `seed`), `Investing` (`cash_buffer_months`, `invest_rest`,
+  labeled `Invest the rest`, `allocation`) and `Spending and risks` (issue #51: both were `Rules`,
+  named by the code, and old revisions keep that source; `spending`, `care`, `disability`
+  (`Disability`, its grid `Yearly
   chance of a disability by age`, `Disabled from (what-if)`, rule `disability`): optional sections
   with `Use`, the age lists as grids) and `Tax` (`tax`, its nested `self_employed` last under the
-  heading `Self-employment`: a top key after it would show under that heading, so `seed` moved to
-  `Rules`; `werbungskosten` (`Work expenses per year €`, the term `Werbungskosten` in `TERMS`, so
+  heading `Self-employment`: a top key after it would show under that heading, so `seed` is in
+  `Markets`; `werbungskosten` (`Work expenses per year €`, the term `Werbungskosten` in `TERMS`, so
   the label fits one line beside its neighbours; rule `deductions`) and `harvest` after
   `teilfreistellung`, `harvest` labeled `Realize gains each December within the tax-free room`;
   `kv_zusatz`, `church`, `land`, `loss_carryforward`, `loss_carryback` and `capital_losses` come

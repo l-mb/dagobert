@@ -105,12 +105,12 @@ def test_a_form_names_a_change_elsewhere_in_the_language_of_the_session(data: Pa
         label = i18n._(assumptions_page.LABELS[("cash_buffer_months",)])
     next(w for w in at.text_input if w.label == label).input("4,5").run()
     edit = store.Edit("assumptions.yaml", {("cash_buffer_months",): 6})
-    store.write(data, [edit], source="Assumptions: Rules")
+    store.write(data, [edit], source="Assumptions: Investing")
     at.run()
     [warning] = [w.value for w in at.warning if "seit dieses Formular angezeigt wurde" in w.value]
-    assert "auf der Seite Annahmen: Rules" in warning
+    assert "auf der Seite Annahmen: Investing" in warning
     assert "Meine Änderungen verwerfen" in [b.label for b in at.button]
-    assert revisions.entries(data)[-1].source == "Assumptions: Rules"
+    assert revisions.entries(data)[-1].source == "Assumptions: Investing"
 
 
 def _save(at: AppTest, tab: str) -> Button:
@@ -133,16 +133,16 @@ def test_a_tab_of_the_assumptions_saves_alone_as_one_revision(tmp_path: Path) ->
     next(
         w for w in at.text_input if w.label == assumptions_page.LABELS[("inflation", "mean")]
     ).input("2,5").run()  # of `Markets`
-    _save(at, "rules").click().run()
+    _save(at, "investing").click().run()
     assert not at.exception
-    assert revisions.entries(data)[-1].source == "app: Rules"
+    assert revisions.entries(data)[-1].source == "app: Investing"
     # one line changed, the comments and the flow mappings stay
     buffer = f"cash_buffer_months: {example.cash_buffer_months:g}\n"
     assert buffer in before
     after = before.replace(buffer, "cash_buffer_months: 4.5\n")
     assert (data / "assumptions.yaml").read_text() == after
     # the edit of another tab of the file stays, and its Save is not refused
-    assert (_save(at, "rules").disabled, _save(at, "markets").disabled) == (True, False)
+    assert (_save(at, "investing").disabled, _save(at, "markets").disabled) == (True, False)
 
 
 def test_an_empty_tax_year_shows_the_year_of_the_start(data: Path) -> None:
@@ -281,7 +281,7 @@ def test_a_whole_number_and_a_choice_empty_again_take_their_default(data: Path) 
     next(
         w for w in at.selectbox if w.label == assumptions_page.LABELS[("care", "index")]
     ).set_value(None).run()
-    for tab in ("person", "rules"):
+    for tab in ("person", "risks"):
         _save(at, tab).click().run()
     assert not at.exception
     a = load_assumptions(data)
@@ -325,7 +325,8 @@ def _notes(at: AppTest) -> list[str]:
 
 def test_simple_mode_shows_the_fields_that_the_plan_uses(tmp_path: Path) -> None:
     """`starter` in simple mode: the core, the expert fields that it sets (an index, the volatility
-    of inflation and of its classes), no tab without a field (`Rules`), and a note per tab and
+    of inflation and of its classes), no tab without a field (`Investing`, `Spending and
+    risks`), and a note per tab and
     below the tabs of what is hidden. Advanced mode shows every field."""
     data = _starter(tmp_path)
     at = _page(data)
@@ -345,7 +346,13 @@ def test_simple_mode_shows_the_fields_that_the_plan_uses(tmp_path: Path) -> None
     assert "Off in Features: gold and crypto; self-employment; children." in tax
     assert rules.startswith("Hidden in simple mode (at their defaults): Cash buffer (months),")
     advanced = _page(data, None)
-    assert [t.label for t in advanced.tabs] == ["Person", "Markets", "Rules", "Tax"]
+    assert [t.label for t in advanced.tabs] == [
+        "Person",
+        "Markets",
+        "Investing",
+        "Spending and risks",
+        "Tax",
+    ]
     assert _notes(advanced) == []
 
 
@@ -373,7 +380,7 @@ def test_a_section_in_use_shows_whole_and_a_feature_off_hides_in_both_modes(
 VISIBLE = {
     "person": (("person", "rv_since"), "2019-11-01", "starter"),
     "markets": (("inflation", "mean"), "2,5", "starter"),
-    "rules": (("care", "cost"), "1900", "engineer"),
+    "risks": (("care", "cost"), "1900", "engineer"),
     "tax": (("tax", "werbungskosten"), "1600", "starter"),
 }
 
@@ -407,10 +414,10 @@ def test_a_field_edited_in_advanced_mode_stays_in_simple_mode(tmp_path: Path, ra
         at.run()
     at.query_params["mode"] = "simple"
     at.run()
-    assert [t.label for t in at.tabs] == ["Person", "Markets", "Rules", "Tax"]
+    assert [t.label for t in at.tabs] == ["Person", "Markets", "Tax"]
     assert LABELS[("seed",)] in _labels(at)
     assert LABELS[("cash_buffer_months",)] not in _labels(at)
-    _save(at, "rules").click().run()
+    _save(at, "markets").click().run()
     assert load_assumptions(data).seed == 8
 
 
@@ -422,13 +429,13 @@ def test_a_section_switched_on_in_advanced_mode_stays_whole_in_simple_mode(
     data = _starter(tmp_path)
     (data / "app.yaml").write_text("scenarios: [ausstieg, plan]\n")
     at = _page(data, None)
-    care = f"{assumptions_page.KEY}-rules-0-care"
+    care = f"{assumptions_page.KEY}-risks-0-care"
     at.toggle(key=care).set_value(True).run()
     at.query_params["mode"] = "simple"
     at.run()
     assert at.toggle(key=care).value
     assert LABELS[("care", "cost")] in _labels(at)
-    assert _save(at, "rules").disabled
+    assert _save(at, "risks").disabled
 
 
 @pytest.mark.parametrize(

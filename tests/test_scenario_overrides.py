@@ -308,7 +308,7 @@ def _tab(data: Path, stem: str, *, phone: bool = False, mode: str | None = None)
 
 def test_simple_mode_shows_the_fields_that_a_scenario_or_the_plan_sets(plans: Path) -> None:
     """The same predicate as the Assumptions page: the loan rate that the scenarios set shows, a
-    part without a field to show does not (`Rules`), and a note names what is hidden."""
+    part without a field to show does not (`Investing`), and a note names what is hidden."""
     at = _tab(plans, "child", mode="simple")
     assert not at.exception
     parts = [e.label for e in at.expander if not e.icon]
@@ -331,7 +331,8 @@ def test_the_tab_renders_the_parts_and_pins_the_ids_on_a_phone(plans: Path, phon
     assert [e.label for e in at.expander if not e.icon] == [  # the parts, not the help folds
         "Person",
         "Markets (1)",
-        "Rules",
+        "Investing",
+        "Spending and risks",
         "Tax",
         "Scale",
         "Dates",

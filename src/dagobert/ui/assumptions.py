@@ -1,5 +1,6 @@
-"""The `Assumptions` page: `assumptions.yaml` in four tabs of forms from the model (`ui.forms`),
-`Person`, `Markets`, `Rules` and `Tax`, each with one Save, one revision `Assumptions: <tab>`.
+"""The `Assumptions` page: `assumptions.yaml` in five tabs of forms from the model (`ui.forms`),
+`Person`, `Markets`, `Investing`, `Spending and risks` and `Tax`, each with one Save, one
+revision `Assumptions: <tab>`.
 `start` shows read only: the roll forward of the Overview moves it together with the amounts in
 euros of the start. `scale` is set in the overrides of a scenario, so it does not show. The
 `phases` and the relatives of `Person` show their name on the pages first (`LabeledRows`) and keep
@@ -493,21 +494,10 @@ TABS = (
     Tab(
         "markets",
         N_("Markets"),
-        ("inflation", "returns", "indices", "refinance_rate", "pension_growth"),
+        ("inflation", "returns", "indices", "refinance_rate", "pension_growth", "seed"),
     ),
-    Tab(
-        "rules",
-        N_("Rules"),
-        (
-            "cash_buffer_months",
-            "invest_rest",
-            "seed",
-            "allocation",
-            "spending",
-            "care",
-            "disability",
-        ),
-    ),
+    Tab("investing", N_("Investing"), ("cash_buffer_months", "invest_rest", "allocation")),
+    Tab("risks", N_("Spending and risks"), ("spending", "care", "disability")),
     Tab("tax", N_("Tax"), ("tax",)),
 )
 

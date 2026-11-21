@@ -52,7 +52,7 @@ msgstr "unbare Einnahmen"
 msgid "wealth built"
 msgstr "Vermögenszuwachs"
 
-#: budget.py cashplan.py ui/cashflows.py
+#: budget.py cashplan.py ui/cashflows.py ui/whereis.py
 msgid "income"
 msgstr "Einnahmen"
 
@@ -103,7 +103,7 @@ msgstr "beginnt: nach dem {why}"
 msgid "follows {base}"
 msgstr "folgt {base}"
 
-#: cashplan.py report/flows.py ui/cashflows.py
+#: cashplan.py report/flows.py ui/cashflows.py ui/whereis.py
 msgid "expenses"
 msgstr "Ausgaben"
 
@@ -548,7 +548,7 @@ msgid "phases"
 msgstr "Phasen"
 
 #: model/assets.py model/assumptions.py model/events.py model/plan.py
-#: model/streams.py ui/scenarios.py
+#: model/streams.py ui/scenarios.py ui/whereis.py
 msgid "Phases"
 msgstr "Phasen"
 
@@ -584,7 +584,7 @@ msgctxt "key"
 msgid "teilfreistellung"
 msgstr "Teilfreistellung"
 
-#: model/assets.py model/assumptions.py ui/assumptions.py
+#: model/assets.py model/assumptions.py ui/assumptions.py ui/whereis.py
 msgid "Tax"
 msgstr "Steuer"
 
@@ -3707,12 +3707,13 @@ msgid "training"
 msgstr "Weiterbildung"
 
 #: model/events.py model/plan.py model/streams.py report/charts.py
-msgid "Pension"
-msgstr "Rente"
-
-#: model/events.py model/plan.py model/streams.py report/charts.py
 msgid "Savings plan"
 msgstr "Sparplan"
+
+#: model/events.py model/plan.py model/streams.py report/charts.py
+#: ui/whereis.py
+msgid "Pension"
+msgstr "Rente"
 
 #: model/events.py model/streams.py
 msgid "Taxable"
@@ -3929,11 +3930,11 @@ msgstr "Basiert auf"
 msgid "Scenarios"
 msgstr "Szenarien"
 
-#: model/plan.py ui/scenarios.py
+#: model/plan.py ui/scenarios.py ui/whereis.py
 msgid "Overrides"
 msgstr "Abweichungen"
 
-#: model/plan.py ui/scenarios.py
+#: model/plan.py ui/scenarios.py ui/whereis.py
 msgid "Events"
 msgstr "Ereignisse"
 
@@ -4970,7 +4971,7 @@ msgstr "Nettovermögen mit {age}"
 msgid "never"
 msgstr "nie"
 
-#: report/summary.py ui/sliders.py
+#: report/summary.py ui/sliders.py ui/whereis.py
 msgid "Taxes"
 msgstr "Steuern"
 
@@ -5925,10 +5926,6 @@ msgid "child-raising years credited to your pension"
 msgstr "Kindererziehungszeiten bei dir"
 
 #: ui/assumptions.py
-msgid "Relatives you may inherit from"
-msgstr "Angehörige, von denen du erben könntest"
-
-#: ui/assumptions.py
 msgid "short name in the files"
 msgstr "Kurzname in den Dateien"
 
@@ -6471,22 +6468,6 @@ msgid "tax year {year}"
 msgstr "Steuerjahr {year}"
 
 #: ui/assumptions.py
-msgid "Person"
-msgstr "Person"
-
-#: ui/assumptions.py
-msgid "Investing"
-msgstr "Geldanlage"
-
-#: ui/assumptions.py
-msgid "Spending and risks"
-msgstr "Ausgaben und Risiken"
-
-#: ui/assumptions.py
-msgid "Health insurance"
-msgstr "Krankenversicherung"
-
-#: ui/assumptions.py
 #, python-brace-format
 msgid "the phase {name} keeps its name while inputs name it: {uses}"
 msgstr ""
@@ -6614,13 +6595,33 @@ msgstr "Angehöriger"
 msgid "Spending rule"
 msgstr "Ausgabenregel"
 
-#: ui/assumptions.py ui/sliders.py
+#: ui/assumptions.py ui/sliders.py ui/whereis.py
 msgid "Markets"
 msgstr "Märkte"
 
 #: ui/assumptions.py ui/welcome.py
 msgid "Private health insurance (PKV)"
 msgstr "Private Krankenversicherung (PKV)"
+
+#: ui/assumptions.py ui/whereis.py
+msgid "Relatives you may inherit from"
+msgstr "Angehörige, von denen du erben könntest"
+
+#: ui/assumptions.py ui/whereis.py
+msgid "Person"
+msgstr "Person"
+
+#: ui/assumptions.py ui/whereis.py
+msgid "Investing"
+msgstr "Geldanlage"
+
+#: ui/assumptions.py ui/whereis.py
+msgid "Spending and risks"
+msgstr "Ausgaben und Risiken"
+
+#: ui/assumptions.py ui/whereis.py
+msgid "Health insurance"
+msgstr "Krankenversicherung"
 
 #: ui/bars.py
 msgid "from the run"
@@ -7259,18 +7260,6 @@ msgid "Indices, pension growth and the insurance: Assumptions"
 msgstr "Indizes, Rentensteigerung und Versicherung: Annahmen"
 
 #: ui/cashflows.py
-msgid "savings"
-msgstr "Sparpläne"
-
-#: ui/cashflows.py
-msgid "health insurance"
-msgstr "Krankenversicherung"
-
-#: ui/cashflows.py
-msgid "disability insurance"
-msgstr "BU-Versicherung"
-
-#: ui/cashflows.py
 msgid "How savings plans work"
 msgstr "So funktionieren Sparpläne"
 
@@ -7297,6 +7286,18 @@ msgstr "Zahlung"
 #: ui/cashflows.py ui/scenario_overrides.py ui/spend.py
 msgid "category"
 msgstr "Kategorie"
+
+#: ui/cashflows.py ui/whereis.py
+msgid "savings"
+msgstr "Sparpläne"
+
+#: ui/cashflows.py ui/whereis.py
+msgid "health insurance"
+msgstr "Krankenversicherung"
+
+#: ui/cashflows.py ui/whereis.py
+msgid "disability insurance"
+msgstr "BU-Versicherung"
 
 #: ui/closing.py
 msgid ""
@@ -10034,6 +10035,10 @@ msgstr "Ausgaben"
 msgid "Export and import"
 msgstr "Export und Import"
 
+#: ui/main.py ui/whereis.py
+msgid "Where is what"
+msgstr "Wo ist was"
+
 #: ui/mode.py
 msgid "Simple"
 msgstr "Einfach"
@@ -12225,7 +12230,7 @@ msgstr ""
 msgid "Spending by category"
 msgstr "Ausgaben nach Kategorie"
 
-#: ui/scenario_overrides.py ui/sliders.py
+#: ui/scenario_overrides.py ui/sliders.py ui/whereis.py
 msgid "Savings plans"
 msgstr "Sparpläne"
 
@@ -14353,6 +14358,182 @@ msgstr "Selbstständig machen"
 msgctxt "phase"
 msgid "Unemployed"
 msgstr "Arbeitslos"
+
+#: ui/whereis.py
+msgid ""
+"Where each input of your plan is, by subject. A link opens its page and "
+"tab."
+msgstr ""
+"Wo jede Eingabe deines Plans steht, nach Thema. Ein Link öffnet Seite und"
+" Tab."
+
+#: ui/whereis.py
+msgid "You and the phases of your life"
+msgstr "Du und deine Lebensphasen"
+
+#: ui/whereis.py
+msgid "Date of birth, the age that the plan reaches, children"
+msgstr "Geburtsdatum, Alter, bis zu dem der Plan reicht, Kinder"
+
+#: ui/whereis.py
+msgid "The phases, their names and their raises"
+msgstr "Die Phasen, ihre Namen und ihre Gehaltssteigerung"
+
+#: ui/whereis.py
+msgid "When a phase begins"
+msgstr "Wann eine Phase beginnt"
+
+#: ui/whereis.py
+msgid "Work and income"
+msgstr "Arbeit und Einkommen"
+
+#: ui/whereis.py
+msgid "Salary, bonus, other income"
+msgstr "Gehalt, Bonus, andere Einnahmen"
+
+#: ui/whereis.py
+msgid "Raises per year in a phase"
+msgstr "Gehaltssteigerung pro Jahr in einer Phase"
+
+#: ui/whereis.py
+msgid "The index that a salary follows"
+msgstr "Der Index, dem ein Gehalt folgt"
+
+#: ui/whereis.py
+msgid "A job loss, a severance, a new job"
+msgstr "Ein Jobverlust, eine Abfindung, ein neuer Job"
+
+#: ui/whereis.py
+msgid "Another salary in one scenario only"
+msgstr "Ein anderes Gehalt nur in einem Szenario"
+
+#: ui/whereis.py
+msgid "The profit of a business"
+msgstr "Der Gewinn eines Betriebs"
+
+#: ui/whereis.py
+msgid "Pension and health insurance of a business"
+msgstr "Renten- und Krankenversicherung eines Betriebs"
+
+#: ui/whereis.py
+msgid "Private or statutory, a change, a cap of the premium"
+msgstr "Privat oder gesetzlich, ein Wechsel, ein Beitragsdeckel"
+
+#: ui/whereis.py
+msgid "The premiums of a private insurance, Krankentagegeld"
+msgstr "Die Beiträge einer privaten Versicherung, Krankentagegeld"
+
+#: ui/whereis.py
+msgid "Premiums paid in advance"
+msgstr "Vorausgezahlte Beiträge"
+
+#: ui/whereis.py
+msgid "The statutory pension and its points"
+msgstr "Die gesetzliche Rente und ihre Rentenpunkte"
+
+#: ui/whereis.py
+msgid "Pension insurance since, pension growth"
+msgstr "Rentenversichert seit, Rentensteigerung"
+
+#: ui/whereis.py
+msgid "Company pension, Basisrente, Altersvorsorgedepot"
+msgstr "Betriebsrente, Basisrente, Altersvorsorgedepot"
+
+#: ui/whereis.py
+msgid "Accounts, depots, trades, gold and crypto"
+msgstr "Konten, Depots, Transaktionen, Gold und Krypto"
+
+#: ui/whereis.py
+msgid "Returns, volatility, inflation"
+msgstr "Renditen, Schwankung, Inflation"
+
+#: ui/whereis.py
+msgid "Cash buffer and allocation"
+msgstr "Liquiditätsreserve und Aufteilung"
+
+#: ui/whereis.py
+msgid "Realize gains each year"
+msgstr "Jedes Jahr Gewinne realisieren"
+
+#: ui/whereis.py
+msgid "Property and loans"
+msgstr "Immobilien und Darlehen"
+
+#: ui/whereis.py
+msgid "A property and its loan"
+msgstr "Eine Immobilie und ihr Darlehen"
+
+#: ui/whereis.py
+msgid "Rent and the costs of a let property"
+msgstr "Miete und Kosten einer vermieteten Immobilie"
+
+#: ui/whereis.py
+msgid "Buy or sell a property, repay a loan"
+msgstr "Eine Immobilie kaufen oder verkaufen, ein Darlehen tilgen"
+
+#: ui/whereis.py
+msgid "The loan rate after the fixed period"
+msgstr "Der Darlehenszins nach der Zinsbindung"
+
+#: ui/whereis.py
+msgid "What you spend"
+msgstr "Was du ausgibst"
+
+#: ui/whereis.py
+msgid "Your expenses by category"
+msgstr "Deine Ausgaben nach Kategorie"
+
+#: ui/whereis.py
+msgid "The spending rule: cuts in bad years"
+msgstr "Die Ausgabenregel: Kürzungen in schlechten Jahren"
+
+#: ui/whereis.py
+msgid "A one-off payment, such as a car"
+msgstr "Eine Einmalzahlung, etwa ein Auto"
+
+#: ui/whereis.py
+msgid "What you spent in a month"
+msgstr "Was du in einem Monat ausgegeben hast"
+
+#: ui/whereis.py
+msgid "Church tax, Bundesland, losses, work expenses"
+msgstr "Kirchensteuer, Bundesland, Verluste, Werbungskosten"
+
+#: ui/whereis.py
+msgid "An expense that lowers the tax"
+msgstr "Eine Ausgabe, die die Steuer senkt"
+
+#: ui/whereis.py
+msgid "A change of the law as a stress test"
+msgstr "Eine Rechtsänderung als Stresstest"
+
+#: ui/whereis.py
+msgid "Risks"
+msgstr "Risiken"
+
+#: ui/whereis.py
+msgid "Disability and long-term care"
+msgstr "Erwerbsminderung und Pflege"
+
+#: ui/whereis.py
+msgid "A disability insurance (BU)"
+msgstr "Eine Berufsunfähigkeitsversicherung (BU)"
+
+#: ui/whereis.py
+msgid "An inheritance or a gift"
+msgstr "Eine Erbschaft oder Schenkung"
+
+#: ui/whereis.py
+msgid "Records"
+msgstr "Erfasste Werte"
+
+#: ui/whereis.py
+msgid "Today's values of your accounts, prices"
+msgstr "Aktuelle Werte deiner Konten, Kurse"
+
+#: ui/whereis.py
+msgid "Price and inflation series"
+msgstr "Kurs- und Inflationsreihen"
 
 #: ui/widgets.py
 msgid "YYYY-MM or MM.YYYY"

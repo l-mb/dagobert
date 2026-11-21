@@ -31,6 +31,7 @@ from dagobert.overrides import Leaf
 from dagobert.references import Kind, References
 from dagobert.store import RowFile
 from dagobert.ui import (
+    TAB,
     fold,
     forms,
     gridcolumns,
@@ -735,7 +736,9 @@ def page(data_dir: Path) -> None:
     here = Here(data_dir, options(refs), refs, mode.view(data_dir))
     tabs = {tab: tab.form(view=here.view) for tab in TABS}
     drawn = [tab for tab, form in tabs.items() if form.fields]
-    for box, tab in zip(st.tabs([_(t.title) for t in drawn]), drawn, strict=True):
+    opens = st.query_params.pop(TAB, None)  # the tab that another page links to, by its key
+    default = next((_(t.title) for t in drawn if t.key == opens), None)
+    for box, tab in zip(st.tabs([_(t.title) for t in drawn], default=default), drawn, strict=True):
         with box:
             _tab(here, tab, tabs[tab])
     # a tab without a field to show, by what it hides

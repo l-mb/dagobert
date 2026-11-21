@@ -48,6 +48,7 @@ if __name__ == "__main__":
         undo,
         uploader_words,
         welcome,
+        whereis,
     )
 
     session_seen.set()
@@ -121,6 +122,7 @@ if __name__ == "__main__":
         ),
         _("Your plan"): dict(
             [
+                entry(N_("Where is what"), whereis.page, "where"),
                 entry(N_("Assets"), lambda: assets.page(assets_file(DATA)), "assets"),
                 entry(N_("Cashflows"), lambda: cashflows.page(streams_file(DATA)), "cashflows"),
                 entry(N_("Assumptions"), lambda: assumptions.page(DATA), "assumptions"),

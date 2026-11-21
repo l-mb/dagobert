@@ -88,6 +88,7 @@ PAGES = (
     "Overview",
     "Snapshot",
     "Spend",
+    "Where is what",
     "Assets",
     "Cashflows",
     "Assumptions",

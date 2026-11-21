@@ -29,6 +29,7 @@ from dagobert.ui import (
     CASHFLOWS_SCENARIO,
     GAIN,
     LOSS,
+    TAB,
     TOTAL,
     day_said,
     fixed,
@@ -837,7 +838,10 @@ def _streams(file: RowFile, day: date, plan: Plan) -> None:
         *[N_("health insurance")] * private,
         *[N_("disability insurance")] * insured,
     )
-    expenses, income, savings, *rest = st.tabs([_(t) for t in tabs], key="cashflows-tabs")
+    opens = st.query_params.pop(TAB, None)  # the tab that another page links to, by its name
+    expenses, income, savings, *rest = st.tabs(
+        [_(t) for t in tabs], default=_(opens) if opens in tabs else None, key="cashflows-tabs"
+    )
     health, bu = rest[:private], rest[private:]
     earned = first_phases(plan)
     with expenses:

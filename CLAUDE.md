@@ -166,13 +166,13 @@ gitignored: the code repository holds no inputs. Development uses a local copy i
   the Overview, `runs.py` its runs, `figures.py` its figures, `sliders.py`, `knobs.py`, `seek.py`
   [overview, explorer, explorer-runs]. Pages: `overview.py`, `snapshot.py` (`corrections.py`),
   `assets.py` (`tradeform.py`, `tradeimport.py`, `position.py`) [grids, tracking], `cashflows.py`
-  (`bars.py`, `refusals.py`), `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode],
-  `data.py`, `assumptions.py`, `transfer.py`, `welcome.py`, `scenarios.py` (`fileactions.py`; tabs
-  `phases.py`, `events.py`, `scenario_overrides.py`, `overridegrids.py`; `lineage.py`).
+  (`bars.py`, `refusals.py`), `spend.py`, `explorer.py`, `flows.py`, `features.py` [mode], `data.py`,
+  `assumptions.py`, `transfer.py`, `welcome.py`, `whereis.py`, `scenarios.py` (`fileactions.py`,
+  `phases.py`, `events.py`, `scenario_overrides.py`, `overridegrids.py`, `lineage.py`).
 - `src/dagobert/data/`: shipped series, read only, see `SOURCES.md` there [series].
-- `data/`: personal inputs; `tmp/`: scratch files; both gitignored. In `data/`: `history.csv`
-  [tracking], `actuals.csv` [spend], `prices/` [prices], `revisions/` [revisions], `series/`: the
-  fetched or imported months, `msci-world.csv` and `bitcoin.csv` never redistributed [series].
+- `data/`: inputs, `tmp/`: scratch; both gitignored. In `data/`: `history.csv` [tracking],
+  `actuals.csv` [spend], `prices/` [prices], `revisions/` [revisions], `series/`: the fetched or
+  imported months, `msci-world.csv` and `bitcoin.csv` never redistributed [series].
 - `Dockerfile`, `.dockerignore`, `compose.yaml`, `Caddyfile`: the image and its examples, see
   Commands [container]. `.github/`: `workflows/ci.yml`, `release.yml`, `dependabot.yml` [tooling].
 - `scripts/`: `pii-check`, `rules-check` [tooling], `i18n` [i18n], `refresh_shipped.py` [series].

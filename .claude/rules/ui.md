@@ -51,9 +51,9 @@ style of the pages (`ui/page.css`): rule `page-style`.
 ## The app
 
 - `uv run dagobert app` opens the Streamlit app in the browser (options: rule `container`). The
-  navigation has four sections (#51). `Track`: `Overview`, `Snapshot`, `Spend`. `Your plan`, the
-  inputs: `Assets`, `Cashflows`, `Assumptions`, `Scenarios`. `Explore`: `Explorer`, `Flows`.
-  `Setup`: `Features`, `Data`, `Export and import`. It registers the pages of `mode.pages` (rule
+  navigation has four sections (#51). `Track`: `Overview`, `Snapshot`, `Spend`. `Your plan`:
+  `Where is what` (rule `whereis`), `Assets`, `Cashflows`, `Assumptions`, `Scenarios`. `Explore`:
+  `Explorer`, `Flows`. `Setup`: `Features`, `Data`, `Export and import`. It registers `mode.pages` (rule
   `mode`), computed before the `try` from the raw inputs: simple mode leaves out Snapshot and Spend
   without records, Data without a series, a feature off its pages; inputs that do not parse register
   every page beside their error. A reload or a bookmark of a page left out (`/snapshot`) shows the

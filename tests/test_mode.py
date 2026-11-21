@@ -33,6 +33,7 @@ NOTHING: frozenset[Feature] = frozenset()
 SHIPPED = mode.DEFAULT  # read at collection, before the fixture `advanced_by_default`
 SIMPLE_PAGES = {
     "Overview",
+    "Where is what",
     "Assets",
     "Cashflows",
     "Explorer",

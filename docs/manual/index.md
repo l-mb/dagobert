@@ -21,6 +21,8 @@ Track: what you have and what you spend.
 
 Your plan: what you enter.
 
+- Where is what: a list by subject, such as health insurance or pension. Each line is a link to
+  the page and the tab that holds the input.
 - [Assets](assets.md): edit your assets, see the trades and returns of your securities, and
   [import the trades](assets.md#import-trades) from the export of your broker.
 - [Cashflows](cashflows.md): edit your income and spending, and see them per phase of life.

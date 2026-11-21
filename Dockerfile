@@ -3,7 +3,7 @@
 # No architecture here: `docker buildx build --platform linux/amd64,linux/arm64` works as is.
 
 # The Python of CI (.python-version). Dependabot raises tag and digest together.
-FROM python:3.14.10-slim-trixie@sha256:3cabfd7d7aaf394e6040e79fa1eec6ca1c52b74ed9188650472695d9a9326999 AS python
+FROM python:3.14.10-slim-trixie@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f AS python
 # A stage, not `COPY --from=<image>`, so that Dependabot sees the pin.
 FROM ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 AS uv
 

@@ -98,12 +98,21 @@ streams. The section shows only when such a day exists. A roll forward shows her
 
 ## Edit the streams
 
-The streams are in four tabs, `expenses`, `income`, `savings` and `disability insurance`. In the
+The streams are in up to five tabs: `expenses`, `income`, `savings`, `health insurance` and
+`disability insurance`. In the
 first two, each category is a block that you open with a click. The header of a block shows its
 sum per month in each phase. The `savings` tab holds your savings plans in one table: the name, the
 rate as `amount`, the asset that the plan buys in `into` (empty: the equity of your depot), the
 months and phases, and the `index` (empty: nominal, as your broker runs the plan). The
 [simulation guide](models.md#savings-plans) explains how a plan runs.
+
+The `health insurance` tab holds the premium of a private health insurance (PKV), with a row for
+each tariff: the health part, the care part, a Krankentagegeld, the statutory surcharge. It
+shows for a plan with a private insurance. The column `health or care` says which part a row is,
+`deductible` the share that the tax office accepts, and `Krankentagegeld €` what a tariff pays
+per month while you cannot work. A premium is an amount below zero. A row with an amount above
+zero lowers the premium, for a Beitragsentlastungstarif. The `expenses` tab leaves these rows
+out. The insurance itself is on the [Assumptions](assumptions.md) page.
 
 The `disability insurance` tab holds your disability insurance (BU): the monthly benefit, the
 monthly premium (0 while an employer pays it, saved negative) and the age at which the contract

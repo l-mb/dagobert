@@ -75,7 +75,14 @@ The rows of the run on the Cashflows sheet come from the ledger: rule `ledger`.
   row, `SAVINGS_NOTE` above it): `name`, `amount` (saved negative), `into` (a select of the equity,
   fixed-income, gold and crypto assets, `model.streams.SAVINGS_TARGETS`), the `_WHEN` fields and
   `index`. A savings plan has no effect in the scheduled changes, `Changes since` and the attention
-  table of the Overview (`cashplan._effects`): it lies outside the monthly totals. A fourth tab
+  table of the Overview (`cashplan._effects`): it lies outside the monthly totals. The tab `health
+  insurance` (`cashflows.HEALTH`, issue #51; `HEALTH_NOTE` folded above it) holds the expenses with
+  `health`, which the expenses tab leaves out (`EXPENSES.match`): `name`, `amount` (as typed: a
+  part above zero is a Beitragsentlastung), `health` as `health or care`, `deductible`, `sick_pay`
+  as `Krankentagegeld €`, the `_WHEN` fields; `grid` `health`, so `mode.EXPERT` of `streams` hides
+  none of them; a new row starts at `kv`, in a grid with rows at the part of most rows (`common`);
+  one saved without `health` is a plain expense. It shows with `tax.pkv`, a row or an unsaved one.
+  The sheet and the totals count the rows as before. A further tab
   `disability insurance` (`cashflows.BU`, `fixed` kind `bu`, rule `disability`; `BU_NOTE` folded
   above it): `name`, `amount` as `Monthly benefit €`, `premium` as `Monthly premium €` (saved
   negative), `until_age` as `Pays until age`, `start`, `end`; the expenses tab leaves it out

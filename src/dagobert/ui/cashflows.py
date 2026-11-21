@@ -150,7 +150,9 @@ _REFS = {
 EXPENSES = Table(
     Stream,
     "streams-expenses",
-    match=lambda row: cashplan.role(row) == cashplan.EXPENSE and row.get("kind") != "bu",
+    match=lambda row: (
+        cashplan.role(row) == cashplan.EXPENSE and row.get("kind") != "bu" and not row.get("health")
+    ),
     fields=("name", "amount", *_WHEN, "tags"),
     more=(
         "cat",
@@ -225,6 +227,43 @@ INCOME = Table(
         "hebesatz": N_(
             "The Gewerbesteuer-Hebesatz of the municipality of a trade business, at least 200%, "
             "in percent: 430 for 430%. Empty: a freelancer, no trade tax."
+        )
+    },
+)
+HEALTH_NOTE = N_(
+    "The premium of a private health insurance (PKV), a row per tariff as your insurer lists "
+    "them: the health part, the care part (Pflegepflichtversicherung), a Krankentagegeld, the "
+    "statutory surcharge that ends at 60. The column for health or care decides which subsidy "
+    "counts. The deductible share is what the tax office accepts, from the yearly certificate of "
+    "the insurer. The Krankentagegeld is what a tariff pays per month while you cannot work. A "
+    "premium is an amount below zero. A row with an amount above zero lowers the premium, for a "
+    "Beitragsentlastungstarif. The insurance itself (private or statutory, a change, a cap) is "
+    "on the Assumptions page."
+)
+# The parts of a PKV premium: an expense with `health`, in a tab of its own with the columns that
+# only a premium takes in plain view (`grid` of its own: `mode.EXPERT` hides them in `streams`)
+HEALTH = Table(
+    Stream,
+    "streams-health",
+    match=lambda row: cashplan.role(row) == cashplan.EXPENSE and bool(row.get("health")),
+    fields=("name", "amount", "health", "deductible", "sick_pay", *_WHEN),
+    more=("cat", "index", "tags"),
+    gates=_GATES,
+    sort_by=("name", "start"),
+    pinned=("name",),
+    negative=(),
+    options=_REFS,
+    common=("health", "cat", "factor"),
+    first={"health": "kv"},
+    grid="health",
+    locked=("name",),
+    rename=Kind.STREAM,
+    identity=("name", "start"),
+    titles={"health": N_("health or care"), "sick_pay": N_("Krankentagegeld €")},
+    helps={
+        "deductible": N_(
+            "The share of the premium that counts for the tax, in percent, from the insurer's "
+            "certificate: empty is all of the care insurance and 80% of the health insurance."
         )
     },
 )
@@ -779,8 +818,14 @@ def _streams(file: RowFile, day: date, plan: Plan) -> None:
         _("How to edit the streams"),
     )
     insured = view.shows(mode.Item(mode.Sort.STREAM, (StreamKind.BU.value,))) or unsaved(BU)
-    tabs = (N_("expenses"), N_("income"), N_("savings"), *[N_("disability insurance")] * insured)
-    expenses, income, savings, *bu = st.tabs([_(t) for t in tabs], key="cashflows-tabs")
+    private = plan.assumptions.tax.pkv or unsaved(HEALTH) or any(s.health for s in plan.streams)
+    tabs = (
+        *(N_("expenses"), N_("income"), N_("savings")),
+        *[N_("health insurance")] * private,
+        *[N_("disability insurance")] * insured,
+    )
+    expenses, income, savings, *rest = st.tabs([_(t) for t in tabs], key="cashflows-tabs")
+    health, bu = rest[:private], rest[private:]
     earned = first_phases(plan)
     with expenses:
         edit_table(file, checked(_with_totals(EXPENSES, day, plan)), view)
@@ -791,6 +836,10 @@ def _streams(file: RowFile, day: date, plan: Plan) -> None:
         fold(_(SAVINGS_NOTE), _("How savings plans work"))
         table = replace(with_phases(SAVINGS, plan.assumptions.phase_labels), first=earned)
         edit_table(file, checked(table), view)
+    for premiums in health:
+        with premiums:
+            fold(_(HEALTH_NOTE), _("How the premiums of a private health insurance work"))
+            edit_table(file, checked(with_phases(HEALTH, plan.assumptions.phase_labels)), view)
     for policies in bu:
         with policies:
             fold(_(BU_NOTE), _("How a disability insurance works"))

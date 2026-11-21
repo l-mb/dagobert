@@ -6889,6 +6889,50 @@ msgstr ""
 "Gewerbesteuer."
 
 #: ui/cashflows.py
+msgid ""
+"The premium of a private health insurance (PKV), a row per tariff as your"
+" insurer lists them: the health part, the care part "
+"(Pflegepflichtversicherung), a Krankentagegeld, the statutory surcharge "
+"that ends at 60. The column for health or care decides which subsidy "
+"counts. The deductible share is what the tax office accepts, from the "
+"yearly certificate of the insurer. The Krankentagegeld is what a tariff "
+"pays per month while you cannot work. A premium is an amount below zero. "
+"A row with an amount above zero lowers the premium, for a "
+"Beitragsentlastungstarif. The insurance itself (private or statutory, a "
+"change, a cap) is on the Assumptions page."
+msgstr ""
+"Der Beitrag einer privaten Krankenversicherung (PKV), eine Zeile je "
+"Tarif, wie dein Versicherer sie aufführt: der Krankenteil, der Pflegeteil"
+" (Pflegepflichtversicherung), ein Krankentagegeld, der gesetzliche "
+"Zuschlag, der mit 60 endet. Die Spalte für Kranken oder Pflege "
+"entscheidet, welcher Zuschuss zählt. Der absetzbare Anteil ist, was das "
+"Finanzamt anerkennt, laut Jahresbescheinigung des Versicherers. Das "
+"Krankentagegeld ist, was ein Tarif pro Monat zahlt, solange du nicht "
+"arbeiten kannst. Ein Beitrag ist ein Betrag unter null. Eine Zeile mit "
+"einem Betrag über null senkt den Beitrag, für einen "
+"Beitragsentlastungstarif. Die Versicherung selbst (privat oder "
+"gesetzlich, ein Wechsel, ein Deckel) steht auf der Seite Annahmen."
+
+#: ui/cashflows.py
+msgid "health or care"
+msgstr "Kranken oder Pflege"
+
+#: ui/cashflows.py
+msgid "Krankentagegeld €"
+msgstr "Krankentagegeld €"
+
+#: ui/cashflows.py
+#, python-format
+msgid ""
+"The share of the premium that counts for the tax, in percent, from the "
+"insurer's certificate: empty is all of the care insurance and 80% of the "
+"health insurance."
+msgstr ""
+"Der Anteil des Beitrags, der steuerlich zählt, in Prozent, laut "
+"Bescheinigung des Versicherers: Leer heißt die ganze Pflegeversicherung "
+"und 80 % der Krankenversicherung."
+
+#: ui/cashflows.py
 msgid "Monthly benefit €"
 msgstr "Monatliche BU-Rente €"
 
@@ -7165,12 +7209,20 @@ msgid "savings"
 msgstr "Sparpläne"
 
 #: ui/cashflows.py
+msgid "health insurance"
+msgstr "Krankenversicherung"
+
+#: ui/cashflows.py
 msgid "disability insurance"
 msgstr "BU-Versicherung"
 
 #: ui/cashflows.py
 msgid "How savings plans work"
 msgstr "So funktionieren Sparpläne"
+
+#: ui/cashflows.py
+msgid "How the premiums of a private health insurance work"
+msgstr "So funktionieren die Beiträge einer privaten Krankenversicherung"
 
 #: ui/cashflows.py
 msgid "How a disability insurance works"

@@ -9,7 +9,7 @@ paths:
 The forms, widgets and their Save: rule `forms`. The input file: `docs/manual/configuration.md`.
 The user guide: `docs/manual/assumptions.md`.
 
-- `src/dagobert/ui/assumptions.py`: the `Assumptions` page in the navigation section `Setup`
+- `src/dagobert/ui/assumptions.py`: the `Assumptions` page in the navigation section `Your plan`
   (`/assumptions`) edits `assumptions.yaml` in four tabs (`TABS`), each one `forms.Form` of the top
   keys it shows (`Tab.tops`; `Tab.key` names its widgets, `Tab.title` is words): `Person` (`person`
   with the grid `Relatives you may inherit from` of `person.relatives`, then the `phases` grid, both

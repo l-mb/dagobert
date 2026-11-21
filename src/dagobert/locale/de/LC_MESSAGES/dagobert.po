@@ -9893,9 +9893,12 @@ msgid "Track"
 msgstr "Verfolgen"
 
 #: ui/main.py
-msgctxt "navigation"
-msgid "Plan"
-msgstr "Planen"
+msgid "Your plan"
+msgstr "Dein Plan"
+
+#: ui/main.py
+msgid "Explore"
+msgstr "Erkunden"
 
 #: ui/main.py
 msgid "Setup"

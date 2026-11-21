@@ -72,7 +72,7 @@ def ngettext(singular: str, plural: str, n: int) -> str:
 
 
 def pgettext(context: str, message: str) -> str:
-    """One English word with two German ones: `pgettext("navigation", "Plan")`."""
+    """One English word with two German ones: `pgettext("amount", "all")`."""
     return translations(_language.get()).pgettext(context, message)
 
 

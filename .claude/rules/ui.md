@@ -51,13 +51,13 @@ style of the pages (`ui/page.css`): rule `page-style`.
 ## The app
 
 - `uv run dagobert app` opens the Streamlit app in the browser (options: rule `container`). The
-  navigation has three sections. `Track`: `Overview`, `Snapshot`, `Assets`, `Cashflows`, `Spend`.
-  `Plan`: `Explorer`, `Flows`. `Setup`: `Features`, `Data`, `Assumptions`, `Scenarios`, `Export and
-  import`. It registers the pages of `mode.pages` (rule `mode`), computed before the `try` from the
-  raw inputs: simple mode leaves out Snapshot and Spend without records, Data without a series, a
-  feature off its pages; inputs that do not parse register every page beside their error. A reload
-  or a bookmark of a page left out (`/snapshot`) shows the dialog `Page not found` of Streamlit and
-  runs the Overview (checked in Chrome, Streamlit 1.65: no error, so no `position="hidden"`).
+  navigation has four sections (#51). `Track`: `Overview`, `Snapshot`, `Spend`. `Your plan`, the
+  inputs: `Assets`, `Cashflows`, `Assumptions`, `Scenarios`. `Explore`: `Explorer`, `Flows`.
+  `Setup`: `Features`, `Data`, `Export and import`. It registers the pages of `mode.pages` (rule
+  `mode`), computed before the `try` from the raw inputs: simple mode leaves out Snapshot and Spend
+  without records, Data without a series, a feature off its pages; inputs that do not parse register
+  every page beside their error. A reload or a bookmark of a page left out (`/snapshot`) shows the
+  dialog `Page not found` of Streamlit and runs the Overview (Chrome, Streamlit 1.65: no error).
 - `Overview`, `Snapshot` and `Assets` open with the tiles: net worth, liquid, illiquid, debt, each
   with the change since the end of the previous month over the assets observed by then
   (`summary.change`). The explorer opens with the scenarios in `data/app.yaml` (`Set as default`,

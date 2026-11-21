@@ -13,7 +13,7 @@ rule `scenario-overrides`.
 
 ## Main scenario, chooser and file actions
 
-- `src/dagobert/ui/scenarios.py`, in the section `Setup` (`/scenarios`). It reads raw YAML
+- `src/dagobert/ui/scenarios.py`, in the section `Your plan` (`/scenarios`). It reads raw YAML
   (`scenariofiles.raw_scenarios`, `references.of`), so a scenario that does not load still opens;
   its problems (`loader.load_plan`) show above the tabs as a warning: a save is refused only for a
   problem that it adds, so the file can be fixed or deleted.

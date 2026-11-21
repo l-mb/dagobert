@@ -87,15 +87,15 @@ def _items(sort: Sort, *names: str) -> frozenset[Item]:
 PAGES = (
     "Overview",
     "Snapshot",
+    "Spend",
     "Assets",
     "Cashflows",
-    "Spend",
+    "Assumptions",
+    "Scenarios",
     "Explorer",
     "Flows",
     "Features",
     "Data",
-    "Assumptions",
-    "Scenarios",
     "Export and import",
 )
 # Shown in simple mode too: the core. A path or a column is core unless `EXPERT` lists it, so a

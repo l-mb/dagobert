@@ -72,7 +72,7 @@ text too (owner, issue #23: `auf der Seite Snapshot`), as do Explorer, Cashflows
 | Undo / Saved at … / Took back the save … / Last save … / Correct a recorded month | Rückgängig / Gespeichert um … / Rückgängig gemacht: das Speichern … / Zuletzt gespeichert … / Einen erfassten Monat korrigieren | the undo of a save (rule `save-guard`); in a sentence the button in quotes, „Rückgängig“ bleibt gesperrt |
 | Save / Discard my edits / stays off / against the plan | Speichern / Meine Änderungen verwerfen / bleibt gesperrt / im Vergleich zum Plan | a button that stays off „bleibt gesperrt", not „bleibt aus" |
 | overrides (tab) / tag / default | Abweichungen / Schlagwort / Standard | |
-| Track / Plan / Setup | Verfolgen / Planen / Einrichten | the sections |
+| Track / Your plan / Explore / Setup | Verfolgen / Dein Plan / Erkunden / Einrichten | the sections |
 | Mode / Simple / Advanced / simple mode / Hidden in simple mode (at their defaults) | Modus / Einfach / Erweitert / einfacher Modus / Im einfachen Modus ausgeblendet (auf Standard) | rule `mode`; `Switch to Advanced in the sidebar` „Stelle in der Seitenleiste auf Erweitert", on a phone `im Menü` |
 | Features (the page) / feature / switched off / in use / Template (a scenario) | Funktionen / Funktion / abgeschaltet / in Gebrauch / Vorlage | `Off in Features` „Unter Funktionen abgeschaltet"; a feature in a sentence by its message in the context `inline`, German with its capitals (`Gold und Krypto`), never a `.lower()` |
 | start a plan / start (a button) / data directory | einen Plan starten / starten / Datenverzeichnis | the start page |

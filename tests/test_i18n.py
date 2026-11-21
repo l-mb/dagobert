@@ -191,7 +191,7 @@ def test_an_accept_language_header_goes_by_weight() -> None:
 def test_a_block_speaks_its_language() -> None:
     with i18n.use("de"):
         assert i18n._("Start a plan") == "Einen Plan starten"
-        assert i18n.pgettext("navigation", "Plan") == "Planen"
+        assert i18n.pgettext("amount", "all") == "alles"
         assert i18n._("Words of no message") == "Words of no message"
     assert i18n._("Start a plan") == "Start a plan"
     assert i18n.ngettext("{n} file", "{n} files", 2) == "{n} files"

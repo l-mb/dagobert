@@ -12,7 +12,7 @@ if __name__ == "__main__":
     import streamlit as st
 
     from dagobert import datadir, i18n
-    from dagobert.i18n import N_, _, pgettext
+    from dagobert.i18n import N_, _
     from dagobert.problems import InputError
     from dagobert.revisions import BusyError
     from dagobert.runner import DATA_ENV
@@ -116,12 +116,18 @@ if __name__ == "__main__":
             [
                 entry(N_("Overview"), lambda: overview.page(streams_file(DATA))),
                 entry(N_("Snapshot"), lambda: snapshot.page(assets_file(DATA)), "snapshot"),
-                entry(N_("Assets"), lambda: assets.page(assets_file(DATA)), "assets"),
-                entry(N_("Cashflows"), lambda: cashflows.page(streams_file(DATA)), "cashflows"),
                 entry(N_("Spend"), lambda: spend.page(streams_file(DATA)), "spend"),
             ]
         ),
-        pgettext("navigation", "Plan"): dict(
+        _("Your plan"): dict(
+            [
+                entry(N_("Assets"), lambda: assets.page(assets_file(DATA)), "assets"),
+                entry(N_("Cashflows"), lambda: cashflows.page(streams_file(DATA)), "cashflows"),
+                entry(N_("Assumptions"), lambda: assumptions.page(DATA), "assumptions"),
+                entry(N_("Scenarios"), lambda: scenarios.page(DATA), "scenarios"),
+            ]
+        ),
+        _("Explore"): dict(
             [
                 entry(N_("Explorer"), lambda: explorer.page(DATA), "explorer"),
                 entry(N_("Flows"), lambda: flows.page(DATA), "flows"),
@@ -131,8 +137,6 @@ if __name__ == "__main__":
             [
                 entry(N_("Features"), lambda: features.page(DATA), "features"),
                 entry(N_("Data"), lambda: data.page(DATA), "data"),
-                entry(N_("Assumptions"), lambda: assumptions.page(DATA), "assumptions"),
-                entry(N_("Scenarios"), lambda: scenarios.page(DATA), "scenarios"),
                 entry(N_("Export and import"), lambda: transfer.page(DATA), "transfer"),
             ]
         ),

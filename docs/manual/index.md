@@ -9,7 +9,7 @@ and macOS, the install guides below give each step.
 If the data directory is empty, the app first shows [Start a plan](start-a-plan.md): start from a
 simple example, from the full example, with the quick start, or from an export of your plan.
 
-The navigation on the left has three sections. On a phone, the button at the top left opens it.
+The navigation on the left has four sections. On a phone, the button at the top left opens it.
 In simple mode, and for a part of life that is off, the navigation leaves out some pages. See
 [Simple and advanced mode, and features](#simple-and-advanced-mode-and-features).
 
@@ -17,12 +17,22 @@ Track: what you have and what you spend.
 
 - [Overview](overview.md): your net worth, the outlook of your plan, and what needs your attention.
 - [Snapshot](snapshot.md): record the values of your accounts, and the prices of your securities.
+- [Spend](spend.md): record what you spent each month, and compare it with the plan.
+
+Your plan: what you enter.
+
 - [Assets](assets.md): edit your assets, see the trades and returns of your securities, and
   [import the trades](assets.md#import-trades) from the export of your broker.
 - [Cashflows](cashflows.md): edit your income and spending, and see them per phase of life.
-- [Spend](spend.md): record what you spent each month, and compare it with the plan.
+- [Assumptions](assumptions.md): edit the facts about you and the assumptions of every scenario,
+  such as the inflation, the returns and the tax.
+- [Scenarios](scenarios.md): create, copy, rename and delete scenarios, and edit their phases.
+- [Events of a scenario](events.md): edit the sales, payments and other events of a scenario, and
+  leave out events that it takes from the scenario that it extends.
+- [Overrides of a scenario](overrides.md): change assumptions, a salary or the items of the
+  scenario that it extends for one scenario only.
 
-Plan: what-if questions.
+Explore: what-if questions.
 
 - [Explorer](explorer.md): run scenarios, move the assumptions with sliders, and compare.
 - [Flows](flows.md): see where the money of one scenario goes in each phase.
@@ -32,13 +42,6 @@ Setup: the data that the app needs.
 - [Features](features.md): switch off the parts of life that your plan does not model, such as
   property or children.
 - [Data](data.md): the external series, such as the consumer prices, and their sources.
-- [Assumptions](assumptions.md): edit the facts about you and the assumptions of every scenario,
-  such as the inflation, the returns and the tax.
-- [Scenarios](scenarios.md): create, copy, rename and delete scenarios, and edit their phases.
-- [Events of a scenario](events.md): edit the sales, payments and other events of a scenario, and
-  leave out events that it takes from the scenario that it extends.
-- [Overrides of a scenario](overrides.md): change assumptions, a salary or the items of the
-  scenario that it extends for one scenario only.
 - [Export and import](transfer.md): a zip of your data directory as a backup or as a copy to work
   on, and its import.
 

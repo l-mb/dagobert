@@ -5,7 +5,7 @@
 # The Python of CI (.python-version). Dependabot raises tag and digest together.
 FROM python:3.14.10-slim-trixie@sha256:3cabfd7d7aaf394e6040e79fa1eec6ca1c52b74ed9188650472695d9a9326999 AS python
 # A stage, not `COPY --from=<image>`, so that Dependabot sees the pin.
-FROM ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.10@sha256:a3ea1357342c1a4bf9a0c53a3deb1b55379aefa037338d8113d5771efa01774f AS uv
 
 FROM python AS build
 COPY --from=uv /uv /usr/local/bin/uv
